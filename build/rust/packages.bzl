@@ -1,4 +1,4 @@
-load("@rules_rust//crate_universe:defs.bzl", "crate")
+# load("@rules_rust//crate_universe:defs.bzl", "crate")
 
 packages = {
     # # Async
