@@ -69,4 +69,7 @@ build:remote --extra_execution_platforms=@buildbuddy_toolchain//:platform
 build:remote --crosstool_top=@buildbuddy_toolchain//:toolchain
 build:remote --extra_toolchains=@buildbuddy_toolchain//:cc_toolchain
 
+# CI
+build:ci --config=remote
+
 try-import %workspace%/.bazelrc.user
