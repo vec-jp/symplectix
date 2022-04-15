@@ -70,9 +70,9 @@ rust_register_toolchains(
     version = _RUST_VERSION,
 )
 
-# load("@rules_rust//bindgen:repositories.bzl", "rust_bindgen_repositories")
+load("@rules_rust//bindgen:repositories.bzl", "rust_bindgen_repositories")
 
-# rust_bindgen_repositories()
+rust_bindgen_repositories()
 
 # load("@rules_rust//wasm_bindgen:repositories.bzl", "rust_wasm_bindgen_repositories")
 
@@ -81,7 +81,8 @@ rust_register_toolchains(
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 
 crate_universe_dependencies(
-    bootstrap = True,
+    # If true, a cargo_bootstrap_repository target will be generated.
+    # bootstrap = True,
     rust_version = _RUST_VERSION,
 )
 
