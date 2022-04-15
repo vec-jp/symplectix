@@ -86,19 +86,13 @@ crate_universe_dependencies(
     rust_version = _RUST_VERSION,
 )
 
-load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "render_config", "splicing_config")
+load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "splicing_config")
 load("//build/rust:packages.bzl", "packages")
 
 crates_repository(
     name = "crates",
     lockfile = "//build/rust:crates.lock",
     packages = packages,
-    # Setting the default package name to `""` forces the use of the macros defined in this repository
-    # to always use the root package when looking for dependencies or aliases. This should be considered
-    # optional as the repository also exposes alises for easy access to all dependencies.
-    render_config = render_config(
-        default_package_name = "",
-    ),
     rust_version = _RUST_VERSION,
     splicing_config = splicing_config(
         resolver_version = "2",
