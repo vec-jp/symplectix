@@ -59,29 +59,9 @@ build --output_groups=+clippy_checks
 build --@rules_rust//:clippy.toml=//build/rust:clippy.toml
 
 # Remote
-build:remote --jobs=50
-build:remote --define=EXECUTOR=remote
-build:remote --remote_timeout=3600
-build:remote --remote_cache=grpcs://remote.buildbuddy.io
-build:remote --remote_executor=grpcs://remote.buildbuddy.io
-build:remote --remote_upload_local_results
-build:remote --bes_results_url=https://app.buildbuddy.io/invocation/
-build:remote --bes_backend=grpcs://remote.buildbuddy.io
-
-build:remote --host_platform=@buildbuddy_toolchain//:platform
-build:remote --platforms=@buildbuddy_toolchain//:platform
-build:remote --extra_execution_platforms=@buildbuddy_toolchain//:platform
-
-build:remote --crosstool_top=@buildbuddy_toolchain//:toolchain
-build:remote --extra_toolchains=@buildbuddy_toolchain//:cc_toolchain
-
-# build:remote --javabase=@buildbuddy_toolchain//:javabase_jdk8
-# build:remote --host_javabase=@buildbuddy_toolchain//:javabase_jdk8
-# build:remote --java_toolchain=@buildbuddy_toolchain//:toolchain_jdk8
-# build:remote --host_java_toolchain=@buildbuddy_toolchain//:toolchain_jdk8
+import %workspace%/.bazelrc.remote
 
 # CI
-build:ci --build_metadata=ROLE=CI
-build:ci --config=remote
+import %workspace%/.bazelrc.ci
 
 try-import %workspace%/.bazelrc.user
