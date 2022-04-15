@@ -91,7 +91,6 @@ load("//build/rust:packages.bzl", "packages")
 
 crates_repository(
     name = "crates",
-    generator = "@cargo_bazel_bootstrap//:cargo-bazel",
     lockfile = "//build/rust:crates.lock",
     packages = packages,
     # Setting the default package name to `""` forces the use of the macros defined in this repository
