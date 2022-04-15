@@ -12,8 +12,8 @@ http_archive(
     name = "bazel_skylib",
     sha256 = _SKYLIB_SHA256,
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/{ver}/bazel-skylib-{ver}.tar.gz".format(ver = _SKYLIB_VERSION),
         "https://github.com/bazelbuild/bazel-skylib/releases/download/{ver}/bazel-skylib-{ver}.tar.gz".format(ver = _SKYLIB_VERSION),
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/{ver}/bazel-skylib-{ver}.tar.gz".format(ver = _SKYLIB_VERSION),
     ],
 )
 
@@ -40,7 +40,10 @@ rules_foreign_cc_dependencies()
 
 # Rust
 
-_RUST_VERSION = "1.60.0"
+# `Digest::compute` in cargo-bazel seems to return a different result for linux and macos.
+# _RUST_VERSION = "1.60.0"
+
+_RUST_VERSION = "1.59.0"
 
 _RUST_EDITION = "2018"
 
@@ -52,8 +55,8 @@ http_archive(
     name = "rules_rust",
     sha256 = _RULES_RUST_SHA256,
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_rust/releases/download/{ver}/rules_rust-v{ver}.tar.gz".format(ver = _RULES_RUST_VERSION),
         "https://github.com/bazelbuild/rules_rust/releases/download/{ver}/rules_rust-v{ver}.tar.gz".format(ver = _RULES_RUST_VERSION),
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_rust/releases/download/{ver}/rules_rust-v{ver}.tar.gz".format(ver = _RULES_RUST_VERSION),
     ],
 )
 
@@ -67,9 +70,9 @@ rust_register_toolchains(
     version = _RUST_VERSION,
 )
 
-load("@rules_rust//bindgen:repositories.bzl", "rust_bindgen_repositories")
+# load("@rules_rust//bindgen:repositories.bzl", "rust_bindgen_repositories")
 
-rust_bindgen_repositories()
+# rust_bindgen_repositories()
 
 # load("@rules_rust//wasm_bindgen:repositories.bzl", "rust_wasm_bindgen_repositories")
 
@@ -77,28 +80,34 @@ rust_bindgen_repositories()
 
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 
-crate_universe_dependencies(rust_version = _RUST_VERSION)
+crate_universe_dependencies(
+    bootstrap = True,
+    rust_version = _RUST_VERSION,
+)
 
-load("@rules_rust//crate_universe:crates_deps.bzl", "crate_repositories")
-
-crate_repositories()
-
-load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "splicing_config")
+load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "render_config", "splicing_config")
 load("//build/rust:packages.bzl", "packages")
 
 crates_repository(
     name = "crates",
+    generator = "@cargo_bazel_bootstrap//:cargo-bazel",
     lockfile = "//build/rust:crates.lock",
     packages = packages,
+    # Setting the default package name to `""` forces the use of the macros defined in this repository
+    # to always use the root package when looking for dependencies or aliases. This should be considered
+    # optional as the repository also exposes alises for easy access to all dependencies.
+    render_config = render_config(
+        default_package_name = "",
+    ),
     rust_version = _RUST_VERSION,
     splicing_config = splicing_config(
         resolver_version = "2",
     ),
 )
 
-load("@crates//:defs.bzl", crate_index_repositories = "crate_repositories")
+load("@crates//:defs.bzl", "crate_repositories")
 
-crate_index_repositories()
+crate_repositories()
 
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_deps")
 
