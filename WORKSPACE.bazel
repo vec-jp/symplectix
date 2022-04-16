@@ -174,7 +174,7 @@ go_rules_dependencies()
 
 go_register_toolchains(version = _GO_VERSION)
 
-gazelle_dependencies()
+gazelle_dependencies(go_repository_default_config = "//:WORKSPACE.bazel")
 
 # Protocol Buffers
 
