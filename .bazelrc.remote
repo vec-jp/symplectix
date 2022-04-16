@@ -1,3 +1,5 @@
+# vi: ft=conf
+
 build:remote --jobs=50
 build:remote --define=EXECUTOR=remote
 build:remote --remote_timeout=3600
