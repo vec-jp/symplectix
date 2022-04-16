@@ -13,3 +13,9 @@ jobs:
 
       - run: |
           reviewdog -version
+
+      - name: actionlint
+        uses: reviewdog/action-actionlint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
