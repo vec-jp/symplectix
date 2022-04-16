@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-bazel run //:buildifier/check
+bazel run --config=verbose //:buildifier/check
