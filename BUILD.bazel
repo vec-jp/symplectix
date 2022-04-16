@@ -1,17 +1,32 @@
-load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier_test")
+load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
 load("@crates//:defs.bzl", "all_crate_deps")
 load("@rules_rust//rust:defs.bzl", "rust_analyzer")
 
 package(default_visibility = ["//visibility:public"])
 
-buildifier_test(
+buildifier(
     name = "buildifier",
-    srcs = [
-        "BUILD.bazel",
-        "WORKSPACE",
+    exclude_patterns = ["**/node_modules/**/*"],
+    lint_mode = "fix",
+    lint_warnings = [
+        "+out-of-order-load",
+    ],
+)
+
+# `mode = "check"` is deprecated.
+# https://github.com/bazelbuild/buildtools/issues/1005
+buildifier(
+    name = "buildifier/check",
+    exclude_patterns = [
+        "**/node_modules/**/*",
     ],
     lint_mode = "warn",
-    mode = "diff",
+    lint_warnings = [
+        "+out-of-order-load",
+        "-function-docstring",
+        "-module-docstring",
+    ],
+    mode = "check",
 )
 
 # Run bazel run @rules_rust//tools/rust_analyzer:gen_rust_project whenever dependencies change
