@@ -1,4 +1,4 @@
-name: CI
+name: bazel
 
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
@@ -34,6 +34,10 @@ jobs:
               --config=ci \
               --remote_header=x-buildbuddy-api-key=${{ secrets.BUILDBUDDY_API_KEY }} \
               //...
+
+      - name: Run buildifier
+        run: |
+          bazel run //:buildifier/check
 
       # Enable when any tests are implemented.
       # - name: Test
