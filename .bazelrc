@@ -9,9 +9,6 @@
 
 build --workspace_status_command=$(pwd)/tools/workspace_status.sh
 
-run --noshow_progress --noshow_loading_progress --ui_event_filters='ERROR'
-run:verbose --show_progress --show_loading_progress --ui_event_filters='INFO,ERROR,DEBUG'
-
 # Make Bazel print out all options from rc files.
 build --announce_rc
 
