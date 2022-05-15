@@ -72,6 +72,23 @@ pub trait Bits {
     }
 
     /// Returns true if the bits contains an element with the given value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
+    /// assert!( Bits::test(v, 0));
+    /// assert!(!Bits::test(v, 1));
+    /// assert!( Bits::test(v, 2));
+    /// assert!(!Bits::test(v, 1000));
+    ///
+    /// let w = &v[1..];
+    /// assert!( Bits::test(w, 0));
+    /// assert!( Bits::test(w, 1));
+    /// assert!(!Bits::test(w, 2));
+    /// assert!(!Bits::test(w, 1000));
+    /// ```
     #[inline]
     fn test(this: &Self, i: usize) -> bool {
         Bits::get(this, i).unwrap_or(false)
