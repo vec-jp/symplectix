@@ -15,17 +15,6 @@ impl Bits for [bool] {
     fn get(this: &Self, i: usize) -> Option<bool> {
         this.get(i).cloned()
     }
-
-    /// ```
-    /// # use bits::Bits;
-    /// let v: &[bool] = &[false, false, true];
-    /// assert!(Bits::at(v, 2));
-    /// ```
-    #[inline]
-    fn at(this: &Self, i: usize) -> bool {
-        assert!(i < Bits::len(this));
-        this[i]
-    }
 }
 
 impl Count for [bool] {

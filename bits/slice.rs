@@ -39,14 +39,8 @@ where
     #[inline]
     fn get(this: &Self, i: usize) -> Option<bool> {
         let (i, o) = address::<T>(i);
-        this.get(i).map(|b| Bits::at(b, o))
-    }
-
-    #[inline]
-    fn at(this: &Self, i: usize) -> bool {
-        assert!(i < Bits::len(this));
-        let (i, o) = address::<T>(i);
-        Bits::at(&this[i], o)
+        this.get(i)
+            .map(|block| Bits::get(block, o).expect("index out of bounds"))
     }
 
     #[inline]

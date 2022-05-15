@@ -13,11 +13,6 @@ macro_rules! Bits {
             <$X as Bits>::get(this$(.$method())?, i)
         }
 
-        #[inline]
-        fn at(this: &Self, i: usize) -> bool {
-            <$X as Bits>::at(this$(.$method())?, i)
-        }
-
         #[doc(hidden)]
         #[inline]
         fn word<W: Word>(&self, i: usize, n: usize) -> W {

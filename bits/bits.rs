@@ -4,7 +4,7 @@ use crate::prelude::*;
 ///
 /// # Implementing `Bits`
 ///
-/// Note that `get` and `at` are circularly referenced.
+/// Note that `get` and `test` are circularly referenced.
 /// So, you need to implement at least **one** of them.
 pub trait Bits {
     /// The number of binary digits.
@@ -33,42 +33,20 @@ pub trait Bits {
     }
 
     /// Returns a bit at the given index `i`.
-    /// Does not panic even if `i` is out of bounds.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use bits::Bits;
-    /// let v: &[u8] = &[0b00000101];
-    /// assert_eq!(Bits::get(v, 0), Some(true));
-    /// assert_eq!(Bits::get(v, 2), Some(true));
-    /// assert_eq!(Bits::get(v, 9), None);
-    /// ```
-    #[inline]
-    fn get(this: &Self, i: usize) -> Option<bool> {
-        (i < Bits::len(this)).then(|| Bits::at(this, i))
-    }
-
-    /// Returns a bit at the given index `i`. Panics iif `i >= Bits::len(self)`.
     ///
     /// # Examples
     ///
     /// ```
     /// # use bits::Bits;
     /// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
-    /// assert!( Bits::at(v, 0));
-    /// assert!(!Bits::at(v, 1));
-    /// assert!( Bits::at(v, 2));
-    ///
-    /// let w = &v[1..];
-    /// assert!( Bits::at(w, 0));
-    /// assert!( Bits::at(w, 1));
-    /// assert!(!Bits::at(w, 2));
+    /// assert_eq!(Bits::get(v, 0),   Some(true));
+    /// assert_eq!(Bits::get(v, 64),  Some(true));
+    /// assert_eq!(Bits::get(v, 128), Some(false));
+    /// assert_eq!(Bits::get(v, 200), None);
     /// ```
     #[inline]
-    #[doc(hidden)]
-    fn at(this: &Self, i: usize) -> bool {
-        Bits::get(this, i).expect("index out of bounds")
+    fn get(this: &Self, i: usize) -> Option<bool> {
+        (i < Bits::len(this)).then(|| Bits::test(this, i))
     }
 
     /// Returns true if the bits contains an element with the given value.
@@ -109,7 +87,7 @@ pub trait Bits {
     fn word<T: Word>(&self, i: usize, n: usize) -> T {
         let mut w = T::NULL;
         for b in i..i + n {
-            if Bits::at(self, b) {
+            if Bits::get(self, b).expect("index out of bounds") {
                 w.put1(b - i);
             }
         }

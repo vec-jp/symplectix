@@ -154,8 +154,8 @@ macro_rules! impls {
             }
 
             #[inline]
-            fn at(this: &Self, i: usize) -> bool {
-                (*this & (1 << i)) > 0
+            fn get(this: &Self, i: usize) -> Option<bool> {
+                (i < Bits::len(this)).then(|| (*this & (1 << i)) > 0)
             }
 
             #[doc(hidden)]

@@ -130,7 +130,7 @@ impl<A: Bits, B: Bits> Bits for And<A, B> {
         cmp::min(Bits::len(&this.a), Bits::len(&this.b))
     }
     #[inline]
-    fn at(this: &Self, i: usize) -> bool {
+    fn test(this: &Self, i: usize) -> bool {
         Bits::test(&this.a, i) && Bits::test(&this.b, i)
     }
 }
@@ -186,7 +186,7 @@ impl<A: Bits, B: Bits> Bits for AndNot<A, B> {
         Bits::len(&this.a)
     }
     #[inline]
-    fn at(this: &Self, i: usize) -> bool {
+    fn test(this: &Self, i: usize) -> bool {
         Bits::test(&this.a, i) & !Bits::test(&this.b, i)
     }
 }
@@ -241,7 +241,7 @@ impl<A: Bits, B: Bits> Bits for Or<A, B> {
         cmp::max(Bits::len(&this.a), Bits::len(&this.b))
     }
     #[inline]
-    fn at(this: &Self, i: usize) -> bool {
+    fn test(this: &Self, i: usize) -> bool {
         Bits::test(&this.a, i) || Bits::test(&this.b, i)
     }
 }
@@ -293,7 +293,7 @@ impl<A: Bits, B: Bits> Bits for Xor<A, B> {
     }
 
     #[inline]
-    fn at(this: &Self, i: usize) -> bool {
+    fn test(this: &Self, i: usize) -> bool {
         Bits::test(&this.a, i) ^ Bits::test(&this.b, i)
     }
 }
