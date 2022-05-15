@@ -19,7 +19,7 @@ impl Bits for [bool] {
     /// ```
     /// # use bits::Bits;
     /// let v: &[bool] = &[false, false, true];
-    /// assert!(v.bit(2));
+    /// assert!(Bits::at(v, 2));
     /// ```
     #[inline]
     fn at(this: &Self, i: usize) -> bool {

@@ -56,16 +56,17 @@ pub trait Bits {
     /// ```
     /// # use bits::Bits;
     /// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
-    /// assert!( v.at(0));
-    /// assert!(!v.at(1));
-    /// assert!( v.at(2));
+    /// assert!( Bits::at(v, 0));
+    /// assert!(!Bits::at(v, 1));
+    /// assert!( Bits::at(v, 2));
     ///
     /// let w = &v[1..];
-    /// assert!( w.at(0));
-    /// assert!( w.at(1));
-    /// assert!(!w.at(2));
+    /// assert!( Bits::at(w, 0));
+    /// assert!( Bits::at(w, 1));
+    /// assert!(!Bits::at(w, 2));
     /// ```
     #[inline]
+    #[doc(hidden)]
     fn at(this: &Self, i: usize) -> bool {
         Bits::get(this, i).expect("index out of bounds")
     }
