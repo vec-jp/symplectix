@@ -37,6 +37,26 @@ where
     }
 
     #[inline]
+    fn count1(&self) -> usize {
+        self.iter().map(Bits::count1).sum()
+    }
+
+    #[inline]
+    fn count0(&self) -> usize {
+        self.iter().map(Bits::count0).sum()
+    }
+
+    #[inline]
+    fn all(&self) -> bool {
+        self.iter().all(Bits::all)
+    }
+
+    #[inline]
+    fn any(&self) -> bool {
+        self.iter().any(Bits::any)
+    }
+
+    #[inline]
     fn get(this: &Self, i: usize) -> Option<bool> {
         let (i, o) = address::<T>(i);
         this.get(i)
@@ -86,30 +106,6 @@ where
                 cur += r.len();
             }
         });
-    }
-}
-
-impl<T> Count for [T]
-where
-    T: Block,
-{
-    #[inline]
-    fn count1(&self) -> usize {
-        self.iter().map(crate::count1).sum()
-    }
-
-    #[inline]
-    fn count0(&self) -> usize {
-        self.iter().map(crate::count0).sum()
-    }
-
-    #[inline]
-    fn all(&self) -> bool {
-        self.iter().all(crate::all)
-    }
-    #[inline]
-    fn any(&self) -> bool {
-        self.iter().any(crate::any)
     }
 }
 

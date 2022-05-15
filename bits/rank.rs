@@ -22,7 +22,7 @@ where
 ///
 /// Note that `rank1` and `rank0` are circularly referenced.
 /// So, you need to implement at least **one** of them.
-pub trait Rank: Count {
+pub trait Rank: Bits {
     /// Counts occurrences of `1` in the given range.
     #[inline]
     fn rank1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {

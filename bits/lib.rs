@@ -10,7 +10,6 @@ mod prelude {
     pub(crate) use crate::mask::{BitwiseAssign, Mask};
     pub(crate) use crate::word::Word;
 
-    pub(crate) use crate::count::Count;
     pub(crate) use crate::rank::Rank;
     pub(crate) use crate::select::Select;
 
@@ -28,9 +27,12 @@ mod word;
 
 pub mod mask;
 
-mod count;
 mod rank;
 mod select;
+
+mod bools;
+mod impls;
+mod slice;
 
 pub use crate::bits::Bits;
 pub use crate::bits_mut::BitsMut;
@@ -42,19 +44,12 @@ pub use crate::mask::Bitwise;
 #[doc(inline)]
 pub use crate::mask::{and, and_not, or, xor};
 
-pub use crate::count::Count;
 pub use crate::rank::{Excess, Rank};
 pub use crate::select::Select;
 
-pub use crate::count::{all, any};
-pub use crate::count::{count0, count1};
 pub use crate::rank::{excess0, excess1};
 pub use crate::rank::{rank0, rank1};
 pub use crate::select::{select0, select1};
-
-mod bools;
-mod impls;
-mod slice;
 
 pub use crate::clamps::clamps;
 
@@ -80,7 +75,7 @@ const fn blocks(n: usize, b: usize) -> usize {
 /// Returns an empty `Vec<T>` with the at least specified capacity in bits.
 ///
 /// ```
-/// # use bits::{self, Bits};
+/// # use bits::Bits;
 /// let v = bits::with_capacity::<u8>(80);
 /// // v has no bits, but an enough capacity to store 80 bits.
 /// assert_eq!(Bits::len(&v), 0);

@@ -1,4 +1,4 @@
-use crate::{Count, Select};
+use crate::{Bits, Select};
 
 /// A helper trait to implement `select1`.
 pub(crate) trait Broadword {

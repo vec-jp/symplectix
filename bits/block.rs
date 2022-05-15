@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 /// [`Bits`](crate::Bits) with a constant size.
-pub trait Block: Clone + Bits + BitsMut + Count + Rank + Select {
+pub trait Block: Clone + Bits + BitsMut + Rank + Select {
     const BITS: usize;
 
     #[doc(hidden)]

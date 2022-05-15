@@ -158,25 +158,6 @@ macro_rules! impls {
                 (i < Bits::len(this)).then(|| (*this & (1 << i)) > 0)
             }
 
-            #[doc(hidden)]
-            #[inline]
-            fn word<N: Word>(&self, i: usize, n: usize) -> N {
-                ((*self >> i) & mask::<Self>(0, n)).cast()
-            }
-        }
-
-        impl BitsMut for $Word {
-            #[inline]
-            fn put1(&mut self, i: usize) {
-                *self |= 1 << i;
-            }
-            #[inline]
-            fn put0(&mut self, i: usize) {
-                *self &= !(1 << i);
-            }
-        }
-
-        impl Count for $Word {
             #[inline]
             fn count1(&self) -> usize {
                 self.count_ones()  as usize
@@ -193,6 +174,23 @@ macro_rules! impls {
             #[inline]
             fn any(&self) -> bool {
                 *self != Self::NULL
+            }
+
+            #[doc(hidden)]
+            #[inline]
+            fn word<N: Word>(&self, i: usize, n: usize) -> N {
+                ((*self >> i) & mask::<Self>(0, n)).cast()
+            }
+        }
+
+        impl BitsMut for $Word {
+            #[inline]
+            fn put1(&mut self, i: usize) {
+                *self |= 1 << i;
+            }
+            #[inline]
+            fn put0(&mut self, i: usize) {
+                *self &= !(1 << i);
             }
         }
 

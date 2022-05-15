@@ -11,16 +11,10 @@ impl Bits for [bool] {
         this.len()
     }
 
-    #[inline]
-    fn get(this: &Self, i: usize) -> Option<bool> {
-        this.get(i).cloned()
-    }
-}
-
-impl Count for [bool] {
     /// ```
+    /// # use bits::Bits;
     /// let v: &[bool] = &[false, false, true];
-    /// assert_eq!(bits::count1(v), 1);
+    /// assert_eq!(Bits::count1(v), 1);
     /// ```
     #[inline]
     fn count1(&self) -> usize {
@@ -28,8 +22,9 @@ impl Count for [bool] {
     }
 
     /// ```
+    /// # use bits::Bits;
     /// let v: &[bool] = &[false, false, true];
-    /// assert!(!bits::all(v));
+    /// assert!(!Bits::all(v));
     /// ```
     #[inline]
     fn all(&self) -> bool {
@@ -37,12 +32,18 @@ impl Count for [bool] {
     }
 
     /// ```
+    /// # use bits::Bits;
     /// let v: &[bool] = &[false, false, true];
-    /// assert!(bits::any(v));
+    /// assert!(Bits::any(v));
     /// ```
     #[inline]
     fn any(&self) -> bool {
         self.iter().any(|&b| b)
+    }
+
+    #[inline]
+    fn get(this: &Self, i: usize) -> Option<bool> {
+        this.get(i).cloned()
     }
 }
 

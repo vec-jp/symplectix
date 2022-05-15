@@ -32,7 +32,82 @@ pub trait Bits {
         Bits::len(this) == 0
     }
 
+    /// Counts the occurrences of `1`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u64] = &[];
+    /// let w: &[u64] = &[0, 0, 0];
+    /// let x: &[u64] = &[0, 1, 3];
+    /// assert_eq!(v.count1(), 0);
+    /// assert_eq!(w.count1(), 0);
+    /// assert_eq!(x.count1(), 3);
+    /// ```
+    #[inline]
+    fn count1(&self) -> usize {
+        Bits::len(self) - self.count0()
+    }
+
+    /// Counts the occurrences of `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u64] = &[];
+    /// let w: &[u64] = &[0, 0, 0];
+    /// let x: &[u64] = &[0, 1, 3];
+    /// assert_eq!(v.count0(), 0);
+    /// assert_eq!(w.count0(), 192);
+    /// assert_eq!(x.count0(), 189);
+    /// ```
+    #[inline]
+    fn count0(&self) -> usize {
+        Bits::len(self) - self.count1()
+    }
+
+    /// Returns true if all bits are enabled. An empty bits should return true.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u64] = &[0, 0, 0];
+    /// let w: &[u64] = &[];
+    /// let x: &[u64] = &[!0, !0, !0];
+    /// assert!(!Bits::all(v));
+    /// assert!( Bits::all(w));
+    /// assert!( Bits::all(x));
+    /// ```
+    #[inline]
+    fn all(&self) -> bool {
+        Bits::is_empty(self) || self.count0() == 0
+    }
+
+    /// Returns true if any bits are enabled. An empty bits should return false.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u64] = &[0, 0, 0];
+    /// let w: &[u64] = &[];
+    /// let x: &[u64] = &[!0, !0, !0];
+    /// let y: &[u64] = &[0, 0, 1];
+    /// assert!(!Bits::any(v));
+    /// assert!(!Bits::any(w));
+    /// assert!( Bits::any(x));
+    /// assert!( Bits::any(y));
+    /// ```
+    #[inline]
+    fn any(&self) -> bool {
+        !Bits::is_empty(self) && self.count1() > 0
+    }
+
     /// Returns a bit at the given index `i`.
+    /// When i is out of bounds, returns **None**.
     ///
     /// # Examples
     ///
@@ -49,7 +124,8 @@ pub trait Bits {
         (i < Bits::len(this)).then(|| Bits::test(this, i))
     }
 
-    /// Returns true if the bits contains an element with the given value.
+    /// Returns a bit at the given index `i`.
+    /// When i is out of bounds, returns **false**.
     ///
     /// # Examples
     ///

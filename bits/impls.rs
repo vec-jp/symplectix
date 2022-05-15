@@ -9,6 +9,24 @@ macro_rules! Bits {
         }
 
         #[inline]
+        fn count1(&self) -> usize {
+            <$X as Bits>::count1(self$(.$method())?)
+        }
+        #[inline]
+        fn count0(&self) -> usize {
+            <$X as Bits>::count0(self$(.$method())?)
+        }
+
+        #[inline]
+        fn all(&self) -> bool {
+            <$X as Bits>::all(self$(.$method())?)
+        }
+        #[inline]
+        fn any(&self) -> bool {
+            <$X as Bits>::any(self$(.$method())?)
+        }
+
+        #[inline]
         fn get(this: &Self, i: usize) -> Option<bool> {
             <$X as Bits>::get(this$(.$method())?, i)
         }
@@ -36,28 +54,6 @@ macro_rules! BitsMut {
         #[inline]
         fn putn<W: Word>(&mut self, i: usize, n: usize, mask: W) {
             <$X as BitsMut>::putn(self$(.$method())?, i, n, mask)
-        }
-    }
-}
-
-macro_rules! Count {
-    ($X:ty $(, $method:ident )?) => {
-        #[inline]
-        fn count1(&self) -> usize {
-            <$X as Count>::count1(self$(.$method())?)
-        }
-        #[inline]
-        fn count0(&self) -> usize {
-            <$X as Count>::count0(self$(.$method())?)
-        }
-
-        #[inline]
-        fn all(&self) -> bool {
-            <$X as Count>::all(self$(.$method())?)
-        }
-        #[inline]
-        fn any(&self) -> bool {
-            <$X as Count>::any(self$(.$method())?)
         }
     }
 }
@@ -124,9 +120,6 @@ impl<'a, T: ?Sized + Bits> Bits for &'a T {
     Bits!(T);
 }
 
-impl<'a, T: ?Sized + Count> Count for &'a T {
-    Count!(T);
-}
 impl<'a, T: ?Sized + Rank> Rank for &'a T {
     Rank!(T);
 }
@@ -172,13 +165,6 @@ where
     [T]: BitsMut,
 {
     BitsMut!([T], as_mut);
-}
-
-impl<T, const N: usize> Count for [T; N]
-where
-    [T]: Count,
-{
-    Count!([T], as_ref);
 }
 
 impl<T, const N: usize> Rank for [T; N]
@@ -244,13 +230,6 @@ where
     BitsMut!([T]);
 }
 
-impl<T> Count for Vec<T>
-where
-    [T]: Count,
-{
-    Count!([T]);
-}
-
 impl<T> Rank for Vec<T>
 where
     [T]: Rank,
@@ -298,13 +277,6 @@ where
     T: ?Sized + BitsMut,
 {
     BitsMut!(T);
-}
-
-impl<T> Count for Box<T>
-where
-    T: ?Sized + Count,
-{
-    Count!(T);
 }
 
 impl<T> Rank for Box<T>
@@ -367,13 +339,6 @@ where
     T::Owned: BitsMut,
 {
     BitsMut!(T::Owned, to_mut);
-}
-
-impl<'a, T> Count for Cow<'a, T>
-where
-    T: ?Sized + ToOwned + Count,
-{
-    Count!(T, as_ref);
 }
 
 impl<'a, T> Rank for Cow<'a, T>

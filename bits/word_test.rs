@@ -1,10 +1,10 @@
-use bits::Word;
+use bits::{Bits, Word};
 
 fn ones<T: Word>(word: T) -> impl Iterator<Item = usize> {
     use core::iter::successors;
     successors(Some(word), |&n| {
         let m = n & !n.lsb();
-        bits::any(&m).then(|| m)
+        Bits::any(&m).then(|| m)
     })
     .map(Word::tzcnt)
 }
