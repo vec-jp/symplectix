@@ -1,17 +1,17 @@
 use crate::prelude::*;
 
 #[inline]
-pub fn select1<T: ?Sized + Select>(x: &T, n: usize) -> Option<usize> {
-    x.select1(n)
+pub fn select_1<T: ?Sized + Select>(x: &T, n: usize) -> Option<usize> {
+    x.select_1(n)
 }
 
 #[inline]
-pub fn select0<T: ?Sized + Select>(x: &T, n: usize) -> Option<usize> {
-    x.select0(n)
+pub fn select_0<T: ?Sized + Select>(x: &T, n: usize) -> Option<usize> {
+    x.select_0(n)
 }
 
 #[cfg(test)]
-pub use helper::{search0, search1};
+pub use helper::{search_0, search_1};
 
 mod helper {
     use crate::{Bits, Rank};
@@ -33,13 +33,13 @@ mod helper {
     }
 
     #[inline]
-    pub fn search1<T: ?Sized + Rank>(bs: &T, n: usize) -> Option<usize> {
-        (n < bs.count1()).then(|| binary_search(0, Bits::len(bs), |k| bs.rank1(..k) > n) - 1)
+    pub fn search_1<T: ?Sized + Rank>(bs: &T, n: usize) -> Option<usize> {
+        (n < bs.count_1()).then(|| binary_search(0, Bits::len(bs), |k| bs.rank_1(..k) > n) - 1)
     }
 
     #[inline]
-    pub fn search0<T: ?Sized + Rank>(bs: &T, n: usize) -> Option<usize> {
-        (n < bs.count0()).then(|| binary_search(0, Bits::len(bs), |k| bs.rank0(..k) > n) - 1)
+    pub fn search_0<T: ?Sized + Rank>(bs: &T, n: usize) -> Option<usize> {
+        (n < bs.count_0()).then(|| binary_search(0, Bits::len(bs), |k| bs.rank_0(..k) > n) - 1)
     }
 }
 
@@ -47,15 +47,15 @@ pub trait Select: Rank {
     /// Returns the position of the n-th 1, indexed starting from zero.
     /// `n` must be less than `self.count1()`, orherwise returns `None`.
     #[inline]
-    fn select1(&self, n: usize) -> Option<usize> {
-        helper::search1(self, n)
+    fn select_1(&self, n: usize) -> Option<usize> {
+        helper::search_1(self, n)
     }
 
     /// Returns the position of the n-th 0, indexed starting from zero.
     /// `n` must be less than `self.count0()`, orherwise returns `None`.
     #[inline]
-    fn select0(&self, n: usize) -> Option<usize> {
-        helper::search0(self, n)
+    fn select_0(&self, n: usize) -> Option<usize> {
+        helper::search_0(self, n)
     }
 
     // #[inline]

@@ -41,13 +41,13 @@ pub trait Bits {
     /// let v: &[u64] = &[];
     /// let w: &[u64] = &[0, 0, 0];
     /// let x: &[u64] = &[0, 1, 3];
-    /// assert_eq!(v.count1(), 0);
-    /// assert_eq!(w.count1(), 0);
-    /// assert_eq!(x.count1(), 3);
+    /// assert_eq!(v.count_1(), 0);
+    /// assert_eq!(w.count_1(), 0);
+    /// assert_eq!(x.count_1(), 3);
     /// ```
     #[inline]
-    fn count1(&self) -> usize {
-        Bits::len(self) - self.count0()
+    fn count_1(&self) -> usize {
+        Bits::len(self) - self.count_0()
     }
 
     /// Counts the occurrences of `0`.
@@ -59,13 +59,13 @@ pub trait Bits {
     /// let v: &[u64] = &[];
     /// let w: &[u64] = &[0, 0, 0];
     /// let x: &[u64] = &[0, 1, 3];
-    /// assert_eq!(v.count0(), 0);
-    /// assert_eq!(w.count0(), 192);
-    /// assert_eq!(x.count0(), 189);
+    /// assert_eq!(v.count_0(), 0);
+    /// assert_eq!(w.count_0(), 192);
+    /// assert_eq!(x.count_0(), 189);
     /// ```
     #[inline]
-    fn count0(&self) -> usize {
-        Bits::len(self) - self.count1()
+    fn count_0(&self) -> usize {
+        Bits::len(self) - self.count_1()
     }
 
     /// Returns true if all bits are enabled. An empty bits should return true.
@@ -83,7 +83,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn all(&self) -> bool {
-        Bits::is_empty(self) || self.count0() == 0
+        Bits::is_empty(self) || self.count_0() == 0
     }
 
     /// Returns true if any bits are enabled. An empty bits should return false.
@@ -103,7 +103,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn any(&self) -> bool {
-        !Bits::is_empty(self) && self.count1() > 0
+        !Bits::is_empty(self) && self.count_1() > 0
     }
 
     /// Returns a bit at the given index `i`.
@@ -164,7 +164,7 @@ pub trait Bits {
         let mut w = T::NULL;
         for b in i..i + n {
             if Bits::get(self, b).expect("index out of bounds") {
-                w.put1(b - i);
+                w.put_1(b - i);
             }
         }
         w

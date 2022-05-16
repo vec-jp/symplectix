@@ -1,6 +1,6 @@
 #![no_std]
 
-use core::{convert::TryFrom, hash::Hash, iter::Sum, ops};
+use core::{convert::TryFrom, hash::Hash, ops};
 
 mod private {
     pub trait Sealed {}
@@ -47,7 +47,7 @@ pub trait Word:
     + ops::BitXorAssign
     + ops::ShlAssign<usize>
     + ops::ShrAssign<usize>
-    + Sum<Self>
+    // + Sum<Self>
     + TryFrom<u8>
     + TryFrom<u16>
     + TryFrom<u32>
@@ -160,7 +160,7 @@ mod tests {
 
     #[test]
     fn lsb() {
-        let tests = vec![
+        let tests = [
             (0b0000_0000_u8, 0b0000_0000),
             (0b0000_0001_u8, 0b0000_0001),
             (0b0000_1100_u8, 0b0000_0100),
@@ -169,14 +169,13 @@ mod tests {
         ];
 
         for (n, want) in tests {
-            println!("n={n:08b} want={want:08b} got={:08b}", n.lsb());
             assert_eq!(n.lsb(), want);
         }
     }
 
     #[test]
     fn msb() {
-        let tests = vec![
+        let tests = [
             (0b0000_0000_u8, 0b0000_0000),
             (0b0000_0001_u8, 0b0000_0001),
             (0b0000_1100_u8, 0b0000_1000),
@@ -185,7 +184,6 @@ mod tests {
         ];
 
         for (n, want) in tests {
-            println!("n={n:08b} want={want:08b} got={:08b}", n.msb());
             assert_eq!(n.msb(), want);
         }
     }

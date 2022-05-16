@@ -37,13 +37,13 @@ where
     }
 
     #[inline]
-    fn count1(&self) -> usize {
-        self.iter().map(Bits::count1).sum()
+    fn count_1(&self) -> usize {
+        self.iter().map(Bits::count_1).sum()
     }
 
     #[inline]
-    fn count0(&self) -> usize {
-        self.iter().map(Bits::count0).sum()
+    fn count_0(&self) -> usize {
+        self.iter().map(Bits::count_0).sum()
     }
 
     #[inline]
@@ -83,26 +83,26 @@ where
     T: Block,
 {
     #[inline]
-    fn put1(&mut self, i: usize) {
+    fn put_1(&mut self, i: usize) {
         assert!(i < Bits::len(self));
         let (i, o) = address::<T>(i);
-        self[i].put1(o);
+        self[i].put_1(o);
     }
 
     #[inline]
-    fn put0(&mut self, i: usize) {
+    fn put_0(&mut self, i: usize) {
         assert!(i < Bits::len(self));
         let (i, o) = address::<T>(i);
-        self[i].put0(o);
+        self[i].put_0(o);
     }
 
     #[inline]
     #[doc(hidden)]
-    fn putn<N: Word>(&mut self, i: usize, n: usize, mask: N) {
+    fn put_n<N: Word>(&mut self, i: usize, n: usize, mask: N) {
         let mut cur = 0;
         iterate::<T, _>(i, i + n, |k, r| {
             if k < self.len() {
-                self[k].putn::<N>(r.start, r.len(), mask.word(cur, r.len()));
+                self[k].put_n::<N>(r.start, r.len(), mask.word(cur, r.len()));
                 cur += r.len();
             }
         });
@@ -114,14 +114,16 @@ where
     T: Block,
 {
     #[inline]
-    fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+    fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         let (s, e) = clamps!(self, &r);
         let (i, r0) = address::<T>(s);
         let (j, r1) = address::<T>(e);
         if i == j {
-            self[i].rank1(r0..r1)
+            self[i].rank_1(r0..r1)
         } else {
-            self[i].rank1(r0..) + self[i + 1..j].count1() + self.get(j).map_or(0, |b| b.rank1(..r1))
+            self[i].rank_1(r0..)
+                + self[i + 1..j].count_1()
+                + self.get(j).map_or(0, |b| b.rank_1(..r1))
         }
     }
 }
@@ -131,25 +133,25 @@ where
     T: Block,
 {
     #[inline]
-    fn select1(&self, mut n: usize) -> Option<usize> {
+    fn select_1(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
-            let c1 = b.count1();
-            if n < c1 {
-                return Some(i * T::BITS + b.select1(n).expect("BUG"));
+            let count = b.count_1();
+            if n < count {
+                return Some(i * T::BITS + b.select_1(n).expect("BUG"));
             }
-            n -= c1;
+            n -= count;
         }
         None
     }
 
     #[inline]
-    fn select0(&self, mut n: usize) -> Option<usize> {
+    fn select_0(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
-            let c0 = b.count0();
-            if n < c0 {
-                return Some(i * T::BITS + b.select0(n).expect("BUG"));
+            let count = b.count_0();
+            if n < count {
+                return Some(i * T::BITS + b.select_0(n).expect("BUG"));
             }
-            n -= c0;
+            n -= count;
         }
         None
     }

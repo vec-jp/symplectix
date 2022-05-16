@@ -9,12 +9,12 @@ macro_rules! Bits {
         }
 
         #[inline]
-        fn count1(&self) -> usize {
-            <$X as Bits>::count1(self$(.$method())?)
+        fn count_1(&self) -> usize {
+            <$X as Bits>::count_1(self$(.$method())?)
         }
         #[inline]
-        fn count0(&self) -> usize {
-            <$X as Bits>::count0(self$(.$method())?)
+        fn count_0(&self) -> usize {
+            <$X as Bits>::count_0(self$(.$method())?)
         }
 
         #[inline]
@@ -42,18 +42,18 @@ macro_rules! Bits {
 macro_rules! BitsMut {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn put1(&mut self, i: usize) {
-            <$X as BitsMut>::put1(self$(.$method())?, i)
+        fn put_1(&mut self, i: usize) {
+            <$X as BitsMut>::put_1(self$(.$method())?, i)
         }
         #[inline]
-        fn put0(&mut self, i: usize) {
-            <$X as BitsMut>::put0(self$(.$method())?, i)
+        fn put_0(&mut self, i: usize) {
+            <$X as BitsMut>::put_0(self$(.$method())?, i)
         }
 
         #[doc(hidden)]
         #[inline]
-        fn putn<W: Word>(&mut self, i: usize, n: usize, mask: W) {
-            <$X as BitsMut>::putn(self$(.$method())?, i, n, mask)
+        fn put_n<W: Word>(&mut self, i: usize, n: usize, mask: W) {
+            <$X as BitsMut>::put_n(self$(.$method())?, i, n, mask)
         }
     }
 }
@@ -61,12 +61,12 @@ macro_rules! BitsMut {
 macro_rules! Rank {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-            <$X as Rank>::rank1(self$(.$method())?, r)
+        fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+            <$X as Rank>::rank_1(self$(.$method())?, r)
         }
         #[inline]
-        fn rank0<R: RangeBounds<usize>>(&self, r: R) -> usize {
-            <$X as Rank>::rank0(self$(.$method())?, r)
+        fn rank_0<R: RangeBounds<usize>>(&self, r: R) -> usize {
+            <$X as Rank>::rank_0(self$(.$method())?, r)
         }
     }
 }
@@ -74,12 +74,12 @@ macro_rules! Rank {
 macro_rules! Select {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn select1(&self, n: usize) -> Option<usize> {
-            <$X as Select>::select1(self$(.$method())?, n)
+        fn select_1(&self, n: usize) -> Option<usize> {
+            <$X as Select>::select_1(self$(.$method())?, n)
         }
         #[inline]
-        fn select0(&self, n: usize) -> Option<usize> {
-            <$X as Select>::select0(self$(.$method())?, n)
+        fn select_0(&self, n: usize) -> Option<usize> {
+            <$X as Select>::select_0(self$(.$method())?, n)
         }
     }
 }

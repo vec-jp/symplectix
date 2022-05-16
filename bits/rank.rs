@@ -1,21 +1,21 @@
 use crate::prelude::*;
 
 #[inline]
-pub fn rank1<T, Index>(x: &T, index: Index) -> usize
+pub fn rank_1<T, Index>(x: &T, index: Index) -> usize
 where
     T: ?Sized + Rank,
     Index: RangeBounds<usize>,
 {
-    x.rank1(index)
+    x.rank_1(index)
 }
 
 #[inline]
-pub fn rank0<T, Index>(x: &T, index: Index) -> usize
+pub fn rank_0<T, Index>(x: &T, index: Index) -> usize
 where
     T: ?Sized + Rank,
     Index: RangeBounds<usize>,
 {
-    x.rank0(index)
+    x.rank_0(index)
 }
 
 /// ## Implementing `Rank`
@@ -25,57 +25,57 @@ where
 pub trait Rank: Bits {
     /// Counts occurrences of `1` in the given range.
     #[inline]
-    fn rank1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
+    fn rank_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
         let (i, j) = clamps!(self, &index);
-        (j - i) - self.rank0(index)
+        (j - i) - self.rank_0(index)
     }
 
     /// Counts occurrences of `0` in the given range.
     #[inline]
-    fn rank0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
+    fn rank_0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
         let (i, j) = clamps!(self, &index);
-        (j - i) - self.rank1(index)
+        (j - i) - self.rank_1(index)
     }
 }
 
 #[inline]
-pub fn excess1<T, Index>(x: &T, index: Index) -> usize
+pub fn excess_1<T, Index>(x: &T, index: Index) -> usize
 where
     T: ?Sized + Rank,
     Index: RangeBounds<usize>,
 {
-    x.excess1(index)
+    x.excess_1(index)
 }
 
 #[inline]
-pub fn excess0<T, Index>(x: &T, index: Index) -> usize
+pub fn excess_0<T, Index>(x: &T, index: Index) -> usize
 where
     T: ?Sized + Rank,
     Index: RangeBounds<usize>,
 {
-    x.excess0(index)
+    x.excess_0(index)
 }
 
 pub trait Excess: Rank {
-    fn excess1<Index: RangeBounds<usize>>(&self, index: Index) -> usize;
-    fn excess0<Index: RangeBounds<usize>>(&self, index: Index) -> usize;
+    fn excess_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize;
+    fn excess_0<Index: RangeBounds<usize>>(&self, index: Index) -> usize;
 }
 
 impl<T: ?Sized + Rank> Excess for T {
     #[inline]
-    fn excess1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
+    fn excess_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
         let (i, j) = clamps!(self, &index);
-        let rank1 = self.rank1(i..j);
-        let rank0 = self.rank0(i..j);
+        let rank1 = self.rank_1(i..j);
+        let rank0 = self.rank_0(i..j);
         assert!(rank1 >= rank0);
         rank1 - rank0
     }
 
     #[inline]
-    fn excess0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
+    fn excess_0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
         let (i, j) = clamps!(self, &index);
-        let rank1 = self.rank1(i..j);
-        let rank0 = self.rank0(i..j);
+        let rank1 = self.rank_1(i..j);
+        let rank0 = self.rank_0(i..j);
         assert!(rank0 >= rank1);
         rank0 - rank1
     }

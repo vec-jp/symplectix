@@ -8,7 +8,7 @@ pub(crate) trait Broadword {
 impl Broadword for u64 {
     #[inline]
     fn broadword(&self, c: usize) -> Option<usize> {
-        (c < self.count1()).then(|| {
+        (c < self.count_1()).then(|| {
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             {
                 if is_x86_feature_detected!("bmi2") {
@@ -21,28 +21,28 @@ impl Broadword for u64 {
     }
 }
 
-const L8: u64 = 0x0101_0101_0101_0101; // has the lowest bit of every bytes
-const H8: u64 = 0x8080_8080_8080_8080; // has the highest bit of every bytes
-
-#[inline]
-const fn le8(x: u64, y: u64) -> u64 {
-    (((y | H8) - (x & !H8)) ^ x ^ y) & H8
-}
-
-#[inline]
-const fn lt8(x: u64, y: u64) -> u64 {
-    (((x | H8) - (y & !H8)) ^ x ^ !y) & H8
-}
-
-#[inline]
-const fn nz8(x: u64) -> u64 {
-    lt8(0, x)
-}
-
 // Sebastiano Vigna, “Broadword Implementation of Rank/Select Queries”
 // Returns 72 when not found.
 #[allow(clippy::many_single_char_names)]
 fn broadword_generic(x: u64, n: usize) -> usize {
+    const L8: u64 = 0x0101_0101_0101_0101; // has the lowest bit of every bytes
+    const H8: u64 = 0x8080_8080_8080_8080; // has the highest bit of every bytes
+
+    #[inline]
+    const fn le8(x: u64, y: u64) -> u64 {
+        (((y | H8) - (x & !H8)) ^ x ^ y) & H8
+    }
+
+    #[inline]
+    const fn lt8(x: u64, y: u64) -> u64 {
+        (((x | H8) - (y & !H8)) ^ x ^ !y) & H8
+    }
+
+    #[inline]
+    const fn nz8(x: u64) -> u64 {
+        lt8(0, x)
+    }
+
     let n = n as u64;
 
     let mut s = x - ((x & 0xAAAA_AAAA_AAAA_AAAA) >> 1);
@@ -63,7 +63,7 @@ macro_rules! impl_broadword_as_u64 {
             impl Broadword for $Ty {
                 #[inline]
                 fn broadword(&self, c: usize) -> Option<usize> {
-                    (c < self.count1()).then(|| (*self as u64).select1(c).unwrap())
+                    (c < self.count_1()).then(|| (*self as u64).select_1(c).unwrap())
                 }
             }
         )*)
@@ -75,15 +75,15 @@ impl Broadword for u128 {
     /// # use bits::{BitsMut, Select};
     /// let mut n: u128 = 0;
     /// for i in (0..128).step_by(2) {
-    ///     n.put1(i);
+    ///     n.put_1(i);
     /// }
-    /// assert_eq!(n.select1(60), Some(120));
-    /// assert_eq!(n.select1(61), Some(122));
+    /// assert_eq!(n.select_1(60), Some(120));
+    /// assert_eq!(n.select_1(61), Some(122));
     /// ```
     #[inline]
     fn broadword(&self, c: usize) -> Option<usize> {
         let this: [u64; 2] = [*self as u64, (*self >> 64) as u64];
-        this.select1(c)
+        this.select_1(c)
     }
 }
 

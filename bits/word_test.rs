@@ -1,12 +1,13 @@
-use bits::{Bits, Word};
+use bits::Bits;
+use word::Word;
 
-fn ones<T: Word>(word: T) -> impl Iterator<Item = usize> {
+fn ones<T: Bits + Word>(word: T) -> impl Iterator<Item = usize> {
     use core::iter::successors;
     successors(Some(word), |&n| {
         let m = n & !n.lsb();
         Bits::any(&m).then(|| m)
     })
-    .map(Word::tzcnt)
+    .map(Word::count_t0)
 }
 
 #[test]
@@ -26,6 +27,6 @@ fn ones_select1() {
     let n: u32 = 0b_0101_0101;
     let mut ones = ones(n);
     for c in 0..64 {
-        assert_eq!(ones.next(), bits::select1(&n, c));
+        assert_eq!(ones.next(), bits::select_1(&n, c));
     }
 }

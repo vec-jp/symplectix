@@ -14,10 +14,10 @@ impl Bits for [bool] {
     /// ```
     /// # use bits::Bits;
     /// let v: &[bool] = &[false, false, true];
-    /// assert_eq!(Bits::count1(v), 1);
+    /// assert_eq!(Bits::count_1(v), 1);
     /// ```
     #[inline]
-    fn count1(&self) -> usize {
+    fn count_1(&self) -> usize {
         self.iter().filter(|&&b| b).count()
     }
 
@@ -51,13 +51,13 @@ impl Rank for [bool] {
     /// ```
     /// # use bits::Rank;
     /// let v: &[bool] = &[false, false, true];
-    /// assert_eq!(v.rank1(..),  1);
-    /// assert_eq!(v.rank1(..2), 0);
+    /// assert_eq!(v.rank_1(..),  1);
+    /// assert_eq!(v.rank_1(..2), 0);
     /// ```
     #[inline]
-    fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+    fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         let (i, j) = clamps!(self, &r);
-        self[i..j].count1()
+        self[i..j].count_1()
     }
 }
 
@@ -65,11 +65,11 @@ impl Select for [bool] {
     /// ```
     /// # use bits::Select;
     /// let v: &[bool] = &[false, false, true];
-    /// assert_eq!(v.select1(0), Some(2));
-    /// assert_eq!(v.select1(1), None);
+    /// assert_eq!(v.select_1(0), Some(2));
+    /// assert_eq!(v.select_1(1), None);
     /// ```
     #[inline]
-    fn select1(&self, n: usize) -> Option<usize> {
+    fn select_1(&self, n: usize) -> Option<usize> {
         self.iter()
             .enumerate()
             .filter_map(|(i, b)| b.then(|| i))
@@ -79,12 +79,12 @@ impl Select for [bool] {
     /// ```
     /// # use bits::Select;
     /// let v: &[bool] = &[false, false, true];
-    /// assert_eq!(v.select0(0), Some(0));
-    /// assert_eq!(v.select0(1), Some(1));
-    /// assert_eq!(v.select0(2), None);
+    /// assert_eq!(v.select_0(0), Some(0));
+    /// assert_eq!(v.select_0(1), Some(1));
+    /// assert_eq!(v.select_0(2), None);
     /// ```
     #[inline]
-    fn select0(&self, n: usize) -> Option<usize> {
+    fn select_0(&self, n: usize) -> Option<usize> {
         self.iter()
             .enumerate()
             .filter_map(|(i, b)| (!b).then(|| i))

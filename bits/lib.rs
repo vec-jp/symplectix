@@ -44,12 +44,8 @@ pub use crate::mask::Bitwise;
 #[doc(inline)]
 pub use crate::mask::{and, and_not, or, xor};
 
-pub use crate::rank::{Excess, Rank};
-pub use crate::select::Select;
-
-pub use crate::rank::{excess0, excess1};
-pub use crate::rank::{rank0, rank1};
-pub use crate::select::{select0, select1};
+pub use crate::rank::{excess_0, excess_1, rank_0, rank_1, Excess, Rank};
+pub use crate::select::{select_0, select_1, Select};
 
 pub use crate::clamps::clamps;
 
