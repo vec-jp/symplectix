@@ -11,6 +11,11 @@ impl Bits for [bool] {
         this.len()
     }
 
+    #[inline]
+    fn get(this: &Self, i: usize) -> Option<bool> {
+        this.get(i).cloned()
+    }
+
     /// ```
     /// # use bits::Bits;
     /// let v: &[bool] = &[false, false, true];
@@ -41,15 +46,8 @@ impl Bits for [bool] {
         self.iter().any(|&b| b)
     }
 
-    #[inline]
-    fn get(this: &Self, i: usize) -> Option<bool> {
-        this.get(i).cloned()
-    }
-}
-
-impl Rank for [bool] {
     /// ```
-    /// # use bits::Rank;
+    /// # use bits::Bits;
     /// let v: &[bool] = &[false, false, true];
     /// assert_eq!(v.rank_1(..),  1);
     /// assert_eq!(v.rank_1(..2), 0);
@@ -59,11 +57,9 @@ impl Rank for [bool] {
         let (i, j) = clamps!(self, &r);
         self[i..j].count_1()
     }
-}
 
-impl Select for [bool] {
     /// ```
-    /// # use bits::Select;
+    /// # use bits::Bits;
     /// let v: &[bool] = &[false, false, true];
     /// assert_eq!(v.select_1(0), Some(2));
     /// assert_eq!(v.select_1(1), None);
@@ -77,7 +73,7 @@ impl Select for [bool] {
     }
 
     /// ```
-    /// # use bits::Select;
+    /// # use bits::Bits;
     /// let v: &[bool] = &[false, false, true];
     /// assert_eq!(v.select_0(0), Some(0));
     /// assert_eq!(v.select_0(1), Some(1));

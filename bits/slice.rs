@@ -5,7 +5,7 @@ use core::ops::Range;
 use core::slice;
 use std::borrow::Cow;
 
-fn iterate<T, F>(s: usize, e: usize, mut f: F)
+fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
 where
     T: Block,
     F: FnMut(usize, Range<usize>),
@@ -37,6 +37,13 @@ where
     }
 
     #[inline]
+    fn get(this: &Self, i: usize) -> Option<bool> {
+        let (i, o) = address::<T>(i);
+        this.get(i)
+            .map(|block| Bits::get(block, o).expect("index out of bounds"))
+    }
+
+    #[inline]
     fn count_1(&self) -> usize {
         self.iter().map(Bits::count_1).sum()
     }
@@ -57,10 +64,41 @@ where
     }
 
     #[inline]
-    fn get(this: &Self, i: usize) -> Option<bool> {
-        let (i, o) = address::<T>(i);
-        this.get(i)
-            .map(|block| Bits::get(block, o).expect("index out of bounds"))
+    fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+        let (s, e) = clamps!(self, &r);
+        let (i, r0) = address::<T>(s);
+        let (j, r1) = address::<T>(e);
+        if i == j {
+            self[i].rank_1(r0..r1)
+        } else {
+            self[i].rank_1(r0..)
+                + self[i + 1..j].count_1()
+                + self.get(j).map_or(0, |b| b.rank_1(..r1))
+        }
+    }
+
+    #[inline]
+    fn select_1(&self, mut n: usize) -> Option<usize> {
+        for (i, b) in self.iter().enumerate() {
+            let count = b.count_1();
+            if n < count {
+                return Some(i * T::BITS + b.select_1(n).expect("BUG"));
+            }
+            n -= count;
+        }
+        None
+    }
+
+    #[inline]
+    fn select_0(&self, mut n: usize) -> Option<usize> {
+        for (i, b) in self.iter().enumerate() {
+            let count = b.count_0();
+            if n < count {
+                return Some(i * T::BITS + b.select_0(n).expect("BUG"));
+            }
+            n -= count;
+        }
+        None
     }
 
     #[inline]
@@ -68,8 +106,8 @@ where
     fn word<N: Word>(&self, i: usize, n: usize) -> N {
         let mut cur = 0;
         let mut out = N::NULL;
-        iterate::<T, _>(i, i + n, |k, r| {
-            if k < self.len() && cur < N::BITS {
+        for_each_blocks::<T, _>(i, i + n, |k, r| {
+            if k < self.len() && cur < <N as Block>::BITS {
                 out |= self[k].word::<N>(r.start, r.len()) << cur;
                 cur += r.len();
             }
@@ -100,60 +138,12 @@ where
     #[doc(hidden)]
     fn put_n<N: Word>(&mut self, i: usize, n: usize, mask: N) {
         let mut cur = 0;
-        iterate::<T, _>(i, i + n, |k, r| {
+        for_each_blocks::<T, _>(i, i + n, |k, r| {
             if k < self.len() {
                 self[k].put_n::<N>(r.start, r.len(), mask.word(cur, r.len()));
                 cur += r.len();
             }
         });
-    }
-}
-
-impl<T> Rank for [T]
-where
-    T: Block,
-{
-    #[inline]
-    fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        let (s, e) = clamps!(self, &r);
-        let (i, r0) = address::<T>(s);
-        let (j, r1) = address::<T>(e);
-        if i == j {
-            self[i].rank_1(r0..r1)
-        } else {
-            self[i].rank_1(r0..)
-                + self[i + 1..j].count_1()
-                + self.get(j).map_or(0, |b| b.rank_1(..r1))
-        }
-    }
-}
-
-impl<T> Select for [T]
-where
-    T: Block,
-{
-    #[inline]
-    fn select_1(&self, mut n: usize) -> Option<usize> {
-        for (i, b) in self.iter().enumerate() {
-            let count = b.count_1();
-            if n < count {
-                return Some(i * T::BITS + b.select_1(n).expect("BUG"));
-            }
-            n -= count;
-        }
-        None
-    }
-
-    #[inline]
-    fn select_0(&self, mut n: usize) -> Option<usize> {
-        for (i, b) in self.iter().enumerate() {
-            let count = b.count_0();
-            if n < count {
-                return Some(i * T::BITS + b.select_0(n).expect("BUG"));
-            }
-            n -= count;
-        }
-        None
     }
 }
 

@@ -9,6 +9,11 @@ macro_rules! Bits {
         }
 
         #[inline]
+        fn get(this: &Self, i: usize) -> Option<bool> {
+            <$X as Bits>::get(this$(.$method())?, i)
+        }
+
+        #[inline]
         fn count_1(&self) -> usize {
             <$X as Bits>::count_1(self$(.$method())?)
         }
@@ -27,8 +32,21 @@ macro_rules! Bits {
         }
 
         #[inline]
-        fn get(this: &Self, i: usize) -> Option<bool> {
-            <$X as Bits>::get(this$(.$method())?, i)
+        fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+            <$X as Bits>::rank_1(self$(.$method())?, r)
+        }
+        #[inline]
+        fn rank_0<R: RangeBounds<usize>>(&self, r: R) -> usize {
+            <$X as Bits>::rank_0(self$(.$method())?, r)
+        }
+
+        #[inline]
+        fn select_1(&self, n: usize) -> Option<usize> {
+            <$X as Bits>::select_1(self$(.$method())?, n)
+        }
+        #[inline]
+        fn select_0(&self, n: usize) -> Option<usize> {
+            <$X as Bits>::select_0(self$(.$method())?, n)
         }
 
         #[doc(hidden)]
@@ -54,32 +72,6 @@ macro_rules! BitsMut {
         #[inline]
         fn put_n<W: Word>(&mut self, i: usize, n: usize, mask: W) {
             <$X as BitsMut>::put_n(self$(.$method())?, i, n, mask)
-        }
-    }
-}
-
-macro_rules! Rank {
-    ($X:ty $(, $method:ident )?) => {
-        #[inline]
-        fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-            <$X as Rank>::rank_1(self$(.$method())?, r)
-        }
-        #[inline]
-        fn rank_0<R: RangeBounds<usize>>(&self, r: R) -> usize {
-            <$X as Rank>::rank_0(self$(.$method())?, r)
-        }
-    }
-}
-
-macro_rules! Select {
-    ($X:ty $(, $method:ident )?) => {
-        #[inline]
-        fn select_1(&self, n: usize) -> Option<usize> {
-            <$X as Select>::select_1(self$(.$method())?, n)
-        }
-        #[inline]
-        fn select_0(&self, n: usize) -> Option<usize> {
-            <$X as Select>::select_0(self$(.$method())?, n)
         }
     }
 }
@@ -120,13 +112,6 @@ impl<'a, T: ?Sized + Bits> Bits for &'a T {
     Bits!(T);
 }
 
-impl<'a, T: ?Sized + Rank> Rank for &'a T {
-    Rank!(T);
-}
-impl<'a, T: ?Sized + Select> Select for &'a T {
-    Select!(T);
-}
-
 // impl<'a, T> Mask for &'a T
 // where
 //     T: ?Sized + Mask,
@@ -165,20 +150,6 @@ where
     [T]: BitsMut,
 {
     BitsMut!([T], as_mut);
-}
-
-impl<T, const N: usize> Rank for [T; N]
-where
-    [T]: Rank,
-{
-    Rank!([T], as_ref);
-}
-
-impl<T, const N: usize> Select for [T; N]
-where
-    [T]: Select,
-{
-    Select!([T], as_ref);
 }
 
 impl<T, const N: usize> Block for [T; N]
@@ -230,20 +201,6 @@ where
     BitsMut!([T]);
 }
 
-impl<T> Rank for Vec<T>
-where
-    [T]: Rank,
-{
-    Rank!([T]);
-}
-
-impl<T> Select for Vec<T>
-where
-    [T]: Select,
-{
-    Select!([T]);
-}
-
 impl<'a, T> Mask for &'a Vec<T>
 where
     &'a [T]: Mask,
@@ -277,20 +234,6 @@ where
     T: ?Sized + BitsMut,
 {
     BitsMut!(T);
-}
-
-impl<T> Rank for Box<T>
-where
-    T: ?Sized + Rank,
-{
-    Rank!(T);
-}
-
-impl<T> Select for Box<T>
-where
-    T: ?Sized + Select,
-{
-    Select!(T);
 }
 
 impl<T> Block for Box<T>
@@ -339,20 +282,6 @@ where
     T::Owned: BitsMut,
 {
     BitsMut!(T::Owned, to_mut);
-}
-
-impl<'a, T> Rank for Cow<'a, T>
-where
-    T: ?Sized + ToOwned + Rank,
-{
-    Rank!(T, as_ref);
-}
-
-impl<'a, T> Select for Cow<'a, T>
-where
-    T: ?Sized + ToOwned + Select,
-{
-    Select!(T, as_ref);
 }
 
 impl<'a, T> Block for Cow<'a, T>

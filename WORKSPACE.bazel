@@ -45,7 +45,7 @@ rules_foreign_cc_dependencies()
 
 _RUST_VERSION = "1.59.0"
 
-_RUST_EDITION = "2018"
+_RUST_EDITION = "2021"
 
 _RULES_RUST_VERSION = "0.2.1"
 

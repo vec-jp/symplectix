@@ -31,6 +31,30 @@ pub trait Bitwise: Sized + Mask {
     fn xor<That: Mask>(self, that: That) -> Xor<Self, That>;
 }
 
+macro_rules! impl_bitwise_ops_for_words {
+    ($( $Word:ty )*) => ($(
+        impl BitwiseAssign<$Word> for $Word {
+            #[inline]
+            fn and(a: &mut Self, b: &$Word) {
+                *a &= *b;
+            }
+            #[inline]
+            fn and_not(a: &mut Self, b: &$Word) {
+                *a &= !*b;
+            }
+            #[inline]
+            fn or(a: &mut Self, b: &$Word) {
+                *a |= *b;
+            }
+            #[inline]
+            fn xor(a: &mut Self, b: &$Word) {
+                *a ^= *b;
+            }
+        }
+    )*)
+}
+impl_bitwise_ops_for_words!(u8 u16 u32 u64 u128);
+
 #[inline]
 pub fn and<This: Mask, That: Mask>(this: This, that: That) -> And<This, That> {
     And { a: this, b: that }

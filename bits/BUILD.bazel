@@ -2,40 +2,26 @@ load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", 
 
 package(default_visibility = ["//visibility:private"])
 
-rustc_flags = select({
-    "@platforms//cpu:x86_64": [
-        "-Ctarget-feature=+avx2,+bmi2,+popcnt",
-    ],
-    "//conditions:default": [],
-})
-
 rust_library(
     name = "bits",
     srcs = glob(
         ["*.rs"],
         exclude = ["*_test.rs"],
     ),
-    deps = [
-        "//num/word",
-    ],
-    rustc_flags = rustc_flags,
     visibility = ["//visibility:public"],
 )
 
 rust_test_suite(
     name = "tests",
     srcs = glob(["*_test.rs"]),
-    rustc_flags = rustc_flags,
     deps = [
         ":bits",
-        "//num/word",
     ],
 )
 
 rust_test(
     name = "cfg_test",
     crate = ":bits",
-    rustc_flags = rustc_flags,
 )
 
 rust_doc_test(

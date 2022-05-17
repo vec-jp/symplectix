@@ -1,6 +1,5 @@
 use crate::prelude::*;
-
-use word::Word as WordBase;
+use core::{hash::Hash, ops};
 
 mod private {
     pub trait Sealed {}
@@ -15,29 +14,141 @@ mod private {
     impl_for_nums!(i8 i16 i32 i64 i128 isize);
 }
 
-const fn bits_of<T>() -> usize {
-    core::mem::size_of::<T>() * 8
-}
-
-pub trait Word: word::Word + Block + private::Sealed {}
-
 #[inline]
-fn mask<N>(i: usize, j: usize) -> N
-where
-    N: Word,
-{
+fn mask<T: Word>(i: usize, j: usize) -> T {
     // TODO: assert!(i <= j);
     // if i == j {
     if i >= j {
-        N::NULL
+        T::NULL
     } else {
-        N::FULL >> (N::BITS - (j - i)) << i
+        T::FULL >> (<T as crate::Block>::BITS - (j - i)) << i
     }
+}
+
+/// `Word` is a fixed-length group of bits that the CPU can process.
+pub trait Word:
+    'static
+    + Copy
+    + Hash
+    + Eq
+    + Ord
+    + Bits
+    + BitsMut
+    + Block
+    + ops::Add<Output = Self>
+    + ops::Sub<Output = Self>
+    + ops::Mul<Output = Self>
+    + ops::Div<Output = Self>
+    + ops::Rem<Output = Self>
+    + ops::AddAssign
+    + ops::SubAssign
+    + ops::MulAssign
+    + ops::DivAssign
+    + ops::RemAssign
+    + ops::BitAnd<Output = Self>
+    + ops::BitOr<Output = Self>
+    + ops::BitXor<Output = Self>
+    + ops::Shl<usize, Output = Self>
+    + ops::Shr<usize, Output = Self>
+    + ops::Not<Output = Self>
+    + ops::BitAndAssign
+    + ops::BitOrAssign
+    + ops::BitXorAssign
+    + ops::ShlAssign<usize>
+    + ops::ShrAssign<usize>
+    + TryFrom<u8>
+    + TryFrom<u16>
+    + TryFrom<u32>
+    + TryFrom<u64>
+    + TryFrom<u128>
+    + TryFrom<usize>
+    + private::Sealed
+{
+    /// literal 0
+    #[doc(hidden)]
+    const _0: Self;
+
+    /// literal 1
+    #[doc(hidden)]
+    const _1: Self;
+
+    /// An empty, no bits are enabled, `Word`.
+    #[doc(hidden)]
+    const NULL: Self;
+
+    /// A full, all bits are enabled, `Word`.
+    #[doc(hidden)]
+    const FULL: Self;
+
+    #[doc(hidden)]
+    #[inline]
+    fn cast<N>(self) -> N
+    where
+        N: Word + TryFrom<Self>,
+    {
+        N::try_from(self).ok().unwrap()
+    }
+
+    /// Returns the number of leading ones in the binary representation of self.
+    fn count_l1(self) -> usize;
+
+    /// Returns the number of leading zeros in the binary representation of self.
+    fn count_l0(self) -> usize;
+
+    /// Returns the number of trailing zeros in the binary representation of self.
+    fn count_t0(self) -> usize;
+
+    /// Least significant set bit (right most set bit).
+    fn lsb(self) -> Self;
+
+    /// Most significant set bit (left most set bit).
+    fn msb(self) -> Self;
 }
 
 macro_rules! impls {
     ($( $Word:ty )*) => ($(
-        impl Word for $Word {}
+        impl Word for $Word {
+            #[doc(hidden)]
+            const _0: Self = 0;
+
+            #[doc(hidden)]
+            const _1: Self = 1;
+
+            #[doc(hidden)]
+            const NULL: Self = 0;
+
+            #[doc(hidden)]
+            const FULL: Self = !0;
+
+            #[inline]
+            fn count_l1(self) -> usize {
+                self.leading_ones() as usize
+            }
+
+            #[inline]
+            fn count_l0(self) -> usize {
+                self.leading_zeros() as usize
+            }
+
+            #[inline]
+            fn count_t0(self) -> usize {
+                self.trailing_zeros() as usize
+            }
+
+            #[inline]
+            fn lsb(self) -> Self {
+                self & self.wrapping_neg()
+            }
+
+            #[inline]
+            fn msb(self) -> Self {
+                if self == 0 {
+                    0
+                } else {
+                    1 << ((<Self as Block>::BITS - 1) ^ self.count_l0())
+                }
+            }
+        }
 
         impl Bits for $Word {
             #[inline]
@@ -47,16 +158,17 @@ macro_rules! impls {
 
             #[inline]
             fn get(this: &Self, i: usize) -> Option<bool> {
-                (i < Bits::len(this)).then(|| (*this & (1 << i)) > 0)
+                (i < Bits::len(this)).then(|| (*this & (1 << i)) != 0)
             }
 
             #[inline]
             fn count_1(&self) -> usize {
-                <Self as WordBase>::count_1(*self)
+                self.count_ones() as usize
             }
+
             #[inline]
             fn count_0(&self) -> usize {
-                <Self as WordBase>::count_0(*self)
+                self.count_zeros() as usize
             }
 
             #[inline]
@@ -67,6 +179,27 @@ macro_rules! impls {
             #[inline]
             fn any(&self) -> bool {
                 *self != Self::NULL
+            }
+
+            #[inline]
+            fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+                let (i, j) = clamps!(self, &r);
+                (*self & mask::<Self>(i, j)).count_1()
+            }
+
+            #[inline]
+            fn rank_0<R: RangeBounds<usize>>(&self, r: R) -> usize {
+                (!*self).rank_1(r)
+            }
+
+            #[inline]
+            fn select_1(&self, n: usize) -> Option<usize> {
+                <Self as SelectWord>::select_1(*self, n)
+            }
+
+            #[inline]
+            fn select_0(&self, n: usize) -> Option<usize> {
+                <Self as SelectWord>::select_1(!self, n)
             }
 
             #[doc(hidden)]
@@ -87,55 +220,99 @@ macro_rules! impls {
             }
         }
 
-        impl Rank for $Word {
-            #[inline]
-            fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                let (i, j) = clamps!(self, &r);
-                (*self & mask::<Self>(i, j)).count_1()
-            }
-            #[inline]
-            fn rank_0<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                (!*self).rank_1(r)
-            }
-        }
-
-        impl Select for $Word {
-            #[inline]
-            fn select_1(&self, n: usize) -> Option<usize> {
-                self.broadword(n)
-            }
-            #[inline]
-            fn select_0(&self, n: usize) -> Option<usize> {
-                (!self).broadword(n)
-            }
-        }
-
         impl Block for $Word {
-            const BITS: usize = bits_of::<$Word>();
+            const BITS: usize = <$Word>::BITS as usize;
+
             #[inline]
             fn null() -> Self {
                 Self::NULL
             }
         }
+    )*)
+}
+impls!(u8 u16 u32 u64 u128);
 
-        impl BitwiseAssign<$Word> for $Word {
-            #[inline]
-            fn and(a: &mut Self, b: &$Word) {
-                *a &= *b;
+/// A helper trait to implement [`Bits::select_1`](crate::Bits::select_1) for u64.
+trait SelectWord {
+    fn select_1(self, n: usize) -> Option<usize>;
+}
+
+impl SelectWord for u64 {
+    #[inline]
+    fn select_1(self, n: usize) -> Option<usize> {
+        (n < self.count_1()).then(|| {
+            #[cfg(target_arch = "x86_64")]
+            {
+                if is_x86_feature_detected!("bmi2") {
+                    use core::arch::x86_64::{_pdep_u64, _tzcnt_u64};
+                    return unsafe { _tzcnt_u64(_pdep_u64(1 << n, self)) as usize };
+                }
             }
+            broadword(self, n as u64)
+        })
+    }
+}
+
+// Sebastiano Vigna, “Broadword Implementation of Rank/Select Queries”
+// Returns 72 when not found.
+#[allow(clippy::many_single_char_names)]
+fn broadword(x: u64, n: u64) -> usize {
+    const L8: u64 = 0x0101_0101_0101_0101; // has the lowest bit of every bytes
+    const H8: u64 = 0x8080_8080_8080_8080; // has the highest bit of every bytes
+
+    #[inline]
+    const fn le8(x: u64, y: u64) -> u64 {
+        (((y | H8) - (x & !H8)) ^ x ^ y) & H8
+    }
+
+    #[inline]
+    const fn lt8(x: u64, y: u64) -> u64 {
+        (((x | H8) - (y & !H8)) ^ x ^ !y) & H8
+    }
+
+    #[inline]
+    const fn nz8(x: u64) -> u64 {
+        lt8(0, x)
+    }
+
+    let mut s = x - ((x & 0xAAAA_AAAA_AAAA_AAAA) >> 1);
+    s = (s & 0x3333_3333_3333_3333) + ((s >> 2) & 0x3333_3333_3333_3333);
+    s = ((s + (s >> 4)) & 0x0F0F_0F0F_0F0F_0F0F).wrapping_mul(L8);
+
+    let b = ((le8(s, n.wrapping_mul(L8)) >> 7).wrapping_mul(L8) >> 53) & !7;
+    let l = n - ((s << 8).wrapping_shr(b as u32) & 0xFF);
+
+    s = nz8((x.wrapping_shr(b as u32) & 0xFF).wrapping_mul(L8) & 0x8040_2010_0804_0201);
+    s = (s >> 7).wrapping_mul(L8);
+
+    (((le8(s, l * L8) >> 7).wrapping_mul(L8) >> 56) + b) as usize
+}
+
+macro_rules! impl_select_word_as_u64 {
+    ( $( $Ty:ty )* ) => ($(
+        impl SelectWord for $Ty {
             #[inline]
-            fn and_not(a: &mut Self, b: &$Word) {
-                *a &= !*b;
-            }
-            #[inline]
-            fn or(a: &mut Self, b: &$Word) {
-                *a |= *b;
-            }
-            #[inline]
-            fn xor(a: &mut Self, b: &$Word) {
-                *a ^= *b;
+            fn select_1(self, c: usize) -> Option<usize> {
+                (c < self.count_1()).then(|| <u64 as SelectWord>::select_1(self as u64, c).unwrap())
             }
         }
     )*)
 }
-impls!(u8 u16 u32 u64 u128);
+impl_select_word_as_u64!(u8 u16 u32);
+
+impl SelectWord for u128 {
+    /// ```
+    /// # use bits::{Bits, BitsMut};
+    /// let mut n: u128 = 0;
+    /// for i in (0..128).step_by(2) {
+    ///     n.put_1(i);
+    /// }
+    /// assert_eq!(n.select_1(60), Some(120));
+    /// assert_eq!(n.select_1(61), Some(122));
+    /// ```
+    #[inline]
+    fn select_1(self, c: usize) -> Option<usize> {
+        let this: [u64; 2] = [self as u64, (self >> 64) as u64];
+        this.select_1(c)
+    }
+}

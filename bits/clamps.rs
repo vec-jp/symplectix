@@ -4,7 +4,7 @@ use core::ops::{Bound::*, RangeBounds};
 
 macro_rules! clamps {
     ( $this:expr, $range:expr ) => {
-        crate::clamps($this, $range).expect("out of bounds")
+        crate::clamps($this, $range).expect("index out of bounds")
     };
 }
 
@@ -20,13 +20,13 @@ where
 
     let (i, j) = (
         match r.start_bound() {
-            Included(&n) => n,
-            Excluded(&n) => n + 1,
+            Included(&s) => s,
+            Excluded(&s) => s + 1,
             Unbounded => min,
         },
         match r.end_bound() {
-            Included(&m) => m + 1,
-            Excluded(&m) => m,
+            Included(&e) => e + 1,
+            Excluded(&e) => e,
             Unbounded => max,
         },
     );
