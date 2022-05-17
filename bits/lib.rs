@@ -16,7 +16,7 @@ mod bools;
 mod impls;
 mod slice;
 
-pub use crate::bits::{Bits, Block};
+pub use crate::bits::*;
 pub use crate::word::Word;
 
 #[inline]
@@ -62,10 +62,9 @@ const fn blocks(n: usize, b: usize) -> usize {
 /// Returns an empty `Vec<T>` with the at least specified capacity in bits.
 ///
 /// ```
-/// # use bits::Bits;
 /// let v = bits::with_capacity::<u8>(80);
 /// // v has no bits, but an enough capacity to store 80 bits.
-/// assert_eq!(Bits::len(&v), 0);
+/// assert_eq!(bits::len(&v), 0);
 /// assert_eq!(v.capacity(), 10);
 /// ```
 pub fn with_capacity<T: Block>(n: usize) -> Vec<T> {
@@ -78,17 +77,3 @@ pub fn with_capacity<T: Block>(n: usize) -> Vec<T> {
 //     let size = blocks(n, T::BITS);
 //     from_fn(|| Some(T::empty())).take(size).collect()
 // }
-
-#[cfg(test)]
-pub mod testing {
-    pub fn bits_is_implemented<T: ?Sized + crate::Bits>() {}
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    #[should_panic]
-    fn fail() {
-        assert_eq!(1, 0);
-    }
-}

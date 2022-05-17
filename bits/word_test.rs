@@ -1,4 +1,4 @@
-use bits::{Bits, Word};
+use bits::Word;
 use core::{arch::x86_64, fmt::Debug};
 
 #[test]
@@ -62,10 +62,10 @@ impl Pdep for u64 {
 fn _pdep<T: Word>(data: T, mut mask: T) -> T {
     let mut dest = T::NULL;
     for i in 0..T::BITS {
-        if !Bits::any(&mask) {
+        if !bits::any(&mask) {
             break;
         }
-        if Bits::get(&data, i).unwrap() {
+        if bits::get(&data, i).unwrap() {
             dest |= mask.lsb();
         }
         mask &= mask - T::_1;

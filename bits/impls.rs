@@ -1,5 +1,5 @@
 use crate::ops::*;
-use crate::{Bits, Block, Word};
+use crate::{Block, Word};
 use core::ops::RangeBounds;
 use std::borrow::{Cow, ToOwned};
 
@@ -107,7 +107,6 @@ macro_rules! BitPut {
     }
 }
 
-impl<'a, T: ?Sized + Bits> Bits for &'a T {}
 impl<'a, T: ?Sized + BitLen> BitLen for &'a T {
     BitLen!(T);
 }
@@ -124,7 +123,6 @@ impl<'a, T: ?Sized + BitGet> BitGet for &'a T {
     BitGet!(T);
 }
 
-impl<T, const N: usize> Bits for [T; N] where [T]: Bits {}
 impl<T, const N: usize> BitLen for [T; N]
 where
     [T]: BitLen,
@@ -173,7 +171,6 @@ where
     }
 }
 
-impl<T> Bits for Vec<T> where [T]: Bits {}
 impl<T> BitLen for Vec<T>
 where
     [T]: BitLen,
@@ -211,7 +208,6 @@ where
     BitPut!([T]);
 }
 
-impl<T: ?Sized + Bits> Bits for Box<T> {}
 impl<T: ?Sized + BitLen> BitLen for Box<T> {
     BitLen!(T);
 }
@@ -238,7 +234,6 @@ impl<T: Block> Block for Box<T> {
     }
 }
 
-impl<'a, T> Bits for Cow<'a, T> where T: ?Sized + ToOwned + Bits {}
 impl<'a, T> BitLen for Cow<'a, T>
 where
     T: ?Sized + ToOwned + BitLen,

@@ -1,4 +1,4 @@
-use crate::{ops::*, to_range};
+use crate::{bits, ops::*, to_range};
 use core::{hash::Hash, ops, ops::RangeBounds};
 
 mod private {
@@ -32,7 +32,6 @@ pub trait Word:
     + Hash
     + Eq
     + Ord
-    + crate::Bits
     + crate::Block
     + ops::Add<Output = Self>
     + ops::Sub<Output = Self>
@@ -149,8 +148,6 @@ macro_rules! impls {
             }
         }
 
-        impl crate::Bits for $Word {
-        }
         impl crate::Block for $Word {
             const BITS: usize = <$Word>::BITS as usize;
 
@@ -197,7 +194,7 @@ macro_rules! impls {
         impl BitRank for $Word {
             #[inline]
             fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                let (i, j) = to_range(&r, 0, BitLen::len(self));
+                let (i, j) = to_range(&r, 0, bits::len(self));
                 (*self & mask::<Self>(i, j)).count_1()
             }
 
@@ -222,7 +219,7 @@ macro_rules! impls {
         impl BitGet for $Word {
             #[inline]
             fn get(this: &Self, i: usize) -> Option<bool> {
-                (i < BitLen::len(this)).then(|| (*this & (1 << i)) != 0)
+                (i < bits::len(this)).then(|| (*this & (1 << i)) != 0)
             }
 
             #[doc(hidden)]
@@ -307,7 +304,7 @@ macro_rules! impl_select_word_as_u64 {
         impl SelectWord for $Ty {
             #[inline]
             fn select_1(self, c: usize) -> Option<usize> {
-                (c < BitCount::count_1(&self)).then(|| <u64 as SelectWord>::select_1(self as u64, c).unwrap())
+                (c < self.count_1()).then(|| <u64 as SelectWord>::select_1(self as u64, c).unwrap())
             }
         }
     )*)
@@ -316,13 +313,12 @@ impl_select_word_as_u64!(u8 u16 u32);
 
 impl SelectWord for u128 {
     /// ```
-    /// # use bits::Bits;
     /// let mut n: u128 = 0;
     /// for i in (0..128).step_by(2) {
-    ///     n.put_1(i);
+    ///     bits::put_1(&mut n, i);
     /// }
-    /// assert_eq!(n.select_1(60), Some(120));
-    /// assert_eq!(n.select_1(61), Some(122));
+    /// assert_eq!(bits::select_1(&n, 60), Some(120));
+    /// assert_eq!(bits::select_1(&n, 61), Some(122));
     /// ```
     #[inline]
     fn select_1(self, c: usize) -> Option<usize> {

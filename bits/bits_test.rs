@@ -1,10 +1,19 @@
-use bits::{Bits, Word};
+use bits::Word;
 use std::borrow::Cow;
 use std::iter::successors;
 
 #[test]
 fn bits_is_implemented() {
-    fn _bits_is_implemented<T: ?Sized + Bits>() {}
+    fn _bits_is_implemented<T>()
+    where
+        T: ?Sized
+            + bits::ops::BitLen
+            + bits::ops::BitCount
+            + bits::ops::BitRank
+            + bits::ops::BitSelect
+            + bits::ops::BitGet,
+    {
+    }
 
     _bits_is_implemented::<&u8>();
     _bits_is_implemented::<[u8; 1]>();
@@ -18,10 +27,10 @@ fn bits_is_implemented() {
     _bits_is_implemented::<Cow<Box<[u8; 2000]>>>();
 }
 
-fn ones<T: Bits + Word>(word: T) -> impl Iterator<Item = usize> {
+fn ones<T: Word>(word: T) -> impl Iterator<Item = usize> {
     successors(Some(word), |&n| {
         let m = n & !n.lsb();
-        Bits::any(&m).then(|| m)
+        bits::any(&m).then(|| m)
     })
     .map(Word::count_t0)
 }
@@ -43,6 +52,6 @@ fn ones_select1() {
     let n: u32 = 0b_0101_0101;
     let mut ones = ones(n);
     for c in 0..64 {
-        assert_eq!(ones.next(), Bits::select_1(&n, c));
+        assert_eq!(ones.next(), bits::select_1(&n, c));
     }
 }

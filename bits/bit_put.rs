@@ -1,4 +1,4 @@
-use crate::{ops::BitGet, Word};
+use crate::{bits, ops::BitGet, Word};
 
 pub trait BitPut: BitGet {
     /// Enables the bit at `i`.
@@ -11,7 +11,7 @@ pub trait BitPut: BitGet {
     #[doc(hidden)]
     fn put_n<N: Word>(&mut self, i: usize, n: usize, mask: N) {
         for b in i..i + n {
-            if BitGet::get(&mask, b - i).expect("index out of bounds") {
+            if bits::get(&mask, b - i).expect("index out of bounds") {
                 self.put_1(b);
             }
         }

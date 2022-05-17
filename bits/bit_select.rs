@@ -27,7 +27,7 @@ pub trait BitSelect: BitRank {
 }
 
 mod helper {
-    use crate::ops::BitRank;
+    use crate::{bits, ops::BitRank};
 
     /// Binary search to find and return the smallest index k in `[i, j)` at which f(k) is true,
     /// assuming that on the range `[i, j)`, f(k) == true implies f(k+1) == true.
@@ -46,12 +46,12 @@ mod helper {
     }
 
     #[inline]
-    pub fn search_1<T: ?Sized + BitRank>(bits: &T, n: usize) -> Option<usize> {
-        (n < bits.count_1()).then(|| binary_search(0, T::len(bits), |k| bits.rank_1(..k) > n) - 1)
+    pub fn search_1<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
+        (n < bs.count_1()).then(|| binary_search(0, bits::len(bs), |k| bs.rank_1(..k) > n) - 1)
     }
 
     #[inline]
-    pub fn search_0<T: ?Sized + BitRank>(bits: &T, n: usize) -> Option<usize> {
-        (n < bits.count_0()).then(|| binary_search(0, T::len(bits), |k| bits.rank_0(..k) > n) - 1)
+    pub fn search_0<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
+        (n < bs.count_0()).then(|| binary_search(0, bits::len(bs), |k| bs.rank_0(..k) > n) - 1)
     }
 }

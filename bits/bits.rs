@@ -1,162 +1,157 @@
 use crate::{ops::*, Word};
-// use crate::prelude::*;
 use core::ops::RangeBounds;
 
-/// `Bits` is a sequence of bit.
-///
-/// # Implementing `Bits`
-///
-/// Note that `get` and `test` are circularly referenced.
-/// So, you need to implement at least **one** of them.
-pub trait Bits {
-    #[inline]
-    fn len(bits: &Self) -> usize
-    where
-        Self: BitLen,
-    {
-        BitLen::len(bits)
-    }
-
-    #[inline]
-    fn is_empty(this: &Self) -> bool
-    where
-        Self: BitLen,
-    {
-        BitLen::is_empty(this)
-    }
-
-    #[inline]
-    fn get(this: &Self, i: usize) -> Option<bool>
-    where
-        Self: BitGet,
-    {
-        BitGet::get(this, i)
-    }
-
-    #[inline]
-    fn test(this: &Self, i: usize) -> bool
-    where
-        Self: BitGet,
-    {
-        BitGet::test(this, i)
-    }
-
-    #[inline]
-    fn put_1(&mut self, i: usize)
-    where
-        Self: BitPut,
-    {
-        BitPut::put_1(self, i)
-    }
-
-    #[inline]
-    fn put_0(&mut self, i: usize)
-    where
-        Self: BitPut,
-    {
-        BitPut::put_0(self, i)
-    }
-
-    #[inline]
-    fn count_1(&self) -> usize
-    where
-        Self: BitCount,
-    {
-        BitCount::count_1(self)
-    }
-
-    #[inline]
-    fn count_0(&self) -> usize
-    where
-        Self: BitCount,
-    {
-        BitCount::count_0(self)
-    }
-
-    #[inline]
-    fn all(&self) -> bool
-    where
-        Self: BitCount,
-    {
-        BitCount::all(self)
-    }
-
-    #[inline]
-    fn any(&self) -> bool
-    where
-        Self: BitCount,
-    {
-        BitCount::any(self)
-    }
-
-    #[inline]
-    fn rank_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize
-    where
-        Self: BitRank,
-    {
-        BitRank::rank_1(self, index)
-    }
-
-    #[inline]
-    fn rank_0<Index: RangeBounds<usize>>(&self, index: Index) -> usize
-    where
-        Self: BitRank,
-    {
-        BitRank::rank_0(self, index)
-    }
-
-    #[inline]
-    fn excess_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize
-    where
-        Self: BitExcess,
-    {
-        BitExcess::excess_1(self, index)
-    }
-
-    #[inline]
-    fn excess_0<Index: RangeBounds<usize>>(&self, index: Index) -> usize
-    where
-        Self: BitExcess,
-    {
-        BitExcess::excess_0(self, index)
-    }
-
-    #[inline]
-    fn select_1(&self, n: usize) -> Option<usize>
-    where
-        Self: BitSelect,
-    {
-        BitSelect::select_1(self, n)
-    }
-
-    #[inline]
-    fn select_0(&self, n: usize) -> Option<usize>
-    where
-        Self: BitSelect,
-    {
-        BitSelect::select_0(self, n)
-    }
-
-    #[doc(hidden)]
-    #[inline]
-    fn word<T: Word>(&self, i: usize, n: usize) -> T
-    where
-        Self: BitGet,
-    {
-        BitGet::word(self, i, n)
-    }
-
-    #[doc(hidden)]
-    #[inline]
-    fn put_n<N: Word>(&mut self, i: usize, n: usize, mask: N)
-    where
-        Self: BitPut,
-    {
-        BitPut::put_n(self, i, n, mask)
-    }
+#[inline]
+pub fn len<T>(bits: &T) -> usize
+where
+    T: ?Sized + BitLen,
+{
+    BitLen::len(bits)
 }
 
-/// [`Bits`](crate::Bits) with a constant size.
+#[inline]
+pub fn is_empty<T>(bits: &T) -> bool
+where
+    T: ?Sized + BitLen,
+{
+    BitLen::is_empty(bits)
+}
+
+#[inline]
+pub fn get<T>(bits: &T, i: usize) -> Option<bool>
+where
+    T: ?Sized + BitGet,
+{
+    BitGet::get(bits, i)
+}
+
+#[inline]
+pub fn test<T>(bits: &T, i: usize) -> bool
+where
+    T: ?Sized + BitGet,
+{
+    BitGet::test(bits, i)
+}
+
+#[inline]
+pub fn put_1<T>(bits: &mut T, i: usize)
+where
+    T: ?Sized + BitPut,
+{
+    BitPut::put_1(bits, i)
+}
+
+#[inline]
+pub fn put_0<T>(bits: &mut T, i: usize)
+where
+    T: ?Sized + BitPut,
+{
+    BitPut::put_0(bits, i)
+}
+
+#[inline]
+pub fn count_1<T>(bits: &T) -> usize
+where
+    T: ?Sized + BitCount,
+{
+    BitCount::count_1(bits)
+}
+
+#[inline]
+pub fn count_0<T>(bits: &T) -> usize
+where
+    T: ?Sized + BitCount,
+{
+    BitCount::count_0(bits)
+}
+
+#[inline]
+pub fn all<T>(bits: &T) -> bool
+where
+    T: ?Sized + BitCount,
+{
+    BitCount::all(bits)
+}
+
+#[inline]
+pub fn any<T>(bits: &T) -> bool
+where
+    T: ?Sized + BitCount,
+{
+    BitCount::any(bits)
+}
+
+#[inline]
+pub fn rank_1<T, Index>(bits: &T, index: Index) -> usize
+where
+    T: ?Sized + BitRank,
+    Index: RangeBounds<usize>,
+{
+    BitRank::rank_1(bits, index)
+}
+
+#[inline]
+pub fn rank_0<T, Index>(bits: &T, index: Index) -> usize
+where
+    T: ?Sized + BitRank,
+    Index: RangeBounds<usize>,
+{
+    BitRank::rank_0(bits, index)
+}
+
+#[inline]
+pub fn excess_1<T, Index>(bits: &T, index: Index) -> usize
+where
+    T: ?Sized + BitExcess,
+    Index: RangeBounds<usize>,
+{
+    BitExcess::excess_1(bits, index)
+}
+
+#[inline]
+pub fn excess_0<T, Index>(bits: &T, index: Index) -> usize
+where
+    T: ?Sized + BitExcess,
+    Index: RangeBounds<usize>,
+{
+    BitExcess::excess_0(bits, index)
+}
+
+#[inline]
+pub fn select_1<T>(bits: &T, n: usize) -> Option<usize>
+where
+    T: ?Sized + BitSelect,
+{
+    BitSelect::select_1(bits, n)
+}
+
+#[inline]
+pub fn select_0<T>(bits: &T, n: usize) -> Option<usize>
+where
+    T: ?Sized + BitSelect,
+{
+    BitSelect::select_0(bits, n)
+}
+
+#[doc(hidden)]
+#[inline]
+pub fn word<T, U>(bits: &T, i: usize, n: usize) -> U
+where
+    T: ?Sized + BitGet,
+    U: Word,
+{
+    BitGet::word(bits, i, n)
+}
+
+#[doc(hidden)]
+#[inline]
+pub fn put_n<T, N: Word>(bits: &mut T, i: usize, n: usize, mask: N)
+where
+    T: ?Sized + BitPut,
+{
+    BitPut::put_n(bits, i, n, mask)
+}
+
 pub trait Block: Clone + BitLen + BitCount + BitRank + BitSelect + BitGet + BitPut {
     const BITS: usize;
 
