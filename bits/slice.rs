@@ -65,15 +65,15 @@ where
 
     #[inline]
     fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        let (s, e) = clamps!(self, &r);
-        let (i, r0) = address::<T>(s);
-        let (j, r1) = address::<T>(e);
+        let (s, e) = to_range(&r, 0, Bits::len(self));
+        let (i, p) = address::<T>(s);
+        let (j, q) = address::<T>(e);
         if i == j {
-            self[i].rank_1(r0..r1)
+            self[i].rank_1(p..q)
         } else {
-            self[i].rank_1(r0..)
+            self[i].rank_1(p..)
                 + self[i + 1..j].count_1()
-                + self.get(j).map_or(0, |b| b.rank_1(..r1))
+                + self.get(j).map_or(0, |b| b.rank_1(..q))
         }
     }
 

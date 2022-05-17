@@ -152,20 +152,20 @@ pub trait Bits {
     /// Counts occurrences of `1` in the given range.
     #[inline]
     fn rank_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let (i, j) = clamps!(self, &index);
+        let (i, j) = to_range(&index, 0, Bits::len(self));
         (j - i) - self.rank_0(index)
     }
 
     /// Counts occurrences of `0` in the given range.
     #[inline]
     fn rank_0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let (i, j) = clamps!(self, &index);
+        let (i, j) = to_range(&index, 0, Bits::len(self));
         (j - i) - self.rank_1(index)
     }
 
     #[inline]
     fn excess_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let (i, j) = clamps!(self, &index);
+        let (i, j) = to_range(&index, 0, Bits::len(self));
         let rank1 = self.rank_1(i..j);
         let rank0 = self.rank_0(i..j);
         assert!(rank1 >= rank0);
@@ -174,7 +174,7 @@ pub trait Bits {
 
     #[inline]
     fn excess_0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let (i, j) = clamps!(self, &index);
+        let (i, j) = to_range(&index, 0, Bits::len(self));
         let rank1 = self.rank_1(i..j);
         let rank0 = self.rank_0(i..j);
         assert!(rank0 >= rank1);

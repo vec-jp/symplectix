@@ -183,7 +183,7 @@ macro_rules! impls {
 
             #[inline]
             fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                let (i, j) = clamps!(self, &r);
+                let (i, j) = to_range(&r, 0, Bits::len(self));
                 (*self & mask::<Self>(i, j)).count_1()
             }
 

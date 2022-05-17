@@ -1,7 +1,7 @@
 //! `bits`
 
 mod prelude {
-    pub(crate) use crate::address;
+    pub(crate) use crate::{address, to_range};
 
     pub(crate) use crate::bits::{Bits, BitsMut, Block};
     pub(crate) use crate::mask::{BitwiseAssign, Mask};
@@ -9,9 +9,6 @@ mod prelude {
 
     pub(crate) use core::ops::RangeBounds;
 }
-
-#[macro_use]
-mod clamps;
 
 mod bits;
 mod word;
@@ -30,8 +27,6 @@ pub use crate::mask::Bitwise;
 #[doc(inline)]
 pub use crate::mask::{and, and_not, or, xor};
 
-pub use crate::clamps::clamps;
-
 #[inline]
 fn address<T: Block>(i: usize) -> (usize, usize) {
     use core::ops::{Div, Rem};
@@ -44,6 +39,27 @@ fn address<T: Block>(i: usize) -> (usize, usize) {
     }
 
     divrem(i, T::BITS)
+}
+
+/// A utility to clamp a given range within a valid range.
+fn to_range<R: core::ops::RangeBounds<usize>>(r: &R, min: usize, max: usize) -> (usize, usize) {
+    use core::ops::Bound::*;
+
+    let (i, j) = (
+        match r.start_bound() {
+            Included(&s) => s,
+            Excluded(&s) => s + 1,
+            Unbounded => min,
+        },
+        match r.end_bound() {
+            Included(&e) => e + 1,
+            Excluded(&e) => e,
+            Unbounded => max,
+        },
+    );
+
+    debug_assert!(min <= i && i <= j && j <= max);
+    (i, j)
 }
 
 /// Calculates the minimum number of blocks to store `n` bits.
