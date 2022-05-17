@@ -1,0 +1,40 @@
+load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", "rust_test", "rust_test_suite")
+
+package(default_visibility = ["//visibility:private"])
+
+rust_library(
+    name = "mask",
+    srcs = glob(
+        ["*.rs"],
+        exclude = ["*_test.rs"],
+    ),
+    crate_root = "mask.rs",
+    deps = [
+        "//bits",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+rust_test_suite(
+    name = "tests",
+    srcs = glob(["*_test.rs"]),
+    deps = [
+        ":mask",
+        "//bits",
+    ],
+)
+
+rust_test(
+    name = "cfg_test",
+    crate = ":mask",
+)
+
+rust_doc_test(
+    name = "doc_test",
+    crate = ":mask",
+)
+
+rust_doc(
+    name = "doc",
+    crate = ":mask",
+)

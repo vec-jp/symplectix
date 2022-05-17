@@ -76,38 +76,6 @@ macro_rules! BitsMut {
     }
 }
 
-macro_rules! BitwiseAssign {
-    (
-        $That:ty,
-        $X:ty,
-        $Y:ty,
-        {
-            $( this => $this:tt; )?
-            $( that => $that:tt; )?
-        }
-    ) => {
-        #[inline]
-        fn and(this: &mut Self, that: &$That) {
-            <$X as BitwiseAssign<$Y>>::and(this$(.$this())?, that$(.$that())?)
-        }
-
-        #[inline]
-        fn and_not(this: &mut Self, that: &$That) {
-            <$X as BitwiseAssign<$Y>>::and_not(this$(.$this())?, that$(.$that())?)
-        }
-
-        #[inline]
-        fn or(this: &mut Self, that: &$That) {
-            <$X as BitwiseAssign<$Y>>::or(this$(.$this())?, that$(.$that())?)
-        }
-
-        #[inline]
-        fn xor(this: &mut Self, that: &$That) {
-            <$X as BitwiseAssign<$Y>>::xor(this$(.$this())?, that$(.$that())?)
-        }
-    };
-}
-
 impl<'a, T: ?Sized + Bits> Bits for &'a T {
     Bits!(T);
 }
@@ -123,18 +91,6 @@ impl<'a, T: ?Sized + Bits> Bits for &'a T {
 //         Mask::blocks(*self)
 //     }
 // }
-
-impl<'inner, 'outer, T: ?Sized> Mask for &'outer &'inner T
-where
-    &'inner T: Mask,
-{
-    type Block = <&'inner T as Mask>::Block;
-    type Blocks = <&'inner T as Mask>::Blocks;
-    #[inline]
-    fn into_blocks(self) -> Self::Blocks {
-        Mask::into_blocks(*self)
-    }
-}
 
 // Array
 
@@ -164,27 +120,6 @@ where
     }
 }
 
-impl<'a, T, const N: usize> Mask for &'a [T; N]
-where
-    &'a [T]: Mask,
-{
-    type Block = <&'a [T] as Mask>::Block;
-    type Blocks = <&'a [T] as Mask>::Blocks;
-    #[inline]
-    fn into_blocks(self) -> Self::Blocks {
-        self.as_ref().into_blocks()
-    }
-}
-
-impl<T, U: ?Sized, const N: usize> BitwiseAssign<U> for [T; N]
-where
-    [T]: BitwiseAssign<U>,
-{
-    BitwiseAssign!(U, [T], U, {
-        this => as_mut;
-    });
-}
-
 // Vec
 
 impl<T> Bits for Vec<T>
@@ -199,25 +134,6 @@ where
     [T]: BitsMut,
 {
     BitsMut!([T]);
-}
-
-impl<'a, T> Mask for &'a Vec<T>
-where
-    &'a [T]: Mask,
-{
-    type Block = <&'a [T] as Mask>::Block;
-    type Blocks = <&'a [T] as Mask>::Blocks;
-    #[inline]
-    fn into_blocks(self) -> Self::Blocks {
-        self.as_slice().into_blocks()
-    }
-}
-
-impl<T, U: ?Sized> BitwiseAssign<U> for Vec<T>
-where
-    [T]: BitwiseAssign<U>,
-{
-    BitwiseAssign!(U, [T], U, {});
 }
 
 // Box
@@ -247,26 +163,6 @@ where
     }
 }
 
-impl<'a, T> Mask for &'a Box<T>
-where
-    &'a T: Mask,
-{
-    type Block = <&'a T as Mask>::Block;
-    type Blocks = <&'a T as Mask>::Blocks;
-    #[inline]
-    fn into_blocks(self) -> Self::Blocks {
-        (&**self).into_blocks()
-    }
-}
-
-impl<T, U> BitwiseAssign<U> for Box<T>
-where
-    T: ?Sized + BitwiseAssign<U>,
-    U: ?Sized,
-{
-    BitwiseAssign!(U, T, U, {});
-}
-
 // Cow
 
 impl<'a, T> Bits for Cow<'a, T>
@@ -293,29 +189,4 @@ where
     fn null() -> Self {
         Cow::Owned(T::null())
     }
-}
-
-impl<'a, 'cow, T> Mask for &'a Cow<'cow, T>
-where
-    T: Clone,
-    &'a T: Mask,
-{
-    type Block = <&'a T as Mask>::Block;
-    type Blocks = <&'a T as Mask>::Blocks;
-    #[inline]
-    fn into_blocks(self) -> Self::Blocks {
-        self.as_ref().into_blocks()
-    }
-}
-
-impl<'a, 'b, T, U> BitwiseAssign<Cow<'b, U>> for Cow<'a, T>
-where
-    T: ?Sized + ToOwned,
-    U: ?Sized + ToOwned,
-    T::Owned: BitwiseAssign<U>,
-{
-    BitwiseAssign!(Cow<'b, U>, T::Owned, U, {
-        this => to_mut;
-        that => as_ref;
-    });
 }

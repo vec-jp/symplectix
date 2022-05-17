@@ -1,9 +1,6 @@
 #![allow(clippy::many_single_char_names)]
 use crate::prelude::*;
-use core::iter::Enumerate;
 use core::ops::Range;
-use core::slice;
-use std::borrow::Cow;
 
 fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
 where
@@ -144,89 +141,5 @@ where
                 cur += r.len();
             }
         });
-    }
-}
-
-impl<T: BitwiseAssign<U>, U> BitwiseAssign<[U]> for [T] {
-    #[inline]
-    fn and(this: &mut Self, that: &[U]) {
-        assert_eq!(this.len(), that.len());
-        for (v1, v2) in this.iter_mut().zip(that) {
-            BitwiseAssign::and(v1, v2);
-        }
-    }
-
-    #[inline]
-    fn and_not(this: &mut Self, that: &[U]) {
-        assert_eq!(this.len(), that.len());
-        for (v1, v2) in this.iter_mut().zip(that) {
-            BitwiseAssign::and_not(v1, v2);
-        }
-    }
-
-    #[inline]
-    fn or(this: &mut Self, that: &[U]) {
-        assert_eq!(this.len(), that.len());
-        for (v1, v2) in this.iter_mut().zip(that) {
-            BitwiseAssign::or(v1, v2);
-        }
-    }
-
-    #[inline]
-    fn xor(this: &mut Self, that: &[U]) {
-        assert_eq!(this.len(), that.len());
-        for (v1, v2) in this.iter_mut().zip(that) {
-            BitwiseAssign::xor(v1, v2);
-        }
-    }
-}
-
-// macro_rules! implWordSteps {
-//     ( $bits:expr; $( $T:ty ),*) => ($(
-//         impl<'a> BitMask for &'a [$T] {
-//             type Block = Cow<'a, Words<[$T; $bits / <$T as Container>::BITS]>>;
-//             type Steps = Box<dyn Iterator<Item = (usize, Self::Block)> + 'a>;
-//             fn steps(self) -> Self::Steps {
-//                 const ARRAY_LEN: usize = $bits / <$T as Container>::BITS;
-//                 Box::new(self.chunks(ARRAY_LEN).enumerate().filter_map(|(i, chunk)| {
-//                     // Skip if chunk has no bits.
-//                     if chunk.any() {
-//                         let chunk = if chunk.len() == ARRAY_LEN {
-//                             Cow::Borrowed(Words::make_ref(chunk))
-//                         } else {
-//                             // Heap or Bits always must have the length `T::LENGTH`
-//                             Cow::Owned(Block::from(chunk))
-//                         };
-//                         return Some((i, chunk));
-//                     }
-
-//                     None
-//                 }))
-//             }
-//         }
-//     )*)
-// }
-// implWordSteps!(65536; u8, u16, u32, u64, u128);
-
-impl<'a, T: Block> Mask for &'a [T] {
-    type Block = Cow<'a, T>;
-    type Blocks = Blocks<'a, T>;
-    fn into_blocks(self) -> Self::Blocks {
-        Blocks {
-            blocks: self.iter().enumerate(),
-        }
-    }
-}
-
-pub struct Blocks<'a, T> {
-    blocks: Enumerate<slice::Iter<'a, T>>,
-}
-
-impl<'a, T: Block> Iterator for Blocks<'a, T> {
-    type Item = (usize, Cow<'a, T>);
-    #[inline]
-    fn next(&mut self) -> Option<Self::Item> {
-        self.blocks
-            .find_map(|(i, b)| b.any().then(|| (i, Cow::Borrowed(b))))
     }
 }

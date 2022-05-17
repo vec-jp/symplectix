@@ -135,14 +135,14 @@ pub trait Bits {
     ///
     /// ```
     /// # use bits::Bits;
-    /// let v: &[u64] = &[0, 0, 0];
-    /// let w: &[u64] = &[];
-    /// let x: &[u64] = &[!0, !0, !0];
-    /// let y: &[u64] = &[0, 0, 1];
-    /// assert!(!Bits::any(v));
-    /// assert!(!Bits::any(w));
-    /// assert!( Bits::any(x));
-    /// assert!( Bits::any(y));
+    /// let b1: &[u64] = &[];
+    /// let b2: &[u64] = &[0, 0, 0];
+    /// let b3: &[u64] = &[!0, !0, !0];
+    /// let b4: &[u64] = &[0, 0, 1];
+    /// assert!(!Bits::any(b1));
+    /// assert!(!Bits::any(b2));
+    /// assert!( Bits::any(b3));
+    /// assert!( Bits::any(b4));
     /// ```
     #[inline]
     fn any(&self) -> bool {

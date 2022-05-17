@@ -1,10 +1,13 @@
 #![allow(clippy::many_single_char_names)]
-use crate::prelude::*;
+
 use core::{
-    cmp,
-    cmp::Ordering::{self, Equal as EQ, Greater as GT, Less as LT},
-    iter::{Fuse, Peekable},
+    cmp::Ordering,
+    cmp::Ordering::*,
+    iter::{Enumerate, Fuse, Peekable},
+    slice,
 };
+
+use std::borrow::Cow;
 
 /// [`core::iter::IntoIterator`]
 pub trait Mask {
@@ -31,6 +34,52 @@ pub trait Bitwise: Sized + Mask {
     fn xor<That: Mask>(self, that: That) -> Xor<Self, That>;
 }
 
+impl<T: Mask> Bitwise for T {
+    #[inline]
+    fn and<That: Mask>(self, that: That) -> And<Self, That> {
+        and(self, that)
+    }
+    #[inline]
+    fn and_not<That: Mask>(self, that: That) -> AndNot<Self, That> {
+        and_not(self, that)
+    }
+    #[inline]
+    fn or<That: Mask>(self, that: That) -> Or<Self, That> {
+        or(self, that)
+    }
+    #[inline]
+    fn xor<That: Mask>(self, that: That) -> Xor<Self, That> {
+        xor(self, that)
+    }
+}
+
+#[inline]
+pub fn and<A: Mask, B: Mask>(a: A, b: B) -> And<A, B> {
+    And { a, b }
+}
+
+#[inline]
+pub fn and_not<A: Mask, B: Mask>(a: A, b: B) -> AndNot<A, B> {
+    AndNot { a, b }
+}
+
+#[inline]
+pub fn or<A: Mask, B: Mask>(a: A, b: B) -> Or<A, B> {
+    Or { a, b }
+}
+
+#[inline]
+pub fn xor<A: Mask, B: Mask>(a: A, b: B) -> Xor<A, B> {
+    Xor { a, b }
+}
+
+pub trait BitwiseAssign<That: ?Sized> {
+    fn and(a: &mut Self, b: &That);
+    fn and_not(a: &mut Self, b: &That);
+    fn or(a: &mut Self, b: &That);
+    fn xor(a: &mut Self, b: &That);
+}
+
 macro_rules! impl_bitwise_ops_for_words {
     ($( $Word:ty )*) => ($(
         impl BitwiseAssign<$Word> for $Word {
@@ -54,52 +103,6 @@ macro_rules! impl_bitwise_ops_for_words {
     )*)
 }
 impl_bitwise_ops_for_words!(u8 u16 u32 u64 u128);
-
-#[inline]
-pub fn and<This: Mask, That: Mask>(this: This, that: That) -> And<This, That> {
-    And { a: this, b: that }
-}
-
-#[inline]
-pub fn and_not<This: Mask, That: Mask>(this: This, that: That) -> AndNot<This, That> {
-    AndNot { a: this, b: that }
-}
-
-#[inline]
-pub fn or<This: Mask, That: Mask>(this: This, that: That) -> Or<This, That> {
-    Or { a: this, b: that }
-}
-
-#[inline]
-pub fn xor<This: Mask, That: Mask>(this: This, that: That) -> Xor<This, That> {
-    Xor { a: this, b: that }
-}
-
-impl<T: Mask> Bitwise for T {
-    #[inline]
-    fn and<That: Mask>(self, that: That) -> And<Self, That> {
-        and(self, that)
-    }
-    #[inline]
-    fn and_not<That: Mask>(self, that: That) -> AndNot<Self, That> {
-        and_not(self, that)
-    }
-    #[inline]
-    fn or<That: Mask>(self, that: That) -> Or<Self, That> {
-        or(self, that)
-    }
-    #[inline]
-    fn xor<That: Mask>(self, that: That) -> Xor<Self, That> {
-        xor(self, that)
-    }
-}
-
-pub trait BitwiseAssign<That: ?Sized> {
-    fn and(a: &mut Self, b: &That);
-    fn and_not(a: &mut Self, b: &That);
-    fn or(a: &mut Self, b: &That);
-    fn xor(a: &mut Self, b: &That);
-}
 
 macro_rules! def_bitwise_structs {
     ( $Struct:ident, $Blocks:ident ) => {
@@ -137,27 +140,27 @@ def_bitwise_structs!(Xor, SymmetricDifference);
 fn compare_index<T, U>(
     x: Option<&(usize, T)>,
     y: Option<&(usize, U)>,
-    none_x: Ordering,
-    none_y: Ordering,
+    when_x_is_none: Ordering,
+    when_y_is_none: Ordering,
 ) -> Ordering {
     match (x, y) {
-        (None, _) => none_x,
-        (_, None) => none_y,
+        (None, _) => when_x_is_none,
+        (_, None) => when_y_is_none,
         (Some((i, _)), Some((j, _))) => i.cmp(j),
     }
 }
 
-impl<A: Bits, B: Bits> Bits for And<A, B> {
-    /// This could be an incorrect value, different from the consumed result.
-    #[inline]
-    fn len(this: &Self) -> usize {
-        cmp::min(Bits::len(&this.a), Bits::len(&this.b))
-    }
-    #[inline]
-    fn test(this: &Self, i: usize) -> bool {
-        Bits::test(&this.a, i) && Bits::test(&this.b, i)
-    }
-}
+// impl<A: Bits, B: Bits> Bits for And<A, B> {
+//     /// This could be an incorrect value, different from the consumed result.
+//     #[inline]
+//     fn len(this: &Self) -> usize {
+//         cmp::min(Bits::len(&this.a), Bits::len(&this.b))
+//     }
+//     #[inline]
+//     fn test(this: &Self, i: usize) -> bool {
+//         Bits::test(&this.a, i) && Bits::test(&this.b, i)
+//     }
+// }
 
 impl<A: Mask, B: Mask> Mask for And<A, B>
 where
@@ -186,17 +189,17 @@ where
         let b = &mut self.b;
         loop {
             match Ord::cmp(&a.peek()?.0, &b.peek()?.0) {
-                LT => {
+                Less => {
                     a.next();
                 }
-                EQ => {
+                Equal => {
                     let (i, mut s1) = a.next().expect("unreachable");
                     let (j, s2) = b.next().expect("unreachable");
-                    assert_eq!(i, j);
+                    debug_assert_eq!(i, j);
                     BitwiseAssign::and(&mut s1, &s2);
                     break Some((i, s1));
                 }
-                GT => {
+                Greater => {
                     b.next();
                 }
             }
@@ -204,16 +207,16 @@ where
     }
 }
 
-impl<A: Bits, B: Bits> Bits for AndNot<A, B> {
-    #[inline]
-    fn len(this: &Self) -> usize {
-        Bits::len(&this.a)
-    }
-    #[inline]
-    fn test(this: &Self, i: usize) -> bool {
-        Bits::test(&this.a, i) & !Bits::test(&this.b, i)
-    }
-}
+// impl<A: Bits, B: Bits> Bits for AndNot<A, B> {
+//     #[inline]
+//     fn len(this: &Self) -> usize {
+//         Bits::len(&this.a)
+//     }
+//     #[inline]
+//     fn test(this: &Self, i: usize) -> bool {
+//         Bits::test(&this.a, i) & !Bits::test(&this.b, i)
+//     }
+// }
 
 impl<A: Mask, B: Mask> Mask for AndNot<A, B>
 where
@@ -241,16 +244,16 @@ where
         let a = &mut self.a;
         let b = &mut self.b;
         loop {
-            match compare_index(a.peek(), b.peek(), LT, LT) {
-                LT => return a.next(),
-                EQ => {
+            match compare_index(a.peek(), b.peek(), Less, Less) {
+                Less => return a.next(),
+                Equal => {
                     let (i, mut s1) = a.next().expect("unreachable");
                     let (j, s2) = b.next().expect("unreachable");
                     debug_assert_eq!(i, j);
                     BitwiseAssign::and_not(&mut s1, &s2);
                     return Some((i, s1));
                 }
-                GT => {
+                Greater => {
                     b.next();
                 }
             };
@@ -258,17 +261,17 @@ where
     }
 }
 
-impl<A: Bits, B: Bits> Bits for Or<A, B> {
-    /// This could be an incorrect value, different from the consumed result.
-    #[inline]
-    fn len(this: &Self) -> usize {
-        cmp::max(Bits::len(&this.a), Bits::len(&this.b))
-    }
-    #[inline]
-    fn test(this: &Self, i: usize) -> bool {
-        Bits::test(&this.a, i) || Bits::test(&this.b, i)
-    }
-}
+// impl<A: Bits, B: Bits> Bits for Or<A, B> {
+//     /// This could be an incorrect value, different from the consumed result.
+//     #[inline]
+//     fn len(this: &Self) -> usize {
+//         cmp::max(Bits::len(&this.a), Bits::len(&this.b))
+//     }
+//     #[inline]
+//     fn test(this: &Self, i: usize) -> bool {
+//         Bits::test(&this.a, i) || Bits::test(&this.b, i)
+//     }
+// }
 
 impl<A: Mask, B: Mask<Block = A::Block>> Mask for Or<A, B>
 where
@@ -293,34 +296,34 @@ where
 {
     type Item = (usize, S);
     fn next(&mut self) -> Option<Self::Item> {
-        let a = &mut self.a;
-        let b = &mut self.b;
-        match compare_index(a.peek(), b.peek(), GT, LT) {
-            LT => a.next(),
-            EQ => {
-                let (i, mut l) = a.next().expect("unreachable");
-                let (j, r) = b.next().expect("unreachable");
+        let x = &mut self.a;
+        let y = &mut self.b;
+        match compare_index(x.peek(), y.peek(), Greater, Less) {
+            Less => x.next(),
+            Equal => {
+                let (i, mut l) = x.next().expect("unreachable");
+                let (j, r) = y.next().expect("unreachable");
                 debug_assert_eq!(i, j);
                 BitwiseAssign::or(&mut l, &r);
                 Some((i, l))
             }
-            GT => b.next(),
+            Greater => y.next(),
         }
     }
 }
 
-impl<A: Bits, B: Bits> Bits for Xor<A, B> {
-    /// This could be an incorrect value, different from the consumed result.
-    #[inline]
-    fn len(this: &Self) -> usize {
-        cmp::max(Bits::len(&this.a), Bits::len(&this.b))
-    }
+// impl<A: Bits, B: Bits> Bits for Xor<A, B> {
+//     /// This could be an incorrect value, different from the consumed result.
+//     #[inline]
+//     fn len(this: &Self) -> usize {
+//         cmp::max(Bits::len(&this.a), Bits::len(&this.b))
+//     }
 
-    #[inline]
-    fn test(this: &Self, i: usize) -> bool {
-        Bits::test(&this.a, i) ^ Bits::test(&this.b, i)
-    }
-}
+//     #[inline]
+//     fn test(this: &Self, i: usize) -> bool {
+//         Bits::test(&this.a, i) ^ Bits::test(&this.b, i)
+//     }
+// }
 
 impl<A: Mask, B: Mask<Block = A::Block>> Mask for Xor<A, B>
 where
@@ -347,16 +350,16 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         let a = &mut self.a;
         let b = &mut self.b;
-        match compare_index(a.peek(), b.peek(), GT, LT) {
-            LT => a.next(),
-            EQ => {
+        match compare_index(a.peek(), b.peek(), Greater, Less) {
+            Less => a.next(),
+            Equal => {
                 let (i, mut l) = a.next().expect("unreachable");
                 let (j, r) = b.next().expect("unreachable");
                 debug_assert_eq!(i, j);
                 BitwiseAssign::xor(&mut l, &r);
                 Some((i, l))
             }
-            GT => b.next(),
+            Greater => b.next(),
         }
     }
 }
@@ -444,3 +447,216 @@ where
 //         self.0.size_hint()
 //     }
 // }
+
+impl<T: BitwiseAssign<U>, U> BitwiseAssign<[U]> for [T] {
+    #[inline]
+    fn and(this: &mut Self, that: &[U]) {
+        assert_eq!(this.len(), that.len());
+        for (v1, v2) in this.iter_mut().zip(that) {
+            BitwiseAssign::and(v1, v2);
+        }
+    }
+
+    #[inline]
+    fn and_not(this: &mut Self, that: &[U]) {
+        assert_eq!(this.len(), that.len());
+        for (v1, v2) in this.iter_mut().zip(that) {
+            BitwiseAssign::and_not(v1, v2);
+        }
+    }
+
+    #[inline]
+    fn or(this: &mut Self, that: &[U]) {
+        assert_eq!(this.len(), that.len());
+        for (v1, v2) in this.iter_mut().zip(that) {
+            BitwiseAssign::or(v1, v2);
+        }
+    }
+
+    #[inline]
+    fn xor(this: &mut Self, that: &[U]) {
+        assert_eq!(this.len(), that.len());
+        for (v1, v2) in this.iter_mut().zip(that) {
+            BitwiseAssign::xor(v1, v2);
+        }
+    }
+}
+
+// macro_rules! implWordSteps {
+//     ( $bits:expr; $( $T:ty ),*) => ($(
+//         impl<'a> BitMask for &'a [$T] {
+//             type Block = Cow<'a, Words<[$T; $bits / <$T as Container>::BITS]>>;
+//             type Steps = Box<dyn Iterator<Item = (usize, Self::Block)> + 'a>;
+//             fn steps(self) -> Self::Steps {
+//                 const ARRAY_LEN: usize = $bits / <$T as Container>::BITS;
+//                 Box::new(self.chunks(ARRAY_LEN).enumerate().filter_map(|(i, chunk)| {
+//                     // Skip if chunk has no bits.
+//                     if chunk.any() {
+//                         let chunk = if chunk.len() == ARRAY_LEN {
+//                             Cow::Borrowed(Words::make_ref(chunk))
+//                         } else {
+//                             // Heap or Bits always must have the length `T::LENGTH`
+//                             Cow::Owned(Block::from(chunk))
+//                         };
+//                         return Some((i, chunk));
+//                     }
+
+//                     None
+//                 }))
+//             }
+//         }
+//     )*)
+// }
+// implWordSteps!(65536; u8, u16, u32, u64, u128);
+
+impl<'a, T: bits::Block> Mask for &'a [T] {
+    type Block = Cow<'a, T>;
+    type Blocks = Blocks<'a, T>;
+    fn into_blocks(self) -> Self::Blocks {
+        Blocks {
+            blocks: self.iter().enumerate(),
+        }
+    }
+}
+
+pub struct Blocks<'a, T> {
+    blocks: Enumerate<slice::Iter<'a, T>>,
+}
+
+impl<'a, T: bits::Block> Iterator for Blocks<'a, T> {
+    type Item = (usize, Cow<'a, T>);
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.blocks
+            .find_map(|(i, b)| b.any().then(|| (i, Cow::Borrowed(b))))
+    }
+}
+
+macro_rules! BitwiseAssign {
+    (
+        $That:ty,
+        $X:ty,
+        $Y:ty,
+        {
+            $( this => $this:tt; )?
+            $( that => $that:tt; )?
+        }
+    ) => {
+        #[inline]
+        fn and(this: &mut Self, that: &$That) {
+            <$X as BitwiseAssign<$Y>>::and(this$(.$this())?, that$(.$that())?)
+        }
+
+        #[inline]
+        fn and_not(this: &mut Self, that: &$That) {
+            <$X as BitwiseAssign<$Y>>::and_not(this$(.$this())?, that$(.$that())?)
+        }
+
+        #[inline]
+        fn or(this: &mut Self, that: &$That) {
+            <$X as BitwiseAssign<$Y>>::or(this$(.$this())?, that$(.$that())?)
+        }
+
+        #[inline]
+        fn xor(this: &mut Self, that: &$That) {
+            <$X as BitwiseAssign<$Y>>::xor(this$(.$this())?, that$(.$that())?)
+        }
+    };
+}
+
+impl<'inner, 'outer, T: ?Sized> Mask for &'outer &'inner T
+where
+    &'inner T: Mask,
+{
+    type Block = <&'inner T as Mask>::Block;
+    type Blocks = <&'inner T as Mask>::Blocks;
+    #[inline]
+    fn into_blocks(self) -> Self::Blocks {
+        Mask::into_blocks(*self)
+    }
+}
+
+impl<'a, T, const N: usize> Mask for &'a [T; N]
+where
+    &'a [T]: Mask,
+{
+    type Block = <&'a [T] as Mask>::Block;
+    type Blocks = <&'a [T] as Mask>::Blocks;
+    #[inline]
+    fn into_blocks(self) -> Self::Blocks {
+        self.as_ref().into_blocks()
+    }
+}
+
+impl<T, U: ?Sized, const N: usize> BitwiseAssign<U> for [T; N]
+where
+    [T]: BitwiseAssign<U>,
+{
+    BitwiseAssign!(U, [T], U, {
+        this => as_mut;
+    });
+}
+
+impl<'a, T> Mask for &'a Vec<T>
+where
+    &'a [T]: Mask,
+{
+    type Block = <&'a [T] as Mask>::Block;
+    type Blocks = <&'a [T] as Mask>::Blocks;
+    #[inline]
+    fn into_blocks(self) -> Self::Blocks {
+        self.as_slice().into_blocks()
+    }
+}
+
+impl<T, U: ?Sized> BitwiseAssign<U> for Vec<T>
+where
+    [T]: BitwiseAssign<U>,
+{
+    BitwiseAssign!(U, [T], U, {});
+}
+
+impl<'a, T> Mask for &'a Box<T>
+where
+    &'a T: Mask,
+{
+    type Block = <&'a T as Mask>::Block;
+    type Blocks = <&'a T as Mask>::Blocks;
+    #[inline]
+    fn into_blocks(self) -> Self::Blocks {
+        (&**self).into_blocks()
+    }
+}
+
+impl<T, U> BitwiseAssign<U> for Box<T>
+where
+    T: ?Sized + BitwiseAssign<U>,
+    U: ?Sized,
+{
+    BitwiseAssign!(U, T, U, {});
+}
+
+impl<'a, 'cow, T> Mask for &'a Cow<'cow, T>
+where
+    T: Clone,
+    &'a T: Mask,
+{
+    type Block = <&'a T as Mask>::Block;
+    type Blocks = <&'a T as Mask>::Blocks;
+    #[inline]
+    fn into_blocks(self) -> Self::Blocks {
+        self.as_ref().into_blocks()
+    }
+}
+
+impl<'a, 'b, T, U> BitwiseAssign<Cow<'b, U>> for Cow<'a, T>
+where
+    T: ?Sized + ToOwned,
+    U: ?Sized + ToOwned,
+    T::Owned: BitwiseAssign<U>,
+{
+    BitwiseAssign!(Cow<'b, U>, T::Owned, U, {
+        this => to_mut;
+        that => as_ref;
+    });
+}

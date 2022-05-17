@@ -4,7 +4,6 @@ mod prelude {
     pub(crate) use crate::{address, to_range};
 
     pub(crate) use crate::bits::{Bits, BitsMut, Block};
-    pub(crate) use crate::mask::{BitwiseAssign, Mask};
     pub(crate) use crate::word::Word;
 
     pub(crate) use core::ops::RangeBounds;
@@ -13,19 +12,12 @@ mod prelude {
 mod bits;
 mod word;
 
-pub mod mask;
-
 mod bools;
 mod impls;
 mod slice;
 
 pub use crate::bits::{Bits, BitsMut, Block};
 pub use crate::word::Word;
-
-#[doc(inline)]
-pub use crate::mask::Bitwise;
-#[doc(inline)]
-pub use crate::mask::{and, and_not, or, xor};
 
 #[inline]
 fn address<T: Block>(i: usize) -> (usize, usize) {
