@@ -1,13 +1,13 @@
 //! `bits`
 
-mod prelude {
-    pub(crate) use crate::{address, to_range};
-
-    pub(crate) use crate::bits::{Bits, BitsMut, Block};
-    pub(crate) use crate::word::Word;
-
-    pub(crate) use core::ops::RangeBounds;
-}
+mod bit_count;
+mod bit_excess;
+mod bit_get;
+mod bit_len;
+mod bit_put;
+mod bit_rank;
+mod bit_select;
+pub mod ops;
 
 mod bits;
 mod word;
@@ -16,7 +16,7 @@ mod bools;
 mod impls;
 mod slice;
 
-pub use crate::bits::{Bits, BitsMut, Block};
+pub use crate::bits::{Bits, Block};
 pub use crate::word::Word;
 
 #[inline]

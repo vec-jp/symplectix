@@ -1,5 +1,5 @@
-use crate::prelude::*;
-use core::{hash::Hash, ops};
+use crate::{ops::*, to_range};
+use core::{hash::Hash, ops, ops::RangeBounds};
 
 mod private {
     pub trait Sealed {}
@@ -32,9 +32,8 @@ pub trait Word:
     + Hash
     + Eq
     + Ord
-    + Bits
-    + BitsMut
-    + Block
+    + crate::Bits
+    + crate::Block
     + ops::Add<Output = Self>
     + ops::Sub<Output = Self>
     + ops::Mul<Output = Self>
@@ -145,22 +144,35 @@ macro_rules! impls {
                 if self == 0 {
                     0
                 } else {
-                    1 << ((<Self as Block>::BITS - 1) ^ self.count_l0())
+                    1 << ((<Self as crate::Block>::BITS - 1) ^ self.count_l0())
                 }
             }
         }
 
-        impl Bits for $Word {
+        impl crate::Bits for $Word {
+        }
+        impl crate::Block for $Word {
+            const BITS: usize = <$Word>::BITS as usize;
+
+            #[inline]
+            fn null() -> Self {
+                Self::NULL
+            }
+        }
+
+        impl BitLen for $Word {
             #[inline]
             fn len(_: &Self) -> usize {
-                <Self as Block>::BITS
+                <Self as crate::Block>::BITS
             }
 
             #[inline]
-            fn get(this: &Self, i: usize) -> Option<bool> {
-                (i < Bits::len(this)).then(|| (*this & (1 << i)) != 0)
+            fn is_empty(this: &Self) -> bool {
+                *this == Self::NULL
             }
+        }
 
+        impl BitCount for $Word {
             #[inline]
             fn count_1(&self) -> usize {
                 self.count_ones() as usize
@@ -180,10 +192,12 @@ macro_rules! impls {
             fn any(&self) -> bool {
                 *self != Self::NULL
             }
+        }
 
+        impl BitRank for $Word {
             #[inline]
             fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                let (i, j) = to_range(&r, 0, Bits::len(self));
+                let (i, j) = to_range(&r, 0, BitLen::len(self));
                 (*self & mask::<Self>(i, j)).count_1()
             }
 
@@ -191,7 +205,9 @@ macro_rules! impls {
             fn rank_0<R: RangeBounds<usize>>(&self, r: R) -> usize {
                 (!*self).rank_1(r)
             }
+        }
 
+        impl BitSelect for $Word {
             #[inline]
             fn select_1(&self, n: usize) -> Option<usize> {
                 <Self as SelectWord>::select_1(*self, n)
@@ -201,6 +217,13 @@ macro_rules! impls {
             fn select_0(&self, n: usize) -> Option<usize> {
                 <Self as SelectWord>::select_1(!self, n)
             }
+        }
+
+        impl BitGet for $Word {
+            #[inline]
+            fn get(this: &Self, i: usize) -> Option<bool> {
+                (i < BitLen::len(this)).then(|| (*this & (1 << i)) != 0)
+            }
 
             #[doc(hidden)]
             #[inline]
@@ -209,7 +232,7 @@ macro_rules! impls {
             }
         }
 
-        impl BitsMut for $Word {
+        impl BitPut for $Word {
             #[inline]
             fn put_1(&mut self, i: usize) {
                 *self |= 1 << i;
@@ -219,20 +242,11 @@ macro_rules! impls {
                 *self &= !(1 << i);
             }
         }
-
-        impl Block for $Word {
-            const BITS: usize = <$Word>::BITS as usize;
-
-            #[inline]
-            fn null() -> Self {
-                Self::NULL
-            }
-        }
     )*)
 }
 impls!(u8 u16 u32 u64 u128);
 
-/// A helper trait to implement [`Bits::select_1`](crate::Bits::select_1) for u64.
+/// A helper trait to implement [`BitSelect`](crate::BitSelect) for u64.
 trait SelectWord {
     fn select_1(self, n: usize) -> Option<usize>;
 }
@@ -240,7 +254,7 @@ trait SelectWord {
 impl SelectWord for u64 {
     #[inline]
     fn select_1(self, n: usize) -> Option<usize> {
-        (n < self.count_1()).then(|| {
+        (n < BitCount::count_1(&self)).then(|| {
             #[cfg(target_arch = "x86_64")]
             {
                 if is_x86_feature_detected!("bmi2") {
@@ -293,7 +307,7 @@ macro_rules! impl_select_word_as_u64 {
         impl SelectWord for $Ty {
             #[inline]
             fn select_1(self, c: usize) -> Option<usize> {
-                (c < self.count_1()).then(|| <u64 as SelectWord>::select_1(self as u64, c).unwrap())
+                (c < BitCount::count_1(&self)).then(|| <u64 as SelectWord>::select_1(self as u64, c).unwrap())
             }
         }
     )*)
@@ -302,7 +316,7 @@ impl_select_word_as_u64!(u8 u16 u32);
 
 impl SelectWord for u128 {
     /// ```
-    /// # use bits::{Bits, BitsMut};
+    /// # use bits::Bits;
     /// let mut n: u128 = 0;
     /// for i in (0..128).step_by(2) {
     ///     n.put_1(i);
