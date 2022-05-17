@@ -509,7 +509,7 @@ impl<T: BitwiseAssign<U>, U> BitwiseAssign<[U]> for [T] {
 // }
 // implWordSteps!(65536; u8, u16, u32, u64, u128);
 
-impl<'a, T: bits::Block> Mask for &'a [T] {
+impl<'a, T: bits::Bits> Mask for &'a [T] {
     type Block = Cow<'a, T>;
     type Blocks = Blocks<'a, T>;
     fn into_blocks(self) -> Self::Blocks {
@@ -523,7 +523,7 @@ pub struct Blocks<'a, T> {
     blocks: Enumerate<slice::Iter<'a, T>>,
 }
 
-impl<'a, T: bits::Block> Iterator for Blocks<'a, T> {
+impl<'a, T: bits::Bits> Iterator for Blocks<'a, T> {
     type Item = (usize, Cow<'a, T>);
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {

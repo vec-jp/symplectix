@@ -21,7 +21,7 @@ fn mask<T: Word>(i: usize, j: usize) -> T {
     if i >= j {
         T::NULL
     } else {
-        T::FULL >> (<T as crate::Block>::BITS - (j - i)) << i
+        T::FULL >> (<T as crate::Bits>::BITS - (j - i)) << i
     }
 }
 
@@ -32,7 +32,7 @@ pub trait Word:
     + Hash
     + Eq
     + Ord
-    + crate::Block
+    + crate::Bits
     + ops::Add<Output = Self>
     + ops::Sub<Output = Self>
     + ops::Mul<Output = Self>
@@ -143,12 +143,12 @@ macro_rules! impls {
                 if self == 0 {
                     0
                 } else {
-                    1 << ((<Self as crate::Block>::BITS - 1) ^ self.count_l0())
+                    1 << ((<Self as crate::Bits>::BITS - 1) ^ self.count_l0())
                 }
             }
         }
 
-        impl crate::Block for $Word {
+        impl crate::Bits for $Word {
             const BITS: usize = <$Word>::BITS as usize;
 
             #[inline]
@@ -160,7 +160,7 @@ macro_rules! impls {
         impl BitLen for $Word {
             #[inline]
             fn len(_: &Self) -> usize {
-                <Self as crate::Block>::BITS
+                <Self as crate::Bits>::BITS
             }
 
             #[inline]

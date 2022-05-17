@@ -1,11 +1,11 @@
 #![allow(clippy::many_single_char_names)]
 
-use crate::{address, bits, ops::*, to_range, Block, Word};
+use crate::{address, bits, ops::*, to_range, Bits, Word};
 use core::ops::{Range, RangeBounds};
 
 fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
 where
-    T: Block,
+    T: Bits,
     F: FnMut(usize, Range<usize>),
 {
     assert!(s <= e);
@@ -25,14 +25,14 @@ where
     }
 }
 
-impl<T: Block> BitLen for [T] {
+impl<T: Bits> BitLen for [T] {
     #[inline]
     fn len(this: &Self) -> usize {
         T::BITS * <[T]>::len(this)
     }
 }
 
-impl<T: Block> BitCount for [T] {
+impl<T: Bits> BitCount for [T] {
     #[inline]
     fn count_1(&self) -> usize {
         self.iter().map(bits::count_1).sum()
@@ -54,7 +54,7 @@ impl<T: Block> BitCount for [T] {
     }
 }
 
-impl<T: Block> BitRank for [T] {
+impl<T: Bits> BitRank for [T] {
     #[inline]
     fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         let (s, e) = to_range(&r, 0, bits::len(self));
@@ -70,7 +70,7 @@ impl<T: Block> BitRank for [T] {
     }
 }
 
-impl<T: Block> BitSelect for [T] {
+impl<T: Bits> BitSelect for [T] {
     #[inline]
     fn select_1(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
@@ -96,7 +96,7 @@ impl<T: Block> BitSelect for [T] {
     }
 }
 
-impl<T: Block> BitGet for [T] {
+impl<T: Bits> BitGet for [T] {
     #[inline]
     fn get(this: &Self, i: usize) -> Option<bool> {
         let (i, o) = address::<T>(i);
@@ -110,7 +110,7 @@ impl<T: Block> BitGet for [T] {
         let mut cur = 0;
         let mut out = N::NULL;
         for_each_blocks::<T, _>(i, i + n, |k, r| {
-            if k < self.len() && cur < <N as Block>::BITS {
+            if k < self.len() && cur < <N as Bits>::BITS {
                 out |= self[k].word::<N>(r.start, r.len()) << cur;
                 cur += r.len();
             }
@@ -119,7 +119,7 @@ impl<T: Block> BitGet for [T] {
     }
 }
 
-impl<T: Block> BitPut for [T] {
+impl<T: Bits> BitPut for [T] {
     #[inline]
     fn put_1(&mut self, i: usize) {
         assert!(i < bits::len(self));

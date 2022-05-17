@@ -151,12 +151,3 @@ where
 {
     BitPut::put_n(bits, i, n, mask)
 }
-
-pub trait Block: Clone + BitLen + BitCount + BitRank + BitSelect + BitGet + BitPut {
-    const BITS: usize;
-
-    #[doc(hidden)]
-    const SIZE: usize = Self::BITS / 8;
-
-    fn null() -> Self;
-}

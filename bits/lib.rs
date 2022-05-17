@@ -19,8 +19,19 @@ mod slice;
 pub use crate::bits::*;
 pub use crate::word::Word;
 
+pub trait Bits:
+    Clone + ops::BitLen + ops::BitCount + ops::BitRank + ops::BitSelect + ops::BitGet + ops::BitPut
+{
+    const BITS: usize;
+
+    #[doc(hidden)]
+    const SIZE: usize = Self::BITS / 8;
+
+    fn null() -> Self;
+}
+
 #[inline]
-fn address<T: Block>(i: usize) -> (usize, usize) {
+fn address<T: Bits>(i: usize) -> (usize, usize) {
     use core::ops::{Div, Rem};
     fn divrem<T, U>(t: T, u: U) -> (<T as Div<U>>::Output, <T as Rem<U>>::Output)
     where
@@ -67,7 +78,7 @@ const fn blocks(n: usize, b: usize) -> usize {
 /// assert_eq!(bits::len(&v), 0);
 /// assert_eq!(v.capacity(), 10);
 /// ```
-pub fn with_capacity<T: Block>(n: usize) -> Vec<T> {
+pub fn with_capacity<T: Bits>(n: usize) -> Vec<T> {
     let size = blocks(n, T::BITS);
     Vec::with_capacity(size)
 }
