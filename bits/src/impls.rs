@@ -1,21 +1,6 @@
 use crate::ops::*;
 use crate::{BitBlock, Word};
-use core::ops::RangeBounds;
 use std::borrow::{Cow, ToOwned};
-
-macro_rules! BitRank {
-    ($X:ty $(, $method:ident )?) => {
-        #[inline]
-        fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-            <$X as BitRank>::rank_1(self$(.$method())?, r)
-        }
-
-        #[inline]
-        fn rank_0<R: RangeBounds<usize>>(&self, r: R) -> usize {
-            <$X as BitRank>::rank_0(self$(.$method())?, r)
-        }
-    }
-}
 
 macro_rules! BitSelect {
     ($X:ty $(, $method:ident )?) => {
@@ -70,9 +55,6 @@ macro_rules! BitPut {
     }
 }
 
-impl<'a, T: ?Sized + BitRank> BitRank for &'a T {
-    BitRank!(T);
-}
 impl<'a, T: ?Sized + BitSelect> BitSelect for &'a T {
     BitSelect!(T);
 }
@@ -80,12 +62,6 @@ impl<'a, T: ?Sized + BitGet> BitGet for &'a T {
     BitGet!(T);
 }
 
-impl<T, const N: usize> BitRank for [T; N]
-where
-    [T]: BitRank,
-{
-    BitRank!([T], as_ref);
-}
 impl<T, const N: usize> BitSelect for [T; N]
 where
     [T]: BitSelect,
@@ -116,12 +92,6 @@ where
     }
 }
 
-impl<T> BitRank for Vec<T>
-where
-    [T]: BitRank,
-{
-    BitRank!([T]);
-}
 impl<T> BitSelect for Vec<T>
 where
     [T]: BitSelect,
@@ -141,9 +111,6 @@ where
     BitPut!([T]);
 }
 
-impl<T: ?Sized + BitRank> BitRank for Box<T> {
-    BitRank!(T);
-}
 impl<T: ?Sized + BitSelect> BitSelect for Box<T> {
     BitSelect!(T);
 }
@@ -161,12 +128,6 @@ impl<T: BitBlock> BitBlock for Box<T> {
     }
 }
 
-impl<'a, T> BitRank for Cow<'a, T>
-where
-    T: ?Sized + ToOwned + BitRank,
-{
-    BitRank!(T, as_ref);
-}
 impl<'a, T> BitSelect for Cow<'a, T>
 where
     T: ?Sized + ToOwned + BitSelect,
