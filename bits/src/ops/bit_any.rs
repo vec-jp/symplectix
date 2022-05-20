@@ -1,4 +1,5 @@
 use crate as bits;
+use crate::BitBlock;
 
 pub trait BitAny: bits::ops::BitCount {
     #[inline]
@@ -7,7 +8,14 @@ pub trait BitAny: bits::ops::BitCount {
     }
 }
 
-macro_rules! BitAny {
+impl<T: BitBlock> BitAny for [T] {
+    #[inline]
+    fn any(&self) -> bool {
+        self.iter().any(bits::any)
+    }
+}
+
+macro_rules! impl_bit_any {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn any(&self) -> bool {
@@ -18,14 +26,14 @@ macro_rules! BitAny {
 }
 
 impl<'a, T: ?Sized + BitAny> BitAny for &'a T {
-    BitAny!(T);
+    impl_bit_any!(T);
 }
 
 impl<T, const N: usize> BitAny for [T; N]
 where
     [T]: BitAny,
 {
-    BitAny!([T], as_ref);
+    impl_bit_any!([T], as_ref);
 }
 
 mod alloc {
@@ -36,17 +44,17 @@ mod alloc {
     where
         [T]: BitAny,
     {
-        BitAny!([T]);
+        impl_bit_any!([T]);
     }
 
     impl<T: ?Sized + BitAny> BitAny for Box<T> {
-        BitAny!(T);
+        impl_bit_any!(T);
     }
 
     impl<'a, T> BitAny for Cow<'a, T>
     where
         T: ?Sized + ToOwned + BitAny,
     {
-        BitAny!(T, as_ref);
+        impl_bit_any!(T, as_ref);
     }
 }

@@ -1,9 +1,17 @@
 use crate as bits;
+use crate::BitBlock;
 
 pub trait BitAll: bits::ops::BitCount {
     #[inline]
     fn all(&self) -> bool {
         bits::is_empty(self) || self.count_0() == 0
+    }
+}
+
+impl<T: BitBlock> BitAll for [T] {
+    #[inline]
+    fn all(&self) -> bool {
+        self.iter().all(bits::all)
     }
 }
 

@@ -26,20 +26,6 @@ where
     }
 }
 
-impl<T: BitBlock> bits::ops::BitAll for [T] {
-    #[inline]
-    fn all(&self) -> bool {
-        self.iter().all(bits::all)
-    }
-}
-
-impl<T: BitBlock> bits::ops::BitAny for [T] {
-    #[inline]
-    fn any(&self) -> bool {
-        self.iter().any(bits::any)
-    }
-}
-
 impl<T: BitBlock> bits::ops::BitRank for [T] {
     #[inline]
     fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
