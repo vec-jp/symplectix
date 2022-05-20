@@ -1,4 +1,5 @@
 use crate as bits;
+use crate::BitBlock;
 
 pub trait BitSelect: bits::ops::BitRank {
     #[inline]
@@ -50,6 +51,32 @@ mod helper {
     #[inline]
     pub fn search_0<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
         (n < bs.count_0()).then(|| binary_search(0, bits::len(bs), |k| bs.rank_0(..k) > n) - 1)
+    }
+}
+
+impl<T: BitBlock> BitSelect for [T] {
+    #[inline]
+    fn select_1(&self, mut n: usize) -> Option<usize> {
+        for (i, b) in self.iter().enumerate() {
+            let count = bits::count_1(b);
+            if n < count {
+                return Some(i * T::BITS + bits::select_1(b, n).expect("BUG"));
+            }
+            n -= count;
+        }
+        None
+    }
+
+    #[inline]
+    fn select_0(&self, mut n: usize) -> Option<usize> {
+        for (i, b) in self.iter().enumerate() {
+            let count = bits::count_0(b);
+            if n < count {
+                return Some(i * T::BITS + bits::select_0(b, n).expect("BUG"));
+            }
+            n -= count;
+        }
+        None
     }
 }
 

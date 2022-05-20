@@ -26,32 +26,6 @@ where
     }
 }
 
-impl<T: BitBlock> bits::ops::BitSelect for [T] {
-    #[inline]
-    fn select_1(&self, mut n: usize) -> Option<usize> {
-        for (i, b) in self.iter().enumerate() {
-            let count = bits::count_1(b);
-            if n < count {
-                return Some(i * T::BITS + bits::select_1(b, n).expect("BUG"));
-            }
-            n -= count;
-        }
-        None
-    }
-
-    #[inline]
-    fn select_0(&self, mut n: usize) -> Option<usize> {
-        for (i, b) in self.iter().enumerate() {
-            let count = bits::count_0(b);
-            if n < count {
-                return Some(i * T::BITS + bits::select_0(b, n).expect("BUG"));
-            }
-            n -= count;
-        }
-        None
-    }
-}
-
 impl<T: BitBlock> bits::ops::BitGet for [T] {
     #[inline]
     fn get(this: &Self, i: usize) -> Option<bool> {
