@@ -1,4 +1,5 @@
 use crate as bits;
+use crate::BitBlock;
 
 pub trait BitCount: bits::ops::BitLen {
     #[inline]
@@ -9,6 +10,18 @@ pub trait BitCount: bits::ops::BitLen {
     #[inline]
     fn count_0(&self) -> usize {
         bits::len(self) - self.count_1()
+    }
+}
+
+impl<T: BitBlock> BitCount for [T] {
+    #[inline]
+    fn count_1(&self) -> usize {
+        self.iter().map(bits::count_1).sum()
+    }
+
+    #[inline]
+    fn count_0(&self) -> usize {
+        self.iter().map(bits::count_0).sum()
     }
 }
 

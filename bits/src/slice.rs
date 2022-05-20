@@ -26,18 +26,6 @@ where
     }
 }
 
-impl<T: BitBlock> bits::ops::BitCount for [T] {
-    #[inline]
-    fn count_1(&self) -> usize {
-        self.iter().map(bits::count_1).sum()
-    }
-
-    #[inline]
-    fn count_0(&self) -> usize {
-        self.iter().map(bits::count_0).sum()
-    }
-}
-
 impl<T: BitBlock> bits::ops::BitAll for [T] {
     #[inline]
     fn all(&self) -> bool {
