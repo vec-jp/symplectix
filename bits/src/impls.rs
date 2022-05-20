@@ -1,6 +1,6 @@
 use crate as bits;
 use crate::ops::*;
-use crate::{Bits, Word};
+use crate::{BitBlock, Word};
 use core::ops::RangeBounds;
 use std::borrow::{Cow, ToOwned};
 
@@ -182,9 +182,9 @@ where
 {
     BitPut!([T], as_mut);
 }
-impl<T, const N: usize> Bits for [T; N]
+impl<T, const N: usize> BitBlock for [T; N]
 where
-    T: Copy + Bits,
+    T: Copy + BitBlock,
 {
     const BITS: usize = T::BITS * N;
 
@@ -267,7 +267,7 @@ impl<T: ?Sized + BitGet> BitGet for Box<T> {
 impl<T: ?Sized + BitPut> BitPut for Box<T> {
     BitPut!(T);
 }
-impl<T: Bits> Bits for Box<T> {
+impl<T: BitBlock> BitBlock for Box<T> {
     const BITS: usize = T::BITS;
     #[inline]
     fn null() -> Self {
@@ -324,9 +324,9 @@ where
 {
     BitPut!(T::Owned, to_mut);
 }
-impl<'a, T> Bits for Cow<'a, T>
+impl<'a, T> BitBlock for Cow<'a, T>
 where
-    T: ?Sized + Bits,
+    T: ?Sized + BitBlock,
 {
     const BITS: usize = T::BITS;
     #[inline]

@@ -1,12 +1,12 @@
 #![allow(clippy::many_single_char_names)]
 
 use crate as bits;
-use crate::{ops::*, Bits, Word};
+use crate::{ops::*, BitBlock, Word};
 use core::ops::{Range, RangeBounds};
 
 fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
 where
-    T: Bits,
+    T: BitBlock,
     F: FnMut(usize, Range<usize>),
 {
     assert!(s <= e);
@@ -26,14 +26,14 @@ where
     }
 }
 
-impl<T: Bits> BitLen for [T] {
+impl<T: BitBlock> BitLen for [T] {
     #[inline]
     fn len(this: &Self) -> usize {
         T::BITS * <[T]>::len(this)
     }
 }
 
-impl<T: Bits> BitCount for [T] {
+impl<T: BitBlock> BitCount for [T] {
     #[inline]
     fn count_1(&self) -> usize {
         self.iter().map(bits::count_1).sum()
@@ -45,21 +45,21 @@ impl<T: Bits> BitCount for [T] {
     }
 }
 
-impl<T: Bits> BitAll for [T] {
+impl<T: BitBlock> BitAll for [T] {
     #[inline]
     fn all(&self) -> bool {
         self.iter().all(bits::all)
     }
 }
 
-impl<T: Bits> BitAny for [T] {
+impl<T: BitBlock> BitAny for [T] {
     #[inline]
     fn any(&self) -> bool {
         self.iter().any(bits::any)
     }
 }
 
-impl<T: Bits> BitRank for [T] {
+impl<T: BitBlock> BitRank for [T] {
     #[inline]
     fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         let (s, e) = bits::to_range(&r, 0, bits::len(self));
@@ -75,7 +75,7 @@ impl<T: Bits> BitRank for [T] {
     }
 }
 
-impl<T: Bits> BitSelect for [T] {
+impl<T: BitBlock> BitSelect for [T] {
     #[inline]
     fn select_1(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
@@ -101,7 +101,7 @@ impl<T: Bits> BitSelect for [T] {
     }
 }
 
-impl<T: Bits> BitGet for [T] {
+impl<T: BitBlock> BitGet for [T] {
     #[inline]
     fn get(this: &Self, i: usize) -> Option<bool> {
         let (i, o) = bits::address::<T>(i);
@@ -115,7 +115,7 @@ impl<T: Bits> BitGet for [T] {
         let mut cur = 0;
         let mut out = N::NULL;
         for_each_blocks::<T, _>(i, i + n, |k, r| {
-            if k < self.len() && cur < <N as Bits>::BITS {
+            if k < self.len() && cur < <N as BitBlock>::BITS {
                 out |= self[k].word::<N>(r.start, r.len()) << cur;
                 cur += r.len();
             }
@@ -124,7 +124,7 @@ impl<T: Bits> BitGet for [T] {
     }
 }
 
-impl<T: Bits> BitPut for [T] {
+impl<T: BitBlock> BitPut for [T] {
     #[inline]
     fn put_1(&mut self, i: usize) {
         assert!(i < bits::len(self));

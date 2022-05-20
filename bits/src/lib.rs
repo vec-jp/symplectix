@@ -10,7 +10,7 @@ mod slice;
 use core::ops::RangeBounds;
 pub use word::Word;
 
-pub trait Bits:
+pub trait BitBlock:
     Clone
     + ops::BitLen
     + ops::BitCount
@@ -30,7 +30,7 @@ pub trait Bits:
 }
 
 #[inline]
-fn address<T: Bits>(i: usize) -> (usize, usize) {
+fn address<T: BitBlock>(i: usize) -> (usize, usize) {
     use core::ops::{Div, Rem};
     fn divrem<T, U>(t: T, u: U) -> (<T as Div<U>>::Output, <T as Rem<U>>::Output)
     where
@@ -78,7 +78,7 @@ const fn blocks(n: usize, b: usize) -> usize {
 /// assert_eq!(bits::len(&v), 0);
 /// assert_eq!(v.capacity(), 10);
 /// ```
-pub fn with_capacity<T: Bits>(n: usize) -> Vec<T> {
+pub fn with_capacity<T: BitBlock>(n: usize) -> Vec<T> {
     let size = blocks(n, T::BITS);
     Vec::with_capacity(size)
 }
