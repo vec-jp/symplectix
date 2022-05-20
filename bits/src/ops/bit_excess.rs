@@ -1,28 +1,25 @@
-use super::BitRank;
 use crate as bits;
 use core::ops::RangeBounds;
 
-pub trait BitExcess: BitRank {
+pub trait BitExcess: bits::ops::BitRank {
     fn excess_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize;
     fn excess_0<Index: RangeBounds<usize>>(&self, index: Index) -> usize;
 }
 
-impl<T: BitRank> BitExcess for T {
+impl<T: bits::ops::BitRank> BitExcess for T {
     #[inline]
     fn excess_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
         let (i, j) = bits::to_range(&index, 0, bits::len(self));
         let rank1 = self.rank_1(i..j);
-        let rank0 = self.rank_0(i..j);
-        assert!(rank1 >= rank0);
+        let rank0 = (j - i) - rank1;
         rank1 - rank0
     }
 
     #[inline]
     fn excess_0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
         let (i, j) = bits::to_range(&index, 0, bits::len(self));
-        let rank1 = self.rank_1(i..j);
         let rank0 = self.rank_0(i..j);
-        assert!(rank0 >= rank1);
+        let rank1 = (j - i) - rank0;
         rank0 - rank1
     }
 }

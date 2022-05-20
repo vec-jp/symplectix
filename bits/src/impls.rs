@@ -2,26 +2,6 @@ use crate::ops::*;
 use crate::{BitBlock, Word};
 use std::borrow::{Cow, ToOwned};
 
-macro_rules! BitGet {
-    ($X:ty $(, $method:ident )?) => {
-        #[inline]
-        fn get(this: &Self, i: usize) -> Option<bool> {
-            <$X as BitGet>::get(this$(.$method())?, i)
-        }
-
-        #[inline]
-        fn test(this: &Self, i: usize) -> bool {
-            <$X as BitGet>::test(this$(.$method())?, i)
-        }
-
-        #[doc(hidden)]
-        #[inline]
-        fn word<W: Word>(&self, i: usize, n: usize) -> W {
-            <$X as BitGet>::word(self$(.$method())?, i, n)
-        }
-    }
-}
-
 macro_rules! BitPut {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
@@ -41,16 +21,6 @@ macro_rules! BitPut {
     }
 }
 
-impl<'a, T: ?Sized + BitGet> BitGet for &'a T {
-    BitGet!(T);
-}
-
-impl<T, const N: usize> BitGet for [T; N]
-where
-    [T]: BitGet,
-{
-    BitGet!([T], as_ref);
-}
 impl<T, const N: usize> BitPut for [T; N]
 where
     [T]: BitPut,
@@ -69,12 +39,6 @@ where
     }
 }
 
-impl<T> BitGet for Vec<T>
-where
-    [T]: BitGet,
-{
-    BitGet!([T]);
-}
 impl<T> BitPut for Vec<T>
 where
     [T]: BitPut,
@@ -82,9 +46,6 @@ where
     BitPut!([T]);
 }
 
-impl<T: ?Sized + BitGet> BitGet for Box<T> {
-    BitGet!(T);
-}
 impl<T: ?Sized + BitPut> BitPut for Box<T> {
     BitPut!(T);
 }
@@ -96,12 +57,6 @@ impl<T: BitBlock> BitBlock for Box<T> {
     }
 }
 
-impl<'a, T> BitGet for Cow<'a, T>
-where
-    T: ?Sized + ToOwned + BitGet,
-{
-    BitGet!(T, as_ref);
-}
 impl<'a, T> BitPut for Cow<'a, T>
 where
     T: ?Sized + ToOwned + BitGet,
