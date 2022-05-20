@@ -9,6 +9,8 @@ fn bits_is_implemented() {
         T: ?Sized
             + bits::ops::BitLen
             + bits::ops::BitCount
+            + bits::ops::BitAll
+            + bits::ops::BitAny
             + bits::ops::BitRank
             + bits::ops::BitSelect
             + bits::ops::BitGet,
