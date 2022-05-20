@@ -1,23 +1,7 @@
-use crate as bits;
 use crate::ops::*;
 use crate::{BitBlock, Word};
 use core::ops::RangeBounds;
 use std::borrow::{Cow, ToOwned};
-
-macro_rules! BitLen {
-    ($X:ty $(, $method:ident )?) => {
-        #[inline]
-        fn len(this: &Self) -> usize {
-            // <$X as BitLen>::len(this$(.$method())?)
-            bits::len::<$X>(this$(.$method())?)
-        }
-        #[inline]
-        fn is_empty(this: &Self) -> bool {
-            // <$X as BitLen>::is_empty(this$(.$method())?)
-            bits::is_empty::<$X>(this$(.$method())?)
-        }
-    }
-}
 
 macro_rules! BitCount {
     ($X:ty $(, $method:ident )?) => {
@@ -112,15 +96,12 @@ macro_rules! BitPut {
 
         #[doc(hidden)]
         #[inline]
-        fn put_n<W: Word>(&mut self, i: usize, n: usize, mask: W) {
-            <$X as BitPut>::put_n(self$(.$method())?, i, n, mask)
+        fn put_word<W: Word>(&mut self, i: usize, n: usize, word: W) {
+            <$X as BitPut>::put_word(self$(.$method())?, i, n, word)
         }
     }
 }
 
-impl<'a, T: ?Sized + BitLen> BitLen for &'a T {
-    BitLen!(T);
-}
 impl<'a, T: ?Sized + BitCount> BitCount for &'a T {
     BitCount!(T);
 }
@@ -134,12 +115,6 @@ impl<'a, T: ?Sized + BitGet> BitGet for &'a T {
     BitGet!(T);
 }
 
-impl<T, const N: usize> BitLen for [T; N]
-where
-    [T]: BitLen,
-{
-    BitLen!([T], as_ref);
-}
 impl<T, const N: usize> BitCount for [T; N]
 where
     [T]: BitCount,
@@ -194,12 +169,6 @@ where
     }
 }
 
-impl<T> BitLen for Vec<T>
-where
-    [T]: BitLen,
-{
-    BitLen!([T]);
-}
 impl<T> BitCount for Vec<T>
 where
     [T]: BitCount,
@@ -243,9 +212,6 @@ where
     BitPut!([T]);
 }
 
-impl<T: ?Sized + BitLen> BitLen for Box<T> {
-    BitLen!(T);
-}
 impl<T: ?Sized + BitCount> BitCount for Box<T> {
     BitCount!(T);
 }
@@ -275,12 +241,6 @@ impl<T: BitBlock> BitBlock for Box<T> {
     }
 }
 
-impl<'a, T> BitLen for Cow<'a, T>
-where
-    T: ?Sized + ToOwned + BitLen,
-{
-    BitLen!(T, as_ref);
-}
 impl<'a, T> BitCount for Cow<'a, T>
 where
     T: ?Sized + ToOwned + BitCount,

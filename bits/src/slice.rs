@@ -141,12 +141,12 @@ impl<T: BitBlock> bits::ops::BitPut for [T] {
 
     #[inline]
     #[doc(hidden)]
-    fn put_n<N: Word>(&mut self, i: usize, n: usize, mask: N) {
+    fn put_word<N: Word>(&mut self, i: usize, n: usize, word: N) {
         let mut cur = 0;
         for_each_blocks::<T, _>(i, i + n, |k, r| {
             if k < self.len() {
-                let word = bits::word(&mask, cur, r.len());
-                bits::put_n::<_, N>(&mut self[k], r.start, r.len(), word);
+                let word = bits::word(&word, cur, r.len());
+                bits::put_word::<_, N>(&mut self[k], r.start, r.len(), word);
                 cur += r.len();
             }
         });

@@ -316,10 +316,10 @@ where
 /// Writes `n` bits in `[i, i+n)`.
 #[doc(hidden)]
 #[inline]
-pub fn put_n<T, U>(bits: &mut T, i: usize, n: usize, mask: U)
+pub fn put_word<T, U>(bits: &mut T, i: usize, n: usize, word: U)
 where
     T: ?Sized + ops::BitPut,
     U: Word,
 {
-    ops::BitPut::put_n(bits, i, n, mask)
+    ops::BitPut::put_word(bits, i, n, word)
 }
