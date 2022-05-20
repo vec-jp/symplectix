@@ -9,10 +9,10 @@ rust_library(
         exclude = ["*_test.rs"],
     ),
     crate_root = "mask.rs",
+    visibility = ["//visibility:public"],
     deps = [
         "//bits",
     ],
-    visibility = ["//visibility:public"],
 )
 
 rust_test_suite(

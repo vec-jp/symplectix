@@ -5,7 +5,10 @@ package(default_visibility = ["//visibility:private"])
 rust_library(
     name = "bits",
     srcs = glob(
-        ["src/*.rs", "src/ops/*.rs"],
+        [
+            "src/*.rs",
+            "src/ops/*.rs",
+        ],
     ),
     visibility = ["//visibility:public"],
 )

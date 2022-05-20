@@ -1,11 +1,11 @@
 //! `bits`
 
 pub mod ops;
+mod word;
 
 mod bools;
 mod impls;
 mod slice;
-mod word;
 
 use core::ops::RangeBounds;
 pub use word::Word;
@@ -100,10 +100,7 @@ pub fn with_capacity<T: Bits>(n: usize) -> Vec<T> {
 /// assert_eq!(bits::len(w), 0);
 /// ```
 #[inline]
-pub fn len<T>(bits: &T) -> usize
-where
-    T: ?Sized + ops::BitLen,
-{
+pub fn len<T: ?Sized + ops::BitLen>(bits: &T) -> usize {
     ops::BitLen::len(bits)
 }
 
@@ -118,42 +115,27 @@ where
 /// assert!( bits::is_empty(w));
 /// ```
 #[inline]
-pub fn is_empty<T>(bits: &T) -> bool
-where
-    T: ?Sized + ops::BitLen,
-{
+pub fn is_empty<T: ?Sized + ops::BitLen>(bits: &T) -> bool {
     ops::BitLen::is_empty(bits)
 }
 
 #[inline]
-pub fn get<T>(bits: &T, i: usize) -> Option<bool>
-where
-    T: ?Sized + ops::BitGet,
-{
+pub fn get<T: ?Sized + ops::BitGet>(bits: &T, i: usize) -> Option<bool> {
     ops::BitGet::get(bits, i)
 }
 
 #[inline]
-pub fn test<T>(bits: &T, i: usize) -> bool
-where
-    T: ?Sized + ops::BitGet,
-{
+pub fn test<T: ?Sized + ops::BitGet>(bits: &T, i: usize) -> bool {
     ops::BitGet::test(bits, i)
 }
 
 #[inline]
-pub fn put_1<T>(bits: &mut T, i: usize)
-where
-    T: ?Sized + ops::BitPut,
-{
+pub fn put_1<T: ?Sized + ops::BitPut>(bits: &mut T, i: usize) {
     ops::BitPut::put_1(bits, i)
 }
 
 #[inline]
-pub fn put_0<T>(bits: &mut T, i: usize)
-where
-    T: ?Sized + ops::BitPut,
-{
+pub fn put_0<T: ?Sized + ops::BitPut>(bits: &mut T, i: usize) {
     ops::BitPut::put_0(bits, i)
 }
 
@@ -170,10 +152,7 @@ where
 /// assert_eq!(bits::count_1(c), 3);
 /// ```
 #[inline]
-pub fn count_1<T>(bits: &T) -> usize
-where
-    T: ?Sized + ops::BitCount,
-{
+pub fn count_1<T: ?Sized + ops::BitCount>(bits: &T) -> usize {
     ops::BitCount::count_1(bits)
 }
 
@@ -190,10 +169,7 @@ where
 /// assert_eq!(bits::count_0(c), 189);
 /// ```
 #[inline]
-pub fn count_0<T>(bits: &T) -> usize
-where
-    T: ?Sized + ops::BitCount,
-{
+pub fn count_0<T: ?Sized + ops::BitCount>(bits: &T) -> usize {
     ops::BitCount::count_0(bits)
 }
 
@@ -210,10 +186,7 @@ where
 /// assert!( bits::all(c));
 /// ```
 #[inline]
-pub fn all<T>(bits: &T) -> bool
-where
-    T: ?Sized + ops::BitAll,
-{
+pub fn all<T: ?Sized + ops::BitAll>(bits: &T) -> bool {
     ops::BitAll::all(bits)
 }
 
@@ -232,10 +205,7 @@ where
 /// assert!( bits::any(b4));
 /// ```
 #[inline]
-pub fn any<T>(bits: &T) -> bool
-where
-    T: ?Sized + ops::BitAny,
-{
+pub fn any<T: ?Sized + ops::BitAny>(bits: &T) -> bool {
     ops::BitAny::any(bits)
 }
 
@@ -276,18 +246,12 @@ where
 }
 
 #[inline]
-pub fn select_1<T>(bits: &T, n: usize) -> Option<usize>
-where
-    T: ?Sized + ops::BitSelect,
-{
+pub fn select_1<T: ?Sized + ops::BitSelect>(bits: &T, n: usize) -> Option<usize> {
     ops::BitSelect::select_1(bits, n)
 }
 
 #[inline]
-pub fn select_0<T>(bits: &T, n: usize) -> Option<usize>
-where
-    T: ?Sized + ops::BitSelect,
-{
+pub fn select_0<T: ?Sized + ops::BitSelect>(bits: &T, n: usize) -> Option<usize> {
     ops::BitSelect::select_0(bits, n)
 }
 
@@ -303,9 +267,10 @@ where
 
 #[doc(hidden)]
 #[inline]
-pub fn put_n<T, N: Word>(bits: &mut T, i: usize, n: usize, mask: N)
+pub fn put_n<T, U>(bits: &mut T, i: usize, n: usize, mask: U)
 where
     T: ?Sized + ops::BitPut,
+    U: Word,
 {
     ops::BitPut::put_n(bits, i, n, mask)
 }
