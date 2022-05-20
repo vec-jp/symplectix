@@ -1,4 +1,4 @@
-use crate::{bits, Word};
+use crate as bits;
 
 pub trait BitGet {
     /// Returns a bit at the given index `i`.
@@ -49,7 +49,7 @@ pub trait BitGet {
     /// assert_eq!(bits::word::<_, u32>(s, 188, 10), 0b1111);
     /// ```
     #[doc(hidden)]
-    fn word<T: Word>(&self, i: usize, n: usize) -> T {
+    fn word<T: bits::Word>(&self, i: usize, n: usize) -> T {
         let mut w = T::NULL;
         for b in i..i + n {
             if bits::get(self, b).expect("index out of bounds") {

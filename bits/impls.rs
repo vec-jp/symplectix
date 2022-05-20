@@ -1,3 +1,4 @@
+use crate as bits;
 use crate::ops::*;
 use crate::{Bits, Word};
 use core::ops::RangeBounds;
@@ -7,11 +8,13 @@ macro_rules! BitLen {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn len(this: &Self) -> usize {
-            <$X as BitLen>::len(this$(.$method())?)
+            // <$X as BitLen>::len(this$(.$method())?)
+            bits::len::<$X>(this$(.$method())?)
         }
         #[inline]
         fn is_empty(this: &Self) -> bool {
-            <$X as BitLen>::is_empty(this$(.$method())?)
+            // <$X as BitLen>::is_empty(this$(.$method())?)
+            bits::is_empty::<$X>(this$(.$method())?)
         }
     }
 }

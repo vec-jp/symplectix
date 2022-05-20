@@ -1,4 +1,5 @@
-use crate::{bits, ops::*, to_range, Bits};
+use crate as bits;
+use crate::{ops::*, to_range, Bits};
 use core::{hash::Hash, ops, ops::RangeBounds};
 
 mod private {

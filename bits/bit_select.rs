@@ -1,4 +1,5 @@
-use crate::ops::BitRank;
+use crate as bits;
+use crate::bit_rank::BitRank;
 
 pub trait BitSelect: BitRank {
     /// Returns the position of the n-th 1, indexed starting from zero.
@@ -27,7 +28,7 @@ pub trait BitSelect: BitRank {
 }
 
 mod helper {
-    use crate::{bits, ops::BitRank};
+    use super::*;
 
     /// Binary search to find and return the smallest index k in `[i, j)` at which f(k) is true,
     /// assuming that on the range `[i, j)`, f(k) == true implies f(k+1) == true.

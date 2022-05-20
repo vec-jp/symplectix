@@ -1,6 +1,6 @@
-use crate::{bits, ops::BitLen};
+use crate as bits;
 
-pub trait BitCount: BitLen {
+pub trait BitCount: bits::ops::BitLen {
     #[inline]
     fn count_1(&self) -> usize {
         bits::len(self) - self.count_0()

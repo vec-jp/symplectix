@@ -1,6 +1,7 @@
 #![allow(clippy::many_single_char_names)]
 
-use crate::{address, bits, ops::*, to_range, Bits, Word};
+use crate as bits;
+use crate::{address, ops::*, to_range, Bits, Word};
 use core::ops::{Range, RangeBounds};
 
 fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
