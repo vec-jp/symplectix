@@ -10,7 +10,7 @@ pub trait BitGet {
     }
 
     #[doc(hidden)]
-    fn word<T: bits::Word>(&self, i: usize, n: usize) -> T {
+    fn word<T: Word>(&self, i: usize, n: usize) -> T {
         let mut w = T::NULL;
         for b in i..i + n {
             if bits::get(self, b).expect("index out of bounds") {
