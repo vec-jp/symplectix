@@ -20,10 +20,12 @@ fn bits_is_implemented() {
     _bits_is_implemented::<&u8>();
     _bits_is_implemented::<[u8; 1]>();
     _bits_is_implemented::<&[u8; 1]>();
+    _bits_is_implemented::<[u8]>();
     _bits_is_implemented::<&[u8]>();
     _bits_is_implemented::<Vec<[u8; 1]>>();
     _bits_is_implemented::<&Vec<[u8; 2]>>();
     _bits_is_implemented::<Box<[u8; 3]>>();
+    _bits_is_implemented::<[Box<[u8; 3]>]>();
     _bits_is_implemented::<&Box<[u8; 4]>>();
     _bits_is_implemented::<Cow<[u8; 1000]>>();
     _bits_is_implemented::<Cow<Box<[u8; 2000]>>>();

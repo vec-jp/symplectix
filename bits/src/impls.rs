@@ -2,20 +2,6 @@ use crate::ops::*;
 use crate::{BitBlock, Word};
 use std::borrow::{Cow, ToOwned};
 
-macro_rules! BitSelect {
-    ($X:ty $(, $method:ident )?) => {
-        #[inline]
-        fn select_1(&self, n: usize) -> Option<usize> {
-            <$X as BitSelect>::select_1(self$(.$method())?, n)
-        }
-
-        #[inline]
-        fn select_0(&self, n: usize) -> Option<usize> {
-            <$X as BitSelect>::select_0(self$(.$method())?, n)
-        }
-    }
-}
-
 macro_rules! BitGet {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
@@ -55,19 +41,10 @@ macro_rules! BitPut {
     }
 }
 
-impl<'a, T: ?Sized + BitSelect> BitSelect for &'a T {
-    BitSelect!(T);
-}
 impl<'a, T: ?Sized + BitGet> BitGet for &'a T {
     BitGet!(T);
 }
 
-impl<T, const N: usize> BitSelect for [T; N]
-where
-    [T]: BitSelect,
-{
-    BitSelect!([T], as_ref);
-}
 impl<T, const N: usize> BitGet for [T; N]
 where
     [T]: BitGet,
@@ -92,12 +69,6 @@ where
     }
 }
 
-impl<T> BitSelect for Vec<T>
-where
-    [T]: BitSelect,
-{
-    BitSelect!([T]);
-}
 impl<T> BitGet for Vec<T>
 where
     [T]: BitGet,
@@ -111,9 +82,6 @@ where
     BitPut!([T]);
 }
 
-impl<T: ?Sized + BitSelect> BitSelect for Box<T> {
-    BitSelect!(T);
-}
 impl<T: ?Sized + BitGet> BitGet for Box<T> {
     BitGet!(T);
 }
@@ -128,12 +96,6 @@ impl<T: BitBlock> BitBlock for Box<T> {
     }
 }
 
-impl<'a, T> BitSelect for Cow<'a, T>
-where
-    T: ?Sized + ToOwned + BitSelect,
-{
-    BitSelect!(T, as_ref);
-}
 impl<'a, T> BitGet for Cow<'a, T>
 where
     T: ?Sized + ToOwned + BitGet,

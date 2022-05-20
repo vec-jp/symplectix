@@ -1,7 +1,6 @@
-use super::BitRank;
 use crate as bits;
 
-pub trait BitSelect: BitRank {
+pub trait BitSelect: bits::ops::BitRank {
     #[inline]
     fn select_1(&self, n: usize) -> Option<usize> {
         helper::search_1(self, n)
@@ -25,6 +24,7 @@ pub trait BitSelect: BitRank {
 
 mod helper {
     use super::*;
+    use crate::ops::BitRank;
 
     /// Binary search to find and return the smallest index k in `[i, j)` at which f(k) is true,
     /// assuming that on the range `[i, j)`, f(k) == true implies f(k+1) == true.
@@ -50,5 +50,55 @@ mod helper {
     #[inline]
     pub fn search_0<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
         (n < bs.count_0()).then(|| binary_search(0, bits::len(bs), |k| bs.rank_0(..k) > n) - 1)
+    }
+}
+
+macro_rules! impl_bit_select {
+    ($X:ty $(, $method:ident )?) => {
+        #[inline]
+        fn select_1(&self, n: usize) -> Option<usize> {
+            // <$X as BitSelect>::select_1(self$(.$method())?, n)
+            bits::select_1::<$X>(self$(.$method())?, n)
+        }
+
+        #[inline]
+        fn select_0(&self, n: usize) -> Option<usize> {
+            // <$X as BitSelect>::select_0(self$(.$method())?, n)
+            bits::select_0::<$X>(self$(.$method())?, n)
+        }
+    }
+}
+
+impl<'a, T: ?Sized + BitSelect> BitSelect for &'a T {
+    impl_bit_select!(T);
+}
+
+impl<T, const N: usize> BitSelect for [T; N]
+where
+    [T]: BitSelect,
+{
+    impl_bit_select!([T], as_ref);
+}
+
+mod alloc {
+    use super::*;
+    use std::borrow::Cow;
+
+    impl<T: ?Sized + BitSelect> BitSelect for Box<T> {
+        impl_bit_select!(T);
+    }
+
+    impl<T> BitSelect for Vec<T>
+    where
+        [T]: BitSelect,
+    {
+        impl_bit_select!([T]);
+    }
+
+    impl<'a, T> BitSelect for Cow<'a, T>
+    where
+        T: ?Sized + ToOwned + BitSelect,
+    {
+        impl_bit_select!(T, as_ref);
     }
 }
