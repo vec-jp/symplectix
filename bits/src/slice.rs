@@ -1,8 +1,8 @@
 #![allow(clippy::many_single_char_names)]
 
 use crate as bits;
-use crate::{ops::*, BitBlock, Word};
-use core::ops::{Range, RangeBounds};
+use crate::{BitBlock, Word};
+use core::ops::Range;
 
 fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
 where
@@ -23,22 +23,6 @@ where
         f(q0, r0..T::BITS);
         (q0 + 1..q1).for_each(|k| f(k, 0..T::BITS));
         f(q1, 0..r1)
-    }
-}
-
-impl<T: BitBlock> bits::ops::BitRank for [T] {
-    #[inline]
-    fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        let (s, e) = bits::to_range(&r, 0, bits::len(self));
-        let (i, p) = bits::address::<T>(s);
-        let (j, q) = bits::address::<T>(e);
-        if i == j {
-            self[i].rank_1(p..q)
-        } else {
-            self[i].rank_1(p..)
-                + self[i + 1..j].count_1()
-                + self.get(j).map_or(0, |b| bits::rank_1(b, ..q))
-        }
     }
 }
 
