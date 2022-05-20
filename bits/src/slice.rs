@@ -26,14 +26,14 @@ where
     }
 }
 
-impl<T: BitBlock> BitLen for [T] {
+impl<T: BitBlock> bits::ops::BitLen for [T] {
     #[inline]
     fn len(this: &Self) -> usize {
         T::BITS * <[T]>::len(this)
     }
 }
 
-impl<T: BitBlock> BitCount for [T] {
+impl<T: BitBlock> bits::ops::BitCount for [T] {
     #[inline]
     fn count_1(&self) -> usize {
         self.iter().map(bits::count_1).sum()
@@ -45,21 +45,21 @@ impl<T: BitBlock> BitCount for [T] {
     }
 }
 
-impl<T: BitBlock> BitAll for [T] {
+impl<T: BitBlock> bits::ops::BitAll for [T] {
     #[inline]
     fn all(&self) -> bool {
         self.iter().all(bits::all)
     }
 }
 
-impl<T: BitBlock> BitAny for [T] {
+impl<T: BitBlock> bits::ops::BitAny for [T] {
     #[inline]
     fn any(&self) -> bool {
         self.iter().any(bits::any)
     }
 }
 
-impl<T: BitBlock> BitRank for [T] {
+impl<T: BitBlock> bits::ops::BitRank for [T] {
     #[inline]
     fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         let (s, e) = bits::to_range(&r, 0, bits::len(self));
@@ -70,18 +70,18 @@ impl<T: BitBlock> BitRank for [T] {
         } else {
             self[i].rank_1(p..)
                 + self[i + 1..j].count_1()
-                + self.get(j).map_or(0, |b| b.rank_1(..q))
+                + self.get(j).map_or(0, |b| bits::rank_1(b, ..q))
         }
     }
 }
 
-impl<T: BitBlock> BitSelect for [T] {
+impl<T: BitBlock> bits::ops::BitSelect for [T] {
     #[inline]
     fn select_1(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
-            let count = b.count_1();
+            let count = bits::count_1(b);
             if n < count {
-                return Some(i * T::BITS + b.select_1(n).expect("BUG"));
+                return Some(i * T::BITS + bits::select_1(b, n).expect("BUG"));
             }
             n -= count;
         }
@@ -91,9 +91,9 @@ impl<T: BitBlock> BitSelect for [T] {
     #[inline]
     fn select_0(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
-            let count = b.count_0();
+            let count = bits::count_0(b);
             if n < count {
-                return Some(i * T::BITS + b.select_0(n).expect("BUG"));
+                return Some(i * T::BITS + bits::select_0(b, n).expect("BUG"));
             }
             n -= count;
         }
@@ -101,7 +101,7 @@ impl<T: BitBlock> BitSelect for [T] {
     }
 }
 
-impl<T: BitBlock> BitGet for [T] {
+impl<T: BitBlock> bits::ops::BitGet for [T] {
     #[inline]
     fn get(this: &Self, i: usize) -> Option<bool> {
         let (i, o) = bits::address::<T>(i);
@@ -116,7 +116,7 @@ impl<T: BitBlock> BitGet for [T] {
         let mut out = N::NULL;
         for_each_blocks::<T, _>(i, i + n, |k, r| {
             if k < self.len() && cur < <N as BitBlock>::BITS {
-                out |= self[k].word::<N>(r.start, r.len()) << cur;
+                out |= bits::word::<_, N>(&self[k], r.start, r.len()) << cur;
                 cur += r.len();
             }
         });
@@ -124,19 +124,19 @@ impl<T: BitBlock> BitGet for [T] {
     }
 }
 
-impl<T: BitBlock> BitPut for [T] {
+impl<T: BitBlock> bits::ops::BitPut for [T] {
     #[inline]
     fn put_1(&mut self, i: usize) {
         assert!(i < bits::len(self));
         let (i, o) = bits::address::<T>(i);
-        self[i].put_1(o);
+        bits::put_1(&mut self[i], o);
     }
 
     #[inline]
     fn put_0(&mut self, i: usize) {
         assert!(i < bits::len(self));
         let (i, o) = bits::address::<T>(i);
-        self[i].put_0(o);
+        bits::put_0(&mut self[i], o);
     }
 
     #[inline]
@@ -145,7 +145,8 @@ impl<T: BitBlock> BitPut for [T] {
         let mut cur = 0;
         for_each_blocks::<T, _>(i, i + n, |k, r| {
             if k < self.len() {
-                self[k].put_n::<N>(r.start, r.len(), bits::word(&mask, cur, r.len()));
+                let word = bits::word(&mask, cur, r.len());
+                bits::put_n::<_, N>(&mut self[k], r.start, r.len(), word);
                 cur += r.len();
             }
         });

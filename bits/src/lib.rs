@@ -119,21 +119,53 @@ pub fn is_empty<T: ?Sized + ops::BitLen>(bits: &T) -> bool {
     ops::BitLen::is_empty(bits)
 }
 
+/// Returns a bit at the given index `i`.
+/// When i is out of bounds, returns **None**.
+///
+/// # Examples
+///
+/// ```
+/// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
+/// assert_eq!(bits::get(v, 0),   Some(true));
+/// assert_eq!(bits::get(v, 64),  Some(true));
+/// assert_eq!(bits::get(v, 128), Some(false));
+/// assert_eq!(bits::get(v, 200), None);
+/// ```
 #[inline]
 pub fn get<T: ?Sized + ops::BitGet>(bits: &T, i: usize) -> Option<bool> {
     ops::BitGet::get(bits, i)
 }
 
+/// Returns a bit at the given index `i`.
+/// When i is out of bounds, returns **false**.
+///
+/// # Examples
+///
+/// ```
+/// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
+/// assert!( bits::test(v, 0));
+/// assert!(!bits::test(v, 1));
+/// assert!( bits::test(v, 2));
+/// assert!(!bits::test(v, 1000));
+///
+/// let w = &v[1..];
+/// assert!( bits::test(w, 0));
+/// assert!( bits::test(w, 1));
+/// assert!(!bits::test(w, 2));
+/// assert!(!bits::test(w, 1000));
+/// ```
 #[inline]
 pub fn test<T: ?Sized + ops::BitGet>(bits: &T, i: usize) -> bool {
     ops::BitGet::test(bits, i)
 }
 
+/// Enables the bit at `i`.
 #[inline]
 pub fn put_1<T: ?Sized + ops::BitPut>(bits: &mut T, i: usize) {
     ops::BitPut::put_1(bits, i)
 }
 
+/// Disables the bit at `i`.
 #[inline]
 pub fn put_0<T: ?Sized + ops::BitPut>(bits: &mut T, i: usize) {
     ops::BitPut::put_0(bits, i)
@@ -209,6 +241,7 @@ pub fn any<T: ?Sized + ops::BitAny>(bits: &T) -> bool {
     ops::BitAny::any(bits)
 }
 
+/// Counts occurrences of `1` in the given range.
 #[inline]
 pub fn rank_1<T, Index>(bits: &T, index: Index) -> usize
 where
@@ -218,6 +251,7 @@ where
     ops::BitRank::rank_1(bits, index)
 }
 
+/// Counts occurrences of `0` in the given range.
 #[inline]
 pub fn rank_0<T, Index>(bits: &T, index: Index) -> usize
 where
@@ -245,16 +279,30 @@ where
     ops::BitExcess::excess_0(bits, index)
 }
 
+/// Returns the position of the n-th 1, indexed starting from zero.
+/// `n` must be less than `self.count1()`, orherwise returns `None`.
 #[inline]
 pub fn select_1<T: ?Sized + ops::BitSelect>(bits: &T, n: usize) -> Option<usize> {
     ops::BitSelect::select_1(bits, n)
 }
 
+/// Returns the position of the n-th 0, indexed starting from zero.
+/// `n` must be less than `self.count0()`, orherwise returns `None`.
 #[inline]
 pub fn select_0<T: ?Sized + ops::BitSelect>(bits: &T, n: usize) -> Option<usize> {
     ops::BitSelect::select_0(bits, n)
 }
 
+/// Reads `n` bits within `[i, i+n)`, and returns it as the lowest `n` bits of `Word`.
+///
+/// # Examples
+///
+/// ```
+/// let s: &[u64] = &[!0, 0, !0];
+/// assert_eq!(bits::word::<_, u32>(s,   0,  4), 0b1111);
+/// assert_eq!(bits::word::<_, u32>(s,  60, 20), 0b1111);
+/// assert_eq!(bits::word::<_, u32>(s, 188, 10), 0b1111);
+/// ```
 #[doc(hidden)]
 #[inline]
 pub fn word<T, U>(bits: &T, i: usize, n: usize) -> U
@@ -265,6 +313,7 @@ where
     ops::BitGet::word(bits, i, n)
 }
 
+/// Writes `n` bits in `[i, i+n)`.
 #[doc(hidden)]
 #[inline]
 pub fn put_n<T, U>(bits: &mut T, i: usize, n: usize, mask: U)

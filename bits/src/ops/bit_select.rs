@@ -2,15 +2,11 @@ use super::BitRank;
 use crate as bits;
 
 pub trait BitSelect: BitRank {
-    /// Returns the position of the n-th 1, indexed starting from zero.
-    /// `n` must be less than `self.count1()`, orherwise returns `None`.
     #[inline]
     fn select_1(&self, n: usize) -> Option<usize> {
         helper::search_1(self, n)
     }
 
-    /// Returns the position of the n-th 0, indexed starting from zero.
-    /// `n` must be less than `self.count0()`, orherwise returns `None`.
     #[inline]
     fn select_0(&self, n: usize) -> Option<usize> {
         helper::search_0(self, n)
