@@ -42,12 +42,16 @@ impl<T: Bits> BitCount for [T] {
     fn count_0(&self) -> usize {
         self.iter().map(bits::count_0).sum()
     }
+}
 
+impl<T: Bits> BitAll for [T] {
     #[inline]
     fn all(&self) -> bool {
         self.iter().all(bits::all)
     }
+}
 
+impl<T: Bits> BitAny for [T] {
     #[inline]
     fn any(&self) -> bool {
         self.iter().any(bits::any)

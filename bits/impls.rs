@@ -27,15 +27,23 @@ macro_rules! BitCount {
         fn count_0(&self) -> usize {
             <$X as BitCount>::count_0(self$(.$method())?)
         }
+    }
+}
 
+macro_rules! BitAll {
+    ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn all(&self) -> bool {
-            <$X as BitCount>::all(self$(.$method())?)
+            <$X as BitAll>::all(self$(.$method())?)
         }
+    }
+}
 
+macro_rules! BitAny {
+    ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn any(&self) -> bool {
-            <$X as BitCount>::any(self$(.$method())?)
+            <$X as BitAny>::any(self$(.$method())?)
         }
     }
 }
@@ -135,6 +143,18 @@ where
 {
     BitCount!([T], as_ref);
 }
+impl<T, const N: usize> BitAll for [T; N]
+where
+    [T]: BitAll,
+{
+    BitAll!([T], as_ref);
+}
+impl<T, const N: usize> BitAny for [T; N]
+where
+    [T]: BitAny,
+{
+    BitAny!([T], as_ref);
+}
 impl<T, const N: usize> BitRank for [T; N]
 where
     [T]: BitRank,
@@ -183,6 +203,18 @@ where
 {
     BitCount!([T]);
 }
+impl<T> BitAll for Vec<T>
+where
+    [T]: BitAll,
+{
+    BitAll!([T]);
+}
+impl<T> BitAny for Vec<T>
+where
+    [T]: BitAny,
+{
+    BitAny!([T]);
+}
 impl<T> BitRank for Vec<T>
 where
     [T]: BitRank,
@@ -213,6 +245,12 @@ impl<T: ?Sized + BitLen> BitLen for Box<T> {
 }
 impl<T: ?Sized + BitCount> BitCount for Box<T> {
     BitCount!(T);
+}
+impl<T: ?Sized + BitAll> BitAll for Box<T> {
+    BitAll!(T);
+}
+impl<T: ?Sized + BitAny> BitAny for Box<T> {
+    BitAny!(T);
 }
 impl<T: ?Sized + BitRank> BitRank for Box<T> {
     BitRank!(T);
@@ -245,6 +283,18 @@ where
     T: ?Sized + ToOwned + BitCount,
 {
     BitCount!(T, as_ref);
+}
+impl<'a, T> BitAll for Cow<'a, T>
+where
+    T: ?Sized + ToOwned + BitAll,
+{
+    BitAll!(T, as_ref);
+}
+impl<'a, T> BitAny for Cow<'a, T>
+where
+    T: ?Sized + ToOwned + BitAny,
+{
+    BitAny!(T, as_ref);
 }
 impl<'a, T> BitRank for Cow<'a, T>
 where
