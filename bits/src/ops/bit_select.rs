@@ -1,5 +1,5 @@
+use super::BitRank;
 use crate as bits;
-use crate::bit_rank::BitRank;
 
 pub trait BitSelect: BitRank {
     /// Returns the position of the n-th 1, indexed starting from zero.

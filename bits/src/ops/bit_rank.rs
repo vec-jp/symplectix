@@ -1,7 +1,8 @@
+use super::BitCount;
 use crate as bits;
 use core::ops::RangeBounds;
 
-pub trait BitRank: bits::ops::BitCount {
+pub trait BitRank: BitCount {
     /// Counts occurrences of `1` in the given range.
     #[inline]
     fn rank_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {

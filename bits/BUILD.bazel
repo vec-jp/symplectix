@@ -5,15 +5,14 @@ package(default_visibility = ["//visibility:private"])
 rust_library(
     name = "bits",
     srcs = glob(
-        ["*.rs"],
-        exclude = ["*_test.rs"],
+        ["src/*.rs", "src/ops/*.rs"],
     ),
     visibility = ["//visibility:public"],
 )
 
 rust_test_suite(
     name = "tests",
-    srcs = glob(["*_test.rs"]),
+    srcs = glob(["tests/*_test.rs"]),
     deps = [
         ":bits",
     ],

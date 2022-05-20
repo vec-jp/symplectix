@@ -1,6 +1,7 @@
+use super::BitGet;
 use crate as bits;
 
-pub trait BitPut: bits::ops::BitGet {
+pub trait BitPut: BitGet {
     /// Enables the bit at `i`.
     fn put_1(&mut self, i: usize);
 

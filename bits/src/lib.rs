@@ -1,25 +1,6 @@
 //! `bits`
 
-mod bit_all;
-mod bit_any;
-mod bit_count;
-mod bit_excess;
-mod bit_get;
-mod bit_len;
-mod bit_put;
-mod bit_rank;
-mod bit_select;
-pub mod ops {
-    pub use crate::bit_all::BitAll;
-    pub use crate::bit_any::BitAny;
-    pub use crate::bit_count::BitCount;
-    pub use crate::bit_excess::BitExcess;
-    pub use crate::bit_get::BitGet;
-    pub use crate::bit_len::BitLen;
-    pub use crate::bit_put::BitPut;
-    pub use crate::bit_rank::BitRank;
-    pub use crate::bit_select::BitSelect;
-}
+pub mod ops;
 
 mod bools;
 mod impls;
@@ -121,9 +102,9 @@ pub fn with_capacity<T: Bits>(n: usize) -> Vec<T> {
 #[inline]
 pub fn len<T>(bits: &T) -> usize
 where
-    T: ?Sized + bit_len::BitLen,
+    T: ?Sized + ops::BitLen,
 {
-    bit_len::BitLen::len(bits)
+    ops::BitLen::len(bits)
 }
 
 /// Returns true iif `bits::len(this) == 0`.
@@ -139,41 +120,41 @@ where
 #[inline]
 pub fn is_empty<T>(bits: &T) -> bool
 where
-    T: ?Sized + bit_len::BitLen,
+    T: ?Sized + ops::BitLen,
 {
-    bit_len::BitLen::is_empty(bits)
+    ops::BitLen::is_empty(bits)
 }
 
 #[inline]
 pub fn get<T>(bits: &T, i: usize) -> Option<bool>
 where
-    T: ?Sized + bit_get::BitGet,
+    T: ?Sized + ops::BitGet,
 {
-    bit_get::BitGet::get(bits, i)
+    ops::BitGet::get(bits, i)
 }
 
 #[inline]
 pub fn test<T>(bits: &T, i: usize) -> bool
 where
-    T: ?Sized + bit_get::BitGet,
+    T: ?Sized + ops::BitGet,
 {
-    bit_get::BitGet::test(bits, i)
+    ops::BitGet::test(bits, i)
 }
 
 #[inline]
 pub fn put_1<T>(bits: &mut T, i: usize)
 where
-    T: ?Sized + bit_put::BitPut,
+    T: ?Sized + ops::BitPut,
 {
-    bit_put::BitPut::put_1(bits, i)
+    ops::BitPut::put_1(bits, i)
 }
 
 #[inline]
 pub fn put_0<T>(bits: &mut T, i: usize)
 where
-    T: ?Sized + bit_put::BitPut,
+    T: ?Sized + ops::BitPut,
 {
-    bit_put::BitPut::put_0(bits, i)
+    ops::BitPut::put_0(bits, i)
 }
 
 /// Counts the occurrences of `1`.
@@ -191,9 +172,9 @@ where
 #[inline]
 pub fn count_1<T>(bits: &T) -> usize
 where
-    T: ?Sized + bit_count::BitCount,
+    T: ?Sized + ops::BitCount,
 {
-    bit_count::BitCount::count_1(bits)
+    ops::BitCount::count_1(bits)
 }
 
 /// Counts the occurrences of `0`.
@@ -211,9 +192,9 @@ where
 #[inline]
 pub fn count_0<T>(bits: &T) -> usize
 where
-    T: ?Sized + bit_count::BitCount,
+    T: ?Sized + ops::BitCount,
 {
-    bit_count::BitCount::count_0(bits)
+    ops::BitCount::count_0(bits)
 }
 
 /// Returns true if all bits are enabled. An empty bits should return true.
@@ -231,9 +212,9 @@ where
 #[inline]
 pub fn all<T>(bits: &T) -> bool
 where
-    T: ?Sized + bit_all::BitAll,
+    T: ?Sized + ops::BitAll,
 {
-    bit_all::BitAll::all(bits)
+    ops::BitAll::all(bits)
 }
 
 /// Returns true if any bits are enabled. An empty bits should return false.
@@ -253,78 +234,78 @@ where
 #[inline]
 pub fn any<T>(bits: &T) -> bool
 where
-    T: ?Sized + bit_any::BitAny,
+    T: ?Sized + ops::BitAny,
 {
-    bit_any::BitAny::any(bits)
+    ops::BitAny::any(bits)
 }
 
 #[inline]
 pub fn rank_1<T, Index>(bits: &T, index: Index) -> usize
 where
-    T: ?Sized + bit_rank::BitRank,
+    T: ?Sized + ops::BitRank,
     Index: RangeBounds<usize>,
 {
-    bit_rank::BitRank::rank_1(bits, index)
+    ops::BitRank::rank_1(bits, index)
 }
 
 #[inline]
 pub fn rank_0<T, Index>(bits: &T, index: Index) -> usize
 where
-    T: ?Sized + bit_rank::BitRank,
+    T: ?Sized + ops::BitRank,
     Index: RangeBounds<usize>,
 {
-    bit_rank::BitRank::rank_0(bits, index)
+    ops::BitRank::rank_0(bits, index)
 }
 
 #[inline]
 pub fn excess_1<T, Index>(bits: &T, index: Index) -> usize
 where
-    T: ?Sized + bit_excess::BitExcess,
+    T: ?Sized + ops::BitExcess,
     Index: RangeBounds<usize>,
 {
-    bit_excess::BitExcess::excess_1(bits, index)
+    ops::BitExcess::excess_1(bits, index)
 }
 
 #[inline]
 pub fn excess_0<T, Index>(bits: &T, index: Index) -> usize
 where
-    T: ?Sized + bit_excess::BitExcess,
+    T: ?Sized + ops::BitExcess,
     Index: RangeBounds<usize>,
 {
-    bit_excess::BitExcess::excess_0(bits, index)
+    ops::BitExcess::excess_0(bits, index)
 }
 
 #[inline]
 pub fn select_1<T>(bits: &T, n: usize) -> Option<usize>
 where
-    T: ?Sized + bit_select::BitSelect,
+    T: ?Sized + ops::BitSelect,
 {
-    bit_select::BitSelect::select_1(bits, n)
+    ops::BitSelect::select_1(bits, n)
 }
 
 #[inline]
 pub fn select_0<T>(bits: &T, n: usize) -> Option<usize>
 where
-    T: ?Sized + bit_select::BitSelect,
+    T: ?Sized + ops::BitSelect,
 {
-    bit_select::BitSelect::select_0(bits, n)
+    ops::BitSelect::select_0(bits, n)
 }
 
 #[doc(hidden)]
 #[inline]
 pub fn word<T, U>(bits: &T, i: usize, n: usize) -> U
 where
-    T: ?Sized + bit_get::BitGet,
+    T: ?Sized + ops::BitGet,
     U: Word,
 {
-    bit_get::BitGet::word(bits, i, n)
+    ops::BitGet::word(bits, i, n)
 }
 
 #[doc(hidden)]
 #[inline]
 pub fn put_n<T, N: Word>(bits: &mut T, i: usize, n: usize, mask: N)
 where
-    T: ?Sized + bit_put::BitPut,
+    T: ?Sized + ops::BitPut,
 {
-    bit_put::BitPut::put_n(bits, i, n, mask)
+    ops::BitPut::put_n(bits, i, n, mask)
 }
