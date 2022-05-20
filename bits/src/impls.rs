@@ -3,20 +3,6 @@ use crate::{BitBlock, Word};
 use core::ops::RangeBounds;
 use std::borrow::{Cow, ToOwned};
 
-macro_rules! BitCount {
-    ($X:ty $(, $method:ident )?) => {
-        #[inline]
-        fn count_1(&self) -> usize {
-            <$X as BitCount>::count_1(self$(.$method())?)
-        }
-
-        #[inline]
-        fn count_0(&self) -> usize {
-            <$X as BitCount>::count_0(self$(.$method())?)
-        }
-    }
-}
-
 macro_rules! BitAll {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
@@ -102,9 +88,6 @@ macro_rules! BitPut {
     }
 }
 
-impl<'a, T: ?Sized + BitCount> BitCount for &'a T {
-    BitCount!(T);
-}
 impl<'a, T: ?Sized + BitRank> BitRank for &'a T {
     BitRank!(T);
 }
@@ -115,12 +98,6 @@ impl<'a, T: ?Sized + BitGet> BitGet for &'a T {
     BitGet!(T);
 }
 
-impl<T, const N: usize> BitCount for [T; N]
-where
-    [T]: BitCount,
-{
-    BitCount!([T], as_ref);
-}
 impl<T, const N: usize> BitAll for [T; N]
 where
     [T]: BitAll,
@@ -169,12 +146,6 @@ where
     }
 }
 
-impl<T> BitCount for Vec<T>
-where
-    [T]: BitCount,
-{
-    BitCount!([T]);
-}
 impl<T> BitAll for Vec<T>
 where
     [T]: BitAll,
@@ -212,9 +183,6 @@ where
     BitPut!([T]);
 }
 
-impl<T: ?Sized + BitCount> BitCount for Box<T> {
-    BitCount!(T);
-}
 impl<T: ?Sized + BitAll> BitAll for Box<T> {
     BitAll!(T);
 }
@@ -241,12 +209,6 @@ impl<T: BitBlock> BitBlock for Box<T> {
     }
 }
 
-impl<'a, T> BitCount for Cow<'a, T>
-where
-    T: ?Sized + ToOwned + BitCount,
-{
-    BitCount!(T, as_ref);
-}
 impl<'a, T> BitAll for Cow<'a, T>
 where
     T: ?Sized + ToOwned + BitAll,

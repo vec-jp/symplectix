@@ -9,7 +9,7 @@ pub trait BitLen {
     }
 }
 
-macro_rules! BitLen {
+macro_rules! impl_bit_len {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn len(this: &Self) -> usize {
@@ -25,14 +25,14 @@ macro_rules! BitLen {
 }
 
 impl<'a, T: ?Sized + BitLen> BitLen for &'a T {
-    BitLen!(T);
+    impl_bit_len!(T);
 }
 
 impl<T, const N: usize> BitLen for [T; N]
 where
     [T]: BitLen,
 {
-    BitLen!([T], as_ref);
+    impl_bit_len!([T], as_ref);
 }
 
 mod alloc {
@@ -43,17 +43,17 @@ mod alloc {
     where
         [T]: BitLen,
     {
-        BitLen!([T]);
+        impl_bit_len!([T]);
     }
 
     impl<T: ?Sized + BitLen> BitLen for Box<T> {
-        BitLen!(T);
+        impl_bit_len!(T);
     }
 
     impl<'a, T> BitLen for Cow<'a, T>
     where
         T: ?Sized + ToOwned + BitLen,
     {
-        BitLen!(T, as_ref);
+        impl_bit_len!(T, as_ref);
     }
 }
