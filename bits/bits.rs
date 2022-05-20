@@ -98,7 +98,7 @@ pub fn with_capacity<T: Bits>(n: usize) -> Vec<T> {
 // }
 
 mod bits {
-    use crate::{ops::*, Word};
+    use crate::{ops::*, word::Word};
     use core::ops::RangeBounds;
 
     #[inline]
