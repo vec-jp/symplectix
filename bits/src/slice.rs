@@ -1,7 +1,7 @@
 #![allow(clippy::many_single_char_names)]
 
 use crate as bits;
-use crate::{address, ops::*, to_range, Bits, Word};
+use crate::{ops::*, Bits, Word};
 use core::ops::{Range, RangeBounds};
 
 fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
@@ -14,8 +14,8 @@ where
         return;
     }
 
-    let (q0, r0) = address::<T>(s);
-    let (q1, r1) = address::<T>(e);
+    let (q0, r0) = bits::address::<T>(s);
+    let (q1, r1) = bits::address::<T>(e);
 
     if q0 == q1 {
         f(q0, r0..r1);
@@ -62,9 +62,9 @@ impl<T: Bits> BitAny for [T] {
 impl<T: Bits> BitRank for [T] {
     #[inline]
     fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        let (s, e) = to_range(&r, 0, bits::len(self));
-        let (i, p) = address::<T>(s);
-        let (j, q) = address::<T>(e);
+        let (s, e) = bits::to_range(&r, 0, bits::len(self));
+        let (i, p) = bits::address::<T>(s);
+        let (j, q) = bits::address::<T>(e);
         if i == j {
             self[i].rank_1(p..q)
         } else {
@@ -104,7 +104,7 @@ impl<T: Bits> BitSelect for [T] {
 impl<T: Bits> BitGet for [T] {
     #[inline]
     fn get(this: &Self, i: usize) -> Option<bool> {
-        let (i, o) = address::<T>(i);
+        let (i, o) = bits::address::<T>(i);
         this.get(i)
             .map(|block| bits::get(block, o).expect("index out of bounds"))
     }
@@ -128,14 +128,14 @@ impl<T: Bits> BitPut for [T] {
     #[inline]
     fn put_1(&mut self, i: usize) {
         assert!(i < bits::len(self));
-        let (i, o) = address::<T>(i);
+        let (i, o) = bits::address::<T>(i);
         self[i].put_1(o);
     }
 
     #[inline]
     fn put_0(&mut self, i: usize) {
         assert!(i < bits::len(self));
-        let (i, o) = address::<T>(i);
+        let (i, o) = bits::address::<T>(i);
         self[i].put_0(o);
     }
 
