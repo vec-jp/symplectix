@@ -26,13 +26,6 @@ where
     }
 }
 
-impl<T: BitBlock> bits::ops::BitLen for [T] {
-    #[inline]
-    fn len(this: &Self) -> usize {
-        T::BITS * <[T]>::len(this)
-    }
-}
-
 impl<T: BitBlock> bits::ops::BitCount for [T] {
     #[inline]
     fn count_1(&self) -> usize {

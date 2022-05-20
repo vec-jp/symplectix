@@ -1,4 +1,5 @@
 use crate as bits;
+use crate::BitBlock;
 
 pub trait BitLen {
     fn len(_: &Self) -> usize;
@@ -6,6 +7,13 @@ pub trait BitLen {
     #[inline]
     fn is_empty(bits: &Self) -> bool {
         Self::len(bits) == 0
+    }
+}
+
+impl<T: BitBlock> BitLen for [T] {
+    #[inline]
+    fn len(this: &Self) -> usize {
+        T::BITS * <[T]>::len(this)
     }
 }
 
