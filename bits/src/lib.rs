@@ -4,11 +4,10 @@ pub mod ops;
 mod word;
 
 mod bools;
-mod impls;
-mod slice;
+
+pub use word::Word;
 
 use core::ops::RangeBounds;
-pub use word::Word;
 
 pub trait BitBlock:
     Clone
@@ -27,6 +26,42 @@ pub trait BitBlock:
     const SIZE: usize = Self::BITS / 8;
 
     fn null() -> Self;
+}
+
+impl<T, const N: usize> BitBlock for [T; N]
+where
+    T: Copy + BitBlock,
+{
+    const BITS: usize = T::BITS * N;
+
+    #[inline]
+    fn null() -> Self {
+        [T::null(); N]
+    }
+}
+
+mod alloc {
+    use super::BitBlock;
+    use std::borrow::Cow;
+
+    impl<T: BitBlock> BitBlock for Box<T> {
+        const BITS: usize = T::BITS;
+        #[inline]
+        fn null() -> Self {
+            Box::new(T::null())
+        }
+    }
+
+    impl<'a, T> BitBlock for Cow<'a, T>
+    where
+        T: ?Sized + BitBlock,
+    {
+        const BITS: usize = T::BITS;
+        #[inline]
+        fn null() -> Self {
+            Cow::Owned(T::null())
+        }
+    }
 }
 
 #[inline]

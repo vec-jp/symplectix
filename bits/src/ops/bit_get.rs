@@ -1,5 +1,6 @@
+use super::for_each_blocks;
 use crate as bits;
-use crate::Word;
+use crate::{BitBlock, Word};
 
 pub trait BitGet {
     fn get(bs: &Self, i: usize) -> Option<bool>;
@@ -18,6 +19,29 @@ pub trait BitGet {
             }
         }
         w
+    }
+}
+
+impl<T: BitBlock> BitGet for [T] {
+    #[inline]
+    fn get(this: &Self, i: usize) -> Option<bool> {
+        let (i, o) = bits::address::<T>(i);
+        this.get(i)
+            .map(|block| bits::get(block, o).expect("index out of bounds"))
+    }
+
+    #[inline]
+    #[doc(hidden)]
+    fn word<N: Word>(&self, i: usize, n: usize) -> N {
+        let mut cur = 0;
+        let mut out = N::NULL;
+        for_each_blocks::<T, _>(i, i + n, |k, r| {
+            if k < self.len() && cur < <N as BitBlock>::BITS {
+                out |= bits::word::<_, N>(&self[k], r.start, r.len()) << cur;
+                cur += r.len();
+            }
+        });
+        out
     }
 }
 

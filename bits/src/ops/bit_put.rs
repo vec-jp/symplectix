@@ -1,5 +1,6 @@
+use super::for_each_blocks;
 use crate as bits;
-use crate::Word;
+use crate::{BitBlock, Word};
 
 pub trait BitPut: bits::ops::BitGet {
     fn put_1(&mut self, i: usize);
@@ -13,6 +14,35 @@ pub trait BitPut: bits::ops::BitGet {
                 self.put_1(b);
             }
         }
+    }
+}
+
+impl<T: BitBlock> BitPut for [T] {
+    #[inline]
+    fn put_1(&mut self, i: usize) {
+        assert!(i < bits::len(self));
+        let (i, o) = bits::address::<T>(i);
+        bits::put_1(&mut self[i], o);
+    }
+
+    #[inline]
+    fn put_0(&mut self, i: usize) {
+        assert!(i < bits::len(self));
+        let (i, o) = bits::address::<T>(i);
+        bits::put_0(&mut self[i], o);
+    }
+
+    #[inline]
+    #[doc(hidden)]
+    fn put_word<N: Word>(&mut self, i: usize, n: usize, word: N) {
+        let mut cur = 0;
+        for_each_blocks::<T, _>(i, i + n, |k, r| {
+            if k < self.len() {
+                let word = bits::word(&word, cur, r.len());
+                bits::put_word::<_, N>(&mut self[k], r.start, r.len(), word);
+                cur += r.len();
+            }
+        });
     }
 }
 
