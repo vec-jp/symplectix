@@ -3,8 +3,6 @@
 pub mod ops;
 mod word;
 
-mod bools;
-
 pub use word::Word;
 
 use core::ops::RangeBounds;
