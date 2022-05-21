@@ -8,6 +8,13 @@ pub trait BitAll: bits::ops::BitCount {
     }
 }
 
+impl BitAll for bool {
+    #[inline]
+    fn all(&self) -> bool {
+        *self
+    }
+}
+
 impl<T: BitBlock> BitAll for [T] {
     #[inline]
     fn all(&self) -> bool {

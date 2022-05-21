@@ -28,6 +28,15 @@ pub trait BitBlock:
     fn null() -> Self;
 }
 
+impl BitBlock for bool {
+    const BITS: usize = 1;
+
+    #[inline]
+    fn null() -> Self {
+        false
+    }
+}
+
 impl<T, const N: usize> BitBlock for [T; N]
 where
     T: Copy + BitBlock,

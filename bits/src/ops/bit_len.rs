@@ -17,6 +17,13 @@ impl<T: BitBlock> BitLen for [T] {
     }
 }
 
+impl BitLen for bool {
+    #[inline]
+    fn len(_: &Self) -> usize {
+        1
+    }
+}
+
 macro_rules! impl_bit_len {
     ($X:ty $(, $method:ident )?) => {
         #[inline]

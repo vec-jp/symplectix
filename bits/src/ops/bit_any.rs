@@ -8,6 +8,13 @@ pub trait BitAny: bits::ops::BitCount {
     }
 }
 
+impl BitAny for bool {
+    #[inline]
+    fn any(&self) -> bool {
+        *self
+    }
+}
+
 impl<T: BitBlock> BitAny for [T] {
     #[inline]
     fn any(&self) -> bool {

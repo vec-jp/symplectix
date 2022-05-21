@@ -45,6 +45,20 @@ impl<T: BitBlock> BitGet for [T] {
     }
 }
 
+/// ```
+/// assert_eq!(bits::get(&true, 0), Some(true));
+/// assert_eq!(bits::get(&true, 1), None);
+///
+/// assert_eq!(bits::get(&false, 0), Some(false));
+/// assert_eq!(bits::get(&false, 1), None);
+/// ```
+impl BitGet for bool {
+    #[inline]
+    fn get(this: &Self, i: usize) -> Option<bool> {
+        (i < bits::len(this)).then(|| *this)
+    }
+}
+
 macro_rules! impl_bit_get {
     ($X:ty $(, $method:ident )?) => {
         #[inline]

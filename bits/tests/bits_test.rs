@@ -59,3 +59,20 @@ fn ones_select1() {
         assert_eq!(ones.next(), bits::select_1(&n, c));
     }
 }
+
+fn rank_1_for_empty_range<T>(bits: &T)
+where
+    T: ?Sized + bits::ops::BitRank,
+{
+    assert_eq!(bits::rank_1(bits, 0..0), 0);
+    assert_eq!(bits::rank_1(bits, 1..1), 0);
+    assert_eq!(bits::rank_1(bits, 2..2), 0);
+    assert_eq!(bits::rank_1(bits, 7..7), 0);
+}
+
+#[test]
+fn rank_1_for_empty_range_should_be_zero() {
+    rank_1_for_empty_range::<u8>(&!0);
+    rank_1_for_empty_range::<[u8]>(&[!0, !0, !0, !0]);
+    rank_1_for_empty_range::<[bool]>(&[true, true, true, true, true, true, true, true]);
+}

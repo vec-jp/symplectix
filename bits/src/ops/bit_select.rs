@@ -80,6 +80,28 @@ impl<T: BitBlock> BitSelect for [T] {
     }
 }
 
+/// ```
+/// assert_eq!(bits::select_1(&true, 0), Some(0));
+/// assert_eq!(bits::select_1(&true, 1), None);
+///
+/// assert_eq!(bits::select_1(&false, 0), None);
+/// assert_eq!(bits::select_1(&false, 1), None);
+///
+/// assert_eq!(bits::select_0(&false, 0), Some(0));
+/// assert_eq!(bits::select_0(&false, 1), None);
+/// ```
+impl BitSelect for bool {
+    #[inline]
+    fn select_1(&self, n: usize) -> Option<usize> {
+        (n < bits::count_1(self)).then(|| 0)
+    }
+
+    #[inline]
+    fn select_0(&self, n: usize) -> Option<usize> {
+        (n < bits::count_0(self)).then(|| 0)
+    }
+}
+
 macro_rules! impl_bit_select {
     ($X:ty $(, $method:ident )?) => {
         #[inline]

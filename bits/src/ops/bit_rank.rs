@@ -32,6 +32,27 @@ impl<T: BitBlock> BitRank for [T] {
     }
 }
 
+/// ```
+/// assert_eq!(bits::rank_1(&true, ..1), 1);
+/// assert_eq!(bits::rank_0(&true, ..1), 0);
+///
+/// assert_eq!(bits::rank_1(&true, ..0), 0);
+/// assert_eq!(bits::rank_0(&true, ..0), 0);
+/// ```
+impl BitRank for bool {
+    #[inline]
+    fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+        let (s, e) = bits::to_range(&r, 0, 1);
+        debug_assert!(s == 0 && e <= 1);
+
+        if s < e {
+            bits::count_1(self)
+        } else {
+            0
+        }
+    }
+}
+
 macro_rules! impl_bit_rank {
     ($X:ty $(, $method:ident )?) => {
         #[inline]

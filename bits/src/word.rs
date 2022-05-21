@@ -212,12 +212,12 @@ macro_rules! impls {
         impl BitSelect for $Word {
             #[inline]
             fn select_1(&self, n: usize) -> Option<usize> {
-                <Self as SelectWord>::select_1(*self, n)
+                <Self as BitSelectImpl>::select_1(*self, n)
             }
 
             #[inline]
             fn select_0(&self, n: usize) -> Option<usize> {
-                <Self as SelectWord>::select_1(!self, n)
+                <Self as BitSelectImpl>::select_1(!self, n)
             }
         }
 
@@ -249,14 +249,14 @@ macro_rules! impls {
 impls!(u8 u16 u32 u64 u128);
 
 /// A helper trait to implement [`BitSelect`](crate::BitSelect) for u64.
-trait SelectWord {
+trait BitSelectImpl {
     fn select_1(self, n: usize) -> Option<usize>;
 }
 
-impl SelectWord for u64 {
+impl BitSelectImpl for u64 {
     #[inline]
     fn select_1(self, n: usize) -> Option<usize> {
-        (n < BitCount::count_1(&self)).then(|| {
+        (n < bits::count_1(&self)).then(|| {
             #[cfg(target_arch = "x86_64")]
             {
                 if is_x86_feature_detected!("bmi2") {
@@ -306,17 +306,17 @@ fn broadword(x: u64, n: u64) -> usize {
 
 macro_rules! impl_select_word_as_u64 {
     ( $( $Ty:ty )* ) => ($(
-        impl SelectWord for $Ty {
+        impl BitSelectImpl for $Ty {
             #[inline]
             fn select_1(self, c: usize) -> Option<usize> {
-                (c < self.count_1()).then(|| <u64 as SelectWord>::select_1(self as u64, c).unwrap())
+                (c < self.count_1()).then(|| <u64 as BitSelectImpl>::select_1(self as u64, c).unwrap())
             }
         }
     )*)
 }
 impl_select_word_as_u64!(u8 u16 u32);
 
-impl SelectWord for u128 {
+impl BitSelectImpl for u128 {
     /// ```
     /// let mut n: u128 = 0;
     /// for i in (0..128).step_by(2) {

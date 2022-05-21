@@ -25,6 +25,24 @@ impl<T: BitBlock> BitCount for [T] {
     }
 }
 
+/// ```
+/// assert_eq!(bits::count_1(&true), 1);
+/// assert_eq!(bits::count_0(&true), 0);
+///
+/// assert_eq!(bits::count_1(&false), 0);
+/// assert_eq!(bits::count_0(&false), 1);
+/// ```
+impl BitCount for bool {
+    #[inline]
+    fn count_1(&self) -> usize {
+        *self as usize
+    }
+    #[inline]
+    fn count_0(&self) -> usize {
+        !self as usize
+    }
+}
+
 macro_rules! impl_bit_count {
     ($X:ty $(, $method:ident )?) => {
         #[inline]

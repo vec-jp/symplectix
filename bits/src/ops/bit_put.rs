@@ -46,6 +46,20 @@ impl<T: BitBlock> BitPut for [T] {
     }
 }
 
+impl BitPut for bool {
+    #[inline]
+    fn put_1(&mut self, i: usize) {
+        assert!(i < bits::len(self));
+        *self = true;
+    }
+
+    #[inline]
+    fn put_0(&mut self, i: usize) {
+        assert!(i < bits::len(self));
+        *self = false;
+    }
+}
+
 macro_rules! impl_bit_put {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
