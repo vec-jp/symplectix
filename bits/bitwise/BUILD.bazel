@@ -3,12 +3,12 @@ load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", 
 package(default_visibility = ["//visibility:private"])
 
 rust_library(
-    name = "mask",
+    name = "bitwise",
     srcs = glob(
         ["*.rs"],
         exclude = ["*_test.rs"],
     ),
-    crate_root = "mask.rs",
+    crate_root = "bitwise.rs",
     visibility = ["//visibility:public"],
     deps = [
         "//bits",
@@ -19,22 +19,22 @@ rust_test_suite(
     name = "tests",
     srcs = glob(["*_test.rs"]),
     deps = [
-        ":mask",
+        ":bitwise",
         "//bits",
     ],
 )
 
 rust_test(
     name = "cfg_test",
-    crate = ":mask",
+    crate = ":bitwise",
 )
 
 rust_doc_test(
     name = "doc_test",
-    crate = ":mask",
+    crate = ":bitwise",
 )
 
 rust_doc(
     name = "doc",
-    crate = ":mask",
+    crate = ":bitwise",
 )
