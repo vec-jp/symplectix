@@ -151,22 +151,7 @@ pub fn with_capacity<T: BitBlock>(n: usize) -> Vec<T> {
 /// ```
 #[inline]
 pub fn len<T: ?Sized + bit_len::BitLen>(bits: &T) -> usize {
-    bit_len::BitLen::len(bits)
-}
-
-/// Returns true iif `bits::len(this) == 0`.
-///
-/// # Examples
-///
-/// ```
-/// let v: &[u64] = &[0, 0, 0];
-/// let w: &[u64] = &[];
-/// assert!(!bits::is_empty(v));
-/// assert!( bits::is_empty(w));
-/// ```
-#[inline]
-pub fn is_empty<T: ?Sized + bit_len::BitLen>(bits: &T) -> bool {
-    bit_len::BitLen::is_empty(bits)
+    bit_len::BitLen::bit_len(bits)
 }
 
 /// Returns a bit at the given index `i`.

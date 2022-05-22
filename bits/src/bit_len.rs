@@ -1,25 +1,30 @@
-use crate as bits;
 use crate::BitBlock;
 
+/// `BitLen` is a trait to compute the number of binary digits.
+///
+/// # Examples
+///
+/// ```
+/// # use bits::ops::BitLen;
+/// let v: &[u8] = &[0, 0, 0];
+/// let w: &[u8] = &[];
+/// assert_eq!(v.bit_len(), 24);
+/// assert_eq!(w.bit_len(), 0);
+/// ```
 pub trait BitLen {
-    fn len(_: &Self) -> usize;
-
-    #[inline]
-    fn is_empty(bits: &Self) -> bool {
-        Self::len(bits) == 0
-    }
+    fn bit_len(&self) -> usize;
 }
 
 impl<T: BitBlock> BitLen for [T] {
     #[inline]
-    fn len(this: &Self) -> usize {
-        T::BITS * <[T]>::len(this)
+    fn bit_len(&self) -> usize {
+        T::BITS * <[T]>::len(self)
     }
 }
 
 impl BitLen for bool {
     #[inline]
-    fn len(_: &Self) -> usize {
+    fn bit_len(&self) -> usize {
         1
     }
 }
@@ -27,14 +32,8 @@ impl BitLen for bool {
 macro_rules! impl_bit_len {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn len(this: &Self) -> usize {
-            // <$X as BitLen>::len(this$(.$method())?)
-            bits::len::<$X>(this$(.$method())?)
-        }
-        #[inline]
-        fn is_empty(this: &Self) -> bool {
-            // <$X as BitLen>::is_empty(this$(.$method())?)
-            bits::is_empty::<$X>(this$(.$method())?)
+        fn bit_len(&self) -> usize {
+            <$X as BitLen>::bit_len(self$(.$method())?)
         }
     }
 }

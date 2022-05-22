@@ -4,7 +4,8 @@ use crate::BitBlock;
 pub trait BitAny: bits::ops::BitCount {
     #[inline]
     fn any(&self) -> bool {
-        !bits::is_empty(self) && self.count_1() > 0
+        // !bits::is_empty(self) && self.count_1() > 0
+        self.bit_len() != 0 && self.count_1() > 0
     }
 }
 

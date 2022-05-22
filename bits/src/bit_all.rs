@@ -4,7 +4,7 @@ use crate::BitBlock;
 pub trait BitAll: bits::ops::BitCount {
     #[inline]
     fn all(&self) -> bool {
-        bits::is_empty(self) || self.count_0() == 0
+        self.bit_len() == 0 || self.count_0() == 0
     }
 }
 

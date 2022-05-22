@@ -160,13 +160,8 @@ macro_rules! impls {
 
         impl BitLen for $Word {
             #[inline]
-            fn len(_: &Self) -> usize {
+            fn bit_len(&self) -> usize {
                 <Self as crate::BitBlock>::BITS
-            }
-
-            #[inline]
-            fn is_empty(this: &Self) -> bool {
-                *this == Self::NULL
             }
         }
 
