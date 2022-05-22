@@ -20,7 +20,7 @@ pub trait BitAny: bits::ops::BitCount {
     #[inline]
     fn any(&self) -> bool {
         // !bits::is_empty(self) && self.count_1() > 0
-        self.bit_len() != 0 && self.count_1() > 0
+        self.bit_len() != 0 && self.bit_count1() > 0
     }
 }
 

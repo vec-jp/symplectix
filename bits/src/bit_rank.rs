@@ -85,7 +85,7 @@ impl<T: BitBlock> BitRank for [T] {
             self[i].rank_1(p..q)
         } else {
             self[i].rank_1(p..)
-                + self[i + 1..j].count_1()
+                + self[i + 1..j].bit_count1()
                 + self.get(j).map_or(0, |b| b.rank_1(..q))
         }
     }
@@ -106,7 +106,7 @@ impl BitRank for bool {
         debug_assert!(s == 0 && e <= 1);
 
         if s < e {
-            self.count_1()
+            self.bit_count1()
         } else {
             0
         }

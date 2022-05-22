@@ -59,7 +59,7 @@ fn next_set_bit() {
 fn ones_select1() {
     let n: u32 = 0b_0101_0101;
     let mut ones = ones(n);
-    for c in 0..n.count_1() {
+    for c in 0..n.bit_count1() {
         assert_eq!(ones.next(), n.select_1(c));
     }
 }

@@ -49,12 +49,12 @@ mod helper {
 
     #[inline]
     pub fn search_1<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
-        (n < bs.count_1()).then(|| binary_search(0, bs.bit_len(), |k| bs.rank_1(..k) > n) - 1)
+        (n < bs.bit_count1()).then(|| binary_search(0, bs.bit_len(), |k| bs.rank_1(..k) > n) - 1)
     }
 
     #[inline]
     pub fn search_0<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
-        (n < bs.count_0()).then(|| binary_search(0, bs.bit_len(), |k| bs.rank_0(..k) > n) - 1)
+        (n < bs.bit_count0()).then(|| binary_search(0, bs.bit_len(), |k| bs.rank_0(..k) > n) - 1)
     }
 }
 
@@ -62,7 +62,7 @@ impl<T: BitBlock> BitSelect for [T] {
     #[inline]
     fn select_1(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
-            let count = b.count_1();
+            let count = b.bit_count1();
             if n < count {
                 return Some(i * T::BITS + b.select_1(n).expect("BUG"));
             }
@@ -74,7 +74,7 @@ impl<T: BitBlock> BitSelect for [T] {
     #[inline]
     fn select_0(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
-            let count = b.count_0();
+            let count = b.bit_count0();
             if n < count {
                 return Some(i * T::BITS + b.select_0(n).expect("BUG"));
             }
@@ -98,12 +98,12 @@ impl<T: BitBlock> BitSelect for [T] {
 impl BitSelect for bool {
     #[inline]
     fn select_1(&self, n: usize) -> Option<usize> {
-        (n < self.count_1()).then(|| 0)
+        (n < self.bit_count1()).then(|| 0)
     }
 
     #[inline]
     fn select_0(&self, n: usize) -> Option<usize> {
-        (n < self.count_0()).then(|| 0)
+        (n < self.bit_count0()).then(|| 0)
     }
 }
 
