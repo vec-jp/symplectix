@@ -528,7 +528,7 @@ impl<'a, T: bits::BitBlock> Iterator for Blocks<'a, T> {
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.blocks
-            .find_map(|(i, b)| b.any().then(|| (i, Cow::Borrowed(b))))
+            .find_map(|(i, b)| b.bit_any().then(|| (i, Cow::Borrowed(b))))
     }
 }
 

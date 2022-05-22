@@ -178,14 +178,14 @@ macro_rules! impls {
 
         impl BitAll for $Word {
             #[inline]
-            fn all(&self) -> bool {
+            fn bit_all(&self) -> bool {
                 *self == Self::FULL
             }
         }
 
         impl BitAny for $Word {
             #[inline]
-            fn any(&self) -> bool {
+            fn bit_any(&self) -> bool {
                 *self != Self::NULL
             }
         }

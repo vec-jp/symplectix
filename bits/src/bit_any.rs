@@ -12,13 +12,13 @@ pub trait BitAny: bits::ops::BitCount {
     /// let b2: &[u64] = &[0, 0, 0];
     /// let b3: &[u64] = &[!0, !0, !0];
     /// let b4: &[u64] = &[0, 0, 1];
-    /// assert!(!b1.any());
-    /// assert!(!b2.any());
-    /// assert!( b3.any());
-    /// assert!( b4.any());
+    /// assert!(!b1.bit_any());
+    /// assert!(!b2.bit_any());
+    /// assert!( b3.bit_any());
+    /// assert!( b4.bit_any());
     /// ```
     #[inline]
-    fn any(&self) -> bool {
+    fn bit_any(&self) -> bool {
         // !bits::is_empty(self) && self.count_1() > 0
         self.bit_len() != 0 && self.bit_count1() > 0
     }
@@ -26,23 +26,23 @@ pub trait BitAny: bits::ops::BitCount {
 
 impl BitAny for bool {
     #[inline]
-    fn any(&self) -> bool {
+    fn bit_any(&self) -> bool {
         *self
     }
 }
 
 impl<T: BitBlock> BitAny for [T] {
     #[inline]
-    fn any(&self) -> bool {
-        self.iter().any(BitAny::any)
+    fn bit_any(&self) -> bool {
+        self.iter().any(BitAny::bit_any)
     }
 }
 
 macro_rules! impl_bit_any {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn any(&self) -> bool {
-            <$X as BitAny>::any(self$(.$method())?)
+        fn bit_any(&self) -> bool {
+            <$X as BitAny>::bit_any(self$(.$method())?)
         }
     }
 }

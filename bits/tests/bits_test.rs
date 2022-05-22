@@ -38,7 +38,7 @@ fn bits_is_implemented() {
 fn ones<T: Word>(word: T) -> impl Iterator<Item = usize> {
     successors(Some(word), |&n| {
         let m = n & !n.lsb();
-        m.any().then(|| m)
+        m.bit_any().then(|| m)
     })
     .map(Word::count_t0)
 }
