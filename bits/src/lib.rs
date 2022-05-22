@@ -150,8 +150,8 @@ pub fn with_capacity<T: BitBlock>(n: usize) -> Vec<T> {
 /// assert_eq!(bits::len(w), 0);
 /// ```
 #[inline]
-pub fn len<T: ?Sized + ops::BitLen>(bits: &T) -> usize {
-    ops::BitLen::len(bits)
+pub fn len<T: ?Sized + bit_len::BitLen>(bits: &T) -> usize {
+    bit_len::BitLen::len(bits)
 }
 
 /// Returns true iif `bits::len(this) == 0`.
@@ -165,8 +165,8 @@ pub fn len<T: ?Sized + ops::BitLen>(bits: &T) -> usize {
 /// assert!( bits::is_empty(w));
 /// ```
 #[inline]
-pub fn is_empty<T: ?Sized + ops::BitLen>(bits: &T) -> bool {
-    ops::BitLen::is_empty(bits)
+pub fn is_empty<T: ?Sized + bit_len::BitLen>(bits: &T) -> bool {
+    bit_len::BitLen::is_empty(bits)
 }
 
 /// Returns a bit at the given index `i`.
@@ -182,8 +182,8 @@ pub fn is_empty<T: ?Sized + ops::BitLen>(bits: &T) -> bool {
 /// assert_eq!(bits::get(v, 200), None);
 /// ```
 #[inline]
-pub fn get<T: ?Sized + ops::BitGet>(bits: &T, i: usize) -> Option<bool> {
-    ops::BitGet::get(bits, i)
+pub fn get<T: ?Sized + bit_get::BitGet>(bits: &T, i: usize) -> Option<bool> {
+    bit_get::BitGet::get(bits, i)
 }
 
 /// Returns a bit at the given index `i`.
@@ -205,20 +205,20 @@ pub fn get<T: ?Sized + ops::BitGet>(bits: &T, i: usize) -> Option<bool> {
 /// assert!(!bits::test(w, 1000));
 /// ```
 #[inline]
-pub fn test<T: ?Sized + ops::BitGet>(bits: &T, i: usize) -> bool {
-    ops::BitGet::test(bits, i)
+pub fn test<T: ?Sized + bit_get::BitGet>(bits: &T, i: usize) -> bool {
+    bit_get::BitGet::test(bits, i)
 }
 
 /// Enables the bit at `i`.
 #[inline]
-pub fn put_1<T: ?Sized + ops::BitPut>(bits: &mut T, i: usize) {
-    ops::BitPut::put_1(bits, i)
+pub fn put_1<T: ?Sized + bit_put::BitPut>(bits: &mut T, i: usize) {
+    bit_put::BitPut::put_1(bits, i)
 }
 
 /// Disables the bit at `i`.
 #[inline]
-pub fn put_0<T: ?Sized + ops::BitPut>(bits: &mut T, i: usize) {
-    ops::BitPut::put_0(bits, i)
+pub fn put_0<T: ?Sized + bit_put::BitPut>(bits: &mut T, i: usize) {
+    bit_put::BitPut::put_0(bits, i)
 }
 
 /// Counts the occurrences of `1`.
@@ -234,8 +234,8 @@ pub fn put_0<T: ?Sized + ops::BitPut>(bits: &mut T, i: usize) {
 /// assert_eq!(bits::count_1(c), 3);
 /// ```
 #[inline]
-pub fn count_1<T: ?Sized + ops::BitCount>(bits: &T) -> usize {
-    ops::BitCount::count_1(bits)
+pub fn count_1<T: ?Sized + bit_count::BitCount>(bits: &T) -> usize {
+    bit_count::BitCount::count_1(bits)
 }
 
 /// Counts the occurrences of `0`.
@@ -251,8 +251,8 @@ pub fn count_1<T: ?Sized + ops::BitCount>(bits: &T) -> usize {
 /// assert_eq!(bits::count_0(c), 189);
 /// ```
 #[inline]
-pub fn count_0<T: ?Sized + ops::BitCount>(bits: &T) -> usize {
-    ops::BitCount::count_0(bits)
+pub fn count_0<T: ?Sized + bit_count::BitCount>(bits: &T) -> usize {
+    bit_count::BitCount::count_0(bits)
 }
 
 /// Returns true if all bits are enabled. An empty bits should return true.
@@ -268,8 +268,8 @@ pub fn count_0<T: ?Sized + ops::BitCount>(bits: &T) -> usize {
 /// assert!( bits::all(c));
 /// ```
 #[inline]
-pub fn all<T: ?Sized + ops::BitAll>(bits: &T) -> bool {
-    ops::BitAll::all(bits)
+pub fn all<T: ?Sized + bit_all::BitAll>(bits: &T) -> bool {
+    bit_all::BitAll::all(bits)
 }
 
 /// Returns true if any bits are enabled. An empty bits should return false.
@@ -287,28 +287,28 @@ pub fn all<T: ?Sized + ops::BitAll>(bits: &T) -> bool {
 /// assert!( bits::any(b4));
 /// ```
 #[inline]
-pub fn any<T: ?Sized + ops::BitAny>(bits: &T) -> bool {
-    ops::BitAny::any(bits)
+pub fn any<T: ?Sized + bit_any::BitAny>(bits: &T) -> bool {
+    bit_any::BitAny::any(bits)
 }
 
 /// Counts occurrences of `1` in the given range.
 #[inline]
 pub fn rank_1<T, Index>(bits: &T, index: Index) -> usize
 where
-    T: ?Sized + ops::BitRank,
+    T: ?Sized + bit_rank::BitRank,
     Index: RangeBounds<usize>,
 {
-    ops::BitRank::rank_1(bits, index)
+    bit_rank::BitRank::rank_1(bits, index)
 }
 
 /// Counts occurrences of `0` in the given range.
 #[inline]
 pub fn rank_0<T, Index>(bits: &T, index: Index) -> usize
 where
-    T: ?Sized + ops::BitRank,
+    T: ?Sized + bit_rank::BitRank,
     Index: RangeBounds<usize>,
 {
-    ops::BitRank::rank_0(bits, index)
+    bit_rank::BitRank::rank_0(bits, index)
 }
 
 /// Counts occurrences of `1` in the given range.
@@ -324,15 +324,15 @@ where
 /// Returns the position of the n-th 1, indexed starting from zero.
 /// `n` must be less than `self.count1()`, orherwise returns `None`.
 #[inline]
-pub fn select_1<T: ?Sized + ops::BitSelect>(bits: &T, n: usize) -> Option<usize> {
-    ops::BitSelect::select_1(bits, n)
+pub fn select_1<T: ?Sized + bit_select::BitSelect>(bits: &T, n: usize) -> Option<usize> {
+    bit_select::BitSelect::select_1(bits, n)
 }
 
 /// Returns the position of the n-th 0, indexed starting from zero.
 /// `n` must be less than `self.count0()`, orherwise returns `None`.
 #[inline]
-pub fn select_0<T: ?Sized + ops::BitSelect>(bits: &T, n: usize) -> Option<usize> {
-    ops::BitSelect::select_0(bits, n)
+pub fn select_0<T: ?Sized + bit_select::BitSelect>(bits: &T, n: usize) -> Option<usize> {
+    bit_select::BitSelect::select_0(bits, n)
 }
 
 /// Reads `n` bits within `[i, i+n)`, and returns it as the lowest `n` bits of `Word`.
@@ -349,10 +349,10 @@ pub fn select_0<T: ?Sized + ops::BitSelect>(bits: &T, n: usize) -> Option<usize>
 #[inline]
 pub fn word<T, U>(bits: &T, i: usize, n: usize) -> U
 where
-    T: ?Sized + ops::BitGet,
+    T: ?Sized + bit_get::BitGet,
     U: Word,
 {
-    ops::BitGet::word(bits, i, n)
+    bit_get::BitGet::word(bits, i, n)
 }
 
 /// Writes `n` bits in `[i, i+n)`.
@@ -360,8 +360,8 @@ where
 #[inline]
 pub fn put_word<T, U>(bits: &mut T, i: usize, n: usize, word: U)
 where
-    T: ?Sized + ops::BitPut,
+    T: ?Sized + bit_put::BitPut,
     U: Word,
 {
-    ops::BitPut::put_word(bits, i, n, word)
+    bit_put::BitPut::put_word(bits, i, n, word)
 }
