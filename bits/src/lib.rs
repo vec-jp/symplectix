@@ -1,5 +1,13 @@
 //! `bits`
 
+pub mod bit_all;
+pub mod bit_any;
+pub mod bit_count;
+pub mod bit_get;
+pub mod bit_len;
+pub mod bit_put;
+pub mod bit_rank;
+pub mod bit_select;
 pub mod ops;
 mod word;
 
@@ -305,12 +313,12 @@ where
 
 /// Counts occurrences of `1` in the given range.
 #[inline]
-pub fn ranks<T, Index>(bits: &T, index: Index) -> ops::bit_rank::Ranks
+pub fn ranks<T, Index>(bits: &T, index: Index) -> bit_rank::Ranks
 where
-    T: ?Sized + ops::BitRank,
+    T: ?Sized + bit_rank::BitRank,
     Index: RangeBounds<usize>,
 {
-    ops::BitRanks::ranks(bits, index)
+    bit_rank::BitRanks::ranks(bits, index)
 }
 
 /// Returns the position of the n-th 1, indexed starting from zero.

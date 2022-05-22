@@ -1,5 +1,5 @@
-use super::for_each_blocks;
 use crate as bits;
+use crate::ops::for_each_blocks;
 use crate::{BitBlock, Word};
 
 pub trait BitGet {

@@ -1,23 +1,14 @@
-pub mod bit_all;
-pub mod bit_any;
-pub mod bit_count;
-pub mod bit_get;
-pub mod bit_len;
-pub mod bit_put;
-pub mod bit_rank;
-pub mod bit_select;
+pub use crate::bit_all::BitAll;
+pub use crate::bit_any::BitAny;
+pub use crate::bit_count::BitCount;
+pub use crate::bit_get::BitGet;
+pub use crate::bit_len::BitLen;
+pub use crate::bit_put::BitPut;
+pub use crate::bit_rank::BitRank;
+pub use crate::bit_rank::BitRanks;
+pub use crate::bit_select::BitSelect;
 
-pub use self::bit_all::BitAll;
-pub use self::bit_any::BitAny;
-pub use self::bit_count::BitCount;
-pub use self::bit_get::BitGet;
-pub use self::bit_len::BitLen;
-pub use self::bit_put::BitPut;
-pub use self::bit_rank::BitRank;
-pub use self::bit_rank::BitRanks;
-pub use self::bit_select::BitSelect;
-
-fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
+pub(crate) fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
 where
     T: crate::BitBlock,
     F: FnMut(usize, core::ops::Range<usize>),
