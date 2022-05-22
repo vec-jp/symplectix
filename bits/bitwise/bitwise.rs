@@ -10,9 +10,9 @@ mod and_not;
 mod or;
 mod xor;
 
-pub use {and::And, and_not::AndNot, or::Or, xor::Xor};
+pub use {and::And, and_not::BitAndNot, or::BitOr, xor::BitXor};
 pub use {and::AndAssign, and_not::AndNotAssign, or::OrAssign, xor::XorAssign};
-pub use {and::BitAnd, and_not::BitAndNot, or::BitOr, xor::BitXor};
+pub use {and::BitAnd, and_not::AndNot, or::Or, xor::Xor};
 pub use {and::Intersection, and_not::Difference, or::Union, xor::SymmetricDifference};
 
 pub trait BitMask {
@@ -36,8 +36,8 @@ pub trait BitMask {
 // }
 
 #[inline]
-pub fn and<A: BitMask, B: BitMask>(a: A, b: B) -> BitAnd<A, B> {
-    BitAnd { a, b }
+pub fn and<A: BitMask, B: BitMask>(a: A, b: B) -> And<A, B> {
+    And { a, b }
 }
 
 #[inline]

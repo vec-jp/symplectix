@@ -4,22 +4,32 @@ use core::{
     iter::{Fuse, Peekable},
 };
 
-pub trait And: Sized + BitMask {
-    fn and<That: BitMask>(self, that: That) -> BitAnd<Self, That>;
+/// # Examples
+///
+/// ```
+/// use bitwise::BitAnd;
+/// let v1: &[u8] = &[0b_1111_0000, 0b_0000_1111, 0b_1010_1010];
+/// let v2: &[u8] = &[0b_0000_1111, 0b_1111_0000, 0b_0101_0101];
+/// for (_index, bits) in v1.and(v2) {
+///     assert_eq!(bits.into_owned(), 0);
+/// }
+/// ```
+pub trait BitAnd: Sized + BitMask {
+    fn and<That: BitMask>(self, that: That) -> And<Self, That>;
+}
+
+impl<T: BitMask> BitAnd for T {
+    #[inline]
+    fn and<That: BitMask>(self, that: That) -> And<Self, That> {
+        And { a: self, b: that }
+    }
 }
 
 pub trait AndAssign<That: ?Sized> {
     fn and_assign(a: &mut Self, b: &That);
 }
 
-impl<T: BitMask> And for T {
-    #[inline]
-    fn and<That: BitMask>(self, that: That) -> BitAnd<Self, That> {
-        BitAnd { a: self, b: that }
-    }
-}
-
-pub struct BitAnd<A, B> {
+pub struct And<A, B> {
     pub(crate) a: A,
     pub(crate) b: B,
 }
@@ -29,7 +39,7 @@ pub struct Intersection<A: Iterator, B: Iterator> {
     b: Peekable<Fuse<B>>,
 }
 
-impl<A, B> IntoIterator for BitAnd<A, B>
+impl<A, B> IntoIterator for And<A, B>
 where
     Self: BitMask,
 {
@@ -41,7 +51,7 @@ where
     }
 }
 
-impl<A: BitMask, B: BitMask> BitMask for BitAnd<A, B>
+impl<A: BitMask, B: BitMask> BitMask for And<A, B>
 where
     A::Bits: AndAssign<B::Bits>,
 {
@@ -83,6 +93,44 @@ where
                     b.next();
                 }
             }
+        }
+    }
+}
+
+mod impls {
+    use super::*;
+    use std::borrow::Cow;
+
+    impl<T, U> AndAssign<U> for Box<T>
+    where
+        T: ?Sized + AndAssign<U>,
+        U: ?Sized,
+    {
+        #[inline]
+        fn and_assign(this: &mut Self, that: &U) {
+            <T as AndAssign<U>>::and_assign(this, that)
+        }
+    }
+
+    impl<T, U: ?Sized> AndAssign<U> for Vec<T>
+    where
+        [T]: AndAssign<U>,
+    {
+        #[inline]
+        fn and_assign(this: &mut Self, that: &U) {
+            <[T] as AndAssign<U>>::and_assign(this.as_mut(), that)
+        }
+    }
+
+    impl<'a, 'b, T, U> AndAssign<Cow<'b, U>> for Cow<'a, T>
+    where
+        T: ?Sized + ToOwned,
+        U: ?Sized + ToOwned,
+        T::Owned: AndAssign<U>,
+    {
+        #[inline]
+        fn and_assign(this: &mut Self, that: &Cow<'b, U>) {
+            <T::Owned as AndAssign<U>>::and_assign(this.to_mut(), that.as_ref())
         }
     }
 }
