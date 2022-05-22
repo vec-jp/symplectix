@@ -34,7 +34,7 @@ pub trait BitRank: BitCount {
 /// assert_eq!(v.bit_ranks(..16).excess0(), None);
 /// ```
 pub trait BitRanks: BitRank {
-    /// Counts `rank0` and `rank1` at a time.
+    /// Computes `bit_rank0` and `bit_rank1` at a time.
     fn bit_ranks<Index: RangeBounds<usize>>(&self, index: Index) -> Ranks;
 }
 
