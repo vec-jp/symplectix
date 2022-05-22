@@ -1,9 +1,8 @@
-use crate as bits;
 use crate::bit_len::BitLen;
-use crate::ops::for_each_blocks;
+use crate::ops::{for_each_blocks, BitGet};
 use crate::{BitBlock, Word};
 
-pub trait BitPut: bits::ops::BitGet {
+pub trait BitPut: BitGet {
     /// Enables the bit at `i`.
     fn bit_put1(&mut self, i: usize);
 
@@ -12,7 +11,7 @@ pub trait BitPut: bits::ops::BitGet {
 
     /// Writes `n` bits in `[i, i+n)`.
     #[doc(hidden)]
-    fn put_word<N: bits::Word>(&mut self, i: usize, n: usize, mask: N) {
+    fn put_word<N: Word>(&mut self, i: usize, n: usize, mask: N) {
         for b in i..i + n {
             if mask.bit_get(b - i).expect("index out of bounds") {
                 self.bit_put1(b);
@@ -25,14 +24,14 @@ impl<T: BitBlock> BitPut for [T] {
     #[inline]
     fn bit_put1(&mut self, i: usize) {
         assert!(i < self.bit_len());
-        let (i, o) = bits::address::<T>(i);
+        let (i, o) = crate::address::<T>(i);
         self[i].bit_put1(o)
     }
 
     #[inline]
     fn bit_put0(&mut self, i: usize) {
         assert!(i < self.bit_len());
-        let (i, o) = bits::address::<T>(i);
+        let (i, o) = crate::address::<T>(i);
         self[i].bit_put0(o)
     }
 
@@ -108,7 +107,7 @@ mod alloc {
 
     impl<'a, T> BitPut for Cow<'a, T>
     where
-        T: ?Sized + ToOwned + bits::ops::BitGet,
+        T: ?Sized + ToOwned + BitGet,
         T::Owned: BitPut,
     {
         impl_bit_put!(T::Owned, to_mut);

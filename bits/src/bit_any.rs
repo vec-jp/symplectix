@@ -1,7 +1,7 @@
-use crate as bits;
+use crate::ops::BitCount;
 use crate::BitBlock;
 
-pub trait BitAny: bits::ops::BitCount {
+pub trait BitAny: BitCount {
     /// Returns true if any bits are enabled. An empty bits should return false.
     ///
     /// # Examples

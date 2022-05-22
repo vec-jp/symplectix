@@ -1,7 +1,7 @@
-use crate as bits;
+use crate::ops::BitLen;
 use crate::BitBlock;
 
-pub trait BitCount: bits::ops::BitLen {
+pub trait BitCount: BitLen {
     /// Counts the occurrences of `1`.
     ///
     /// # Examples

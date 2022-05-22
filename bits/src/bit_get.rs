@@ -1,4 +1,3 @@
-use crate as bits;
 use crate::ops::{for_each_blocks, BitLen};
 use crate::{BitBlock, Word};
 
@@ -68,7 +67,7 @@ pub trait BitGet {
 impl<T: BitBlock> BitGet for [T] {
     #[inline]
     fn bit_get(&self, i: usize) -> Option<bool> {
-        let (i, o) = bits::address::<T>(i);
+        let (i, o) = crate::address::<T>(i);
         self.get(i)
             .map(|b| b.bit_get(o).expect("index out of bounds"))
     }
@@ -80,7 +79,6 @@ impl<T: BitBlock> BitGet for [T] {
         let mut out = N::NULL;
         for_each_blocks::<T, _>(i, i + n, |k, r| {
             if k < self.len() && cur < <N as BitBlock>::BITS {
-                // out |= bits::word::<_, N>(&self[k], r.start, r.len()) << cur;
                 out |= self[k].word::<N>(r.start, r.len()) << cur;
                 cur += r.len();
             }

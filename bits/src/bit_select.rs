@@ -1,8 +1,7 @@
-use crate as bits;
-use crate::ops::BitCount;
+use crate::ops::{BitCount, BitRank};
 use crate::BitBlock;
 
-pub trait BitSelect: bits::ops::BitRank {
+pub trait BitSelect: BitRank {
     /// Returns the position of the n-th 1, indexed starting from zero.
     /// `n` must be less than `self.count1()`, orherwise returns `None`.
     #[inline]
