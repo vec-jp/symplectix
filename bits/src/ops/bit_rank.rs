@@ -16,6 +16,61 @@ pub trait BitRank: bits::ops::BitCount {
     }
 }
 
+/// `BitRanks` is an extenstion trait for `BitRank`.
+///
+/// # Examples
+///
+/// ```
+/// # use bits::ops::BitRanks;
+/// let v: &[u8] = &[0b_1111_0000, 0b_1111_1100];
+/// assert_eq!(v.ranks(..10).diff(), 2);
+/// assert_eq!(v.ranks(..10).excess_1(), None);
+/// assert_eq!(v.ranks(..10).excess_0(), Some(2));
+///
+/// assert_eq!(v.ranks(..16).diff(), 4);
+/// assert_eq!(v.ranks(..16).excess_1(), Some(4));
+/// assert_eq!(v.ranks(..16).excess_0(), None);
+/// ```
+pub trait BitRanks: BitRank {
+    fn ranks<Index: RangeBounds<usize>>(&self, index: Index) -> Ranks;
+}
+
+impl<T: ?Sized + BitRank> BitRanks for T {
+    #[inline]
+    fn ranks<Index: RangeBounds<usize>>(&self, index: Index) -> Ranks {
+        let (i, j) = bits::to_range(&index, 0, bits::len(self));
+        let rank_1 = bits::rank_1(self, i..j);
+        let rank_0 = (j - i) - rank_1;
+        Ranks { rank_0, rank_1 }
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Ranks {
+    rank_0: usize,
+    rank_1: usize,
+}
+
+impl Ranks {
+    #[inline]
+    pub fn diff(self) -> usize {
+        let Ranks { rank_0, rank_1 } = self;
+        rank_0.abs_diff(rank_1)
+    }
+
+    #[inline]
+    pub fn excess_1(self) -> Option<usize> {
+        let Ranks { rank_0, rank_1 } = self;
+        rank_1.checked_sub(rank_0)
+    }
+
+    #[inline]
+    pub fn excess_0(self) -> Option<usize> {
+        let Ranks { rank_0, rank_1 } = self;
+        rank_0.checked_sub(rank_1)
+    }
+}
+
 impl<T: BitBlock> BitRank for [T] {
     #[inline]
     fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
@@ -24,6 +79,8 @@ impl<T: BitBlock> BitRank for [T] {
         let (j, q) = bits::address::<T>(e);
         if i == j {
             self[i].rank_1(p..q)
+        // } else if s == 0 {
+        //     bits::count_1(&self[i..j]) + self.get(j).map_or(0, |b| bits::rank_1(b, ..q))
         } else {
             self[i].rank_1(p..)
                 + bits::count_1(&self[i + 1..j])

@@ -12,7 +12,7 @@ fn bits_is_implemented() {
             + bits::ops::BitAll
             + bits::ops::BitAny
             + bits::ops::BitRank
-            + bits::ops::BitExcess
+            + bits::ops::BitRanks
             + bits::ops::BitSelect
             + bits::ops::BitGet,
     {

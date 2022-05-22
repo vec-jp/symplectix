@@ -303,31 +303,14 @@ where
     ops::BitRank::rank_0(bits, index)
 }
 
+/// Counts occurrences of `1` in the given range.
 #[inline]
-pub fn excess<T, Index>(bits: &T, index: Index) -> usize
+pub fn ranks<T, Index>(bits: &T, index: Index) -> ops::bit_rank::Ranks
 where
-    T: ?Sized + ops::BitExcess,
+    T: ?Sized + ops::BitRank,
     Index: RangeBounds<usize>,
 {
-    ops::BitExcess::excess(bits, index)
-}
-
-#[inline]
-pub fn excess_1<T, Index>(bits: &T, index: Index) -> Option<usize>
-where
-    T: ?Sized + ops::BitExcess,
-    Index: RangeBounds<usize>,
-{
-    ops::BitExcess::excess_1(bits, index)
-}
-
-#[inline]
-pub fn excess_0<T, Index>(bits: &T, index: Index) -> Option<usize>
-where
-    T: ?Sized + ops::BitExcess,
-    Index: RangeBounds<usize>,
-{
-    ops::BitExcess::excess_0(bits, index)
+    ops::BitRanks::ranks(bits, index)
 }
 
 /// Returns the position of the n-th 1, indexed starting from zero.
