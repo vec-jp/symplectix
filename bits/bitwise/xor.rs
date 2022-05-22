@@ -5,7 +5,7 @@ use core::{
 };
 
 pub trait Xor: Sized + BitMask {
-    fn xor<That: BitMask>(self, that: That) -> BitXor<Self, That>;
+    fn xor<That: BitMask>(self, that: That) -> BitwiseXor<Self, That>;
 }
 
 pub trait XorAssign<That: ?Sized> {
@@ -14,12 +14,12 @@ pub trait XorAssign<That: ?Sized> {
 
 impl<T: BitMask> Xor for T {
     #[inline]
-    fn xor<That: BitMask>(self, that: That) -> BitXor<Self, That> {
-        BitXor { a: self, b: that }
+    fn xor<That: BitMask>(self, that: That) -> BitwiseXor<Self, That> {
+        BitwiseXor { a: self, b: that }
     }
 }
 
-pub struct BitXor<A, B> {
+pub struct BitwiseXor<A, B> {
     pub(crate) a: A,
     pub(crate) b: B,
 }
@@ -29,7 +29,7 @@ pub struct SymmetricDifference<A: Iterator, B: Iterator> {
     b: Peekable<Fuse<B>>,
 }
 
-impl<A, B> IntoIterator for BitXor<A, B>
+impl<A, B> IntoIterator for BitwiseXor<A, B>
 where
     Self: BitMask,
 {
@@ -41,7 +41,7 @@ where
     }
 }
 
-impl<A: BitMask, B: BitMask<Bits = A::Bits>> BitMask for BitXor<A, B>
+impl<A: BitMask, B: BitMask<Bits = A::Bits>> BitMask for BitwiseXor<A, B>
 where
     A::Bits: XorAssign<B::Bits>,
 {

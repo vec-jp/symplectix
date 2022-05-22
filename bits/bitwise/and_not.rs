@@ -5,7 +5,7 @@ use core::{
 };
 
 pub trait AndNot: Sized + BitMask {
-    fn and_not<That: BitMask>(self, that: That) -> BitAndNot<Self, That>;
+    fn and_not<That: BitMask>(self, that: That) -> BitwiseAndNot<Self, That>;
 }
 
 pub trait AndNotAssign<That: ?Sized> {
@@ -14,12 +14,12 @@ pub trait AndNotAssign<That: ?Sized> {
 
 impl<T: BitMask> AndNot for T {
     #[inline]
-    fn and_not<That: BitMask>(self, that: That) -> BitAndNot<Self, That> {
-        BitAndNot { a: self, b: that }
+    fn and_not<That: BitMask>(self, that: That) -> BitwiseAndNot<Self, That> {
+        BitwiseAndNot { a: self, b: that }
     }
 }
 
-pub struct BitAndNot<A, B> {
+pub struct BitwiseAndNot<A, B> {
     pub(crate) a: A,
     pub(crate) b: B,
 }
@@ -29,7 +29,7 @@ pub struct Difference<A: Iterator, B: Iterator> {
     b: Peekable<Fuse<B>>,
 }
 
-impl<A, B> IntoIterator for BitAndNot<A, B>
+impl<A, B> IntoIterator for BitwiseAndNot<A, B>
 where
     Self: BitMask,
 {
@@ -41,7 +41,7 @@ where
     }
 }
 
-impl<A: BitMask, B: BitMask> BitMask for BitAndNot<A, B>
+impl<A: BitMask, B: BitMask> BitMask for BitwiseAndNot<A, B>
 where
     A::Bits: AndNotAssign<B::Bits>,
 {

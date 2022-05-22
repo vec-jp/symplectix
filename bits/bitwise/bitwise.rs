@@ -10,9 +10,9 @@ mod and_not;
 mod or;
 mod xor;
 
-pub use {and::And, and_not::BitAndNot, or::BitOr, xor::BitXor};
+pub use {and::And, and_not::AndNot, or::Or, xor::Xor};
 pub use {and::AndAssign, and_not::AndNotAssign, or::OrAssign, xor::XorAssign};
-pub use {and::BitAnd, and_not::AndNot, or::Or, xor::Xor};
+pub use {and::BitwiseAnd, and_not::BitwiseAndNot, or::BitwiseOr, xor::BitwiseXor};
 pub use {and::Intersection, and_not::Difference, or::Union, xor::SymmetricDifference};
 
 pub trait BitMask {
@@ -36,23 +36,23 @@ pub trait BitMask {
 // }
 
 #[inline]
-pub fn and<A: BitMask, B: BitMask>(a: A, b: B) -> And<A, B> {
-    And { a, b }
+pub fn and<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseAnd<A, B> {
+    BitwiseAnd { a, b }
 }
 
 #[inline]
-pub fn and_not<A: BitMask, B: BitMask>(a: A, b: B) -> BitAndNot<A, B> {
-    BitAndNot { a, b }
+pub fn and_not<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseAndNot<A, B> {
+    BitwiseAndNot { a, b }
 }
 
 #[inline]
-pub fn or<A: BitMask, B: BitMask>(a: A, b: B) -> BitOr<A, B> {
-    BitOr { a, b }
+pub fn or<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseOr<A, B> {
+    BitwiseOr { a, b }
 }
 
 #[inline]
-pub fn xor<A: BitMask, B: BitMask>(a: A, b: B) -> BitXor<A, B> {
-    BitXor { a, b }
+pub fn xor<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseXor<A, B> {
+    BitwiseXor { a, b }
 }
 
 macro_rules! impl_bitwise_ops_for_words {
@@ -392,14 +392,6 @@ where
 //     fn bit_mask(self) -> Self::Iter {
 //         (&**self).bit_mask()
 //     }
-// }
-
-// impl<T, U> BitwiseAssign<U> for Box<T>
-// where
-//     T: ?Sized + BitwiseAssign<U>,
-//     U: ?Sized,
-// {
-//     BitwiseAssign!(U, T, U, {});
 // }
 
 // impl<'a, T> BitMask for &'a Vec<T>

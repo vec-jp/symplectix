@@ -5,21 +5,14 @@ use core::{
 };
 
 pub trait Or: Sized + BitMask {
-    fn or<That: BitMask>(self, that: That) -> BitOr<Self, That>;
+    fn or<That: BitMask>(self, that: That) -> BitwiseOr<Self, That>;
 }
 
 pub trait OrAssign<That: ?Sized> {
     fn or_assign(a: &mut Self, b: &That);
 }
 
-impl<T: BitMask> Or for T {
-    #[inline]
-    fn or<That: BitMask>(self, that: That) -> BitOr<Self, That> {
-        BitOr { a: self, b: that }
-    }
-}
-
-pub struct BitOr<A, B> {
+pub struct BitwiseOr<A, B> {
     pub(crate) a: A,
     pub(crate) b: B,
 }
@@ -29,7 +22,14 @@ pub struct Union<A: Iterator, B: Iterator> {
     b: Peekable<Fuse<B>>,
 }
 
-impl<A, B> IntoIterator for BitOr<A, B>
+impl<T: BitMask> Or for T {
+    #[inline]
+    fn or<That: BitMask>(self, that: That) -> BitwiseOr<Self, That> {
+        BitwiseOr { a: self, b: that }
+    }
+}
+
+impl<A, B> IntoIterator for BitwiseOr<A, B>
 where
     Self: BitMask,
 {
@@ -41,7 +41,7 @@ where
     }
 }
 
-impl<A: BitMask, B: BitMask<Bits = A::Bits>> BitMask for BitOr<A, B>
+impl<A: BitMask, B: BitMask<Bits = A::Bits>> BitMask for BitwiseOr<A, B>
 where
     A::Bits: OrAssign<B::Bits>,
 {

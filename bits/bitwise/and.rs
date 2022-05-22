@@ -7,29 +7,22 @@ use core::{
 /// # Examples
 ///
 /// ```
-/// use bitwise::BitAnd;
+/// # use bitwise::And;
 /// let v1: &[u8] = &[0b_1111_0000, 0b_0000_1111, 0b_1010_1010];
 /// let v2: &[u8] = &[0b_0000_1111, 0b_1111_0000, 0b_0101_0101];
 /// for (_index, bits) in v1.and(v2) {
-///     assert_eq!(bits.into_owned(), 0);
+///     assert_eq!(bits.into_owned(), 0b_0000_0000);
 /// }
 /// ```
-pub trait BitAnd: Sized + BitMask {
-    fn and<That: BitMask>(self, that: That) -> And<Self, That>;
-}
-
-impl<T: BitMask> BitAnd for T {
-    #[inline]
-    fn and<That: BitMask>(self, that: That) -> And<Self, That> {
-        And { a: self, b: that }
-    }
+pub trait And: Sized + BitMask {
+    fn and<That: BitMask>(self, that: That) -> BitwiseAnd<Self, That>;
 }
 
 pub trait AndAssign<That: ?Sized> {
     fn and_assign(a: &mut Self, b: &That);
 }
 
-pub struct And<A, B> {
+pub struct BitwiseAnd<A, B> {
     pub(crate) a: A,
     pub(crate) b: B,
 }
@@ -39,7 +32,14 @@ pub struct Intersection<A: Iterator, B: Iterator> {
     b: Peekable<Fuse<B>>,
 }
 
-impl<A, B> IntoIterator for And<A, B>
+impl<T: BitMask> And for T {
+    #[inline]
+    fn and<That: BitMask>(self, that: That) -> BitwiseAnd<Self, That> {
+        BitwiseAnd { a: self, b: that }
+    }
+}
+
+impl<A, B> IntoIterator for BitwiseAnd<A, B>
 where
     Self: BitMask,
 {
@@ -51,7 +51,7 @@ where
     }
 }
 
-impl<A: BitMask, B: BitMask> BitMask for And<A, B>
+impl<A: BitMask, B: BitMask> BitMask for BitwiseAnd<A, B>
 where
     A::Bits: AndAssign<B::Bits>,
 {
