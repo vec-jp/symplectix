@@ -192,14 +192,14 @@ macro_rules! impls {
 
         impl BitRank for $Word {
             #[inline]
-            fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+            fn bit_rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
                 let (i, j) = to_range(&r, 0, self.bit_len());
                 (*self & mask::<Self>(i, j)).bit_count1()
             }
 
             #[inline]
-            fn rank_0<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                (!*self).rank_1(r)
+            fn bit_rank0<R: RangeBounds<usize>>(&self, r: R) -> usize {
+                (!*self).bit_rank1(r)
             }
         }
 

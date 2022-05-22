@@ -68,22 +68,25 @@ fn rank_for_empty_range<T>(bits: &T)
 where
     T: ?Sized + bits::ops::BitRank,
 {
-    assert_eq!(bits.rank_0(0..0), 0);
-    assert_eq!(bits.rank_0(1..1), 0);
-    assert_eq!(bits.rank_0(2..2), 0);
-    assert_eq!(bits.rank_0(7..7), 0);
+    assert_eq!(bits.bit_rank0(0..0), 0);
+    assert_eq!(bits.bit_rank0(1..1), 0);
+    assert_eq!(bits.bit_rank0(2..2), 0);
+    assert_eq!(bits.bit_rank0(7..7), 0);
 
-    assert_eq!(bits.rank_1(0..0), 0);
-    assert_eq!(bits.rank_1(1..1), 0);
-    assert_eq!(bits.rank_1(2..2), 0);
-    assert_eq!(bits.rank_1(7..7), 0);
+    assert_eq!(bits.bit_rank1(0..0), 0);
+    assert_eq!(bits.bit_rank1(1..1), 0);
+    assert_eq!(bits.bit_rank1(2..2), 0);
+    assert_eq!(bits.bit_rank1(7..7), 0);
 }
 
 fn rank_0_plus_rank_1<T>(bits: &T, r: core::ops::Range<usize>)
 where
     T: ?Sized + bits::ops::BitRank,
 {
-    assert_eq!(bits.rank_0(r.clone()) + bits.rank_1(r.clone()), r.len());
+    assert_eq!(
+        bits.bit_rank0(r.clone()) + bits.bit_rank1(r.clone()),
+        r.len()
+    );
 }
 
 #[test]
