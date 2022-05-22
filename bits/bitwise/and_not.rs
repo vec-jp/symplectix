@@ -4,6 +4,16 @@ use core::{
     iter::{Fuse, Peekable},
 };
 
+/// # Examples
+///
+/// ```
+/// # use bitwise::AndNot;
+/// let v1: &[u8] = &[0b_1111_0000, 0b_0000_1111, 0b_1010_1010];
+/// let v2: &[u8] = &[0b_0000_1111, 0b_1111_0000, 0b_0101_0101];
+/// for (index, bits) in v1.and_not(v2) {
+///     assert_eq!(bits.into_owned(), v1[index]);
+/// }
+/// ```
 pub trait AndNot: Sized + BitMask {
     fn and_not<That: BitMask>(self, that: That) -> BitwiseAndNot<Self, That>;
 }
@@ -80,6 +90,44 @@ where
                     b.next();
                 }
             };
+        }
+    }
+}
+
+mod impls {
+    use super::*;
+    use std::borrow::Cow;
+
+    impl<T, U> AndNotAssign<U> for Box<T>
+    where
+        T: ?Sized + AndNotAssign<U>,
+        U: ?Sized,
+    {
+        #[inline]
+        fn and_not_assign(this: &mut Self, that: &U) {
+            <T as AndNotAssign<U>>::and_not_assign(this, that)
+        }
+    }
+
+    impl<T, U: ?Sized> AndNotAssign<U> for Vec<T>
+    where
+        [T]: AndNotAssign<U>,
+    {
+        #[inline]
+        fn and_not_assign(this: &mut Self, that: &U) {
+            <[T] as AndNotAssign<U>>::and_not_assign(this.as_mut(), that)
+        }
+    }
+
+    impl<'a, 'b, T, U> AndNotAssign<Cow<'b, U>> for Cow<'a, T>
+    where
+        T: ?Sized + ToOwned,
+        U: ?Sized + ToOwned,
+        T::Owned: AndNotAssign<U>,
+    {
+        #[inline]
+        fn and_not_assign(this: &mut Self, that: &Cow<'b, U>) {
+            <T::Owned as AndNotAssign<U>>::and_not_assign(this.to_mut(), that.as_ref())
         }
     }
 }

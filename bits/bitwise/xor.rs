@@ -4,6 +4,16 @@ use core::{
     iter::{Fuse, Peekable},
 };
 
+/// # Examples
+///
+/// ```
+/// # use bitwise::Xor;
+/// let v1: &[u8] = &[0b_1111_0000, 0b_0000_1111, 0b_1010_1010];
+/// let v2: &[u8] = &[0b_0011_0011, 0b_1100_1100, 0b_0110_1001];
+/// for (_index, bits) in v1.xor(v2) {
+///     assert_eq!(bits.into_owned(), 0b_1100_0011);
+/// }
+/// ```
 pub trait Xor: Sized + BitMask {
     fn xor<That: BitMask>(self, that: That) -> BitwiseXor<Self, That>;
 }
@@ -76,6 +86,44 @@ where
                 Some((i, l))
             }
             Greater => b.next(),
+        }
+    }
+}
+
+mod impls {
+    use super::*;
+    use std::borrow::Cow;
+
+    impl<T, U> XorAssign<U> for Box<T>
+    where
+        T: ?Sized + XorAssign<U>,
+        U: ?Sized,
+    {
+        #[inline]
+        fn xor_assign(this: &mut Self, that: &U) {
+            <T as XorAssign<U>>::xor_assign(this, that)
+        }
+    }
+
+    impl<T, U: ?Sized> XorAssign<U> for Vec<T>
+    where
+        [T]: XorAssign<U>,
+    {
+        #[inline]
+        fn xor_assign(this: &mut Self, that: &U) {
+            <[T] as XorAssign<U>>::xor_assign(this.as_mut(), that)
+        }
+    }
+
+    impl<'a, 'b, T, U> XorAssign<Cow<'b, U>> for Cow<'a, T>
+    where
+        T: ?Sized + ToOwned,
+        U: ?Sized + ToOwned,
+        T::Owned: XorAssign<U>,
+    {
+        #[inline]
+        fn xor_assign(this: &mut Self, that: &Cow<'b, U>) {
+            <T::Owned as XorAssign<U>>::xor_assign(this.to_mut(), that.as_ref())
         }
     }
 }

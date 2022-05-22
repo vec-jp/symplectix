@@ -4,6 +4,16 @@ use core::{
     iter::{Fuse, Peekable},
 };
 
+/// # Examples
+///
+/// ```
+/// # use bitwise::Or;
+/// let v1: &[u8] = &[0b_1111_0000, 0b_0000_1111, 0b_1010_1010];
+/// let v2: &[u8] = &[0b_0000_1111, 0b_1111_0000, 0b_0101_0101];
+/// for (_index, bits) in v1.or(v2) {
+///     assert_eq!(bits.into_owned(), 0b_1111_1111);
+/// }
+/// ```
 pub trait Or: Sized + BitMask {
     fn or<That: BitMask>(self, that: That) -> BitwiseOr<Self, That>;
 }
@@ -76,6 +86,44 @@ where
                 Some((i, l))
             }
             Greater => y.next(),
+        }
+    }
+}
+
+mod impls {
+    use super::*;
+    use std::borrow::Cow;
+
+    impl<T, U> OrAssign<U> for Box<T>
+    where
+        T: ?Sized + OrAssign<U>,
+        U: ?Sized,
+    {
+        #[inline]
+        fn or_assign(this: &mut Self, that: &U) {
+            <T as OrAssign<U>>::or_assign(this, that)
+        }
+    }
+
+    impl<T, U: ?Sized> OrAssign<U> for Vec<T>
+    where
+        [T]: OrAssign<U>,
+    {
+        #[inline]
+        fn or_assign(this: &mut Self, that: &U) {
+            <[T] as OrAssign<U>>::or_assign(this.as_mut(), that)
+        }
+    }
+
+    impl<'a, 'b, T, U> OrAssign<Cow<'b, U>> for Cow<'a, T>
+    where
+        T: ?Sized + ToOwned,
+        U: ?Sized + ToOwned,
+        T::Owned: OrAssign<U>,
+    {
+        #[inline]
+        fn or_assign(this: &mut Self, that: &Cow<'b, U>) {
+            <T::Owned as OrAssign<U>>::or_assign(this.to_mut(), that.as_ref())
         }
     }
 }

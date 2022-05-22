@@ -230,6 +230,29 @@ fn compare_index<T, U>(
 //     }
 // }
 
+impl<'a, T: bits::Bits> BitMask for &'a [T] {
+    type Bits = Cow<'a, T>;
+    type Iter = Blocks<'a, T>;
+    fn bit_mask(self) -> Self::Iter {
+        Blocks {
+            blocks: self.iter().enumerate(),
+        }
+    }
+}
+
+pub struct Blocks<'a, T> {
+    blocks: Enumerate<slice::Iter<'a, T>>,
+}
+
+impl<'a, T: bits::Bits> Iterator for Blocks<'a, T> {
+    type Item = (usize, Cow<'a, T>);
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.blocks
+            .find_map(|(i, b)| b.bit_any().then(|| (i, Cow::Borrowed(b))))
+    }
+}
+
 impl<T: AndAssign<U>, U> AndAssign<[U]> for [T] {
     fn and_assign(this: &mut Self, that: &[U]) {
         assert_eq!(this.len(), that.len());
@@ -263,29 +286,6 @@ impl<T: XorAssign<U>, U> XorAssign<[U]> for [T] {
         for (v1, v2) in this.iter_mut().zip(that) {
             XorAssign::xor_assign(v1, v2);
         }
-    }
-}
-
-impl<'a, T: bits::Bits> BitMask for &'a [T] {
-    type Bits = Cow<'a, T>;
-    type Iter = Blocks<'a, T>;
-    fn bit_mask(self) -> Self::Iter {
-        Blocks {
-            blocks: self.iter().enumerate(),
-        }
-    }
-}
-
-pub struct Blocks<'a, T> {
-    blocks: Enumerate<slice::Iter<'a, T>>,
-}
-
-impl<'a, T: bits::Bits> Iterator for Blocks<'a, T> {
-    type Item = (usize, Cow<'a, T>);
-    #[inline]
-    fn next(&mut self) -> Option<Self::Item> {
-        self.blocks
-            .find_map(|(i, b)| b.bit_any().then(|| (i, Cow::Borrowed(b))))
     }
 }
 
@@ -349,91 +349,3 @@ where
         <[T] as XorAssign<U>>::xor_assign(this.as_mut(), that)
     }
 }
-
-// macro_rules! BitwiseAssign {
-//     (
-//         $That:ty,
-//         $X:ty,
-//         $Y:ty,
-//         {
-//             $( this => $this:tt; )?
-//             $( that => $that:tt; )?
-//         }
-//     ) => {
-//         #[inline]
-//         fn and(this: &mut Self, that: &$That) {
-//             <$X as BitwiseAssign<$Y>>::and(this$(.$this())?, that$(.$that())?)
-//         }
-
-//         #[inline]
-//         fn and_not(this: &mut Self, that: &$That) {
-//             <$X as BitwiseAssign<$Y>>::and_not(this$(.$this())?, that$(.$that())?)
-//         }
-
-//         #[inline]
-//         fn or(this: &mut Self, that: &$That) {
-//             <$X as BitwiseAssign<$Y>>::or(this$(.$this())?, that$(.$that())?)
-//         }
-
-//         #[inline]
-//         fn xor(this: &mut Self, that: &$That) {
-//             <$X as BitwiseAssign<$Y>>::xor(this$(.$this())?, that$(.$that())?)
-//         }
-//     };
-// }
-
-// impl<'a, T> BitMask for &'a Box<T>
-// where
-//     &'a T: BitMask,
-// {
-//     type Bits = <&'a T as BitMask>::Bits;
-//     type Iter = <&'a T as BitMask>::Iter;
-//     #[inline]
-//     fn bit_mask(self) -> Self::Iter {
-//         (&**self).bit_mask()
-//     }
-// }
-
-// impl<'a, T> BitMask for &'a Vec<T>
-// where
-//     &'a [T]: BitMask,
-// {
-//     type Bits = <&'a [T] as BitMask>::Bits;
-//     type Iter = <&'a [T] as BitMask>::Iter;
-//     #[inline]
-//     fn bit_mask(self) -> Self::Iter {
-//         self.as_slice().bit_mask()
-//     }
-// }
-
-// impl<T, U: ?Sized> BitwiseAssign<U> for Vec<T>
-// where
-//     [T]: BitwiseAssign<U>,
-// {
-//     BitwiseAssign!(U, [T], U, {});
-// }
-
-// impl<'a, 'cow, T> BitMask for &'a Cow<'cow, T>
-// where
-//     T: Clone,
-//     &'a T: BitMask,
-// {
-//     type Bits = <&'a T as BitMask>::Bits;
-//     type Iter = <&'a T as BitMask>::Iter;
-//     #[inline]
-//     fn bit_mask(self) -> Self::Iter {
-//         self.as_ref().bit_mask()
-//     }
-// }
-
-// impl<'a, 'b, T, U> BitwiseAssign<Cow<'b, U>> for Cow<'a, T>
-// where
-//     T: ?Sized + ToOwned,
-//     U: ?Sized + ToOwned,
-//     T::Owned: BitwiseAssign<U>,
-// {
-//     BitwiseAssign!(Cow<'b, U>, T::Owned, U, {
-//         this => to_mut;
-//         that => as_ref;
-//     });
-// }
