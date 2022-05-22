@@ -304,7 +304,16 @@ where
 }
 
 #[inline]
-pub fn excess_1<T, Index>(bits: &T, index: Index) -> usize
+pub fn excess<T, Index>(bits: &T, index: Index) -> usize
+where
+    T: ?Sized + ops::BitExcess,
+    Index: RangeBounds<usize>,
+{
+    ops::BitExcess::excess(bits, index)
+}
+
+#[inline]
+pub fn excess_1<T, Index>(bits: &T, index: Index) -> Option<usize>
 where
     T: ?Sized + ops::BitExcess,
     Index: RangeBounds<usize>,
@@ -313,7 +322,7 @@ where
 }
 
 #[inline]
-pub fn excess_0<T, Index>(bits: &T, index: Index) -> usize
+pub fn excess_0<T, Index>(bits: &T, index: Index) -> Option<usize>
 where
     T: ?Sized + ops::BitExcess,
     Index: RangeBounds<usize>,
