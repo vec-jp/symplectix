@@ -6,15 +6,15 @@ pub trait BitSelect: bits::ops::BitRank {
     /// Returns the position of the n-th 1, indexed starting from zero.
     /// `n` must be less than `self.count1()`, orherwise returns `None`.
     #[inline]
-    fn select_1(&self, n: usize) -> Option<usize> {
-        helper::search_1(self, n)
+    fn bit_select1(&self, n: usize) -> Option<usize> {
+        helper::bit_search1(self, n)
     }
 
     /// Returns the position of the n-th 0, indexed starting from zero.
     /// `n` must be less than `self.count0()`, orherwise returns `None`.
     #[inline]
-    fn select_0(&self, n: usize) -> Option<usize> {
-        helper::search_0(self, n)
+    fn bit_select0(&self, n: usize) -> Option<usize> {
+        helper::bit_search0(self, n)
     }
 
     // #[inline]
@@ -48,23 +48,23 @@ mod helper {
     }
 
     #[inline]
-    pub fn search_1<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
+    pub fn bit_search1<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
         (n < bs.bit_count1()).then(|| binary_search(0, bs.bit_len(), |k| bs.bit_rank1(..k) > n) - 1)
     }
 
     #[inline]
-    pub fn search_0<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
+    pub fn bit_search0<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
         (n < bs.bit_count0()).then(|| binary_search(0, bs.bit_len(), |k| bs.bit_rank0(..k) > n) - 1)
     }
 }
 
 impl<T: BitBlock> BitSelect for [T] {
     #[inline]
-    fn select_1(&self, mut n: usize) -> Option<usize> {
+    fn bit_select1(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
             let count = b.bit_count1();
             if n < count {
-                return Some(i * T::BITS + b.select_1(n).expect("BUG"));
+                return Some(i * T::BITS + b.bit_select1(n).expect("BUG"));
             }
             n -= count;
         }
@@ -72,11 +72,11 @@ impl<T: BitBlock> BitSelect for [T] {
     }
 
     #[inline]
-    fn select_0(&self, mut n: usize) -> Option<usize> {
+    fn bit_select0(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
             let count = b.bit_count0();
             if n < count {
-                return Some(i * T::BITS + b.select_0(n).expect("BUG"));
+                return Some(i * T::BITS + b.bit_select0(n).expect("BUG"));
             }
             n -= count;
         }
@@ -86,23 +86,23 @@ impl<T: BitBlock> BitSelect for [T] {
 
 /// ```
 /// # use bits::ops::BitSelect;
-/// assert_eq!(BitSelect::select_1(&true, 0), Some(0));
-/// assert_eq!(BitSelect::select_1(&true, 1), None);
+/// assert_eq!(BitSelect::bit_select1(&true, 0), Some(0));
+/// assert_eq!(BitSelect::bit_select1(&true, 1), None);
 ///
-/// assert_eq!(BitSelect::select_1(&false, 0), None);
-/// assert_eq!(BitSelect::select_1(&false, 1), None);
+/// assert_eq!(BitSelect::bit_select1(&false, 0), None);
+/// assert_eq!(BitSelect::bit_select1(&false, 1), None);
 ///
-/// assert_eq!(BitSelect::select_0(&false, 0), Some(0));
-/// assert_eq!(BitSelect::select_0(&false, 1), None);
+/// assert_eq!(BitSelect::bit_select0(&false, 0), Some(0));
+/// assert_eq!(BitSelect::bit_select0(&false, 1), None);
 /// ```
 impl BitSelect for bool {
     #[inline]
-    fn select_1(&self, n: usize) -> Option<usize> {
+    fn bit_select1(&self, n: usize) -> Option<usize> {
         (n < self.bit_count1()).then(|| 0)
     }
 
     #[inline]
-    fn select_0(&self, n: usize) -> Option<usize> {
+    fn bit_select0(&self, n: usize) -> Option<usize> {
         (n < self.bit_count0()).then(|| 0)
     }
 }
@@ -110,13 +110,13 @@ impl BitSelect for bool {
 macro_rules! impl_bit_select {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn select_1(&self, n: usize) -> Option<usize> {
-            <$X as BitSelect>::select_1(self$(.$method())?, n)
+        fn bit_select1(&self, n: usize) -> Option<usize> {
+            <$X as BitSelect>::bit_select1(self$(.$method())?, n)
         }
 
         #[inline]
-        fn select_0(&self, n: usize) -> Option<usize> {
-            <$X as BitSelect>::select_0(self$(.$method())?, n)
+        fn bit_select0(&self, n: usize) -> Option<usize> {
+            <$X as BitSelect>::bit_select0(self$(.$method())?, n)
         }
     }
 }

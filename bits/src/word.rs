@@ -205,13 +205,13 @@ macro_rules! impls {
 
         impl BitSelect for $Word {
             #[inline]
-            fn select_1(&self, n: usize) -> Option<usize> {
-                <Self as BitSelectImpl>::select_1(*self, n)
+            fn bit_select1(&self, n: usize) -> Option<usize> {
+                <Self as BitSelectImpl>::bit_select1(*self, n)
             }
 
             #[inline]
-            fn select_0(&self, n: usize) -> Option<usize> {
-                <Self as BitSelectImpl>::select_1(!self, n)
+            fn bit_select0(&self, n: usize) -> Option<usize> {
+                <Self as BitSelectImpl>::bit_select1(!self, n)
             }
         }
 
@@ -244,12 +244,12 @@ impls!(u8 u16 u32 u64 u128);
 
 /// A helper trait to implement [`BitSelect`](crate::BitSelect) for u64.
 trait BitSelectImpl {
-    fn select_1(self, n: usize) -> Option<usize>;
+    fn bit_select1(self, n: usize) -> Option<usize>;
 }
 
 impl BitSelectImpl for u64 {
     #[inline]
-    fn select_1(self, n: usize) -> Option<usize> {
+    fn bit_select1(self, n: usize) -> Option<usize> {
         (n < self.bit_count1()).then(|| {
             #[cfg(target_arch = "x86_64")]
             {
@@ -302,8 +302,8 @@ macro_rules! impl_select_word_as_u64 {
     ( $( $Ty:ty )* ) => ($(
         impl BitSelectImpl for $Ty {
             #[inline]
-            fn select_1(self, c: usize) -> Option<usize> {
-                (c < self.bit_count1()).then(|| <u64 as BitSelectImpl>::select_1(self as u64, c).unwrap())
+            fn bit_select1(self, c: usize) -> Option<usize> {
+                (c < self.bit_count1()).then(|| <u64 as BitSelectImpl>::bit_select1(self as u64, c).unwrap())
             }
         }
     )*)
@@ -317,12 +317,12 @@ impl BitSelectImpl for u128 {
     /// for i in (0..128).step_by(2) {
     ///     n.bit_put1(i);
     /// }
-    /// assert_eq!(n.select_1(60), Some(120));
-    /// assert_eq!(n.select_1(61), Some(122));
+    /// assert_eq!(n.bit_select1(60), Some(120));
+    /// assert_eq!(n.bit_select1(61), Some(122));
     /// ```
     #[inline]
-    fn select_1(self, c: usize) -> Option<usize> {
+    fn bit_select1(self, c: usize) -> Option<usize> {
         let this: [u64; 2] = [self as u64, (self >> 64) as u64];
-        this.select_1(c)
+        this.bit_select1(c)
     }
 }

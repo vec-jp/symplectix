@@ -60,7 +60,7 @@ fn ones_select1() {
     let n: u32 = 0b_0101_0101;
     let mut ones = ones(n);
     for c in 0..n.bit_count1() {
-        assert_eq!(ones.next(), n.select_1(c));
+        assert_eq!(ones.next(), n.bit_select1(c));
     }
 }
 
