@@ -1,5 +1,5 @@
 use crate::ops::BitCount;
-use crate::BitBlock;
+use crate::Bits;
 
 pub trait BitAny: BitCount {
     /// Returns true if any bits are enabled. An empty bits should return false.
@@ -31,7 +31,7 @@ impl BitAny for bool {
     }
 }
 
-impl<T: BitBlock> BitAny for [T] {
+impl<T: Bits> BitAny for [T] {
     #[inline]
     fn bit_any(&self) -> bool {
         self.iter().any(BitAny::bit_any)

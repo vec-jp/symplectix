@@ -8,12 +8,12 @@ pub mod bit_len;
 pub mod bit_put;
 pub mod bit_rank;
 pub mod bit_select;
+mod bits;
 pub mod ops;
-mod word;
 
-pub use word::Word;
+pub use self::bits::Word;
 
-pub trait BitBlock:
+pub trait Bits:
     Clone
     + ops::BitLen
     + ops::BitCount
@@ -32,7 +32,7 @@ pub trait BitBlock:
     fn null() -> Self;
 }
 
-impl BitBlock for bool {
+impl Bits for bool {
     const BITS: usize = 1;
 
     #[inline]
@@ -41,9 +41,9 @@ impl BitBlock for bool {
     }
 }
 
-impl<T, const N: usize> BitBlock for [T; N]
+impl<T, const N: usize> Bits for [T; N]
 where
-    T: Copy + BitBlock,
+    T: Copy + Bits,
 {
     const BITS: usize = T::BITS * N;
 
@@ -54,10 +54,10 @@ where
 }
 
 mod alloc {
-    use super::BitBlock;
+    use super::Bits;
     use std::borrow::Cow;
 
-    impl<T: BitBlock> BitBlock for Box<T> {
+    impl<T: Bits> Bits for Box<T> {
         const BITS: usize = T::BITS;
         #[inline]
         fn null() -> Self {
@@ -65,9 +65,9 @@ mod alloc {
         }
     }
 
-    impl<'a, T> BitBlock for Cow<'a, T>
+    impl<'a, T> Bits for Cow<'a, T>
     where
-        T: ?Sized + BitBlock,
+        T: ?Sized + Bits,
     {
         const BITS: usize = T::BITS;
         #[inline]
@@ -78,7 +78,7 @@ mod alloc {
 }
 
 #[inline]
-fn address<T: BitBlock>(i: usize) -> (usize, usize) {
+fn address<T: Bits>(i: usize) -> (usize, usize) {
     use core::ops::{Div, Rem};
     fn divrem<T, U>(t: T, u: U) -> (<T as Div<U>>::Output, <T as Rem<U>>::Output)
     where
@@ -127,7 +127,7 @@ const fn blocks(n: usize, b: usize) -> usize {
 /// assert_eq!(v.bit_len(), 0);
 /// assert_eq!(v.capacity(), 10);
 /// ```
-pub fn with_capacity<T: BitBlock>(n: usize) -> Vec<T> {
+pub fn with_capacity<T: Bits>(n: usize) -> Vec<T> {
     let size = blocks(n, T::BITS);
     Vec::with_capacity(size)
 }

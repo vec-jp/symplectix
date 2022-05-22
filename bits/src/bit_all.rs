@@ -1,5 +1,5 @@
 use crate::ops::BitCount;
-use crate::BitBlock;
+use crate::Bits;
 
 pub trait BitAll: BitCount {
     /// Returns true if all bits are enabled. An empty bits should return true.
@@ -28,7 +28,7 @@ impl BitAll for bool {
     }
 }
 
-impl<T: BitBlock> BitAll for [T] {
+impl<T: Bits> BitAll for [T] {
     #[inline]
     fn bit_all(&self) -> bool {
         self.iter().all(BitAll::bit_all)

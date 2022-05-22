@@ -1,6 +1,6 @@
 use crate::bit_len::BitLen;
 use crate::ops::{for_each_blocks, BitGet};
-use crate::{BitBlock, Word};
+use crate::{Bits, Word};
 
 pub trait BitPut: BitGet {
     /// Enables the bit at `i`.
@@ -20,7 +20,7 @@ pub trait BitPut: BitGet {
     }
 }
 
-impl<T: BitBlock> BitPut for [T] {
+impl<T: Bits> BitPut for [T] {
     #[inline]
     fn bit_put1(&mut self, i: usize) {
         assert!(i < self.bit_len());

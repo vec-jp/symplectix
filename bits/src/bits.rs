@@ -1,4 +1,4 @@
-use crate::{ops::*, to_range, BitBlock};
+use crate::{ops::*, to_range, Bits};
 use core::{hash::Hash, ops, ops::RangeBounds};
 
 mod private {
@@ -21,7 +21,7 @@ fn mask<T: Word>(i: usize, j: usize) -> T {
     if i >= j {
         T::NULL
     } else {
-        T::FULL >> (<T as BitBlock>::BITS - (j - i)) << i
+        T::FULL >> (<T as Bits>::BITS - (j - i)) << i
     }
 }
 
@@ -32,7 +32,7 @@ pub trait Word:
     + Hash
     + Eq
     + Ord
-    + BitBlock
+    + Bits
     + ops::Add<Output = Self>
     + ops::Sub<Output = Self>
     + ops::Mul<Output = Self>
@@ -143,12 +143,12 @@ macro_rules! impls {
                 if self == 0 {
                     0
                 } else {
-                    1 << ((<Self as crate::BitBlock>::BITS - 1) ^ self.count_l0())
+                    1 << ((<Self as crate::Bits>::BITS - 1) ^ self.count_l0())
                 }
             }
         }
 
-        impl crate::BitBlock for $Word {
+        impl crate::Bits for $Word {
             const BITS: usize = <$Word>::BITS as usize;
 
             #[inline]
@@ -160,7 +160,7 @@ macro_rules! impls {
         impl BitLen for $Word {
             #[inline]
             fn bit_len(&self) -> usize {
-                <Self as crate::BitBlock>::BITS
+                <Self as crate::Bits>::BITS
             }
         }
 

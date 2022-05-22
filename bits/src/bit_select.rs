@@ -1,5 +1,5 @@
 use crate::ops::{BitCount, BitRank};
-use crate::BitBlock;
+use crate::Bits;
 
 pub trait BitSelect: BitRank {
     /// Returns the position of the n-th 1, indexed starting from zero.
@@ -57,7 +57,7 @@ mod helper {
     }
 }
 
-impl<T: BitBlock> BitSelect for [T] {
+impl<T: Bits> BitSelect for [T] {
     #[inline]
     fn bit_select1(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {

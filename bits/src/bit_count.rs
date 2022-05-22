@@ -1,5 +1,5 @@
 use crate::ops::BitLen;
-use crate::BitBlock;
+use crate::Bits;
 
 pub trait BitCount: BitLen {
     /// Counts the occurrences of `1`.
@@ -39,7 +39,7 @@ pub trait BitCount: BitLen {
     }
 }
 
-impl<T: BitBlock> BitCount for [T] {
+impl<T: Bits> BitCount for [T] {
     #[inline]
     fn bit_count1(&self) -> usize {
         self.iter().map(BitCount::bit_count1).sum()
