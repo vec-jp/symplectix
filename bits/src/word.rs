@@ -1,4 +1,3 @@
-use crate as bits;
 use crate::{ops::*, to_range, BitBlock};
 use core::{hash::Hash, ops, ops::RangeBounds};
 
@@ -194,7 +193,7 @@ macro_rules! impls {
         impl BitRank for $Word {
             #[inline]
             fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                let (i, j) = to_range(&r, 0, bits::len(self));
+                let (i, j) = to_range(&r, 0, self.bit_len());
                 (*self & mask::<Self>(i, j)).count_1()
             }
 
@@ -251,7 +250,7 @@ trait BitSelectImpl {
 impl BitSelectImpl for u64 {
     #[inline]
     fn select_1(self, n: usize) -> Option<usize> {
-        (n < bits::count_1(&self)).then(|| {
+        (n < self.count_1()).then(|| {
             #[cfg(target_arch = "x86_64")]
             {
                 if is_x86_feature_detected!("bmi2") {
@@ -313,12 +312,13 @@ impl_select_word_as_u64!(u8 u16 u32);
 
 impl BitSelectImpl for u128 {
     /// ```
+    /// # use bits::ops::{BitPut, BitSelect};
     /// let mut n: u128 = 0;
     /// for i in (0..128).step_by(2) {
-    ///     bits::put_1(&mut n, i);
+    ///     n.bit_put1(i);
     /// }
-    /// assert_eq!(bits::select_1(&n, 60), Some(120));
-    /// assert_eq!(bits::select_1(&n, 61), Some(122));
+    /// assert_eq!(n.select_1(60), Some(120));
+    /// assert_eq!(n.select_1(61), Some(122));
     /// ```
     #[inline]
     fn select_1(self, c: usize) -> Option<usize> {

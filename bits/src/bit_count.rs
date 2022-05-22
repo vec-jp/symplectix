@@ -2,35 +2,61 @@ use crate as bits;
 use crate::BitBlock;
 
 pub trait BitCount: bits::ops::BitLen {
+    /// Counts the occurrences of `1`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::ops::BitCount;
+    /// let a: &[u64] = &[];
+    /// let b: &[u64] = &[0, 0, 0];
+    /// let c: &[u64] = &[0, 1, 3];
+    /// assert_eq!(a.count_1(), 0);
+    /// assert_eq!(b.count_1(), 0);
+    /// assert_eq!(c.count_1(), 3);
+    /// ```
     #[inline]
     fn count_1(&self) -> usize {
-        bits::len(self) - self.count_0()
+        self.bit_len() - self.count_0()
     }
 
+    /// Counts the occurrences of `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::ops::BitCount;
+    /// let a: &[u64] = &[];
+    /// let b: &[u64] = &[0, 0, 0];
+    /// let c: &[u64] = &[0, 1, 3];
+    /// assert_eq!(a.count_0(), 0);
+    /// assert_eq!(b.count_0(), 192);
+    /// assert_eq!(c.count_0(), 189);
+    /// ```
     #[inline]
     fn count_0(&self) -> usize {
-        bits::len(self) - self.count_1()
+        self.bit_len() - self.count_1()
     }
 }
 
 impl<T: BitBlock> BitCount for [T] {
     #[inline]
     fn count_1(&self) -> usize {
-        self.iter().map(bits::count_1).sum()
+        self.iter().map(BitCount::count_1).sum()
     }
 
     #[inline]
     fn count_0(&self) -> usize {
-        self.iter().map(bits::count_0).sum()
+        self.iter().map(BitCount::count_0).sum()
     }
 }
 
 /// ```
-/// assert_eq!(bits::count_1(&true), 1);
-/// assert_eq!(bits::count_0(&true), 0);
-///
-/// assert_eq!(bits::count_1(&false), 0);
-/// assert_eq!(bits::count_0(&false), 1);
+/// # use bits::ops::BitCount;
+/// assert_eq!(BitCount::count_1(&true),  1);
+/// assert_eq!(BitCount::count_1(&false), 0);
+/// assert_eq!(BitCount::count_0(&true),  0);
+/// assert_eq!(BitCount::count_0(&false), 1);
 /// ```
 impl BitCount for bool {
     #[inline]
@@ -47,14 +73,12 @@ macro_rules! impl_bit_count {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn count_1(&self) -> usize {
-            // <$X as BitCount>::count_1(self$(.$method())?)
-            bits::count_1::<$X>(self$(.$method())?)
+            <$X as BitCount>::count_1(self$(.$method())?)
         }
 
         #[inline]
         fn count_0(&self) -> usize {
-            // <$X as BitCount>::count_0(self$(.$method())?)
-            bits::count_0::<$X>(self$(.$method())?)
+            <$X as BitCount>::count_0(self$(.$method())?)
         }
     }
 }

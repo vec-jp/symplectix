@@ -1,17 +1,20 @@
 use crate as bits;
+use crate::ops::{BitCount, BitLen};
 use crate::BitBlock;
 use core::ops::RangeBounds;
 
 pub trait BitRank: bits::ops::BitCount {
+    /// Counts occurrences of `1` in the given range.
     #[inline]
     fn rank_1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let (i, j) = bits::to_range(&index, 0, bits::len(self));
+        let (i, j) = bits::to_range(&index, 0, self.bit_len());
         (j - i) - self.rank_0(index)
     }
 
+    /// Counts occurrences of `0` in the given range.
     #[inline]
     fn rank_0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let (i, j) = bits::to_range(&index, 0, bits::len(self));
+        let (i, j) = bits::to_range(&index, 0, self.bit_len());
         (j - i) - self.rank_1(index)
     }
 }
@@ -32,69 +35,69 @@ pub trait BitRank: bits::ops::BitCount {
 /// assert_eq!(v.ranks(..16).excess_0(), None);
 /// ```
 pub trait BitRanks: BitRank {
+    /// Counts `rank0` and `rank1` at a time.
     fn ranks<Index: RangeBounds<usize>>(&self, index: Index) -> Ranks;
 }
 
 impl<T: ?Sized + BitRank> BitRanks for T {
     #[inline]
     fn ranks<Index: RangeBounds<usize>>(&self, index: Index) -> Ranks {
-        let (i, j) = bits::to_range(&index, 0, bits::len(self));
-        let rank_1 = bits::rank_1(self, i..j);
-        let rank_0 = (j - i) - rank_1;
-        Ranks { rank_0, rank_1 }
+        let (i, j) = bits::to_range(&index, 0, self.bit_len());
+        let rank1 = self.rank_1(i..j);
+        let rank0 = (j - i) - rank1;
+        Ranks { rank0, rank1 }
     }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Ranks {
-    rank_0: usize,
-    rank_1: usize,
+    rank0: usize,
+    rank1: usize,
 }
 
 impl Ranks {
     #[inline]
     pub fn diff(self) -> usize {
-        let Ranks { rank_0, rank_1 } = self;
-        rank_0.abs_diff(rank_1)
+        let Ranks { rank0, rank1 } = self;
+        rank0.abs_diff(rank1)
     }
 
     #[inline]
     pub fn excess_1(self) -> Option<usize> {
-        let Ranks { rank_0, rank_1 } = self;
-        rank_1.checked_sub(rank_0)
+        let Ranks { rank0, rank1 } = self;
+        rank1.checked_sub(rank0)
     }
 
     #[inline]
     pub fn excess_0(self) -> Option<usize> {
-        let Ranks { rank_0, rank_1 } = self;
-        rank_0.checked_sub(rank_1)
+        let Ranks { rank0, rank1 } = self;
+        rank0.checked_sub(rank1)
     }
 }
 
 impl<T: BitBlock> BitRank for [T] {
     #[inline]
     fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        let (s, e) = bits::to_range(&r, 0, bits::len(self));
+        let (s, e) = bits::to_range(&r, 0, self.bit_len());
         let (i, p) = bits::address::<T>(s);
         let (j, q) = bits::address::<T>(e);
         if i == j {
             self[i].rank_1(p..q)
-        // } else if s == 0 {
-        //     bits::count_1(&self[i..j]) + self.get(j).map_or(0, |b| bits::rank_1(b, ..q))
         } else {
             self[i].rank_1(p..)
-                + bits::count_1(&self[i + 1..j])
-                + self.get(j).map_or(0, |b| bits::rank_1(b, ..q))
+                + self[i + 1..j].count_1()
+                + self.get(j).map_or(0, |b| b.rank_1(..q))
         }
     }
 }
 
 /// ```
-/// assert_eq!(bits::rank_1(&true, ..1), 1);
-/// assert_eq!(bits::rank_0(&true, ..1), 0);
+/// # use bits::ops::BitRank;
+/// assert_eq!(BitRank::rank_1(&true, ..1), 1);
+/// assert_eq!(BitRank::rank_0(&true, ..1), 0);
 ///
-/// assert_eq!(bits::rank_1(&true, ..0), 0);
-/// assert_eq!(bits::rank_0(&true, ..0), 0);
+/// assert_eq!(BitRank::rank_1(&true, ..0), 0);
+/// assert_eq!(BitRank::rank_0(&true, ..0), 0);
 /// ```
 impl BitRank for bool {
     #[inline]
@@ -103,7 +106,7 @@ impl BitRank for bool {
         debug_assert!(s == 0 && e <= 1);
 
         if s < e {
-            bits::count_1(self)
+            self.count_1()
         } else {
             0
         }
@@ -114,14 +117,12 @@ macro_rules! impl_bit_rank {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn rank_1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-            // <$X as BitRank>::rank_1(self$(.$method())?, r)
-            bits::rank_1::<$X, R>(self$(.$method())?, r)
+            <$X as BitRank>::rank_1(self$(.$method())?, r)
         }
 
         #[inline]
         fn rank_0<R: RangeBounds<usize>>(&self, r: R) -> usize {
-            // <$X as BitRank>::rank_0(self$(.$method())?, r)
-            bits::rank_0::<$X, R>(self$(.$method())?, r)
+            <$X as BitRank>::rank_0(self$(.$method())?, r)
         }
     }
 }

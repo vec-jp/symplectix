@@ -1,4 +1,7 @@
-use bits::Word;
+use bits::{
+    ops::{BitCount, BitSelect},
+    Word,
+};
 use std::borrow::Cow;
 use std::iter::successors;
 
@@ -35,7 +38,7 @@ fn bits_is_implemented() {
 fn ones<T: Word>(word: T) -> impl Iterator<Item = usize> {
     successors(Some(word), |&n| {
         let m = n & !n.lsb();
-        bits::any(&m).then(|| m)
+        m.any().then(|| m)
     })
     .map(Word::count_t0)
 }
@@ -56,8 +59,8 @@ fn next_set_bit() {
 fn ones_select1() {
     let n: u32 = 0b_0101_0101;
     let mut ones = ones(n);
-    for c in 0..bits::count_1(&n) {
-        assert_eq!(ones.next(), bits::select_1(&n, c));
+    for c in 0..n.count_1() {
+        assert_eq!(ones.next(), n.select_1(c));
     }
 }
 
@@ -65,25 +68,22 @@ fn rank_for_empty_range<T>(bits: &T)
 where
     T: ?Sized + bits::ops::BitRank,
 {
-    assert_eq!(bits::rank_0(bits, 0..0), 0);
-    assert_eq!(bits::rank_0(bits, 1..1), 0);
-    assert_eq!(bits::rank_0(bits, 2..2), 0);
-    assert_eq!(bits::rank_0(bits, 7..7), 0);
+    assert_eq!(bits.rank_0(0..0), 0);
+    assert_eq!(bits.rank_0(1..1), 0);
+    assert_eq!(bits.rank_0(2..2), 0);
+    assert_eq!(bits.rank_0(7..7), 0);
 
-    assert_eq!(bits::rank_1(bits, 0..0), 0);
-    assert_eq!(bits::rank_1(bits, 1..1), 0);
-    assert_eq!(bits::rank_1(bits, 2..2), 0);
-    assert_eq!(bits::rank_1(bits, 7..7), 0);
+    assert_eq!(bits.rank_1(0..0), 0);
+    assert_eq!(bits.rank_1(1..1), 0);
+    assert_eq!(bits.rank_1(2..2), 0);
+    assert_eq!(bits.rank_1(7..7), 0);
 }
 
 fn rank_0_plus_rank_1<T>(bits: &T, r: core::ops::Range<usize>)
 where
     T: ?Sized + bits::ops::BitRank,
 {
-    assert_eq!(
-        bits::rank_0(bits, r.clone()) + bits::rank_1(bits, r.clone()),
-        r.len(),
-    );
+    assert_eq!(bits.rank_0(r.clone()) + bits.rank_1(r.clone()), r.len());
 }
 
 #[test]

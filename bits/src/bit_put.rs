@@ -1,12 +1,16 @@
 use crate as bits;
+use crate::bit_len::BitLen;
 use crate::ops::for_each_blocks;
 use crate::{BitBlock, Word};
 
 pub trait BitPut: bits::ops::BitGet {
+    /// Enables the bit at `i`.
     fn bit_put1(&mut self, i: usize);
 
+    /// Disables the bit at `i`.
     fn bit_put0(&mut self, i: usize);
 
+    /// Writes `n` bits in `[i, i+n)`.
     #[doc(hidden)]
     fn put_word<N: bits::Word>(&mut self, i: usize, n: usize, mask: N) {
         for b in i..i + n {
@@ -20,14 +24,14 @@ pub trait BitPut: bits::ops::BitGet {
 impl<T: BitBlock> BitPut for [T] {
     #[inline]
     fn bit_put1(&mut self, i: usize) {
-        assert!(i < bits::len(self));
+        assert!(i < self.bit_len());
         let (i, o) = bits::address::<T>(i);
         self[i].bit_put1(o)
     }
 
     #[inline]
     fn bit_put0(&mut self, i: usize) {
-        assert!(i < bits::len(self));
+        assert!(i < self.bit_len());
         let (i, o) = bits::address::<T>(i);
         self[i].bit_put0(o)
     }
@@ -38,7 +42,7 @@ impl<T: BitBlock> BitPut for [T] {
         let mut cur = 0;
         for_each_blocks::<T, _>(i, i + n, |k, r| {
             if k < self.len() {
-                let word = bits::word(&word, cur, r.len());
+                let word = word.word(cur, r.len());
                 self[k].put_word::<N>(r.start, r.len(), word);
                 cur += r.len();
             }
@@ -49,13 +53,13 @@ impl<T: BitBlock> BitPut for [T] {
 impl BitPut for bool {
     #[inline]
     fn bit_put1(&mut self, i: usize) {
-        assert!(i < bits::len(self));
+        assert!(i < self.bit_len());
         *self = true;
     }
 
     #[inline]
     fn bit_put0(&mut self, i: usize) {
-        assert!(i < bits::len(self));
+        assert!(i < self.bit_len());
         *self = false;
     }
 }

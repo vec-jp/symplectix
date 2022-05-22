@@ -2,6 +2,21 @@ use crate as bits;
 use crate::BitBlock;
 
 pub trait BitAny: bits::ops::BitCount {
+    /// Returns true if any bits are enabled. An empty bits should return false.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::ops::BitAny;
+    /// let b1: &[u64] = &[];
+    /// let b2: &[u64] = &[0, 0, 0];
+    /// let b3: &[u64] = &[!0, !0, !0];
+    /// let b4: &[u64] = &[0, 0, 1];
+    /// assert!(!b1.any());
+    /// assert!(!b2.any());
+    /// assert!( b3.any());
+    /// assert!( b4.any());
+    /// ```
     #[inline]
     fn any(&self) -> bool {
         // !bits::is_empty(self) && self.count_1() > 0
@@ -19,7 +34,7 @@ impl BitAny for bool {
 impl<T: BitBlock> BitAny for [T] {
     #[inline]
     fn any(&self) -> bool {
-        self.iter().any(bits::any)
+        self.iter().any(BitAny::any)
     }
 }
 
@@ -27,8 +42,7 @@ macro_rules! impl_bit_any {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn any(&self) -> bool {
-            // <$X as BitAny>::any(self$(.$method())?)
-            bits::any::<$X>(self$(.$method())?)
+            <$X as BitAny>::any(self$(.$method())?)
         }
     }
 }
