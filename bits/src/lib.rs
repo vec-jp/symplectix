@@ -168,7 +168,7 @@ pub fn len<T: ?Sized + bit_len::BitLen>(bits: &T) -> usize {
 /// ```
 #[inline]
 pub fn get<T: ?Sized + bit_get::BitGet>(bits: &T, i: usize) -> Option<bool> {
-    bit_get::BitGet::get(bits, i)
+    bit_get::BitGet::bit_get(bits, i)
 }
 
 /// Returns a bit at the given index `i`.
@@ -191,7 +191,7 @@ pub fn get<T: ?Sized + bit_get::BitGet>(bits: &T, i: usize) -> Option<bool> {
 /// ```
 #[inline]
 pub fn test<T: ?Sized + bit_get::BitGet>(bits: &T, i: usize) -> bool {
-    bit_get::BitGet::test(bits, i)
+    bit_get::BitGet::bit_test(bits, i)
 }
 
 /// Enables the bit at `i`.

@@ -1,20 +1,20 @@
 use crate as bits;
-use crate::ops::for_each_blocks;
+use crate::ops::{for_each_blocks, BitLen};
 use crate::{BitBlock, Word};
 
 pub trait BitGet {
-    fn get(bs: &Self, i: usize) -> Option<bool>;
+    fn bit_get(&self, i: usize) -> Option<bool>;
 
     #[inline]
-    fn test(bs: &Self, i: usize) -> bool {
-        bits::get(bs, i).unwrap_or(false)
+    fn bit_test(&self, i: usize) -> bool {
+        self.bit_get(i).unwrap_or(false)
     }
 
     #[doc(hidden)]
     fn word<T: Word>(&self, i: usize, n: usize) -> T {
         let mut w = T::NULL;
         for b in i..i + n {
-            if bits::get(self, b).expect("index out of bounds") {
+            if self.bit_get(b).expect("index out of bounds") {
                 bits::put_1(&mut w, b - i);
             }
         }
@@ -24,10 +24,10 @@ pub trait BitGet {
 
 impl<T: BitBlock> BitGet for [T] {
     #[inline]
-    fn get(this: &Self, i: usize) -> Option<bool> {
+    fn bit_get(&self, i: usize) -> Option<bool> {
         let (i, o) = bits::address::<T>(i);
-        this.get(i)
-            .map(|block| bits::get(block, o).expect("index out of bounds"))
+        self.get(i)
+            .map(|b| b.bit_get(o).expect("index out of bounds"))
     }
 
     #[inline]
@@ -46,29 +46,30 @@ impl<T: BitBlock> BitGet for [T] {
 }
 
 /// ```
-/// assert_eq!(bits::get(&true, 0), Some(true));
-/// assert_eq!(bits::get(&true, 1), None);
+/// # use bits::ops::BitGet;
+/// assert_eq!(BitGet::bit_get(&true, 0), Some(true));
+/// assert_eq!(BitGet::bit_get(&true, 1), None);
 ///
-/// assert_eq!(bits::get(&false, 0), Some(false));
-/// assert_eq!(bits::get(&false, 1), None);
+/// assert_eq!(BitGet::bit_get(&false, 0), Some(false));
+/// assert_eq!(BitGet::bit_get(&false, 1), None);
 /// ```
 impl BitGet for bool {
     #[inline]
-    fn get(this: &Self, i: usize) -> Option<bool> {
-        (i < bits::len(this)).then(|| *this)
+    fn bit_get(&self, i: usize) -> Option<bool> {
+        (i < self.bit_len()).then(|| *self)
     }
 }
 
 macro_rules! impl_bit_get {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn get(this: &Self, i: usize) -> Option<bool> {
-            <$X as BitGet>::get(this$(.$method())?, i)
+        fn bit_get(&self, i: usize) -> Option<bool> {
+            <$X as BitGet>::bit_get(self$(.$method())?, i)
         }
 
         #[inline]
-        fn test(this: &Self, i: usize) -> bool {
-            <$X as BitGet>::test(this$(.$method())?, i)
+        fn bit_test(&self, i: usize) -> bool {
+            <$X as BitGet>::bit_test(self$(.$method())?, i)
         }
 
         #[doc(hidden)]

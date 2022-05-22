@@ -218,8 +218,8 @@ macro_rules! impls {
 
         impl BitGet for $Word {
             #[inline]
-            fn get(this: &Self, i: usize) -> Option<bool> {
-                (i < bits::len(this)).then(|| (*this & (1 << i)) != 0)
+            fn bit_get(&self, i: usize) -> Option<bool> {
+                (i < self.bit_len()).then(|| (*self & (1 << i)) != 0)
             }
 
             #[doc(hidden)]
