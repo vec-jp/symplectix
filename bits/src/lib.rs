@@ -197,13 +197,13 @@ pub fn test<T: ?Sized + bit_get::BitGet>(bits: &T, i: usize) -> bool {
 /// Enables the bit at `i`.
 #[inline]
 pub fn put_1<T: ?Sized + bit_put::BitPut>(bits: &mut T, i: usize) {
-    bit_put::BitPut::put_1(bits, i)
+    bit_put::BitPut::bit_put1(bits, i)
 }
 
 /// Disables the bit at `i`.
 #[inline]
 pub fn put_0<T: ?Sized + bit_put::BitPut>(bits: &mut T, i: usize) {
-    bit_put::BitPut::put_0(bits, i)
+    bit_put::BitPut::bit_put0(bits, i)
 }
 
 /// Counts the occurrences of `1`.

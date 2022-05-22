@@ -231,11 +231,11 @@ macro_rules! impls {
 
         impl BitPut for $Word {
             #[inline]
-            fn put_1(&mut self, i: usize) {
+            fn bit_put1(&mut self, i: usize) {
                 *self |= 1 << i;
             }
             #[inline]
-            fn put_0(&mut self, i: usize) {
+            fn bit_put0(&mut self, i: usize) {
                 *self &= !(1 << i);
             }
         }
