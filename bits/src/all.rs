@@ -1,25 +1,7 @@
-use crate::ops::BitCount;
+use crate::ops::Count;
 use crate::Block;
 
-pub trait All: BitCount {
-    /// Returns true if all bits are enabled. An empty bits should return true.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use bits::ops::All;
-    /// let a: &[u64] = &[0, 0, 0];
-    /// let b: &[u64] = &[];
-    /// let c: &[u64] = &[!0, !0, !0];
-    /// assert!(!a.all());
-    /// assert!( b.all());
-    /// assert!( c.all());
-    /// ```
-    #[inline]
-    fn all(&self) -> bool {
-        self.bits() == 0 || self.bit_count0() == 0
-    }
-}
+pub trait All: Count {}
 
 impl All for bool {
     #[inline]

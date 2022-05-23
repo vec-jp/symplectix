@@ -1,4 +1,4 @@
-use crate::ops::{BitCount, BitRank};
+use crate::ops::{BitRank, Count};
 use crate::Block;
 
 pub trait BitSelect: BitRank {
@@ -48,12 +48,12 @@ mod helper {
 
     #[inline]
     pub fn bit_search1<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
-        (n < bs.bit_count1()).then(|| binary_search(0, bs.bits(), |k| bs.bit_rank1(..k) > n) - 1)
+        (n < bs.count1()).then(|| binary_search(0, bs.bits(), |k| bs.bit_rank1(..k) > n) - 1)
     }
 
     #[inline]
     pub fn bit_search0<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
-        (n < bs.bit_count0()).then(|| binary_search(0, bs.bits(), |k| bs.bit_rank0(..k) > n) - 1)
+        (n < bs.count0()).then(|| binary_search(0, bs.bits(), |k| bs.bit_rank0(..k) > n) - 1)
     }
 }
 
@@ -61,7 +61,7 @@ impl<T: Block> BitSelect for [T] {
     #[inline]
     fn bit_select1(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
-            let count = b.bit_count1();
+            let count = b.count1();
             if n < count {
                 return Some(i * T::BITS + b.bit_select1(n).expect("BUG"));
             }
@@ -73,7 +73,7 @@ impl<T: Block> BitSelect for [T] {
     #[inline]
     fn bit_select0(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
-            let count = b.bit_count0();
+            let count = b.count0();
             if n < count {
                 return Some(i * T::BITS + b.bit_select0(n).expect("BUG"));
             }
@@ -97,12 +97,12 @@ impl<T: Block> BitSelect for [T] {
 impl BitSelect for bool {
     #[inline]
     fn bit_select1(&self, n: usize) -> Option<usize> {
-        (n < self.bit_count1()).then(|| 0)
+        (n < self.count1()).then(|| 0)
     }
 
     #[inline]
     fn bit_select0(&self, n: usize) -> Option<usize> {
-        (n < self.bit_count0()).then(|| 0)
+        (n < self.count0()).then(|| 0)
     }
 }
 

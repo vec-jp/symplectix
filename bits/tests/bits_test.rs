@@ -1,5 +1,5 @@
 use bits::{
-    ops::{BitCount, BitSelect},
+    ops::{BitSelect, Count},
     Word,
 };
 use std::borrow::Cow;
@@ -11,9 +11,7 @@ fn bits_is_implemented() {
     where
         T: ?Sized
             + bits::ops::Bits
-            + bits::ops::BitCount
-            + bits::ops::All
-            + bits::ops::BitAny
+            + bits::ops::Count
             + bits::ops::BitRank
             + bits::ops::BitRanks
             + bits::ops::BitSelect
@@ -38,7 +36,7 @@ fn bits_is_implemented() {
 fn ones<T: Word>(word: T) -> impl Iterator<Item = usize> {
     successors(Some(word), |&n| {
         let m = n & !n.lsb();
-        m.bit_any().then(|| m)
+        m.any().then(|| m)
     })
     .map(Word::count_t0)
 }
@@ -59,7 +57,7 @@ fn next_set_bit() {
 fn ones_select1() {
     let n: u32 = 0b_0101_0101;
     let mut ones = ones(n);
-    for c in 0..n.bit_count1() {
+    for c in 0..n.count1() {
         assert_eq!(ones.next(), n.bit_select1(c));
     }
 }

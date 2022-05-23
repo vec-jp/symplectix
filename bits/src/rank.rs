@@ -1,8 +1,8 @@
-use crate::ops::{BitCount, Bits};
+use crate::ops::{Bits, Count};
 use crate::Block;
 use core::ops::RangeBounds;
 
-pub trait BitRank: BitCount {
+pub trait BitRank: Count {
     /// Counts occurrences of `1` in the given range.
     #[inline]
     fn bit_rank1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
@@ -84,7 +84,7 @@ impl<T: Block> BitRank for [T] {
             self[i].bit_rank1(p..q)
         } else {
             self[i].bit_rank1(p..)
-                + self[i + 1..j].bit_count1()
+                + self[i + 1..j].count1()
                 + self.get(j).map_or(0, |b| b.bit_rank1(..q))
         }
     }
@@ -105,7 +105,7 @@ impl BitRank for bool {
         debug_assert!(s == 0 && e <= 1);
 
         if s < e {
-            self.bit_count1()
+            self.count1()
         } else {
             0
         }

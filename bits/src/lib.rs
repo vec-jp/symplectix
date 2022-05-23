@@ -1,7 +1,7 @@
 //! `bits`
 
-pub mod all;
-pub mod any;
+// pub mod all;
+// pub mod any;
 pub mod bits;
 pub mod count;
 pub mod get;

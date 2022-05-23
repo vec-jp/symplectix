@@ -1,7 +1,8 @@
-pub use crate::all::All;
-pub use crate::any::BitAny;
+// pub use crate::all::All;
+// pub use crate::any::Any;
+
 pub use crate::bits::Bits;
-pub use crate::count::BitCount;
+pub use crate::count::Count;
 pub use crate::get::BitGet;
 pub use crate::put::BitPut;
 pub use crate::rank::BitRank;

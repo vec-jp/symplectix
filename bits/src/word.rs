@@ -164,28 +164,24 @@ macro_rules! impls {
             }
         }
 
-        impl BitCount for $Word {
+        impl Count for $Word {
             #[inline]
-            fn bit_count1(&self) -> usize {
+            fn count1(&self) -> usize {
                 self.count_ones() as usize
             }
 
             #[inline]
-            fn bit_count0(&self) -> usize {
+            fn count0(&self) -> usize {
                 self.count_zeros() as usize
             }
-        }
 
-        impl All for $Word {
             #[inline]
             fn all(&self) -> bool {
                 *self == Self::FULL
             }
-        }
 
-        impl BitAny for $Word {
             #[inline]
-            fn bit_any(&self) -> bool {
+            fn any(&self) -> bool {
                 *self != Self::NULL
             }
         }
@@ -194,7 +190,7 @@ macro_rules! impls {
             #[inline]
             fn bit_rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
                 let (i, j) = to_range(&r, 0, self.bits());
-                (*self & mask::<Self>(i, j)).bit_count1()
+                (*self & mask::<Self>(i, j)).count1()
             }
 
             #[inline]
@@ -250,7 +246,7 @@ trait BitSelectImpl {
 impl BitSelectImpl for u64 {
     #[inline]
     fn bit_select1(self, n: usize) -> Option<usize> {
-        (n < self.bit_count1()).then(|| {
+        (n < self.count1()).then(|| {
             #[cfg(target_arch = "x86_64")]
             {
                 if is_x86_feature_detected!("bmi2") {
@@ -303,7 +299,7 @@ macro_rules! impl_select_word_as_u64 {
         impl BitSelectImpl for $Ty {
             #[inline]
             fn bit_select1(self, c: usize) -> Option<usize> {
-                (c < self.bit_count1()).then(|| <u64 as BitSelectImpl>::bit_select1(self as u64, c).unwrap())
+                (c < self.count1()).then(|| <u64 as BitSelectImpl>::bit_select1(self as u64, c).unwrap())
             }
         }
     )*)

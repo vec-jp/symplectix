@@ -1,23 +1,23 @@
 use crate::ops::Bits;
 use crate::Block;
 
-pub trait BitCount: Bits {
+pub trait Count: Bits {
     /// Counts the occurrences of `1`.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use bits::ops::BitCount;
+    /// # use bits::ops::Count;
     /// let a: &[u64] = &[];
     /// let b: &[u64] = &[0, 0, 0];
     /// let c: &[u64] = &[0, 1, 3];
-    /// assert_eq!(a.bit_count1(), 0);
-    /// assert_eq!(b.bit_count1(), 0);
-    /// assert_eq!(c.bit_count1(), 3);
+    /// assert_eq!(a.count1(), 0);
+    /// assert_eq!(b.count1(), 0);
+    /// assert_eq!(c.count1(), 3);
     /// ```
     #[inline]
-    fn bit_count1(&self) -> usize {
-        self.bits() - self.bit_count0()
+    fn count1(&self) -> usize {
+        self.bits() - self.count0()
     }
 
     /// Counts the occurrences of `0`.
@@ -25,94 +25,160 @@ pub trait BitCount: Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits::ops::BitCount;
+    /// # use bits::ops::Count;
     /// let a: &[u64] = &[];
     /// let b: &[u64] = &[0, 0, 0];
     /// let c: &[u64] = &[0, 1, 3];
-    /// assert_eq!(a.bit_count0(), 0);
-    /// assert_eq!(b.bit_count0(), 192);
-    /// assert_eq!(c.bit_count0(), 189);
+    /// assert_eq!(a.count0(), 0);
+    /// assert_eq!(b.count0(), 192);
+    /// assert_eq!(c.count0(), 189);
     /// ```
     #[inline]
-    fn bit_count0(&self) -> usize {
-        self.bits() - self.bit_count1()
+    fn count0(&self) -> usize {
+        self.bits() - self.count1()
+    }
+
+    /// Returns true if all bits are enabled. An empty bits should return true.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::ops::Count;
+    /// let a: &[u64] = &[0, 0, 0];
+    /// let b: &[u64] = &[];
+    /// let c: &[u64] = &[!0, !0, !0];
+    /// assert!(!a.all());
+    /// assert!( b.all());
+    /// assert!( c.all());
+    /// ```
+    #[inline]
+    fn all(&self) -> bool {
+        self.bits() == 0 || self.count0() == 0
+    }
+
+    /// Returns true if any bits are enabled. An empty bits should return false.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::ops::Count;
+    /// let b1: &[u64] = &[];
+    /// let b2: &[u64] = &[0, 0, 0];
+    /// let b3: &[u64] = &[!0, !0, !0];
+    /// let b4: &[u64] = &[0, 0, 1];
+    /// assert!(!b1.any());
+    /// assert!(!b2.any());
+    /// assert!( b3.any());
+    /// assert!( b4.any());
+    /// ```
+    #[inline]
+    fn any(&self) -> bool {
+        self.bits() != 0 && self.count1() > 0
     }
 }
 
-impl<T: Block> BitCount for [T] {
+impl<T: Block> Count for [T] {
     #[inline]
-    fn bit_count1(&self) -> usize {
-        self.iter().map(BitCount::bit_count1).sum()
+    fn count1(&self) -> usize {
+        self.iter().map(Count::count1).sum()
     }
 
     #[inline]
-    fn bit_count0(&self) -> usize {
-        self.iter().map(BitCount::bit_count0).sum()
+    fn count0(&self) -> usize {
+        self.iter().map(Count::count0).sum()
+    }
+
+    #[inline]
+    fn all(&self) -> bool {
+        self.iter().all(Count::all)
+    }
+
+    #[inline]
+    fn any(&self) -> bool {
+        self.iter().any(Count::any)
     }
 }
 
 /// ```
-/// # use bits::ops::BitCount;
-/// assert_eq!(BitCount::bit_count1(&true),  1);
-/// assert_eq!(BitCount::bit_count1(&false), 0);
-/// assert_eq!(BitCount::bit_count0(&true),  0);
-/// assert_eq!(BitCount::bit_count0(&false), 1);
+/// # use bits::ops::Count;
+/// assert_eq!(bits::ops::Count::count1(&true),  1);
+/// assert_eq!(bits::ops::Count::count1(&false), 0);
+/// assert_eq!(bits::ops::Count::count0(&true),  0);
+/// assert_eq!(bits::ops::Count::count0(&false), 1);
 /// ```
-impl BitCount for bool {
+impl Count for bool {
     #[inline]
-    fn bit_count1(&self) -> usize {
+    fn count1(&self) -> usize {
         *self as usize
     }
     #[inline]
-    fn bit_count0(&self) -> usize {
+    fn count0(&self) -> usize {
         !self as usize
     }
+
+    #[inline]
+    fn all(&self) -> bool {
+        *self
+    }
+    #[inline]
+    fn any(&self) -> bool {
+        *self
+    }
 }
 
-macro_rules! impl_bit_count {
+macro_rules! impl_count {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn bit_count1(&self) -> usize {
-            <$X as BitCount>::bit_count1(self$(.$method())?)
+        fn count1(&self) -> usize {
+            <$X as Count>::count1(self$(.$method())?)
         }
 
         #[inline]
-        fn bit_count0(&self) -> usize {
-            <$X as BitCount>::bit_count0(self$(.$method())?)
+        fn count0(&self) -> usize {
+            <$X as Count>::count0(self$(.$method())?)
+        }
+
+        #[inline]
+        fn all(&self) -> bool {
+            <$X as Count>::all(self$(.$method())?)
+        }
+        #[inline]
+        fn any(&self) -> bool {
+            <$X as Count>::any(self$(.$method())?)
         }
     }
 }
 
-impl<'a, T: ?Sized + BitCount> BitCount for &'a T {
-    impl_bit_count!(T);
+impl<'a, T: ?Sized + Count> Count for &'a T {
+    impl_count!(T);
 }
 
-impl<T, const N: usize> BitCount for [T; N]
+impl<T, const N: usize> Count for [T; N]
 where
-    [T]: BitCount,
+    [T]: Count,
 {
-    impl_bit_count!([T], as_ref);
+    impl_count!([T], as_ref);
 }
 
 mod alloc {
     use super::*;
     use std::borrow::Cow;
 
-    impl<T> BitCount for Vec<T>
+    impl<T> Count for Vec<T>
     where
-        [T]: BitCount,
+        [T]: Count,
     {
-        impl_bit_count!([T]);
+        impl_count!([T]);
     }
 
-    impl<T: ?Sized + BitCount> BitCount for Box<T> {
-        impl_bit_count!(T);
+    impl<T: ?Sized + Count> Count for Box<T> {
+        impl_count!(T);
     }
 
-    impl<'a, T> BitCount for Cow<'a, T>
+    impl<'a, T> Count for Cow<'a, T>
     where
-        T: ?Sized + ToOwned + BitCount,
+        T: ?Sized + ToOwned + Count,
     {
-        impl_bit_count!(T, as_ref);
+        impl_count!(T, as_ref);
     }
 }
