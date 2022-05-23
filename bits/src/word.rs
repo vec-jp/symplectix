@@ -199,15 +199,15 @@ macro_rules! impls {
             }
         }
 
-        impl BitSelect for $Word {
+        impl Select for $Word {
             #[inline]
-            fn bit_select1(&self, n: usize) -> Option<usize> {
-                <Self as BitSelectImpl>::bit_select1(*self, n)
+            fn select1(&self, n: usize) -> Option<usize> {
+                <Self as SelectWord>::select_word(*self, n)
             }
 
             #[inline]
-            fn bit_select0(&self, n: usize) -> Option<usize> {
-                <Self as BitSelectImpl>::bit_select1(!self, n)
+            fn select0(&self, n: usize) -> Option<usize> {
+                <Self as SelectWord>::select_word(!self, n)
             }
         }
 
@@ -238,14 +238,14 @@ macro_rules! impls {
 }
 impls!(u8 u16 u32 u64 u128);
 
-/// A helper trait to implement [`BitSelect`](crate::BitSelect) for u64.
-trait BitSelectImpl {
-    fn bit_select1(self, n: usize) -> Option<usize>;
+/// A helper trait to implement `Select` for u64.
+trait SelectWord {
+    fn select_word(self, n: usize) -> Option<usize>;
 }
 
-impl BitSelectImpl for u64 {
+impl SelectWord for u64 {
     #[inline]
-    fn bit_select1(self, n: usize) -> Option<usize> {
+    fn select_word(self, n: usize) -> Option<usize> {
         (n < self.count1()).then(|| {
             #[cfg(target_arch = "x86_64")]
             {
@@ -296,29 +296,29 @@ fn broadword(x: u64, n: u64) -> usize {
 
 macro_rules! impl_select_word_as_u64 {
     ( $( $Ty:ty )* ) => ($(
-        impl BitSelectImpl for $Ty {
+        impl SelectWord for $Ty {
             #[inline]
-            fn bit_select1(self, c: usize) -> Option<usize> {
-                (c < self.count1()).then(|| <u64 as BitSelectImpl>::bit_select1(self as u64, c).unwrap())
+            fn select_word(self, c: usize) -> Option<usize> {
+                (c < self.count1()).then(|| <u64 as SelectWord>::select_word(self as u64, c).unwrap())
             }
         }
     )*)
 }
 impl_select_word_as_u64!(u8 u16 u32);
 
-impl BitSelectImpl for u128 {
+impl SelectWord for u128 {
     /// ```
-    /// # use bits::ops::{BitPut, BitSelect};
+    /// # use bits::ops::{BitPut, Select};
     /// let mut n: u128 = 0;
     /// for i in (0..128).step_by(2) {
     ///     n.bit_put1(i);
     /// }
-    /// assert_eq!(n.bit_select1(60), Some(120));
-    /// assert_eq!(n.bit_select1(61), Some(122));
+    /// assert_eq!(n.select1(60), Some(120));
+    /// assert_eq!(n.select1(61), Some(122));
     /// ```
     #[inline]
-    fn bit_select1(self, c: usize) -> Option<usize> {
+    fn select_word(self, c: usize) -> Option<usize> {
         let this: [u64; 2] = [self as u64, (self >> 64) as u64];
-        this.bit_select1(c)
+        this.select1(c)
     }
 }

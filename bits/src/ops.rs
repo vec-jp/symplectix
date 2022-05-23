@@ -7,7 +7,7 @@ pub use crate::excess::Excess;
 pub use crate::get::BitGet;
 pub use crate::put::BitPut;
 pub use crate::rank::Rank;
-pub use crate::select::BitSelect;
+pub use crate::select::Select;
 
 pub(crate) fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
 where

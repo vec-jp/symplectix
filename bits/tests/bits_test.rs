@@ -1,5 +1,5 @@
 use bits::{
-    ops::{BitSelect, Count},
+    ops::{Count, Select},
     Word,
 };
 use std::borrow::Cow;
@@ -13,7 +13,7 @@ fn bits_is_implemented() {
             + bits::ops::Bits
             + bits::ops::Count
             + bits::ops::Rank
-            + bits::ops::BitSelect
+            + bits::ops::Select
             + bits::ops::BitGet,
     {
     }
@@ -57,7 +57,7 @@ fn ones_select1() {
     let n: u32 = 0b_0101_0101;
     let mut ones = ones(n);
     for c in 0..n.count1() {
-        assert_eq!(ones.next(), n.bit_select1(c));
+        assert_eq!(ones.next(), n.select1(c));
     }
 }
 
