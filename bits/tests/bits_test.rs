@@ -12,7 +12,7 @@ fn bits_is_implemented() {
         T: ?Sized
             + bits::ops::Bits
             + bits::ops::Count
-            + bits::ops::BitRank
+            + bits::ops::Rank
             + bits::ops::BitRanks
             + bits::ops::BitSelect
             + bits::ops::BitGet,
@@ -64,27 +64,24 @@ fn ones_select1() {
 
 fn rank_for_empty_range<T>(bits: &T)
 where
-    T: ?Sized + bits::ops::BitRank,
+    T: ?Sized + bits::ops::Rank,
 {
-    assert_eq!(bits.bit_rank0(0..0), 0);
-    assert_eq!(bits.bit_rank0(1..1), 0);
-    assert_eq!(bits.bit_rank0(2..2), 0);
-    assert_eq!(bits.bit_rank0(7..7), 0);
+    assert_eq!(bits.rank0(0..0), 0);
+    assert_eq!(bits.rank0(1..1), 0);
+    assert_eq!(bits.rank0(2..2), 0);
+    assert_eq!(bits.rank0(7..7), 0);
 
-    assert_eq!(bits.bit_rank1(0..0), 0);
-    assert_eq!(bits.bit_rank1(1..1), 0);
-    assert_eq!(bits.bit_rank1(2..2), 0);
-    assert_eq!(bits.bit_rank1(7..7), 0);
+    assert_eq!(bits.rank1(0..0), 0);
+    assert_eq!(bits.rank1(1..1), 0);
+    assert_eq!(bits.rank1(2..2), 0);
+    assert_eq!(bits.rank1(7..7), 0);
 }
 
 fn rank_0_plus_rank_1<T>(bits: &T, r: core::ops::Range<usize>)
 where
-    T: ?Sized + bits::ops::BitRank,
+    T: ?Sized + bits::ops::Rank,
 {
-    assert_eq!(
-        bits.bit_rank0(r.clone()) + bits.bit_rank1(r.clone()),
-        r.len()
-    );
+    assert_eq!(bits.rank0(r.clone()) + bits.rank1(r.clone()), r.len());
 }
 
 #[test]

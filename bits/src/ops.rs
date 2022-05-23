@@ -5,8 +5,8 @@ pub use crate::bits::Bits;
 pub use crate::count::Count;
 pub use crate::get::BitGet;
 pub use crate::put::BitPut;
-pub use crate::rank::BitRank;
 pub use crate::rank::BitRanks;
+pub use crate::rank::Rank;
 pub use crate::select::BitSelect;
 
 pub(crate) fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)

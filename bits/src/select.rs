@@ -1,7 +1,7 @@
-use crate::ops::{BitRank, Count};
+use crate::ops::{Count, Rank};
 use crate::Block;
 
-pub trait BitSelect: BitRank {
+pub trait BitSelect: Rank {
     /// Returns the position of the n-th 1, indexed starting from zero.
     /// `n` must be less than `self.count1()`, orherwise returns `None`.
     #[inline]
@@ -28,7 +28,7 @@ pub trait BitSelect: BitRank {
 }
 
 mod helper {
-    use crate::ops::BitRank;
+    use crate::ops::Rank;
 
     /// Binary search to find and return the smallest index k in `[i, j)` at which f(k) is true,
     /// assuming that on the range `[i, j)`, f(k) == true implies f(k+1) == true.
@@ -47,13 +47,13 @@ mod helper {
     }
 
     #[inline]
-    pub fn bit_search1<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
-        (n < bs.count1()).then(|| binary_search(0, bs.bits(), |k| bs.bit_rank1(..k) > n) - 1)
+    pub fn bit_search1<T: ?Sized + Rank>(bs: &T, n: usize) -> Option<usize> {
+        (n < bs.count1()).then(|| binary_search(0, bs.bits(), |k| bs.rank1(..k) > n) - 1)
     }
 
     #[inline]
-    pub fn bit_search0<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
-        (n < bs.count0()).then(|| binary_search(0, bs.bits(), |k| bs.bit_rank0(..k) > n) - 1)
+    pub fn bit_search0<T: ?Sized + Rank>(bs: &T, n: usize) -> Option<usize> {
+        (n < bs.count0()).then(|| binary_search(0, bs.bits(), |k| bs.rank0(..k) > n) - 1)
     }
 }
 

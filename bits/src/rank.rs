@@ -2,19 +2,19 @@ use crate::ops::{Bits, Count};
 use crate::Block;
 use core::ops::RangeBounds;
 
-pub trait BitRank: Count {
+pub trait Rank: Count {
     /// Counts occurrences of `1` in the given range.
     #[inline]
-    fn bit_rank1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
+    fn rank1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
         let (i, j) = crate::to_range(&index, 0, self.bits());
-        (j - i) - self.bit_rank0(index)
+        (j - i) - self.rank0(index)
     }
 
     /// Counts occurrences of `0` in the given range.
     #[inline]
-    fn bit_rank0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
+    fn rank0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
         let (i, j) = crate::to_range(&index, 0, self.bits());
-        (j - i) - self.bit_rank1(index)
+        (j - i) - self.rank1(index)
     }
 }
 
@@ -33,16 +33,16 @@ pub trait BitRank: Count {
 /// assert_eq!(v.bit_ranks(..16).excess1(), Some(4));
 /// assert_eq!(v.bit_ranks(..16).excess0(), None);
 /// ```
-pub trait BitRanks: BitRank {
+pub trait BitRanks: Rank {
     /// Computes `bit_rank0` and `bit_rank1` at a time.
     fn bit_ranks<Index: RangeBounds<usize>>(&self, index: Index) -> Ranks;
 }
 
-impl<T: ?Sized + BitRank> BitRanks for T {
+impl<T: ?Sized + Rank> BitRanks for T {
     #[inline]
     fn bit_ranks<Index: RangeBounds<usize>>(&self, index: Index) -> Ranks {
         let (i, j) = crate::to_range(&index, 0, self.bits());
-        let rank1 = self.bit_rank1(i..j);
+        let rank1 = self.rank1(i..j);
         let rank0 = (j - i) - rank1;
         Ranks { rank0, rank1 }
     }
@@ -74,33 +74,31 @@ impl Ranks {
     }
 }
 
-impl<T: Block> BitRank for [T] {
+impl<T: Block> Rank for [T] {
     #[inline]
-    fn bit_rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+    fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         let (s, e) = crate::to_range(&r, 0, self.bits());
         let (i, p) = crate::address::<T>(s);
         let (j, q) = crate::address::<T>(e);
         if i == j {
-            self[i].bit_rank1(p..q)
+            self[i].rank1(p..q)
         } else {
-            self[i].bit_rank1(p..)
-                + self[i + 1..j].count1()
-                + self.get(j).map_or(0, |b| b.bit_rank1(..q))
+            self[i].rank1(p..) + self[i + 1..j].count1() + self.get(j).map_or(0, |b| b.rank1(..q))
         }
     }
 }
 
 /// ```
-/// # use bits::ops::BitRank;
-/// assert_eq!(BitRank::bit_rank1(&true, ..1), 1);
-/// assert_eq!(BitRank::bit_rank0(&true, ..1), 0);
+/// # use bits::ops::Rank;
+/// assert_eq!(Rank::rank1(&true, ..1), 1);
+/// assert_eq!(Rank::rank0(&true, ..1), 0);
 ///
-/// assert_eq!(BitRank::bit_rank1(&true, ..0), 0);
-/// assert_eq!(BitRank::bit_rank0(&true, ..0), 0);
+/// assert_eq!(Rank::rank1(&true, ..0), 0);
+/// assert_eq!(Rank::rank0(&true, ..0), 0);
 /// ```
-impl BitRank for bool {
+impl Rank for bool {
     #[inline]
-    fn bit_rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+    fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         let (s, e) = crate::to_range(&r, 0, 1);
         debug_assert!(s == 0 && e <= 1);
 
@@ -112,50 +110,50 @@ impl BitRank for bool {
     }
 }
 
-macro_rules! impl_bit_rank {
+macro_rules! impl_rank {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn bit_rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-            <$X as BitRank>::bit_rank1(self$(.$method())?, r)
+        fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+            <$X as Rank>::rank1(self$(.$method())?, r)
         }
 
         #[inline]
-        fn bit_rank0<R: RangeBounds<usize>>(&self, r: R) -> usize {
-            <$X as BitRank>::bit_rank0(self$(.$method())?, r)
+        fn rank0<R: RangeBounds<usize>>(&self, r: R) -> usize {
+            <$X as Rank>::rank0(self$(.$method())?, r)
         }
     }
 }
 
-impl<'a, T: ?Sized + BitRank> BitRank for &'a T {
-    impl_bit_rank!(T);
+impl<'a, T: ?Sized + Rank> Rank for &'a T {
+    impl_rank!(T);
 }
 
-impl<T, const N: usize> BitRank for [T; N]
+impl<T, const N: usize> Rank for [T; N]
 where
-    [T]: BitRank,
+    [T]: Rank,
 {
-    impl_bit_rank!([T], as_ref);
+    impl_rank!([T], as_ref);
 }
 
 mod alloc {
     use super::*;
     use std::borrow::Cow;
 
-    impl<T> BitRank for Vec<T>
+    impl<T> Rank for Vec<T>
     where
-        [T]: BitRank,
+        [T]: Rank,
     {
-        impl_bit_rank!([T]);
+        impl_rank!([T]);
     }
 
-    impl<T: ?Sized + BitRank> BitRank for Box<T> {
-        impl_bit_rank!(T);
+    impl<T: ?Sized + Rank> Rank for Box<T> {
+        impl_rank!(T);
     }
 
-    impl<'a, T> BitRank for Cow<'a, T>
+    impl<'a, T> Rank for Cow<'a, T>
     where
-        T: ?Sized + ToOwned + BitRank,
+        T: ?Sized + ToOwned + Rank,
     {
-        impl_bit_rank!(T, as_ref);
+        impl_rank!(T, as_ref);
     }
 }

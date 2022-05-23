@@ -1,28 +1,7 @@
 use crate::ops::Count;
 use crate::Block;
 
-pub trait Any: Count {
-    /// Returns true if any bits are enabled. An empty bits should return false.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use bits::ops::BitAny;
-    /// let b1: &[u64] = &[];
-    /// let b2: &[u64] = &[0, 0, 0];
-    /// let b3: &[u64] = &[!0, !0, !0];
-    /// let b4: &[u64] = &[0, 0, 1];
-    /// assert!(!b1.bit_any());
-    /// assert!(!b2.bit_any());
-    /// assert!( b3.bit_any());
-    /// assert!( b4.bit_any());
-    /// ```
-    #[inline]
-    fn any(&self) -> bool {
-        // !bits::is_empty(self) && self.count_1() > 0
-        self.bits() != 0 && self.count1() > 0
-    }
-}
+pub trait Any: Count {}
 
 impl Any for bool {
     #[inline]
