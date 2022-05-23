@@ -1,5 +1,4 @@
-use crate::ops::{Bits, Count};
-use crate::Block;
+use crate::{Bits, Block, Count};
 use core::ops::RangeBounds;
 
 pub trait Rank: Count {
@@ -33,7 +32,7 @@ impl<T: Block> Rank for [T] {
 }
 
 /// ```
-/// # use bits::ops::Rank;
+/// # use bits::Rank;
 /// assert_eq!(Rank::rank1(&true, ..1), 1);
 /// assert_eq!(Rank::rank0(&true, ..1), 0);
 ///

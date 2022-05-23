@@ -1,20 +1,27 @@
 //! `bits`
 
-pub mod bits;
-pub mod bits_mut;
-pub mod count;
-pub mod excess;
-pub mod ops;
-pub mod rank;
-pub mod select;
-
+mod bits;
+mod bits_mut;
 mod block;
+mod count;
+mod excess;
+mod rank;
+mod select;
 mod word;
-pub use self::{block::Block, word::Word};
+
+pub use self::bits::Bits;
+pub use self::bits_mut::BitsMut;
+pub use self::block::Block;
+pub use self::count::Count;
+pub use self::excess::Excess;
+pub use self::rank::Rank;
+pub use self::select::Select;
+pub use self::word::Word;
+
+use core::ops::{Bound, Div, Range, RangeBounds, Rem};
 
 #[inline]
 fn address<T: Block>(i: usize) -> (usize, usize) {
-    use core::ops::{Div, Rem};
     fn divrem<T, U>(t: T, u: U) -> (<T as Div<U>>::Output, <T as Rem<U>>::Output)
     where
         T: Copy + Div<U> + Rem<U>,
@@ -28,19 +35,17 @@ fn address<T: Block>(i: usize) -> (usize, usize) {
 
 /// A utility to clamp the given range into a valid one.
 /// Panics if debug is enabled and `min <= i && i <= j && j <= max`.
-fn to_range<R: core::ops::RangeBounds<usize>>(r: &R, min: usize, max: usize) -> (usize, usize) {
-    use core::ops::Bound::*;
-
+fn to_range<R: RangeBounds<usize>>(r: &R, min: usize, max: usize) -> (usize, usize) {
     let (i, j) = (
         match r.start_bound() {
-            Included(&s) => s,
-            Excluded(&s) => s + 1,
-            Unbounded => min,
+            Bound::Included(&s) => s,
+            Bound::Excluded(&s) => s + 1,
+            Bound::Unbounded => min,
         },
         match r.end_bound() {
-            Included(&e) => e + 1,
-            Excluded(&e) => e,
-            Unbounded => max,
+            Bound::Included(&e) => e + 1,
+            Bound::Excluded(&e) => e,
+            Bound::Unbounded => max,
         },
     );
 
@@ -53,10 +58,32 @@ const fn blocks(n: usize, b: usize) -> usize {
     n / b + (n % b > 0) as usize
 }
 
+fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
+where
+    T: Block,
+    F: FnMut(usize, Range<usize>),
+{
+    assert!(s <= e);
+    if s == e {
+        return;
+    }
+
+    let (q0, r0) = crate::address::<T>(s);
+    let (q1, r1) = crate::address::<T>(e);
+
+    if q0 == q1 {
+        f(q0, r0..r1);
+    } else {
+        f(q0, r0..T::BITS);
+        (q0 + 1..q1).for_each(|k| f(k, 0..T::BITS));
+        f(q1, 0..r1)
+    }
+}
+
 /// Returns an empty `Vec<T>` with the at least specified capacity in bits.
 ///
 /// ```
-/// # use bits::ops::Bits;
+/// # use bits::Bits;
 /// let v = bits::with_capacity::<u8>(80);
 /// // v has no bits, but an enough capacity to store 80 bits.
 /// assert_eq!(v.bits(), 0);

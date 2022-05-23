@@ -1,4 +1,4 @@
-use crate::rank::Rank;
+use crate::Rank;
 use core::ops::RangeBounds;
 
 /// `Excess` extends `Rank` to count exceeded bits.
@@ -6,7 +6,7 @@ use core::ops::RangeBounds;
 /// # Examples
 ///
 /// ```
-/// # use bits::ops::Excess;
+/// # use bits::Excess;
 /// let v: &[u8] = &[0b_1111_0000, 0b_1111_1100];
 /// assert_eq!(v.excess(..10), 2);
 /// assert_eq!(v.excess1(..10), None);

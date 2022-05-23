@@ -1,7 +1,4 @@
-use bits::{
-    ops::{Count, Select},
-    Word,
-};
+use bits::{Count, Select, Word};
 use std::borrow::Cow;
 use std::iter::successors;
 
@@ -9,7 +6,7 @@ use std::iter::successors;
 fn bits_is_implemented() {
     fn _test<T>()
     where
-        T: ?Sized + bits::ops::Bits + bits::ops::Count + bits::ops::Rank + bits::ops::Select,
+        T: ?Sized + bits::Bits + bits::Count + bits::Rank + bits::Select,
     {
     }
 
@@ -58,7 +55,7 @@ fn ones_select1() {
 
 fn rank_for_empty_range<T>(bits: &T)
 where
-    T: ?Sized + bits::ops::Rank,
+    T: ?Sized + bits::Rank,
 {
     assert_eq!(bits.rank0(0..0), 0);
     assert_eq!(bits.rank0(1..1), 0);
@@ -73,7 +70,7 @@ where
 
 fn rank_0_plus_rank_1<T>(bits: &T, r: core::ops::Range<usize>)
 where
-    T: ?Sized + bits::ops::Rank,
+    T: ?Sized + bits::Rank,
 {
     assert_eq!(bits.rank0(r.clone()) + bits.rank1(r.clone()), r.len());
 }

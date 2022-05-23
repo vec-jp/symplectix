@@ -1,4 +1,4 @@
-use crate::{ops::*, to_range, Block};
+use crate::*;
 use core::{hash::Hash, ops, ops::RangeBounds};
 
 mod private {
@@ -306,7 +306,7 @@ impl_select_word_as_u64!(u8 u16 u32);
 
 impl SelectWord for u128 {
     /// ```
-    /// # use bits::ops::{BitsMut, Select};
+    /// # use bits::{BitsMut, Select};
     /// let mut n: u128 = 0;
     /// for i in (0..128).step_by(2) {
     ///     n.set_bit(i);

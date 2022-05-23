@@ -1,5 +1,4 @@
-use crate::ops::{for_each_blocks, Bits};
-use crate::{Block, Word};
+use crate::{Bits, Block, Word};
 
 pub trait BitsMut: Bits {
     fn set_bit(&mut self, i: usize);
@@ -36,7 +35,7 @@ impl<T: Block> BitsMut for [T] {
     #[doc(hidden)]
     fn put_word<N: Word>(&mut self, i: usize, n: usize, word: N) {
         let mut cur = 0;
-        for_each_blocks::<T, _>(i, i + n, |k, r| {
+        crate::for_each_blocks::<T, _>(i, i + n, |k, r| {
             if k < self.len() {
                 let word = word.word(cur, r.len());
                 self[k].put_word::<N>(r.start, r.len(), word);

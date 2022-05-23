@@ -1,5 +1,4 @@
-use crate::ops::Bits;
-use crate::Block;
+use crate::{Bits, Block};
 
 pub trait Count: Bits {
     /// Counts the occurrences of `1`.
@@ -7,7 +6,7 @@ pub trait Count: Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits::ops::Count;
+    /// # use bits::Count;
     /// let a: &[u64] = &[];
     /// let b: &[u64] = &[0, 0, 0];
     /// let c: &[u64] = &[0, 1, 3];
@@ -25,7 +24,7 @@ pub trait Count: Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits::ops::Count;
+    /// # use bits::Count;
     /// let a: &[u64] = &[];
     /// let b: &[u64] = &[0, 0, 0];
     /// let c: &[u64] = &[0, 1, 3];
@@ -43,7 +42,7 @@ pub trait Count: Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits::ops::Count;
+    /// # use bits::Count;
     /// let a: &[u64] = &[0, 0, 0];
     /// let b: &[u64] = &[];
     /// let c: &[u64] = &[!0, !0, !0];
@@ -61,7 +60,7 @@ pub trait Count: Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits::ops::Count;
+    /// # use bits::Count;
     /// let b1: &[u64] = &[];
     /// let b2: &[u64] = &[0, 0, 0];
     /// let b3: &[u64] = &[!0, !0, !0];
@@ -100,11 +99,10 @@ impl<T: Block> Count for [T] {
 }
 
 /// ```
-/// # use bits::ops::Count;
-/// assert_eq!(bits::ops::Count::count1(&true),  1);
-/// assert_eq!(bits::ops::Count::count1(&false), 0);
-/// assert_eq!(bits::ops::Count::count0(&true),  0);
-/// assert_eq!(bits::ops::Count::count0(&false), 1);
+/// assert_eq!(bits::Count::count1(&true),  1);
+/// assert_eq!(bits::Count::count1(&false), 0);
+/// assert_eq!(bits::Count::count0(&true),  0);
+/// assert_eq!(bits::Count::count0(&false), 1);
 /// ```
 impl Count for bool {
     #[inline]

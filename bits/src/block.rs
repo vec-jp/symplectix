@@ -1,4 +1,4 @@
-use crate::ops::*;
+use crate::*;
 
 pub trait Block: Clone + Bits + Count + Rank + Excess + Select + BitsMut {
     const BITS: usize;

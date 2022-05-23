@@ -1,4 +1,3 @@
-use crate::ops::for_each_blocks;
 use crate::{Block, Word};
 
 pub trait Bits {
@@ -7,7 +6,7 @@ pub trait Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits::ops::Bits;
+    /// # use bits::Bits;
     /// let v: &[u8] = &[0, 0, 0];
     /// let w: &[u8] = &[];
     /// assert_eq!(v.bits(), 24);
@@ -21,7 +20,7 @@ pub trait Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits::ops::Bits;
+    /// # use bits::Bits;
     /// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
     /// assert_eq!(v.bit(0),   Some(true));
     /// assert_eq!(v.bit(64),  Some(true));
@@ -35,7 +34,7 @@ pub trait Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits::ops::Bits;
+    /// # use bits::Bits;
     /// let s: &[u64] = &[!0, 0, !0];
     /// assert_eq!(s.word::<u32>(  0,  4), 0b1111);
     /// assert_eq!(s.word::<u32>( 60, 20), 0b1111);
@@ -70,7 +69,7 @@ impl<T: Block> Bits for [T] {
     fn word<N: Word>(&self, i: usize, n: usize) -> N {
         let mut cur = 0;
         let mut out = N::NULL;
-        for_each_blocks::<T, _>(i, i + n, |k, r| {
+        crate::for_each_blocks::<T, _>(i, i + n, |k, r| {
             if k < self.len() && cur < <N as Block>::BITS {
                 out |= self[k].word::<N>(r.start, r.len()) << cur;
                 cur += r.len();
@@ -81,7 +80,7 @@ impl<T: Block> Bits for [T] {
 }
 
 /// ```
-/// # use bits::ops::Bits;
+/// # use bits::Bits;
 /// assert_eq!(Bits::bit(&true,  0), Some(true));
 /// assert_eq!(Bits::bit(&true,  1), None);
 /// assert_eq!(Bits::bit(&false, 0), Some(false));
