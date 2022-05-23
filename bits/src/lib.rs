@@ -1,14 +1,14 @@
 //! `bits`
 
-pub mod bit_all;
-pub mod bit_any;
-pub mod bit_count;
-pub mod bit_get;
-pub mod bit_len;
-pub mod bit_put;
-pub mod bit_rank;
-pub mod bit_select;
+pub mod all;
+pub mod any;
+pub mod count;
+pub mod get;
+pub mod len;
 pub mod ops;
+pub mod put;
+pub mod rank;
+pub mod select;
 
 mod block;
 mod word;

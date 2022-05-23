@@ -1,12 +1,12 @@
-pub use crate::bit_all::BitAll;
-pub use crate::bit_any::BitAny;
-pub use crate::bit_count::BitCount;
-pub use crate::bit_get::BitGet;
-pub use crate::bit_len::BitLen;
-pub use crate::bit_put::BitPut;
-pub use crate::bit_rank::BitRank;
-pub use crate::bit_rank::BitRanks;
-pub use crate::bit_select::BitSelect;
+pub use crate::all::BitAll;
+pub use crate::any::BitAny;
+pub use crate::count::BitCount;
+pub use crate::get::BitGet;
+pub use crate::len::BitLen;
+pub use crate::put::BitPut;
+pub use crate::rank::BitRank;
+pub use crate::rank::BitRanks;
+pub use crate::select::BitSelect;
 
 pub(crate) fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
 where

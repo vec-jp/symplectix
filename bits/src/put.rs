@@ -1,4 +1,4 @@
-use crate::bit_len::BitLen;
+use crate::len::BitLen;
 use crate::ops::{for_each_blocks, BitGet};
 use crate::{Block, Word};
 
