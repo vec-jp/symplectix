@@ -1,9 +1,8 @@
 //! `bits`
 
-// pub mod all;
-// pub mod any;
 pub mod bits;
 pub mod count;
+pub mod excess;
 pub mod get;
 pub mod ops;
 pub mod put;

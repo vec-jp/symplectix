@@ -13,7 +13,6 @@ fn bits_is_implemented() {
             + bits::ops::Bits
             + bits::ops::Count
             + bits::ops::Rank
-            + bits::ops::BitRanks
             + bits::ops::BitSelect
             + bits::ops::BitGet,
     {

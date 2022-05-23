@@ -3,9 +3,9 @@
 
 pub use crate::bits::Bits;
 pub use crate::count::Count;
+pub use crate::excess::Excess;
 pub use crate::get::BitGet;
 pub use crate::put::BitPut;
-pub use crate::rank::BitRanks;
 pub use crate::rank::Rank;
 pub use crate::select::BitSelect;
 
