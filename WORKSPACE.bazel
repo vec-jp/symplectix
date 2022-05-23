@@ -40,9 +40,6 @@ rules_foreign_cc_dependencies()
 
 # Rust
 
-# `Digest::compute` in cargo-bazel seems to return a different result for linux and macos.
-# _RUST_VERSION = "1.60.0"
-
 _RUST_VERSION = "1.60.0"
 
 _RUST_EDITION = "2021"
