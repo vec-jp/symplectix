@@ -1,6 +1,6 @@
 use crate::ops::*;
 
-pub trait Block: Clone + Bits + Count + Rank + Excess + Select + BitPut {
+pub trait Block: Clone + Bits + Count + Rank + Excess + Select + BitsMut {
     const BITS: usize;
 
     #[doc(hidden)]

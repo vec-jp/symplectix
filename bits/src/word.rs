@@ -175,6 +175,17 @@ macro_rules! impls {
             }
         }
 
+        impl BitsMut for $Word {
+            #[inline]
+            fn set_bit(&mut self, i: usize) {
+                *self |= 1 << i;
+            }
+            #[inline]
+            fn unset_bit(&mut self, i: usize) {
+                *self &= !(1 << i);
+            }
+        }
+
         impl Count for $Word {
             #[inline]
             fn count1(&self) -> usize {
@@ -219,17 +230,6 @@ macro_rules! impls {
             #[inline]
             fn select0(&self, n: usize) -> Option<usize> {
                 <Self as SelectWord>::select_word(!self, n)
-            }
-        }
-
-        impl BitPut for $Word {
-            #[inline]
-            fn bit_put1(&mut self, i: usize) {
-                *self |= 1 << i;
-            }
-            #[inline]
-            fn bit_put0(&mut self, i: usize) {
-                *self &= !(1 << i);
             }
         }
     )*)
@@ -306,10 +306,10 @@ impl_select_word_as_u64!(u8 u16 u32);
 
 impl SelectWord for u128 {
     /// ```
-    /// # use bits::ops::{BitPut, Select};
+    /// # use bits::ops::{BitsMut, Select};
     /// let mut n: u128 = 0;
     /// for i in (0..128).step_by(2) {
-    ///     n.bit_put1(i);
+    ///     n.set_bit(i);
     /// }
     /// assert_eq!(n.select1(60), Some(120));
     /// assert_eq!(n.select1(61), Some(122));

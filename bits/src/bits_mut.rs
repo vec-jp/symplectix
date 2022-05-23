@@ -1,37 +1,35 @@
 use crate::ops::{for_each_blocks, Bits};
 use crate::{Block, Word};
 
-pub trait BitPut: Bits {
-    /// Enables the bit at `i`.
-    fn bit_put1(&mut self, i: usize);
+pub trait BitsMut: Bits {
+    fn set_bit(&mut self, i: usize);
 
-    /// Disables the bit at `i`.
-    fn bit_put0(&mut self, i: usize);
+    fn unset_bit(&mut self, i: usize);
 
     /// Writes `n` bits in `[i, i+n)`.
     #[doc(hidden)]
     fn put_word<N: Word>(&mut self, i: usize, n: usize, mask: N) {
         for b in i..i + n {
             if mask.bit(b - i).expect("index out of bounds") {
-                self.bit_put1(b);
+                self.set_bit(b);
             }
         }
     }
 }
 
-impl<T: Block> BitPut for [T] {
+impl<T: Block> BitsMut for [T] {
     #[inline]
-    fn bit_put1(&mut self, i: usize) {
+    fn set_bit(&mut self, i: usize) {
         assert!(i < self.bits());
         let (i, o) = crate::address::<T>(i);
-        self[i].bit_put1(o)
+        self[i].set_bit(o)
     }
 
     #[inline]
-    fn bit_put0(&mut self, i: usize) {
+    fn unset_bit(&mut self, i: usize) {
         assert!(i < self.bits());
         let (i, o) = crate::address::<T>(i);
-        self[i].bit_put0(o)
+        self[i].unset_bit(o)
     }
 
     #[inline]
@@ -48,67 +46,67 @@ impl<T: Block> BitPut for [T] {
     }
 }
 
-impl BitPut for bool {
+impl BitsMut for bool {
     #[inline]
-    fn bit_put1(&mut self, i: usize) {
+    fn set_bit(&mut self, i: usize) {
         assert!(i < self.bits());
         *self = true;
     }
 
     #[inline]
-    fn bit_put0(&mut self, i: usize) {
+    fn unset_bit(&mut self, i: usize) {
         assert!(i < self.bits());
         *self = false;
     }
 }
 
-macro_rules! impl_bit_put {
+macro_rules! impl_bits_mut {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn bit_put1(&mut self, i: usize) {
-            <$X as BitPut>::bit_put1(self$(.$method())?, i)
+        fn set_bit(&mut self, i: usize) {
+            <$X as BitsMut>::set_bit(self$(.$method())?, i)
         }
 
         #[inline]
-        fn bit_put0(&mut self, i: usize) {
-            <$X as BitPut>::bit_put0(self$(.$method())?, i)
+        fn unset_bit(&mut self, i: usize) {
+            <$X as BitsMut>::unset_bit(self$(.$method())?, i)
         }
 
         #[doc(hidden)]
         #[inline]
         fn put_word<W: Word>(&mut self, i: usize, n: usize, word: W) {
-            <$X as BitPut>::put_word(self$(.$method())?, i, n, word)
+            <$X as BitsMut>::put_word(self$(.$method())?, i, n, word)
         }
     }
 }
 
-impl<T, const N: usize> BitPut for [T; N]
+impl<T, const N: usize> BitsMut for [T; N]
 where
-    [T]: BitPut,
+    [T]: BitsMut,
 {
-    impl_bit_put!([T], as_mut);
+    impl_bits_mut!([T], as_mut);
 }
 
 mod alloc {
     use super::*;
     use std::borrow::Cow;
 
-    impl<T: ?Sized + BitPut> BitPut for Box<T> {
-        impl_bit_put!(T);
+    impl<T: ?Sized + BitsMut> BitsMut for Box<T> {
+        impl_bits_mut!(T);
     }
 
-    impl<T> BitPut for Vec<T>
+    impl<T> BitsMut for Vec<T>
     where
-        [T]: BitPut,
+        [T]: BitsMut,
     {
-        impl_bit_put!([T]);
+        impl_bits_mut!([T]);
     }
 
-    impl<'a, T> BitPut for Cow<'a, T>
+    impl<'a, T> BitsMut for Cow<'a, T>
     where
         T: ?Sized + ToOwned + Bits,
-        T::Owned: BitPut,
+        T::Owned: BitsMut,
     {
-        impl_bit_put!(T::Owned, to_mut);
+        impl_bits_mut!(T::Owned, to_mut);
     }
 }

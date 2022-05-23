@@ -1,11 +1,10 @@
 //! `bits`
 
 pub mod bits;
+pub mod bits_mut;
 pub mod count;
 pub mod excess;
-// pub mod get;
 pub mod ops;
-pub mod put;
 pub mod rank;
 pub mod select;
 

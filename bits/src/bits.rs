@@ -46,7 +46,7 @@ pub trait Bits {
         let mut w = T::NULL;
         for b in i..i + n {
             if self.bit(b).expect("index out of bounds") {
-                w.bit_put1(b - i);
+                w.set_bit(b - i);
             }
         }
         w
