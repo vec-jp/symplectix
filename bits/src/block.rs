@@ -1,7 +1,7 @@
 use crate::ops::*;
 
 pub trait Block:
-    Clone + BitLen + BitCount + BitAll + BitAny + BitRank + BitSelect + BitGet + BitPut
+    Clone + Bits + BitCount + All + BitAny + BitRank + BitSelect + BitGet + BitPut
 {
     const BITS: usize;
 

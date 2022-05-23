@@ -2,9 +2,9 @@
 
 pub mod all;
 pub mod any;
+pub mod bits;
 pub mod count;
 pub mod get;
-pub mod len;
 pub mod ops;
 pub mod put;
 pub mod rank;
@@ -58,15 +58,14 @@ const fn blocks(n: usize, b: usize) -> usize {
 /// Returns an empty `Vec<T>` with the at least specified capacity in bits.
 ///
 /// ```
-/// # use bits::ops::BitLen;
+/// # use bits::ops::Bits;
 /// let v = bits::with_capacity::<u8>(80);
 /// // v has no bits, but an enough capacity to store 80 bits.
-/// assert_eq!(v.bit_len(), 0);
+/// assert_eq!(v.bits(), 0);
 /// assert_eq!(v.capacity(), 10);
 /// ```
-pub fn with_capacity<T: Block>(n: usize) -> Vec<T> {
-    let size = blocks(n, T::BITS);
-    Vec::with_capacity(size)
+pub fn with_capacity<T: Block>(capacity: usize) -> Vec<T> {
+    Vec::with_capacity(blocks(capacity, T::BITS))
 }
 
 // pub fn null<T: Block>(n: usize) -> Vec<T> {

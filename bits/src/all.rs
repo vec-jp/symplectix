@@ -1,79 +1,79 @@
 use crate::ops::BitCount;
 use crate::Block;
 
-pub trait BitAll: BitCount {
+pub trait All: BitCount {
     /// Returns true if all bits are enabled. An empty bits should return true.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use bits::ops::BitAll;
+    /// # use bits::ops::All;
     /// let a: &[u64] = &[0, 0, 0];
     /// let b: &[u64] = &[];
     /// let c: &[u64] = &[!0, !0, !0];
-    /// assert!(!a.bit_all());
-    /// assert!( b.bit_all());
-    /// assert!( c.bit_all());
+    /// assert!(!a.all());
+    /// assert!( b.all());
+    /// assert!( c.all());
     /// ```
     #[inline]
-    fn bit_all(&self) -> bool {
-        self.bit_len() == 0 || self.bit_count0() == 0
+    fn all(&self) -> bool {
+        self.bits() == 0 || self.bit_count0() == 0
     }
 }
 
-impl BitAll for bool {
+impl All for bool {
     #[inline]
-    fn bit_all(&self) -> bool {
+    fn all(&self) -> bool {
         *self
     }
 }
 
-impl<T: Block> BitAll for [T] {
+impl<T: Block> All for [T] {
     #[inline]
-    fn bit_all(&self) -> bool {
-        self.iter().all(BitAll::bit_all)
+    fn all(&self) -> bool {
+        self.iter().all(All::all)
     }
 }
 
-macro_rules! impl_bit_all {
+macro_rules! impl_all {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn bit_all(&self) -> bool {
-            <$X as BitAll>::bit_all(self$(.$method())?)
+        fn all(&self) -> bool {
+            <$X as All>::all(self$(.$method())?)
         }
     }
 }
 
-impl<'a, T: ?Sized + BitAll> BitAll for &'a T {
-    impl_bit_all!(T);
+impl<'a, T: ?Sized + All> All for &'a T {
+    impl_all!(T);
 }
 
-impl<T, const N: usize> BitAll for [T; N]
+impl<T, const N: usize> All for [T; N]
 where
-    [T]: BitAll,
+    [T]: All,
 {
-    impl_bit_all!([T], as_ref);
+    impl_all!([T], as_ref);
 }
 
 mod alloc {
     use super::*;
     use std::borrow::Cow;
 
-    impl<T> BitAll for Vec<T>
+    impl<T> All for Vec<T>
     where
-        [T]: BitAll,
+        [T]: All,
     {
-        impl_bit_all!([T]);
+        impl_all!([T]);
     }
 
-    impl<T: ?Sized + BitAll> BitAll for Box<T> {
-        impl_bit_all!(T);
+    impl<T: ?Sized + All> All for Box<T> {
+        impl_all!(T);
     }
 
-    impl<'a, T> BitAll for Cow<'a, T>
+    impl<'a, T> All for Cow<'a, T>
     where
-        T: ?Sized + ToOwned + BitAll,
+        T: ?Sized + ToOwned + All,
     {
-        impl_bit_all!(T, as_ref);
+        impl_all!(T, as_ref);
     }
 }

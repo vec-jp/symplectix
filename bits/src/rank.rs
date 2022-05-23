@@ -1,4 +1,4 @@
-use crate::ops::{BitCount, BitLen};
+use crate::ops::{BitCount, Bits};
 use crate::Block;
 use core::ops::RangeBounds;
 
@@ -6,14 +6,14 @@ pub trait BitRank: BitCount {
     /// Counts occurrences of `1` in the given range.
     #[inline]
     fn bit_rank1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let (i, j) = crate::to_range(&index, 0, self.bit_len());
+        let (i, j) = crate::to_range(&index, 0, self.bits());
         (j - i) - self.bit_rank0(index)
     }
 
     /// Counts occurrences of `0` in the given range.
     #[inline]
     fn bit_rank0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let (i, j) = crate::to_range(&index, 0, self.bit_len());
+        let (i, j) = crate::to_range(&index, 0, self.bits());
         (j - i) - self.bit_rank1(index)
     }
 }
@@ -41,7 +41,7 @@ pub trait BitRanks: BitRank {
 impl<T: ?Sized + BitRank> BitRanks for T {
     #[inline]
     fn bit_ranks<Index: RangeBounds<usize>>(&self, index: Index) -> Ranks {
-        let (i, j) = crate::to_range(&index, 0, self.bit_len());
+        let (i, j) = crate::to_range(&index, 0, self.bits());
         let rank1 = self.bit_rank1(i..j);
         let rank0 = (j - i) - rank1;
         Ranks { rank0, rank1 }
@@ -77,7 +77,7 @@ impl Ranks {
 impl<T: Block> BitRank for [T] {
     #[inline]
     fn bit_rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        let (s, e) = crate::to_range(&r, 0, self.bit_len());
+        let (s, e) = crate::to_range(&r, 0, self.bits());
         let (i, p) = crate::address::<T>(s);
         let (j, q) = crate::address::<T>(e);
         if i == j {

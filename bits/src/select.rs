@@ -48,12 +48,12 @@ mod helper {
 
     #[inline]
     pub fn bit_search1<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
-        (n < bs.bit_count1()).then(|| binary_search(0, bs.bit_len(), |k| bs.bit_rank1(..k) > n) - 1)
+        (n < bs.bit_count1()).then(|| binary_search(0, bs.bits(), |k| bs.bit_rank1(..k) > n) - 1)
     }
 
     #[inline]
     pub fn bit_search0<T: ?Sized + BitRank>(bs: &T, n: usize) -> Option<usize> {
-        (n < bs.bit_count0()).then(|| binary_search(0, bs.bit_len(), |k| bs.bit_rank0(..k) > n) - 1)
+        (n < bs.bit_count0()).then(|| binary_search(0, bs.bits(), |k| bs.bit_rank0(..k) > n) - 1)
     }
 }
 

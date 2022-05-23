@@ -10,9 +10,9 @@ fn bits_is_implemented() {
     fn _test<T>()
     where
         T: ?Sized
-            + bits::ops::BitLen
+            + bits::ops::Bits
             + bits::ops::BitCount
-            + bits::ops::BitAll
+            + bits::ops::All
             + bits::ops::BitAny
             + bits::ops::BitRank
             + bits::ops::BitRanks

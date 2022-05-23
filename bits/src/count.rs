@@ -1,7 +1,7 @@
-use crate::ops::BitLen;
+use crate::ops::Bits;
 use crate::Block;
 
-pub trait BitCount: BitLen {
+pub trait BitCount: Bits {
     /// Counts the occurrences of `1`.
     ///
     /// # Examples
@@ -17,7 +17,7 @@ pub trait BitCount: BitLen {
     /// ```
     #[inline]
     fn bit_count1(&self) -> usize {
-        self.bit_len() - self.bit_count0()
+        self.bits() - self.bit_count0()
     }
 
     /// Counts the occurrences of `0`.
@@ -35,7 +35,7 @@ pub trait BitCount: BitLen {
     /// ```
     #[inline]
     fn bit_count0(&self) -> usize {
-        self.bit_len() - self.bit_count1()
+        self.bits() - self.bit_count1()
     }
 }
 

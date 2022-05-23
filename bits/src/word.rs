@@ -157,9 +157,9 @@ macro_rules! impls {
             }
         }
 
-        impl BitLen for $Word {
+        impl Bits for $Word {
             #[inline]
-            fn bit_len(&self) -> usize {
+            fn bits(&self) -> usize {
                 <Self as Block>::BITS
             }
         }
@@ -176,9 +176,9 @@ macro_rules! impls {
             }
         }
 
-        impl BitAll for $Word {
+        impl All for $Word {
             #[inline]
-            fn bit_all(&self) -> bool {
+            fn all(&self) -> bool {
                 *self == Self::FULL
             }
         }
@@ -193,7 +193,7 @@ macro_rules! impls {
         impl BitRank for $Word {
             #[inline]
             fn bit_rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                let (i, j) = to_range(&r, 0, self.bit_len());
+                let (i, j) = to_range(&r, 0, self.bits());
                 (*self & mask::<Self>(i, j)).bit_count1()
             }
 
@@ -218,7 +218,7 @@ macro_rules! impls {
         impl BitGet for $Word {
             #[inline]
             fn bit_get(&self, i: usize) -> Option<bool> {
-                (i < self.bit_len()).then(|| (*self & (1 << i)) != 0)
+                (i < self.bits()).then(|| (*self & (1 << i)) != 0)
             }
 
             #[doc(hidden)]

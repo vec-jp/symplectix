@@ -1,4 +1,4 @@
-use crate::ops::{for_each_blocks, BitLen};
+use crate::ops::{for_each_blocks, Bits};
 use crate::{Block, Word};
 
 pub trait BitGet {
@@ -98,7 +98,7 @@ impl<T: Block> BitGet for [T] {
 impl BitGet for bool {
     #[inline]
     fn bit_get(&self, i: usize) -> Option<bool> {
-        (i < self.bit_len()).then(|| *self)
+        (i < self.bits()).then(|| *self)
     }
 }
 

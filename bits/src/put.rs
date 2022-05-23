@@ -1,4 +1,4 @@
-use crate::len::BitLen;
+use crate::bits::Bits;
 use crate::ops::{for_each_blocks, BitGet};
 use crate::{Block, Word};
 
@@ -23,14 +23,14 @@ pub trait BitPut: BitGet {
 impl<T: Block> BitPut for [T] {
     #[inline]
     fn bit_put1(&mut self, i: usize) {
-        assert!(i < self.bit_len());
+        assert!(i < self.bits());
         let (i, o) = crate::address::<T>(i);
         self[i].bit_put1(o)
     }
 
     #[inline]
     fn bit_put0(&mut self, i: usize) {
-        assert!(i < self.bit_len());
+        assert!(i < self.bits());
         let (i, o) = crate::address::<T>(i);
         self[i].bit_put0(o)
     }
@@ -52,13 +52,13 @@ impl<T: Block> BitPut for [T] {
 impl BitPut for bool {
     #[inline]
     fn bit_put1(&mut self, i: usize) {
-        assert!(i < self.bit_len());
+        assert!(i < self.bits());
         *self = true;
     }
 
     #[inline]
     fn bit_put0(&mut self, i: usize) {
-        assert!(i < self.bit_len());
+        assert!(i < self.bits());
         *self = false;
     }
 }
