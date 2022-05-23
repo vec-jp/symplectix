@@ -14,6 +14,9 @@ use core::{
 /// for (_index, bits) in v1.and(v2).and(v3) {
 ///     assert_eq!(bits.into_owned(), 0b_0000_0000);
 /// }
+/// for (_index, bits) in v1.and(v2.and(v3)) {
+///     assert_eq!(bits.into_owned(), 0b_0000_0000);
+/// }
 /// ```
 pub trait And: Sized + BitMask {
     fn and<That: BitMask>(self, that: That) -> BitwiseAnd<Self, That>;
