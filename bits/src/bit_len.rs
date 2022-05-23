@@ -1,4 +1,4 @@
-use crate::Bits;
+use crate::Block;
 
 /// `BitLen` is a trait to compute the number of binary digits.
 ///
@@ -15,7 +15,7 @@ pub trait BitLen {
     fn bit_len(&self) -> usize;
 }
 
-impl<T: Bits> BitLen for [T] {
+impl<T: Block> BitLen for [T] {
     #[inline]
     fn bit_len(&self) -> usize {
         T::BITS * <[T]>::len(self)

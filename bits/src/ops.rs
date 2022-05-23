@@ -10,7 +10,7 @@ pub use crate::bit_select::BitSelect;
 
 pub(crate) fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
 where
-    T: crate::Bits,
+    T: crate::Block,
     F: FnMut(usize, core::ops::Range<usize>),
 {
     assert!(s <= e);

@@ -227,7 +227,7 @@ fn compare_index<T, U>(
 //     }
 // }
 
-impl<'a, T: bits::Bits> BitMask for &'a [T] {
+impl<'a, T: bits::Block> BitMask for &'a [T] {
     type Bits = Cow<'a, T>;
     type Iter = Blocks<'a, T>;
     fn bit_mask(self) -> Self::Iter {
@@ -241,7 +241,7 @@ pub struct Blocks<'a, T> {
     blocks: Enumerate<slice::Iter<'a, T>>,
 }
 
-impl<'a, T: bits::Bits> Iterator for Blocks<'a, T> {
+impl<'a, T: bits::Block> Iterator for Blocks<'a, T> {
     type Item = (usize, Cow<'a, T>);
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {

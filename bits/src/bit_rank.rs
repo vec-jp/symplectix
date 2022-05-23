@@ -1,5 +1,5 @@
 use crate::ops::{BitCount, BitLen};
-use crate::Bits;
+use crate::Block;
 use core::ops::RangeBounds;
 
 pub trait BitRank: BitCount {
@@ -74,7 +74,7 @@ impl Ranks {
     }
 }
 
-impl<T: Bits> BitRank for [T] {
+impl<T: Block> BitRank for [T] {
     #[inline]
     fn bit_rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         let (s, e) = crate::to_range(&r, 0, self.bit_len());

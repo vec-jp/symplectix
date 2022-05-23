@@ -10,13 +10,12 @@ pub mod bit_rank;
 pub mod bit_select;
 pub mod ops;
 
-mod bits;
+mod block;
 mod word;
-pub use self::bits::Bits;
-pub use self::word::Word;
+pub use self::{block::Block, word::Word};
 
 #[inline]
-fn address<T: Bits>(i: usize) -> (usize, usize) {
+fn address<T: Block>(i: usize) -> (usize, usize) {
     use core::ops::{Div, Rem};
     fn divrem<T, U>(t: T, u: U) -> (<T as Div<U>>::Output, <T as Rem<U>>::Output)
     where
@@ -65,7 +64,7 @@ const fn blocks(n: usize, b: usize) -> usize {
 /// assert_eq!(v.bit_len(), 0);
 /// assert_eq!(v.capacity(), 10);
 /// ```
-pub fn with_capacity<T: Bits>(n: usize) -> Vec<T> {
+pub fn with_capacity<T: Block>(n: usize) -> Vec<T> {
     let size = blocks(n, T::BITS);
     Vec::with_capacity(size)
 }

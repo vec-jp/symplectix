@@ -1,6 +1,6 @@
 use crate::ops::*;
 
-pub trait Bits:
+pub trait Block:
     Clone + BitLen + BitCount + BitAll + BitAny + BitRank + BitSelect + BitGet + BitPut
 {
     const BITS: usize;
@@ -8,50 +8,50 @@ pub trait Bits:
     #[doc(hidden)]
     const SIZE: usize = Self::BITS / 8;
 
-    fn null() -> Self;
+    fn empty() -> Self;
 }
 
-impl Bits for bool {
+impl Block for bool {
     const BITS: usize = 1;
 
     #[inline]
-    fn null() -> Self {
+    fn empty() -> Self {
         false
     }
 }
 
-impl<T, const N: usize> Bits for [T; N]
+impl<T, const N: usize> Block for [T; N]
 where
-    T: Copy + Bits,
+    T: Copy + Block,
 {
     const BITS: usize = T::BITS * N;
 
     #[inline]
-    fn null() -> Self {
-        [T::null(); N]
+    fn empty() -> Self {
+        [T::empty(); N]
     }
 }
 
 mod alloc {
-    use super::Bits;
+    use super::Block;
     use std::borrow::Cow;
 
-    impl<T: Bits> Bits for Box<T> {
+    impl<T: Block> Block for Box<T> {
         const BITS: usize = T::BITS;
         #[inline]
-        fn null() -> Self {
-            Box::new(T::null())
+        fn empty() -> Self {
+            Box::new(T::empty())
         }
     }
 
-    impl<'a, T> Bits for Cow<'a, T>
+    impl<'a, T> Block for Cow<'a, T>
     where
-        T: ?Sized + Bits,
+        T: ?Sized + Block,
     {
         const BITS: usize = T::BITS;
         #[inline]
-        fn null() -> Self {
-            Cow::Owned(T::null())
+        fn empty() -> Self {
+            Cow::Owned(T::empty())
         }
     }
 }
