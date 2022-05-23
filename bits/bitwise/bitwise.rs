@@ -1,19 +1,13 @@
-#![allow(clippy::many_single_char_names)]
+use std::{borrow::Cow, cmp::Ordering, iter::Enumerate, slice};
 
-use core::{cmp::Ordering, iter::Enumerate, slice};
+pub mod and;
+pub mod not;
+pub mod or;
+pub mod xor;
+pub use {and::And, not::Not, or::Or, xor::Xor};
 
-use std::borrow::Cow;
-
-mod and;
-mod and_not;
-// mod not;
-mod or;
-mod xor;
-
-pub use {and::And, and_not::AndNot, or::Or, xor::Xor};
-pub use {and::AndAssign, and_not::AndNotAssign, or::OrAssign, xor::XorAssign};
-pub use {and::BitwiseAnd, and_not::BitwiseAndNot, or::BitwiseOr, xor::BitwiseXor};
-pub use {and::Intersection, and_not::Difference, or::Union, xor::SymmetricDifference};
+use {and::AndAssign, not::NotAssign, or::OrAssign, xor::XorAssign};
+use {and::BitwiseAnd, not::BitwiseNot, or::BitwiseOr, xor::BitwiseXor};
 
 pub trait BitMask {
     type Bits;
@@ -41,8 +35,8 @@ pub fn and<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseAnd<A, B> {
 }
 
 #[inline]
-pub fn and_not<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseAndNot<A, B> {
-    BitwiseAndNot { a, b }
+pub fn not<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseNot<A, B> {
+    BitwiseNot { a, b }
 }
 
 #[inline]
@@ -63,18 +57,21 @@ macro_rules! impl_bitwise_ops_for_words {
                 *a &= *b;
             }
         }
-        impl AndNotAssign<$Word> for $Word {
+
+        impl NotAssign<$Word> for $Word {
             #[inline]
-            fn and_not_assign(a: &mut Self, b: &$Word) {
+            fn not_assign(a: &mut Self, b: &$Word) {
                 *a &= !*b;
             }
         }
+
         impl OrAssign<$Word> for $Word {
             #[inline]
             fn or_assign(a: &mut Self, b: &$Word) {
                 *a |= *b;
             }
         }
+
         impl XorAssign<$Word> for $Word {
             #[inline]
             fn xor_assign(a: &mut Self, b: &$Word) {
@@ -262,11 +259,11 @@ impl<T: AndAssign<U>, U> AndAssign<[U]> for [T] {
     }
 }
 
-impl<T: AndNotAssign<U>, U> AndNotAssign<[U]> for [T] {
-    fn and_not_assign(this: &mut Self, that: &[U]) {
+impl<T: NotAssign<U>, U> NotAssign<[U]> for [T] {
+    fn not_assign(this: &mut Self, that: &[U]) {
         assert_eq!(this.len(), that.len());
         for (v1, v2) in this.iter_mut().zip(that) {
-            AndNotAssign::and_not_assign(v1, v2);
+            NotAssign::not_assign(v1, v2);
         }
     }
 }
@@ -322,13 +319,13 @@ where
         <[T] as AndAssign<U>>::and_assign(this.as_mut(), that)
     }
 }
-impl<T, U: ?Sized, const N: usize> AndNotAssign<U> for [T; N]
+impl<T, U: ?Sized, const N: usize> NotAssign<U> for [T; N]
 where
-    [T]: AndNotAssign<U>,
+    [T]: NotAssign<U>,
 {
     #[inline]
-    fn and_not_assign(this: &mut Self, that: &U) {
-        <[T] as AndNotAssign<U>>::and_not_assign(this.as_mut(), that)
+    fn not_assign(this: &mut Self, that: &U) {
+        <[T] as NotAssign<U>>::not_assign(this.as_mut(), that)
     }
 }
 impl<T, U: ?Sized, const N: usize> OrAssign<U> for [T; N]
