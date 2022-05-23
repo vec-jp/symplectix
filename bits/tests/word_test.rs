@@ -65,7 +65,7 @@ fn _pdep<T: Word>(data: T, mut mask: T) -> T {
         if !mask.any() {
             break;
         }
-        if data.bit_get(i).unwrap() {
+        if data.bit(i).unwrap() {
             dest |= mask.lsb();
         }
         mask &= mask - T::_1;

@@ -9,12 +9,7 @@ use std::iter::successors;
 fn bits_is_implemented() {
     fn _test<T>()
     where
-        T: ?Sized
-            + bits::ops::Bits
-            + bits::ops::Count
-            + bits::ops::Rank
-            + bits::ops::Select
-            + bits::ops::BitGet,
+        T: ?Sized + bits::ops::Bits + bits::ops::Count + bits::ops::Rank + bits::ops::Select,
     {
     }
 

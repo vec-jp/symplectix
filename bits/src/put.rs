@@ -1,8 +1,7 @@
-use crate::bits::Bits;
-use crate::ops::{for_each_blocks, BitGet};
+use crate::ops::{for_each_blocks, Bits};
 use crate::{Block, Word};
 
-pub trait BitPut: BitGet {
+pub trait BitPut: Bits {
     /// Enables the bit at `i`.
     fn bit_put1(&mut self, i: usize);
 
@@ -13,7 +12,7 @@ pub trait BitPut: BitGet {
     #[doc(hidden)]
     fn put_word<N: Word>(&mut self, i: usize, n: usize, mask: N) {
         for b in i..i + n {
-            if mask.bit_get(b - i).expect("index out of bounds") {
+            if mask.bit(b - i).expect("index out of bounds") {
                 self.bit_put1(b);
             }
         }
@@ -107,7 +106,7 @@ mod alloc {
 
     impl<'a, T> BitPut for Cow<'a, T>
     where
-        T: ?Sized + ToOwned + BitGet,
+        T: ?Sized + ToOwned + Bits,
         T::Owned: BitPut,
     {
         impl_bit_put!(T::Owned, to_mut);

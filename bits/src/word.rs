@@ -162,6 +162,17 @@ macro_rules! impls {
             fn bits(&self) -> usize {
                 <Self as Block>::BITS
             }
+
+            #[inline]
+            fn bit(&self, i: usize) -> Option<bool> {
+                (i < self.bits()).then(|| (*self & (1 << i)) != 0)
+            }
+
+            #[doc(hidden)]
+            #[inline]
+            fn word<N: Word>(&self, i: usize, n: usize) -> N {
+                ((*self >> i) & mask::<Self>(0, n)).cast()
+            }
         }
 
         impl Count for $Word {
@@ -208,19 +219,6 @@ macro_rules! impls {
             #[inline]
             fn select0(&self, n: usize) -> Option<usize> {
                 <Self as SelectWord>::select_word(!self, n)
-            }
-        }
-
-        impl BitGet for $Word {
-            #[inline]
-            fn bit_get(&self, i: usize) -> Option<bool> {
-                (i < self.bits()).then(|| (*self & (1 << i)) != 0)
-            }
-
-            #[doc(hidden)]
-            #[inline]
-            fn word<N: Word>(&self, i: usize, n: usize) -> N {
-                ((*self >> i) & mask::<Self>(0, n)).cast()
             }
         }
 

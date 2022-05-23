@@ -3,7 +3,7 @@
 pub mod bits;
 pub mod count;
 pub mod excess;
-pub mod get;
+// pub mod get;
 pub mod ops;
 pub mod put;
 pub mod rank;
