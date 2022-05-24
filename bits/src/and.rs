@@ -1,23 +1,9 @@
-use crate::IntoBlocks;
+use crate::block::IntoBlocks;
 use core::{
     cmp::Ordering::*,
     iter::{Fuse, Peekable},
 };
 
-/// # Examples
-///
-/// ```
-/// # use bitwise::And;
-/// let v1: &[u8] = &[0b_1111_0000, 0b_0000_1111, 0b_1010_1010];
-/// let v2: &[u8] = &[0b_0011_1100, 0b_0011_1100, 0b_0101_0101];
-/// let v3: &[u8] = &[0b_1100_0011, 0b_1100_0011, 0b_1010_1010];
-/// for (_index, bits) in v1.and(v2).and(v3) {
-///     assert_eq!(bits.into_owned(), 0b_0000_0000);
-/// }
-/// for (_index, bits) in v1.and(v2.and(v3)) {
-///     assert_eq!(bits.into_owned(), 0b_0000_0000);
-/// }
-/// ```
 pub trait And: Sized + IntoBlocks {
     fn and<That: IntoBlocks>(self, that: That) -> BitwiseAnd<Self, That>;
 }
@@ -42,6 +28,52 @@ impl<T: IntoBlocks> And for T {
         BitwiseAnd { a: self, b: that }
     }
 }
+
+macro_rules! impl_and_assign_for_words {
+    ($( $Word:ty )*) => ($(
+        impl AndAssign<$Word> for $Word {
+            #[inline]
+            fn and_assign(a: &mut Self, b: &$Word) {
+                *a &= *b;
+            }
+        }
+    )*)
+}
+impl_and_assign_for_words!(u8 u16 u32 u64 u128);
+
+impl<T, U> AndAssign<[U]> for [T]
+where
+    T: AndAssign<U>,
+{
+    fn and_assign(this: &mut Self, that: &[U]) {
+        assert_eq!(this.len(), that.len());
+        for (v1, v2) in this.iter_mut().zip(that) {
+            AndAssign::and_assign(v1, v2);
+        }
+    }
+}
+
+impl<T, U: ?Sized, const N: usize> AndAssign<U> for [T; N]
+where
+    [T]: AndAssign<U>,
+{
+    #[inline]
+    fn and_assign(this: &mut Self, that: &U) {
+        <[T] as AndAssign<U>>::and_assign(this.as_mut(), that)
+    }
+}
+
+// impl<A: Bits, B: Bits> Bits for And<A, B> {
+//     /// This could be an incorrect value, different from the consumed result.
+//     #[inline]
+//     fn len(this: &Self) -> usize {
+//         cmp::min(Bits::len(&this.a), Bits::len(&this.b))
+//     }
+//     #[inline]
+//     fn test(this: &Self, i: usize) -> bool {
+//         Bits::test(&this.a, i) && Bits::test(&this.b, i)
+//     }
+// }
 
 impl<A, B> IntoIterator for BitwiseAnd<A, B>
 where
@@ -101,9 +133,12 @@ where
     }
 }
 
-mod impls {
+#[cfg(feature = "alloc")]
+mod impl_alloc {
     use super::*;
-    use std::borrow::Cow;
+    use alloc::borrow::{Cow, ToOwned};
+    use alloc::boxed::Box;
+    use alloc::vec::Vec;
 
     impl<T, U> AndAssign<U> for Box<T>
     where

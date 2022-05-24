@@ -1,19 +1,9 @@
-use crate::{compare_index, IntoBlocks};
+use crate::{block::IntoBlocks, compare_index};
 use core::{
     cmp::Ordering::*,
     iter::{Fuse, Peekable},
 };
 
-/// # Examples
-///
-/// ```
-/// # use bitwise::Or;
-/// let v1: &[u8] = &[0b_1111_0000, 0b_0000_1111, 0b_1010_1010];
-/// let v2: &[u8] = &[0b_0000_1111, 0b_1111_0000, 0b_0101_0101];
-/// for (_index, bits) in v1.or(v2) {
-///     assert_eq!(bits.into_owned(), 0b_1111_1111);
-/// }
-/// ```
 pub trait Or: Sized + IntoBlocks {
     fn or<That: IntoBlocks>(self, that: That) -> BitwiseOr<Self, That>;
 }
@@ -38,6 +28,49 @@ impl<T: IntoBlocks> Or for T {
         BitwiseOr { a: self, b: that }
     }
 }
+
+macro_rules! impl_or_assign_for_words {
+    ($( $Word:ty )*) => ($(
+        impl OrAssign<$Word> for $Word {
+            #[inline]
+            fn or_assign(a: &mut Self, b: &$Word) {
+                *a |= *b;
+            }
+        }
+    )*)
+}
+impl_or_assign_for_words!(u8 u16 u32 u64 u128);
+
+impl<T: OrAssign<U>, U> OrAssign<[U]> for [T] {
+    fn or_assign(this: &mut Self, that: &[U]) {
+        assert_eq!(this.len(), that.len());
+        for (v1, v2) in this.iter_mut().zip(that) {
+            OrAssign::or_assign(v1, v2);
+        }
+    }
+}
+
+impl<T, U: ?Sized, const N: usize> OrAssign<U> for [T; N]
+where
+    [T]: OrAssign<U>,
+{
+    #[inline]
+    fn or_assign(this: &mut Self, that: &U) {
+        <[T] as OrAssign<U>>::or_assign(this.as_mut(), that)
+    }
+}
+
+// impl<A: Bits, B: Bits> Bits for Or<A, B> {
+//     /// This could be an incorrect value, different from the consumed result.
+//     #[inline]
+//     fn len(this: &Self) -> usize {
+//         cmp::max(Bits::len(&this.a), Bits::len(&this.b))
+//     }
+//     #[inline]
+//     fn test(this: &Self, i: usize) -> bool {
+//         Bits::test(&this.a, i) || Bits::test(&this.b, i)
+//     }
+// }
 
 impl<A, B> IntoIterator for BitwiseOr<A, B>
 where
@@ -90,9 +123,12 @@ where
     }
 }
 
-mod impls {
+#[cfg(feature = "alloc")]
+mod impl_alloc {
     use super::*;
-    use std::borrow::Cow;
+    use alloc::borrow::{Cow, ToOwned};
+    use alloc::boxed::Box;
+    use alloc::vec::Vec;
 
     impl<T, U> OrAssign<U> for Box<T>
     where

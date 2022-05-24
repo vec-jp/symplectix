@@ -1,32 +1,15 @@
-use crate::{compare_index, IntoBlocks};
+use crate::{block::IntoBlocks, compare_index};
 use core::{
     cmp::Ordering::*,
     iter::{Fuse, Peekable},
 };
 
-/// # Examples
-///
-/// ```
-/// # use bitwise::Not;
-/// let v1: &[u8] = &[0b_1111_1111, 0b_1111_1111, 0b_1111_1111];
-/// let v2: &[u8] = &[0b_0000_1111, 0b_1111_0000, 0b_0101_0101];
-/// for (index, bits) in v1.not(v2) {
-///     assert_eq!(bits.into_owned(), !v2[index]);
-/// }
-/// ```
 pub trait Not: Sized + IntoBlocks {
     fn not<That: IntoBlocks>(self, that: That) -> BitwiseNot<Self, That>;
 }
 
 pub trait NotAssign<That: ?Sized> {
     fn not_assign(a: &mut Self, b: &That);
-}
-
-impl<T: IntoBlocks> Not for T {
-    #[inline]
-    fn not<That: IntoBlocks>(self, that: That) -> BitwiseNot<Self, That> {
-        BitwiseNot { a: self, b: that }
-    }
 }
 
 pub struct BitwiseNot<A, B> {
@@ -38,6 +21,55 @@ pub struct Difference<A: Iterator, B: Iterator> {
     a: Peekable<Fuse<A>>,
     b: Peekable<Fuse<B>>,
 }
+
+impl<T: IntoBlocks> Not for T {
+    #[inline]
+    fn not<That: IntoBlocks>(self, that: That) -> BitwiseNot<Self, That> {
+        BitwiseNot { a: self, b: that }
+    }
+}
+
+macro_rules! impl_not_assign_for_words {
+    ($( $Word:ty )*) => ($(
+        impl NotAssign<$Word> for $Word {
+            #[inline]
+            fn not_assign(a: &mut Self, b: &$Word) {
+                *a &= !*b;
+            }
+        }
+    )*)
+}
+impl_not_assign_for_words!(u8 u16 u32 u64 u128);
+
+impl<T: NotAssign<U>, U> NotAssign<[U]> for [T] {
+    fn not_assign(this: &mut Self, that: &[U]) {
+        assert_eq!(this.len(), that.len());
+        for (v1, v2) in this.iter_mut().zip(that) {
+            NotAssign::not_assign(v1, v2);
+        }
+    }
+}
+
+impl<T, U: ?Sized, const N: usize> NotAssign<U> for [T; N]
+where
+    [T]: NotAssign<U>,
+{
+    #[inline]
+    fn not_assign(this: &mut Self, that: &U) {
+        <[T] as NotAssign<U>>::not_assign(this.as_mut(), that)
+    }
+}
+
+// impl<A: Bits, B: Bits> Bits for AndNot<A, B> {
+//     #[inline]
+//     fn len(this: &Self) -> usize {
+//         Bits::len(&this.a)
+//     }
+//     #[inline]
+//     fn test(this: &Self, i: usize) -> bool {
+//         Bits::test(&this.a, i) & !Bits::test(&this.b, i)
+//     }
+// }
 
 impl<A, B> IntoIterator for BitwiseNot<A, B>
 where
@@ -94,9 +126,12 @@ where
     }
 }
 
-mod impls {
+#[cfg(feature = "alloc")]
+mod impl_alloc {
     use super::*;
-    use std::borrow::Cow;
+    use alloc::borrow::{Cow, ToOwned};
+    use alloc::boxed::Box;
+    use alloc::vec::Vec;
 
     impl<T, U> NotAssign<U> for Box<T>
     where

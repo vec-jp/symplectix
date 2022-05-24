@@ -37,6 +37,5 @@ rust_analyzer(
     targets = [
         # bazel query 'kind("rust_*library|rust_binary", //...:all)'
         "//bits",
-        "//bits/bitwise",
     ] + all_crate_deps(),
 )

@@ -1,32 +1,15 @@
-use crate::{compare_index, IntoBlocks};
+use crate::{block::IntoBlocks, compare_index};
 use core::{
     cmp::Ordering::*,
     iter::{Fuse, Peekable},
 };
 
-/// # Examples
-///
-/// ```
-/// # use bitwise::Xor;
-/// let v1: &[u8] = &[0b_1111_0000, 0b_0000_1111, 0b_1010_1010];
-/// let v2: &[u8] = &[0b_0011_0011, 0b_1100_1100, 0b_0110_1001];
-/// for (_index, bits) in v1.xor(v2) {
-///     assert_eq!(bits.into_owned(), 0b_1100_0011);
-/// }
-/// ```
 pub trait Xor: Sized + IntoBlocks {
     fn xor<That: IntoBlocks>(self, that: That) -> BitwiseXor<Self, That>;
 }
 
 pub trait XorAssign<That: ?Sized> {
     fn xor_assign(a: &mut Self, b: &That);
-}
-
-impl<T: IntoBlocks> Xor for T {
-    #[inline]
-    fn xor<That: IntoBlocks>(self, that: That) -> BitwiseXor<Self, That> {
-        BitwiseXor { a: self, b: that }
-    }
 }
 
 pub struct BitwiseXor<A, B> {
@@ -38,6 +21,57 @@ pub struct SymmetricDifference<A: Iterator, B: Iterator> {
     a: Peekable<Fuse<A>>,
     b: Peekable<Fuse<B>>,
 }
+
+impl<T: IntoBlocks> Xor for T {
+    #[inline]
+    fn xor<That: IntoBlocks>(self, that: That) -> BitwiseXor<Self, That> {
+        BitwiseXor { a: self, b: that }
+    }
+}
+
+macro_rules! impl_xor_assign_for_words {
+    ($( $Word:ty )*) => ($(
+        impl XorAssign<$Word> for $Word {
+            #[inline]
+            fn xor_assign(a: &mut Self, b: &$Word) {
+                *a ^= *b;
+            }
+        }
+    )*)
+}
+impl_xor_assign_for_words!(u8 u16 u32 u64 u128);
+
+impl<T: XorAssign<U>, U> XorAssign<[U]> for [T] {
+    fn xor_assign(this: &mut Self, that: &[U]) {
+        assert_eq!(this.len(), that.len());
+        for (v1, v2) in this.iter_mut().zip(that) {
+            XorAssign::xor_assign(v1, v2);
+        }
+    }
+}
+
+impl<T, U: ?Sized, const N: usize> XorAssign<U> for [T; N]
+where
+    [T]: XorAssign<U>,
+{
+    #[inline]
+    fn xor_assign(this: &mut Self, that: &U) {
+        <[T] as XorAssign<U>>::xor_assign(this.as_mut(), that)
+    }
+}
+
+// impl<A: Bits, B: Bits> Bits for Xor<A, B> {
+//     /// This could be an incorrect value, different from the consumed result.
+//     #[inline]
+//     fn len(this: &Self) -> usize {
+//         cmp::max(Bits::len(&this.a), Bits::len(&this.b))
+//     }
+
+//     #[inline]
+//     fn test(this: &Self, i: usize) -> bool {
+//         Bits::test(&this.a, i) ^ Bits::test(&this.b, i)
+//     }
+// }
 
 impl<A, B> IntoIterator for BitwiseXor<A, B>
 where
@@ -90,9 +124,12 @@ where
     }
 }
 
-mod impls {
+#[cfg(feature = "alloc")]
+mod impl_alloc {
     use super::*;
-    use std::borrow::Cow;
+    use alloc::borrow::{Cow, ToOwned};
+    use alloc::boxed::Box;
+    use alloc::vec::Vec;
 
     impl<T, U> XorAssign<U> for Box<T>
     where
