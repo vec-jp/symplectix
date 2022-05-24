@@ -1,5 +1,8 @@
 use crate::*;
 
+#[cfg(feature = "std")]
+pub use impl_alloc::Blocks;
+
 pub trait Block: Clone + Bits + Count + Rank + Excess + Select + BitsMut {
     const BITS: usize;
 
@@ -30,11 +33,43 @@ where
     }
 }
 
+pub trait IntoBlocks {
+    type Block;
+
+    type Blocks: Iterator<Item = (usize, Self::Block)>;
+
+    fn into_blocks(self) -> Self::Blocks;
+}
+
+impl<'inner, 'outer, T: ?Sized> IntoBlocks for &'outer &'inner T
+where
+    &'inner T: IntoBlocks,
+{
+    type Block = <&'inner T as IntoBlocks>::Block;
+    type Blocks = <&'inner T as IntoBlocks>::Blocks;
+    #[inline]
+    fn into_blocks(self) -> Self::Blocks {
+        IntoBlocks::into_blocks(*self)
+    }
+}
+
+impl<'a, T, const N: usize> IntoBlocks for &'a [T; N]
+where
+    &'a [T]: IntoBlocks,
+{
+    type Block = <&'a [T] as IntoBlocks>::Block;
+    type Blocks = <&'a [T] as IntoBlocks>::Blocks;
+    #[inline]
+    fn into_blocks(self) -> Self::Blocks {
+        self.as_ref().into_blocks()
+    }
+}
+
 #[cfg(feature = "std")]
 mod impl_alloc {
-    use super::Block;
+    use super::*;
+    use core::{iter::Enumerate, slice};
     use std::borrow::Cow;
-    // use alloc::boxed::Box;
 
     impl<T: Block> Block for Box<T> {
         const BITS: usize = T::BITS;
@@ -52,6 +87,29 @@ mod impl_alloc {
         #[inline]
         fn empty() -> Self {
             Cow::Owned(T::empty())
+        }
+    }
+
+    impl<'a, T: Block> IntoBlocks for &'a [T] {
+        type Block = Cow<'a, T>;
+        type Blocks = Blocks<'a, T>;
+        fn into_blocks(self) -> Self::Blocks {
+            Blocks {
+                blocks: self.iter().enumerate(),
+            }
+        }
+    }
+
+    pub struct Blocks<'a, T> {
+        blocks: Enumerate<slice::Iter<'a, T>>,
+    }
+
+    impl<'a, T: Block> Iterator for Blocks<'a, T> {
+        type Item = (usize, Cow<'a, T>);
+        #[inline]
+        fn next(&mut self) -> Option<Self::Item> {
+            self.blocks
+                .find_map(|(i, b)| b.any().then(|| (i, Cow::Borrowed(b))))
         }
     }
 }

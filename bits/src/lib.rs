@@ -6,14 +6,14 @@
 // #[macro_use]
 // extern crate std;
 
-mod bits;
-mod bits_mut;
-mod block;
-mod count;
-mod excess;
-mod rank;
-mod select;
-mod word;
+pub mod bits;
+pub mod bits_mut;
+pub mod block;
+pub mod count;
+pub mod excess;
+pub mod rank;
+pub mod select;
+pub mod word;
 
 pub use self::bits::Bits;
 pub use self::bits_mut::BitsMut;

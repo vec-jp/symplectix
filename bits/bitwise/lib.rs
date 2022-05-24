@@ -1,4 +1,5 @@
-use std::{borrow::Cow, cmp::Ordering, iter::Enumerate, slice};
+use bits::block::IntoBlocks;
+use std::cmp::Ordering;
 
 pub mod and;
 pub mod not;
@@ -8,14 +9,6 @@ pub use {and::And, not::Not, or::Or, xor::Xor};
 
 use {and::AndAssign, not::NotAssign, or::OrAssign, xor::XorAssign};
 use {and::BitwiseAnd, not::BitwiseNot, or::BitwiseOr, xor::BitwiseXor};
-
-pub trait IntoBlocks {
-    type Block;
-
-    type Blocks: Iterator<Item = (usize, Self::Block)>;
-
-    fn into_blocks(self) -> Self::Blocks;
-}
 
 #[inline]
 pub fn and<A: IntoBlocks, B: IntoBlocks>(a: A, b: B) -> BitwiseAnd<A, B> {
@@ -215,29 +208,6 @@ fn compare_index<T, U>(
 //     }
 // }
 
-impl<'a, T: bits::Block> IntoBlocks for &'a [T] {
-    type Block = Cow<'a, T>;
-    type Blocks = Blocks<'a, T>;
-    fn into_blocks(self) -> Self::Blocks {
-        Blocks {
-            blocks: self.iter().enumerate(),
-        }
-    }
-}
-
-pub struct Blocks<'a, T> {
-    blocks: Enumerate<slice::Iter<'a, T>>,
-}
-
-impl<'a, T: bits::Block> Iterator for Blocks<'a, T> {
-    type Item = (usize, Cow<'a, T>);
-    #[inline]
-    fn next(&mut self) -> Option<Self::Item> {
-        self.blocks
-            .find_map(|(i, b)| b.any().then(|| (i, Cow::Borrowed(b))))
-    }
-}
-
 impl<T: AndAssign<U>, U> AndAssign<[U]> for [T] {
     fn and_assign(this: &mut Self, that: &[U]) {
         assert_eq!(this.len(), that.len());
@@ -271,30 +241,6 @@ impl<T: XorAssign<U>, U> XorAssign<[U]> for [T] {
         for (v1, v2) in this.iter_mut().zip(that) {
             XorAssign::xor_assign(v1, v2);
         }
-    }
-}
-
-impl<'inner, 'outer, T: ?Sized> IntoBlocks for &'outer &'inner T
-where
-    &'inner T: IntoBlocks,
-{
-    type Block = <&'inner T as IntoBlocks>::Block;
-    type Blocks = <&'inner T as IntoBlocks>::Blocks;
-    #[inline]
-    fn into_blocks(self) -> Self::Blocks {
-        IntoBlocks::into_blocks(*self)
-    }
-}
-
-impl<'a, T, const N: usize> IntoBlocks for &'a [T; N]
-where
-    &'a [T]: IntoBlocks,
-{
-    type Block = <&'a [T] as IntoBlocks>::Block;
-    type Blocks = <&'a [T] as IntoBlocks>::Blocks;
-    #[inline]
-    fn into_blocks(self) -> Self::Blocks {
-        self.as_ref().into_blocks()
     }
 }
 
