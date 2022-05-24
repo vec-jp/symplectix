@@ -158,12 +158,12 @@ where
     impl_count!([T], as_ref);
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 mod impl_alloc {
     use super::*;
-    use std::borrow::{Cow, ToOwned};
-    // use alloc::boxed::Box;
-    // use alloc::vec::Vec;
+    use alloc::borrow::{Cow, ToOwned};
+    use alloc::boxed::Box;
+    use alloc::vec::Vec;
 
     impl<T> Count for Vec<T>
     where

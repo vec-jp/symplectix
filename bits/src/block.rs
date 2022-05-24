@@ -1,6 +1,6 @@
 use crate::*;
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 pub use impl_alloc::Blocks;
 
 pub trait Block: Clone + Bits + Count + Rank + Excess + Select + BitsMut {
@@ -65,11 +65,12 @@ where
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 mod impl_alloc {
     use super::*;
+    use alloc::borrow::Cow;
+    use alloc::boxed::Box;
     use core::{iter::Enumerate, slice};
-    use std::borrow::Cow;
 
     impl<T: Block> Block for Box<T> {
         const BITS: usize = T::BITS;

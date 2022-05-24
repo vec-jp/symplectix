@@ -86,12 +86,12 @@ where
     impl_bits_mut!([T], as_mut);
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 mod impl_alloc {
     use super::*;
-    use std::borrow::{Cow, ToOwned};
-    // use alloc::boxed::Box;
-    // use alloc::vec::Vec;
+    use alloc::borrow::{Cow, ToOwned};
+    use alloc::boxed::Box;
+    use alloc::vec::Vec;
 
     impl<T: ?Sized + BitsMut> BitsMut for Box<T> {
         impl_bits_mut!(T);

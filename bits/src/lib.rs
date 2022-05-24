@@ -1,10 +1,9 @@
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 
 //! `bits`
 
-// #[cfg(feature = "std")]
-// #[macro_use]
-// extern crate std;
+#[cfg(feature = "alloc")]
+extern crate alloc;
 
 pub mod bits;
 pub mod bits_mut;
@@ -81,10 +80,10 @@ where
     }
 }
 
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 pub mod bit_vec {
     use super::*;
-    // use alloc::vec::Vec;
+    use alloc::vec::Vec;
 
     /// Calculates the minimum number of blocks to store `n` bits.
     pub const fn blocks(n: usize, b: usize) -> usize {
