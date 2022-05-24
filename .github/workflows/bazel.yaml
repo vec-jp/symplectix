@@ -30,16 +30,12 @@ jobs:
 
       - name: Build
         run: |
-          bazel build \
-              --config=ci \
-              --remote_header=x-buildbuddy-api-key=${{ secrets.BUILDBUDDY_API_KEY }} \
-              //...
+          bazel build --config=ci //...
+
+      - name: Test
+        run: |
+          bazel build --config=ci //...
 
       - name: Run buildifier
         run: |
-          bazel run //:buildifier/check
-
-      # Enable when any tests are implemented.
-      # - name: Test
-      #   run: |
-      #     bazel test //...
+          bazel run --config=ci //:buildifier/check
