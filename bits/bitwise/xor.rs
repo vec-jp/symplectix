@@ -1,4 +1,4 @@
-use crate::{compare_index, BitMask};
+use crate::{compare_index, IntoBlocks};
 use core::{
     cmp::Ordering::*,
     iter::{Fuse, Peekable},
@@ -14,17 +14,17 @@ use core::{
 ///     assert_eq!(bits.into_owned(), 0b_1100_0011);
 /// }
 /// ```
-pub trait Xor: Sized + BitMask {
-    fn xor<That: BitMask>(self, that: That) -> BitwiseXor<Self, That>;
+pub trait Xor: Sized + IntoBlocks {
+    fn xor<That: IntoBlocks>(self, that: That) -> BitwiseXor<Self, That>;
 }
 
 pub trait XorAssign<That: ?Sized> {
     fn xor_assign(a: &mut Self, b: &That);
 }
 
-impl<T: BitMask> Xor for T {
+impl<T: IntoBlocks> Xor for T {
     #[inline]
-    fn xor<That: BitMask>(self, that: That) -> BitwiseXor<Self, That> {
+    fn xor<That: IntoBlocks>(self, that: That) -> BitwiseXor<Self, That> {
         BitwiseXor { a: self, b: that }
     }
 }
@@ -41,27 +41,27 @@ pub struct SymmetricDifference<A: Iterator, B: Iterator> {
 
 impl<A, B> IntoIterator for BitwiseXor<A, B>
 where
-    Self: BitMask,
+    Self: IntoBlocks,
 {
-    type Item = (usize, <Self as BitMask>::Bits);
-    type IntoIter = <Self as BitMask>::Iter;
+    type Item = (usize, <Self as IntoBlocks>::Block);
+    type IntoIter = <Self as IntoBlocks>::Blocks;
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        self.bit_mask()
+        self.into_blocks()
     }
 }
 
-impl<A: BitMask, B: BitMask<Bits = A::Bits>> BitMask for BitwiseXor<A, B>
+impl<A: IntoBlocks, B: IntoBlocks<Block = A::Block>> IntoBlocks for BitwiseXor<A, B>
 where
-    A::Bits: XorAssign<B::Bits>,
+    A::Block: XorAssign<B::Block>,
 {
-    type Bits = A::Bits;
-    type Iter = SymmetricDifference<A::Iter, B::Iter>;
+    type Block = A::Block;
+    type Blocks = SymmetricDifference<A::Blocks, B::Blocks>;
     #[inline]
-    fn bit_mask(self) -> Self::Iter {
+    fn into_blocks(self) -> Self::Blocks {
         SymmetricDifference {
-            a: self.a.bit_mask().fuse().peekable(),
-            b: self.b.bit_mask().fuse().peekable(),
+            a: self.a.into_blocks().fuse().peekable(),
+            b: self.b.into_blocks().fuse().peekable(),
         }
     }
 }

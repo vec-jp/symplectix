@@ -9,43 +9,31 @@ pub use {and::And, not::Not, or::Or, xor::Xor};
 use {and::AndAssign, not::NotAssign, or::OrAssign, xor::XorAssign};
 use {and::BitwiseAnd, not::BitwiseNot, or::BitwiseOr, xor::BitwiseXor};
 
-pub trait BitMask {
-    type Bits;
+pub trait IntoBlocks {
+    type Block;
 
-    type Iter: Iterator<Item = (usize, Self::Bits)>;
+    type Blocks: Iterator<Item = (usize, Self::Block)>;
 
-    fn bit_mask(self) -> Self::Iter;
+    fn into_blocks(self) -> Self::Blocks;
 }
 
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub struct Entry<T> {
-//     index: usize,
-//     bits: T,
-// }
-
-// impl<T> Entry<T> {
-//     pub fn new(index: usize, bits: T) -> Entry<T> {
-//         Entry { index, bits }
-//     }
-// }
-
 #[inline]
-pub fn and<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseAnd<A, B> {
+pub fn and<A: IntoBlocks, B: IntoBlocks>(a: A, b: B) -> BitwiseAnd<A, B> {
     BitwiseAnd { a, b }
 }
 
 #[inline]
-pub fn not<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseNot<A, B> {
+pub fn not<A: IntoBlocks, B: IntoBlocks>(a: A, b: B) -> BitwiseNot<A, B> {
     BitwiseNot { a, b }
 }
 
 #[inline]
-pub fn or<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseOr<A, B> {
+pub fn or<A: IntoBlocks, B: IntoBlocks>(a: A, b: B) -> BitwiseOr<A, B> {
     BitwiseOr { a, b }
 }
 
 #[inline]
-pub fn xor<A: BitMask, B: BitMask>(a: A, b: B) -> BitwiseXor<A, B> {
+pub fn xor<A: IntoBlocks, B: IntoBlocks>(a: A, b: B) -> BitwiseXor<A, B> {
     BitwiseXor { a, b }
 }
 
@@ -227,10 +215,10 @@ fn compare_index<T, U>(
 //     }
 // }
 
-impl<'a, T: bits::Block> BitMask for &'a [T] {
-    type Bits = Cow<'a, T>;
-    type Iter = Blocks<'a, T>;
-    fn bit_mask(self) -> Self::Iter {
+impl<'a, T: bits::Block> IntoBlocks for &'a [T] {
+    type Block = Cow<'a, T>;
+    type Blocks = Blocks<'a, T>;
+    fn into_blocks(self) -> Self::Blocks {
         Blocks {
             blocks: self.iter().enumerate(),
         }
@@ -286,27 +274,27 @@ impl<T: XorAssign<U>, U> XorAssign<[U]> for [T] {
     }
 }
 
-impl<'inner, 'outer, T: ?Sized> BitMask for &'outer &'inner T
+impl<'inner, 'outer, T: ?Sized> IntoBlocks for &'outer &'inner T
 where
-    &'inner T: BitMask,
+    &'inner T: IntoBlocks,
 {
-    type Bits = <&'inner T as BitMask>::Bits;
-    type Iter = <&'inner T as BitMask>::Iter;
+    type Block = <&'inner T as IntoBlocks>::Block;
+    type Blocks = <&'inner T as IntoBlocks>::Blocks;
     #[inline]
-    fn bit_mask(self) -> Self::Iter {
-        BitMask::bit_mask(*self)
+    fn into_blocks(self) -> Self::Blocks {
+        IntoBlocks::into_blocks(*self)
     }
 }
 
-impl<'a, T, const N: usize> BitMask for &'a [T; N]
+impl<'a, T, const N: usize> IntoBlocks for &'a [T; N]
 where
-    &'a [T]: BitMask,
+    &'a [T]: IntoBlocks,
 {
-    type Bits = <&'a [T] as BitMask>::Bits;
-    type Iter = <&'a [T] as BitMask>::Iter;
+    type Block = <&'a [T] as IntoBlocks>::Block;
+    type Blocks = <&'a [T] as IntoBlocks>::Blocks;
     #[inline]
-    fn bit_mask(self) -> Self::Iter {
-        self.as_ref().bit_mask()
+    fn into_blocks(self) -> Self::Blocks {
+        self.as_ref().into_blocks()
     }
 }
 

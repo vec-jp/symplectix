@@ -245,13 +245,14 @@ impl SelectWord for u64 {
     #[inline]
     fn select_word(self, n: usize) -> Option<usize> {
         (n < self.count1()).then(|| {
-            #[cfg(target_arch = "x86_64")]
+            #[cfg(all(feature = "std", any(target_arch = "x86", target_arch = "x86_64")))]
             {
                 if is_x86_feature_detected!("bmi2") {
-                    use core::arch::x86_64::{_pdep_u64, _tzcnt_u64};
+                    use std::arch::x86_64::{_pdep_u64, _tzcnt_u64};
                     return unsafe { _tzcnt_u64(_pdep_u64(1 << n, self)) as usize };
                 }
             }
+
             broadword(self, n as u64)
         })
     }

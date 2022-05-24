@@ -37,7 +37,7 @@ trait Pdep {
 
 impl Pdep for u32 {
     fn pdep(self, mask: Self) -> Self {
-        #[cfg(target_arch = "x86_64")]
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
         {
             if is_x86_feature_detected!("bmi2") {
                 return unsafe { x86_64::_pdep_u32(self, mask) };
@@ -49,7 +49,7 @@ impl Pdep for u32 {
 
 impl Pdep for u64 {
     fn pdep(self, mask: Self) -> Self {
-        #[cfg(target_arch = "x86_64")]
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
         {
             if is_x86_feature_detected!("bmi2") {
                 return unsafe { x86_64::_pdep_u64(self, mask) };

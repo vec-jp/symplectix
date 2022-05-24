@@ -8,7 +8,6 @@ rust_library(
         ["*.rs"],
         exclude = ["*_test.rs"],
     ),
-    crate_root = "bitwise.rs",
     visibility = ["//visibility:public"],
     deps = [
         "//bits",

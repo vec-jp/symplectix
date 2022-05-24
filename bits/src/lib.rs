@@ -1,4 +1,10 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
 //! `bits`
+
+// #[cfg(feature = "std")]
+// #[macro_use]
+// extern crate std;
 
 mod bits;
 mod bits_mut;
@@ -53,11 +59,6 @@ fn to_range<R: RangeBounds<usize>>(r: &R, min: usize, max: usize) -> (usize, usi
     (i, j)
 }
 
-/// Calculates the minimum number of blocks to store `n` bits.
-const fn blocks(n: usize, b: usize) -> usize {
-    n / b + (n % b > 0) as usize
-}
-
 fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
 where
     T: Block,
@@ -80,21 +81,32 @@ where
     }
 }
 
-/// Returns an empty `Vec<T>` with the at least specified capacity in bits.
-///
-/// ```
-/// # use bits::Bits;
-/// let v = bits::with_capacity::<u8>(80);
-/// // v has no bits, but an enough capacity to store 80 bits.
-/// assert_eq!(v.bits(), 0);
-/// assert_eq!(v.capacity(), 10);
-/// ```
-pub fn with_capacity<T: Block>(capacity: usize) -> Vec<T> {
-    Vec::with_capacity(blocks(capacity, T::BITS))
-}
+#[cfg(feature = "std")]
+pub mod bit_vec {
+    use super::*;
+    // use alloc::vec::Vec;
 
-// pub fn null<T: Block>(n: usize) -> Vec<T> {
-//     use core::iter::from_fn;
-//     let size = blocks(n, T::BITS);
-//     from_fn(|| Some(T::empty())).take(size).collect()
-// }
+    /// Calculates the minimum number of blocks to store `n` bits.
+    pub const fn blocks(n: usize, b: usize) -> usize {
+        n / b + (n % b > 0) as usize
+    }
+
+    /// Returns an empty `Vec<T>` with the at least specified capacity in bits.
+    ///
+    /// ```
+    /// # use bits::{bit_vec, Bits};
+    /// let v = bit_vec::with_capacity::<u8>(80);
+    /// // v has no bits, but an enough capacity to store 80 bits.
+    /// assert_eq!(v.bits(), 0);
+    /// assert_eq!(v.capacity(), 10);
+    /// ```
+    pub fn with_capacity<T: Block>(capacity: usize) -> Vec<T> {
+        Vec::with_capacity(blocks(capacity, T::BITS))
+    }
+
+    // pub fn null<T: Block>(n: usize) -> Vec<T> {
+    //     use core::iter::from_fn;
+    //     let size = blocks(n, T::BITS);
+    //     from_fn(|| Some(T::empty())).take(size).collect()
+    // }
+}

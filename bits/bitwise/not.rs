@@ -1,4 +1,4 @@
-use crate::{compare_index, BitMask};
+use crate::{compare_index, IntoBlocks};
 use core::{
     cmp::Ordering::*,
     iter::{Fuse, Peekable},
@@ -14,17 +14,17 @@ use core::{
 ///     assert_eq!(bits.into_owned(), !v2[index]);
 /// }
 /// ```
-pub trait Not: Sized + BitMask {
-    fn not<That: BitMask>(self, that: That) -> BitwiseNot<Self, That>;
+pub trait Not: Sized + IntoBlocks {
+    fn not<That: IntoBlocks>(self, that: That) -> BitwiseNot<Self, That>;
 }
 
 pub trait NotAssign<That: ?Sized> {
     fn not_assign(a: &mut Self, b: &That);
 }
 
-impl<T: BitMask> Not for T {
+impl<T: IntoBlocks> Not for T {
     #[inline]
-    fn not<That: BitMask>(self, that: That) -> BitwiseNot<Self, That> {
+    fn not<That: IntoBlocks>(self, that: That) -> BitwiseNot<Self, That> {
         BitwiseNot { a: self, b: that }
     }
 }
@@ -41,27 +41,27 @@ pub struct Difference<A: Iterator, B: Iterator> {
 
 impl<A, B> IntoIterator for BitwiseNot<A, B>
 where
-    Self: BitMask,
+    Self: IntoBlocks,
 {
-    type Item = (usize, <Self as BitMask>::Bits);
-    type IntoIter = <Self as BitMask>::Iter;
+    type Item = (usize, <Self as IntoBlocks>::Block);
+    type IntoIter = <Self as IntoBlocks>::Blocks;
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
-        self.bit_mask()
+        self.into_blocks()
     }
 }
 
-impl<A: BitMask, B: BitMask> BitMask for BitwiseNot<A, B>
+impl<A: IntoBlocks, B: IntoBlocks> IntoBlocks for BitwiseNot<A, B>
 where
-    A::Bits: NotAssign<B::Bits>,
+    A::Block: NotAssign<B::Block>,
 {
-    type Bits = A::Bits;
-    type Iter = Difference<A::Iter, B::Iter>;
+    type Block = A::Block;
+    type Blocks = Difference<A::Blocks, B::Blocks>;
     #[inline]
-    fn bit_mask(self) -> Self::Iter {
+    fn into_blocks(self) -> Self::Blocks {
         Difference {
-            a: self.a.bit_mask().fuse().peekable(),
-            b: self.b.bit_mask().fuse().peekable(),
+            a: self.a.into_blocks().fuse().peekable(),
+            b: self.b.into_blocks().fuse().peekable(),
         }
     }
 }

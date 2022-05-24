@@ -30,9 +30,11 @@ where
     }
 }
 
-mod alloc {
+#[cfg(feature = "std")]
+mod impl_alloc {
     use super::Block;
     use std::borrow::Cow;
+    // use alloc::boxed::Box;
 
     impl<T: Block> Block for Box<T> {
         const BITS: usize = T::BITS;

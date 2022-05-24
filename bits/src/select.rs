@@ -130,9 +130,12 @@ where
     impl_select!([T], as_ref);
 }
 
-mod alloc {
+#[cfg(feature = "std")]
+mod impl_alloc {
     use super::*;
-    use std::borrow::Cow;
+    use std::borrow::{Cow, ToOwned};
+    // use alloc::boxed::Box;
+    // use alloc::vec::Vec;
 
     impl<T: ?Sized + Select> Select for Box<T> {
         impl_select!(T);
