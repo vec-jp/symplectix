@@ -42,11 +42,11 @@ rust_library(
 )
 
 rust_test(
-    name = "bits_no_std_cfg_test",
+    name = "no_std_cfg_test",
     crate = ":bits_no_std",
 )
 
 rust_doc_test(
-    name = "bits_no_std_doc_test",
+    name = "no_std_doc_test",
     crate = ":bits_no_std",
 )
