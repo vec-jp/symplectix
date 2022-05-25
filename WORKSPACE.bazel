@@ -40,7 +40,7 @@ rules_foreign_cc_dependencies()
 
 # Rust
 
-_RUST_VERSION = "1.60.0"
+_RUST_VERSION = "1.61.0"
 
 _RUST_EDITION = "2021"
 
