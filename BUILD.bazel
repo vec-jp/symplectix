@@ -1,6 +1,4 @@
 load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
-load("@crates//:defs.bzl", "all_crate_deps")
-load("@rules_rust//rust:defs.bzl", "rust_analyzer")
 
 package(default_visibility = ["//visibility:public"])
 
