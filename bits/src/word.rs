@@ -234,7 +234,7 @@ macro_rules! impls {
         }
     )*)
 }
-impls!(u8 u16 u32 u64 u128);
+impls!(u8 u16 u32 u64 u128 usize);
 
 /// A helper trait to implement `Select` for u64.
 trait SelectWord {
@@ -330,5 +330,31 @@ impl SelectWord for u128 {
     fn select_word(self, c: usize) -> Option<usize> {
         let this: [u64; 2] = [self as u64, (self >> 64) as u64];
         this.select1(c)
+    }
+}
+
+impl SelectWord for usize {
+    #[cfg(target_pointer_width = "16")]
+    #[inline]
+    fn select_word(self, c: usize) -> Option<usize> {
+        (self as u16).select_word(c)
+    }
+
+    #[cfg(target_pointer_width = "32")]
+    #[inline]
+    fn select_word(self, c: usize) -> Option<usize> {
+        (self as u32).select_word(c)
+    }
+
+    #[cfg(target_pointer_width = "64")]
+    #[inline]
+    fn select_word(self, c: usize) -> Option<usize> {
+        (self as u64).select_word(c)
+    }
+
+    #[cfg(target_pointer_width = "128")]
+    #[inline]
+    fn select_word(self, c: usize) -> Option<usize> {
+        (self as u128).select_word(c)
     }
 }
