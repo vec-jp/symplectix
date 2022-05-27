@@ -20,13 +20,19 @@ pub trait Rank: Count {
 impl<T: Block> Rank for [T] {
     #[inline]
     fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        let (s, e) = crate::to_range(&r, 0, self.bits());
-        let (i, p) = crate::address::<T>(s);
-        let (j, q) = crate::address::<T>(e);
-        if i == j {
-            self[i].rank1(p..q)
+        if self.is_empty() {
+            0
         } else {
-            self[i].rank1(p..) + self[i + 1..j].count1() + self.get(j).map_or(0, |b| b.rank1(..q))
+            let (s, e) = crate::to_range(&r, 0, self.bits());
+            let (i, p) = crate::address::<T>(s);
+            let (j, q) = crate::address::<T>(e);
+            if i == j {
+                self[i].rank1(p..q)
+            } else {
+                self[i].rank1(p..)
+                    + self[i + 1..j].count1()
+                    + self.get(j).map_or(0, |b| b.rank1(..q))
+            }
         }
     }
 }

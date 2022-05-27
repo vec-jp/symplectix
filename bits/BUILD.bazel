@@ -23,6 +23,10 @@ rust_test_suite(
     srcs = glob(["tests/*.rs"]),
     deps = [
         ":bits",
+        "@crates//:quickcheck",
+    ],
+    proc_macro_deps = [
+        "@crates//:quickcheck_macros",
     ],
 )
 
