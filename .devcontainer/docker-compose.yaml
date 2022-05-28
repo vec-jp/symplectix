@@ -4,8 +4,10 @@ version: "3"
 
 services:
   workspace:
+    build:
+      context: ./workspace
     # Need to load the image by `bazel run //tools/devcontainer:debian_bullseye_slim`.
-    image: bazel/tools/devcontainer:debian_bullseye_slim
+    # image: bazel/tools/devcontainer:debian_bullseye_slim
     user: "1000:1000"
     command: sleep infinity
     tty: true

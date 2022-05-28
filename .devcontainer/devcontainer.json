@@ -21,12 +21,10 @@
     "files.exclude": {
       "**/.git": true,
       "bazel-*": true,
-      "tmp": true
     },
     "search.exclude": {
       "**/.git": true,
       "bazel-*": true,
-      "tmp": true
     },
   },
   // Add the IDs of extensions you want installed when the container is created.
