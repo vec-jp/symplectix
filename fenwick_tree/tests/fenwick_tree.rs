@@ -2,6 +2,7 @@
 extern crate quickcheck_macros;
 
 use fenwick_tree as fw;
+use fw::Search;
 use std::ops::AddAssign;
 
 fn make_fenwick_tree<T, A>(zero: T, seq: &A) -> Vec<T>
@@ -16,13 +17,48 @@ where
     tree
 }
 
+#[test]
+fn prefix() {
+    let mut indices = fw::prefix(7);
+    assert_eq!(indices.next(), Some(7));
+    assert_eq!(indices.next(), Some(6));
+    assert_eq!(indices.next(), Some(4));
+    assert_eq!(indices.next(), None);
+}
+
+#[test]
+fn update() {
+    let mut indices = fw::update_(7, 8);
+    assert_eq!(indices.next(), Some(7));
+    assert_eq!(indices.next(), Some(8));
+    assert_eq!(indices.next(), None);
+}
+
+#[test]
+fn sum() {
+    let data: &[u32] = &[1, 0, 3, 5];
+    let tree = make_fenwick_tree(0, data);
+    assert_eq!(4, fw::nodes(&tree));
+
+    assert_eq!(0, fw::sum(&tree, 0));
+    assert_eq!(1, fw::sum(&tree, 1));
+    assert_eq!(1, fw::sum(&tree, 2));
+    assert_eq!(4, fw::sum(&tree, 3));
+    assert_eq!(9, fw::sum(&tree, 4));
+
+    assert_eq!(tree.lower_bound(None, 0), 0);
+    assert_eq!(tree.lower_bound(None, 1), 1);
+    assert_eq!(tree.lower_bound(None, 4), 3);
+    assert_eq!(tree.lower_bound(None, 5), 4);
+}
+
 #[quickcheck]
 fn initialization(vec: Vec<u64>) -> bool {
     let tree1 = make_fenwick_tree(0, &vec[..]);
 
     let mut tree2 = vec![0; vec.len() + 1];
     for (i, d) in vec.into_iter().enumerate() {
-        fw::add(&mut tree2, i, d);
+        fw::incr(&mut tree2, i, d);
     }
 
     tree1 == tree2
@@ -64,7 +100,7 @@ fn next_index_for_update() {
     ];
 
     assert_eq!(
-        fenwick_tree::update(succ[0], 2097152 + 1).collect::<Vec<_>>(),
+        fw::update(succ[0], 2097152 + 1).collect::<Vec<_>>(),
         &succ[1..]
     );
 }
@@ -84,8 +120,20 @@ fn next_index_for_query() {
         0b_0100_0000_0000_0000_0000, // 262144
     ];
 
-    assert_eq!(fenwick_tree::query(pred[0]).collect::<Vec<_>>(), &pred[0..]);
+    assert_eq!(fw::prefix(pred[0]).collect::<Vec<_>>(), &pred[0..]);
 }
+
+// #[quickcheck]
+// fn prop_lower_bound(vec: Vec<u64>) -> bool {
+//     let tree = make_fenwick_tree(0, &vec[..]);
+//     let sum = fw::sum_all(&tree);
+
+//     tree.lower_bound(None, 0) == 0
+//         && (1..=sum).all(|w| {
+//             let i = tree.lower_bound(None, w);
+//             (i..=tree.size()).all(|j| tree.lower_bound(Some(j), w) == i)
+//         })
+// }
 
 // fn values(n: usize) -> Vec<u64> {
 //     use std::iter::successors;
@@ -121,18 +169,6 @@ fn next_index_for_query() {
 //             let get_from_tree = (0..vec.len()).all(|i| vec[i] == tree.sum(i+1) - tree.sum(i));
 
 //             sum0_is_always_zero && sumx_eq_vec_sum && sum_all && get_from_tree
-//         }
-
-//         fn prop_lower_bound(vec: Vec<u64>) -> bool {
-//             let tree = fenwick1::tree(0, &vec[..]);
-//             let sum = tree.sum(tree.size());
-
-//             tree.lower_bound(None, 0) == 0 && (1..=sum).all(|w| {
-//                 let i = tree.lower_bound(None, w);
-//                 (i..=tree.size()).all(|j| {
-//                     tree.lower_bound(Some(j), w) == i
-//                 })
-//             })
 //         }
 
 //         fn prop_accumulate(data: Vec<u64>) -> bool {

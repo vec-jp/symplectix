@@ -1,31 +1,84 @@
-//! 1-based FenwickTree (BinaryIndexedTree).
+//! 1-indexed FenwickTree (BinaryIndexedTree).
 
 use bits::Word;
 use std::iter::successors;
 use std::ops::{AddAssign, SubAssign};
 
-pub trait Tree {
+// The next node to be updated can be found by adding the node size `n.lsb()`.
+#[inline]
+fn next_index_to_be_updated(d: usize) -> usize {
+    d + d.lsb()
+}
+
+// The next node to be queried can be found by subtracting the node size `n.lsb()`.
+#[inline]
+fn next_index_for_prefix(d: usize) -> usize {
+    d - d.lsb()
+}
+
+#[inline]
+pub fn prefix(i: usize) -> impl Iterator<Item = usize> {
+    // for j := i; j > 0; j -= lsb(x)
+    successors((i > 0).then(|| i), |&i| {
+        let j = next_index_for_prefix(i);
+        (j > 0).then(|| j)
+    })
+}
+
+#[inline]
+pub fn update(i: usize, slice_len: usize) -> impl Iterator<Item = usize> {
+    // The next segment to be updated can be found by adding the segment length `n.lsb()`.
+    #[inline]
+    fn next(&d: &usize) -> Option<usize> {
+        Some(next_index_to_be_updated(d))
+    }
+
+    // for x := k+1; x < max; x += lsb(x) { ...
+    successors(Some(i + 1), next).take_while(move |&x| x < slice_len)
+}
+
+#[inline]
+pub fn update_(i: usize, nodes: usize) -> impl Iterator<Item = usize> {
+    // The next segment to be updated can be found by adding the segment length `n.lsb()`.
+    #[inline]
+    fn next(&d: &usize) -> Option<usize> {
+        Some(next_index_to_be_updated(d))
+    }
+
+    // for x := k; x < max; x += lsb(x) { ...
+    successors(Some(i), next).take_while(move |&x| x <= nodes)
+}
+
+pub trait Nodes {
     /// The size of fenwick tree.
     fn nodes(&self) -> usize;
 }
 
-pub trait Sum: Tree {
+pub trait Sum: Nodes {
+    /// Sum of the original data within [1..index].
+    /// Sum of the nodes within [0..index).
     fn sum(&self, index: usize) -> u64;
 }
 
-pub trait Search: Tree {
-    /// Finds the lowest bound `i` that satisfies `sum(i) >= w` when we know the result `i` is reside within [..hint].
+pub trait Search: Nodes {
+    /// Finds the lowest idnex `i` that satisfies `sum(i) >= w`.
+    /// When we know the result `i` is reside within [..hint].
     fn lower_bound(&self, hint: Option<usize>, w: u64) -> usize;
 }
 
-pub trait Add: Tree {
+pub trait Incr: Nodes {
     /// Corresponds to `T[i] += delta` in `[T]`.
-    fn add(&mut self, i: usize, delta: u64);
+    fn incr(&mut self, i: usize, delta: u64);
 }
 
-pub trait Sub: Tree {
+pub trait Decr: Nodes {
     /// Corresponds to `T[i] -= delta` in `[T]`.
-    fn sub(&mut self, i: usize, delta: u64);
+    fn decr(&mut self, i: usize, delta: u64);
+}
+
+#[inline]
+pub fn nodes<T: Nodes>(tree: &T) -> usize {
+    tree.nodes()
 }
 
 #[inline]
@@ -40,13 +93,13 @@ pub fn sum_all<T: Sum>(tree: &T) -> u64 {
 }
 
 #[inline]
-pub fn add<T: Add>(tree: &mut T, index: usize, delta: u64) {
-    tree.add(index, delta)
+pub fn incr<T: Incr>(tree: &mut T, index: usize, delta: u64) {
+    tree.incr(index, delta)
 }
 
 #[inline]
-pub fn sub<T: Sub>(tree: &mut T, index: usize, delta: u64) {
-    tree.sub(index, delta)
+pub fn decr<T: Decr>(tree: &mut T, index: usize, delta: u64) {
+    tree.decr(index, delta)
 }
 
 #[cfg(test)]
@@ -78,41 +131,6 @@ where
             tree[j] += tree[i];
         }
     }
-}
-
-// The next node to be updated can be found by adding the node size `n.lsb()`.
-#[inline]
-fn next_index_to_be_updated(d: usize) -> usize {
-    d + d.lsb()
-}
-
-// The next node to be queried can be found by subtracting the node size `n.lsb()`.
-#[inline]
-fn next_index_to_be_queried(d: usize) -> usize {
-    d - d.lsb()
-}
-
-#[inline]
-pub fn update(k: usize, max: usize) -> impl Iterator<Item = usize> {
-    // The next segment to be updated can be found by adding the segment length `n.lsb()`.
-    #[inline]
-    fn next(&d: &usize) -> Option<usize> {
-        Some(next_index_to_be_updated(d))
-    }
-
-    // for x := k+1; x < max; x += lsb(x) { ...
-    successors(Some(k + 1), next).take_while(move |&x| x < max)
-}
-
-#[inline]
-pub fn query(k: usize) -> impl Iterator<Item = usize> {
-    #[inline]
-    fn next(&d: &usize) -> Option<usize> {
-        Some(next_index_to_be_queried(d))
-    }
-
-    // for x := k; x > 0; x -= lsb(x) { ...
-    successors(Some(k), next).take_while(move |&x| x > 0)
 }
 
 #[inline]
@@ -153,7 +171,7 @@ where
 
     let mut vec = vec![0; tree.len()];
     for i in 1..tree.len() {
-        let j = next_index_to_be_queried(i);
+        let j = next_index_for_prefix(i);
         vec[i] = tree[i].into() + vec[j];
     }
     vec
@@ -184,7 +202,7 @@ pub fn pop<T: Copy>(tree: &mut Vec<T>) -> Option<T> {
     }
 }
 
-impl<T> Tree for [T] {
+impl<T> Nodes for [T] {
     #[inline]
     fn nodes(&self) -> usize {
         self.len() - 1 // self[0] is a dummy node
@@ -194,7 +212,7 @@ impl<T> Tree for [T] {
 impl<T: Copy + Into<u64>> Sum for [T] {
     #[inline]
     fn sum(&self, i: usize) -> u64 {
-        query(i).map(|i| self[i].into()).sum()
+        prefix(i).map(|i| self[i].into()).sum()
     }
 }
 
@@ -222,22 +240,22 @@ impl<T: Copy + Into<u64>> Search for [T] {
     }
 }
 
-impl<T> Add for [T]
+impl<T> Incr for [T]
 where
     T: AddAssign<u64>,
 {
     #[inline]
-    fn add(&mut self, i: usize, delta: u64) {
+    fn incr(&mut self, i: usize, delta: u64) {
         update(i, self.len()).for_each(|p| self[p] += delta)
     }
 }
 
-impl<T> Sub for [T]
+impl<T> Decr for [T]
 where
     T: SubAssign<u64>,
 {
     #[inline]
-    fn sub(&mut self, i: usize, delta: u64) {
+    fn decr(&mut self, i: usize, delta: u64) {
         update(i, self.len()).for_each(|p| self[p] -= delta)
     }
 }
@@ -260,7 +278,7 @@ impl<T> ComplementedQuery<[T]> for [T] {
     }
 }
 
-impl<'a, T> Tree for Complemented<'a, [T]>
+impl<'a, T> Nodes for Complemented<'a, [T]>
 where
     T: Copy + Into<u64>,
 {
@@ -307,9 +325,9 @@ where
     }
 }
 
-impl<T> Tree for Vec<T>
+impl<T> Nodes for Vec<T>
 where
-    [T]: Tree,
+    [T]: Nodes,
 {
     #[inline]
     fn nodes(&self) -> usize {
@@ -344,23 +362,23 @@ impl<T> ComplementedQuery<[T]> for Vec<T> {
     }
 }
 
-impl<T> Add for Vec<T>
+impl<T> Incr for Vec<T>
 where
-    [T]: Add,
+    [T]: Incr,
 {
     #[inline]
-    fn add(&mut self, i: usize, delta: u64) {
-        <[T]>::add(self, i, delta)
+    fn incr(&mut self, i: usize, delta: u64) {
+        <[T]>::incr(self, i, delta)
     }
 }
 
-impl<T> Sub for Vec<T>
+impl<T> Decr for Vec<T>
 where
-    [T]: Sub,
+    [T]: Decr,
 {
     #[inline]
-    fn sub(&mut self, i: usize, delta: u64) {
-        <[T]>::sub(self, i, delta)
+    fn decr(&mut self, i: usize, delta: u64) {
+        <[T]>::decr(self, i, delta)
     }
 }
 
