@@ -40,16 +40,24 @@ pub fn update(i: usize, nodes: usize) -> impl Iterator<Item = usize> {
     })
 }
 
-#[inline]
-pub fn update_(i: usize, slice_len: usize) -> impl Iterator<Item = usize> {
-    // The next segment to be updated can be found by adding the segment length `n.lsb()`.
-    #[inline]
-    fn next(&d: &usize) -> Option<usize> {
-        Some(next_index_for_update(d))
-    }
+// #[inline]
+// pub fn update_(i: usize, slice_len: usize) -> impl Iterator<Item = usize> {
+//     // The next segment to be updated can be found by adding the segment length `n.lsb()`.
+//     #[inline]
+//     fn next(&d: &usize) -> Option<usize> {
+//         Some(next_index_for_update(d))
+//     }
+//     // for x := k+1; x < max; x += lsb(x) { ...
+//     successors(Some(i + 1), next).take_while(move |&x| x < slice_len)
+// }
 
-    // for x := k+1; x < max; x += lsb(x) { ...
-    successors(Some(i + 1), next).take_while(move |&x| x < slice_len)
+#[inline]
+pub fn search(last: usize) -> impl Iterator<Item = usize> {
+    // for x := m.msb(); x > 0; x >>= 1
+    successors((last > 0).then(|| last.msb()), |&i| {
+        let x = i >> 1;
+        (x > 0).then(|| x)
+    })
 }
 
 pub trait Nodes {
@@ -136,18 +144,6 @@ where
     }
 }
 
-#[inline]
-pub fn search(x: usize) -> impl Iterator<Item = usize> {
-    // Top to bottom. `d` is the length of a segment (8, 4, 2, ...)
-    #[inline]
-    fn next(d: &usize) -> Option<usize> {
-        Some(d >> 1)
-    }
-
-    // for x := m.msb(); x > 0; x >>= 1 { ...
-    successors(Some(x.msb()), next).take_while(move |&x| x > 0)
-}
-
 // Returns the nodes that need to be accumulated in the node at `x`.
 #[inline]
 pub fn diassemble(x: usize) -> impl Iterator<Item = usize> {
@@ -224,6 +220,8 @@ impl<T: Copy + Into<u64>> Search for [T] {
     fn lower_bound(&self, hint: Option<usize>, mut w: u64) -> usize {
         assert!(!self.is_empty());
 
+        // self.binary_search(x)
+
         if w == 0 {
             return 0;
         }
@@ -249,7 +247,7 @@ where
 {
     #[inline]
     fn incr(&mut self, i: usize, delta: u64) {
-        update_(i, self.len()).for_each(|p| self[p] += delta)
+        update(i, self.nodes()).for_each(|p| self[p] += delta)
     }
 }
 
@@ -259,7 +257,7 @@ where
 {
     #[inline]
     fn decr(&mut self, i: usize, delta: u64) {
-        update_(i, self.len()).for_each(|p| self[p] -= delta)
+        update(i, self.nodes()).for_each(|p| self[p] -= delta)
     }
 }
 

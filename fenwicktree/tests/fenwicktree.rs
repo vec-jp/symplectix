@@ -5,18 +5,6 @@ use fenwicktree as fw;
 use fw::Search;
 use std::ops::AddAssign;
 
-fn make_fenwick_tree<T, A>(zero: T, seq: &A) -> Vec<T>
-where
-    T: Copy + AddAssign,
-    A: ?Sized + AsRef<[T]>,
-{
-    let seq = seq.as_ref();
-    let mut tree = vec![zero; seq.len() + 1];
-    tree[1..].copy_from_slice(seq);
-    fw::init(&mut tree);
-    tree
-}
-
 #[test]
 fn next_index_for_prefix() {
     let indices = vec![
@@ -33,6 +21,41 @@ fn next_index_for_prefix() {
     ];
 
     assert_eq!(fw::prefix(indices[0]).collect::<Vec<_>>(), &indices[0..]);
+}
+
+#[test]
+fn next_index_for_update() {
+    let indices = vec![
+        0b_0000_0110_1110_1010_1101_0001, // 453329
+        0b_0000_0110_1110_1010_1101_0010, // 453330
+        0b_0000_0110_1110_1010_1101_0100, // 453332
+        0b_0000_0110_1110_1010_1101_1000, // 453336
+        0b_0000_0110_1110_1010_1110_0000, // 453344
+        0b_0000_0110_1110_1011_0000_0000, // 453376
+        0b_0000_0110_1110_1100_0000_0000, // 453632
+        0b_0000_0110_1111_0000_0000_0000, // 454656
+        0b_0000_0111_0000_0000_0000_0000, // 458752
+        0b_0000_1000_0000_0000_0000_0000, // 524288
+        0b_0001_0000_0000_0000_0000_0000, // 1048576
+        0b_0010_0000_0000_0000_0000_0000, // 2097152
+    ];
+
+    assert_eq!(
+        fw::update(indices[0], indices[indices.len() - 1] + 1).collect::<Vec<_>>(),
+        &indices[0..]
+    );
+}
+
+fn make_fenwick_tree<T, A>(zero: T, seq: &A) -> Vec<T>
+where
+    T: Copy + AddAssign,
+    A: ?Sized + AsRef<[T]>,
+{
+    let seq = seq.as_ref();
+    let mut tree = vec![zero; seq.len() + 1];
+    tree[1..].copy_from_slice(seq);
+    fw::init(&mut tree);
+    tree
 }
 
 #[test]
@@ -54,29 +77,6 @@ fn prefix() {
     let mut indices = fw::prefix(8);
     assert_eq!(indices.next(), Some(8));
     assert_eq!(indices.next(), None);
-}
-
-#[test]
-fn next_index_for_update() {
-    let indices = vec![
-        0b_0000_0110_1110_1010_1101_0001, // 453329
-        0b_0000_0110_1110_1010_1101_0010, // 453330
-        0b_0000_0110_1110_1010_1101_0100, // 453332
-        0b_0000_0110_1110_1010_1101_1000, // 453336
-        0b_0000_0110_1110_1010_1110_0000, // 453344
-        0b_0000_0110_1110_1011_0000_0000, // 453376
-        0b_0000_0110_1110_1100_0000_0000, // 453632
-        0b_0000_0110_1111_0000_0000_0000, // 454656
-        0b_0000_0111_0000_0000_0000_0000, // 458752
-        0b_0000_1000_0000_0000_0000_0000, // 524288
-        0b_0001_0000_0000_0000_0000_0000, // 1048576
-        0b_0010_0000_0000_0000_0000_0000, // 2097152
-    ];
-
-    assert_eq!(
-        fw::update(indices[0], 2097152 + 1).collect::<Vec<_>>(),
-        &indices[0..]
-    );
 }
 
 #[test]
@@ -133,15 +133,13 @@ fn sum() {
 }
 
 #[quickcheck]
-fn initialization(vec: Vec<u64>) -> bool {
-    let tree1 = make_fenwick_tree(0, &vec[..]);
-
-    let mut tree2 = vec![0; vec.len() + 1];
-    for (i, d) in vec.into_iter().enumerate() {
-        fw::incr(&mut tree2, i, d);
+fn tree_by_incr(vec: Vec<u64>) -> bool {
+    let mut tree = vec![0; vec.len() + 1];
+    for (i, &d) in vec.iter().enumerate() {
+        fw::incr(&mut tree, i + 1, d);
     }
 
-    tree1 == tree2
+    tree[0] == 0 && tree == make_fenwick_tree(0, &vec[..])
 }
 
 #[quickcheck]
