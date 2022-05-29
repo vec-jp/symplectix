@@ -34,7 +34,7 @@
     "rust-lang.rust-analyzer",
   ],
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [],
+  "forwardPorts": [],
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "sudo chown -R nonroot:nonroot /home/nonroot/.cache",
+  "postCreateCommand": "cd .devcontainer/workspace && ./setup.sh scripts/post_container_create"
 }

@@ -2,6 +2,8 @@
 set -eu -o pipefail -o posix
 shopt -s inherit_errexit
 
-for f in /tmp/scripts/*.sh; do
+scripts_dir="$1"
+
+for f in "${scripts_dir}"/*.sh; do
   bash "$f"
 done
