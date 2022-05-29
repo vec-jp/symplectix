@@ -161,8 +161,7 @@ where
     vec
 }
 
-#[allow(dead_code)]
-pub fn push<T>(tree: &mut Vec<T>, mut x: T)
+pub fn push<T>(tree: &mut Vec<T>, mut value: T)
 where
     T: Copy + AddAssign,
 {
@@ -171,12 +170,11 @@ where
     assert!(!tree.is_empty());
     // `tree.len()` points to the index to which `x` belongs when pushed
     for i in prefix(tree.len()).skip(1) {
-        x += tree[i];
+        value += tree[i];
     }
-    tree.push(x);
+    tree.push(value);
 }
 
-#[allow(dead_code)]
 pub fn pop<T>(tree: &mut Vec<T>) -> Option<T> {
     // tree[0] is dummy value, popping it doesn't make sense.
     (tree.len() > 1).then(|| tree.pop().expect("len > 1"))
