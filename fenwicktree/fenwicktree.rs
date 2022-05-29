@@ -6,7 +6,7 @@ use std::ops::{AddAssign, SubAssign};
 
 // The next node to be updated can be found by adding the node size `n.lsb()`.
 #[inline]
-fn next_index_to_be_updated(d: usize) -> usize {
+fn next_index_for_update(d: usize) -> usize {
     d + d.lsb()
 }
 
@@ -16,37 +16,40 @@ fn next_index_for_prefix(d: usize) -> usize {
     d - d.lsb()
 }
 
+/// # Examples
+///
+/// ```
+/// for i in fenwicktree::prefix(7) {
+/// }
+/// ```
 #[inline]
 pub fn prefix(i: usize) -> impl Iterator<Item = usize> {
-    // for j := i; j > 0; j -= lsb(x)
+    // for x := i; x > 0; x -= lsb(x)
     successors((i > 0).then(|| i), |&i| {
-        let j = next_index_for_prefix(i);
-        (j > 0).then(|| j)
+        let x = next_index_for_prefix(i);
+        (x > 0).then(|| x)
     })
 }
 
 #[inline]
-pub fn update(i: usize, slice_len: usize) -> impl Iterator<Item = usize> {
+pub fn update(i: usize, nodes: usize) -> impl Iterator<Item = usize> {
+    // for x := i; x <= nodes; x += lsb(x)
+    successors((i > 0).then(|| i), move |&i| {
+        let x = next_index_for_update(i);
+        (x <= nodes).then(|| x)
+    })
+}
+
+#[inline]
+pub fn update_(i: usize, slice_len: usize) -> impl Iterator<Item = usize> {
     // The next segment to be updated can be found by adding the segment length `n.lsb()`.
     #[inline]
     fn next(&d: &usize) -> Option<usize> {
-        Some(next_index_to_be_updated(d))
+        Some(next_index_for_update(d))
     }
 
     // for x := k+1; x < max; x += lsb(x) { ...
     successors(Some(i + 1), next).take_while(move |&x| x < slice_len)
-}
-
-#[inline]
-pub fn update_(i: usize, nodes: usize) -> impl Iterator<Item = usize> {
-    // The next segment to be updated can be found by adding the segment length `n.lsb()`.
-    #[inline]
-    fn next(&d: &usize) -> Option<usize> {
-        Some(next_index_to_be_updated(d))
-    }
-
-    // for x := k; x < max; x += lsb(x) { ...
-    successors(Some(i), next).take_while(move |&x| x <= nodes)
 }
 
 pub trait Nodes {
@@ -126,7 +129,7 @@ where
     assert!(!tree.is_empty());
     let n = tree.len();
     for i in 1..n {
-        let j = next_index_to_be_updated(i);
+        let j = next_index_for_update(i);
         if p <= j && j < n {
             tree[j] += tree[i];
         }
@@ -246,7 +249,7 @@ where
 {
     #[inline]
     fn incr(&mut self, i: usize, delta: u64) {
-        update(i, self.len()).for_each(|p| self[p] += delta)
+        update_(i, self.len()).for_each(|p| self[p] += delta)
     }
 }
 
@@ -256,7 +259,7 @@ where
 {
     #[inline]
     fn decr(&mut self, i: usize, delta: u64) {
-        update(i, self.len()).for_each(|p| self[p] -= delta)
+        update_(i, self.len()).for_each(|p| self[p] -= delta)
     }
 }
 
