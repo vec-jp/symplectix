@@ -46,18 +46,6 @@ fn next_index_for_update() {
     );
 }
 
-fn make_fenwick_tree<T, A>(zero: T, seq: &A) -> Vec<T>
-where
-    T: Copy + AddAssign,
-    A: ?Sized + AsRef<[T]>,
-{
-    let seq = seq.as_ref();
-    let mut tree = vec![zero; seq.len() + 1];
-    tree[1..].copy_from_slice(seq);
-    fw::init(&mut tree);
-    tree
-}
-
 #[test]
 fn prefix() {
     let mut indices = fw::prefix(0);
@@ -114,6 +102,18 @@ fn update() {
 //     assert_eq!(indices.next(), None);
 // }
 
+fn make_fenwick_tree<T, A>(zero: T, seq: &A) -> Vec<T>
+where
+    T: Copy + AddAssign,
+    A: ?Sized + AsRef<[T]>,
+{
+    let seq = seq.as_ref();
+    let mut tree = vec![zero; seq.len() + 1];
+    tree[1..].copy_from_slice(seq);
+    fw::init(&mut tree);
+    tree
+}
+
 #[test]
 fn sum() {
     let data: &[u32] = &[1, 0, 3, 5];
@@ -158,6 +158,18 @@ fn sum_x_eq_vec_sum(vec: Vec<u64>) -> bool {
 fn sum_all_eq_vec_sum(vec: Vec<u64>) -> bool {
     let tree = make_fenwick_tree(0, &vec[..]);
     fw::sum_all(&tree) == vec.iter().sum()
+}
+
+#[quickcheck]
+fn push_pop(vec: Vec<u64>) -> bool {
+    let tree = make_fenwick_tree(0, &vec[..]);
+
+    let mut cloned = tree.clone();
+    if let Some(x) = cloned.pop() {
+        cloned.push(x);
+    }
+
+    tree == cloned
 }
 
 // #[quickcheck]

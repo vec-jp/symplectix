@@ -159,8 +159,8 @@ pub fn diassemble(x: usize) -> impl Iterator<Item = usize> {
         .map(move |d| x - d)
 }
 
-/// Tranform tree into an accumulated vector.
-/// e.g. O[1, 1, 0, 2] -> F[1, 2, 0, 4] => A[1, 2, 2, 4]
+/// Tranforms a tree into an accumulated vector.
+/// e.g. `[1, 2, 0, 4]` => `[1, 2, 2, 4]`.
 #[inline]
 pub fn accumulate<T>(tree: &[T]) -> Vec<u64>
 where
