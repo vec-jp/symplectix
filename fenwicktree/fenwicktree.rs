@@ -144,21 +144,6 @@ where
     }
 }
 
-// Returns the nodes that need to be accumulated in the node at `x`.
-#[inline]
-pub fn diassemble(x: usize) -> impl Iterator<Item = usize> {
-    // Bottom to top. `d` is the length of a segment (1, 2, 4, ...)
-    #[inline]
-    fn next(d: &usize) -> Option<usize> {
-        Some(d << 1)
-    }
-
-    let n = x.lsb(); // n <= x
-    successors(Some(1), next)
-        .take_while(move |&d| d < n)
-        .map(move |d| x - d)
-}
-
 /// Tranforms a tree into an accumulated vector.
 /// e.g. `[1, 2, 0, 4]` => `[1, 2, 2, 4]`.
 #[inline]
@@ -184,21 +169,17 @@ where
     // we can push `x` to an empty tree,
     // but tree[0] should be always dummy value.
     assert!(!tree.is_empty());
-    let p = tree.len(); // index that `x` belongs to when pushed
-    for a in diassemble(p) {
-        x += tree[a];
+    // `tree.len()` points to the index to which `x` belongs when pushed
+    for i in prefix(tree.len()).skip(1) {
+        x += tree[i];
     }
     tree.push(x);
 }
 
 #[allow(dead_code)]
-pub fn pop<T: Copy>(tree: &mut Vec<T>) -> Option<T> {
+pub fn pop<T>(tree: &mut Vec<T>) -> Option<T> {
     // tree[0] is dummy value, popping it doesn't make sense.
-    if tree.len() > 1 {
-        tree.pop()
-    } else {
-        None
-    }
+    (tree.len() > 1).then(|| tree.pop().expect("len > 1"))
 }
 
 impl<T> Nodes for [T] {
