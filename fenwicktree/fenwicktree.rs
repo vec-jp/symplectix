@@ -193,25 +193,22 @@ impl<T: Copy + Into<u64>> Sum for [T] {
 }
 
 impl<T: Copy + Into<u64>> Search for [T] {
-    // fn lower_bound<U>(&self, hint: Option<usize>, mut w: U) -> usize
     fn lower_bound(&self, hint: Option<usize>, mut w: u64) -> usize {
         assert!(!self.is_empty());
-
-        // self.binary_search(x)
 
         if w == 0 {
             return 0;
         }
 
         let mut i = 0;
-        for d in search(hint.unwrap_or_else(|| self.nodes())) {
+        search(hint.unwrap_or_else(|| self.nodes())).for_each(|d| {
             if let Some(v) = self.get(i + d).copied().map(Into::into) {
                 if v < w {
                     w -= v;
-                    i += d; // move to right
+                    i += d;
                 }
             }
-        }
+        });
 
         i + 1
     }
