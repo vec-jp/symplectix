@@ -175,12 +175,14 @@ fn sum_all_eq_vec_sum(vec: Vec<u64>) -> bool {
     bit.sum(bit.nodes()) == vec.iter().sum()
 }
 
-// #[quickcheck]
-// fn lower_bound_sum(vec: Vec<u64>) -> bool {
-//     let sum = vec.iter().sum::<u64>();
-//     let bit = make_fenwicktree(0, &vec[..]);
-//     (0..sum).all(|w| bit.sum(bit.lower_bound(None, w)) >= w)
-// }
+// It takes too long to complete the test when using `Vec<u64>`.
+#[quickcheck]
+fn lower_bound_sum(vec: Vec<u16>) -> bool {
+    let bit = make_fenwicktree(0, &vec);
+    (0..vec.iter().sum::<u16>())
+        .map(Into::into)
+        .all(|w| bit.sum(bit.lower_bound(None, w)) >= w)
+}
 
 #[quickcheck]
 fn push_pop(vec: Vec<u64>) -> bool {
