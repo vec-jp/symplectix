@@ -6,14 +6,14 @@ use std::ops::{AddAssign, SubAssign};
 
 // The next node to be updated can be found by adding the node size `n.lsb()`.
 #[inline]
-fn next_index_for_update(d: usize) -> usize {
-    d + d.lsb()
+fn next_index_for_update(i: usize) -> usize {
+    i + i.lsb()
 }
 
 // The next node to be queried can be found by subtracting the node size `n.lsb()`.
 #[inline]
-fn next_index_for_prefix(d: usize) -> usize {
-    d - d.lsb()
+fn next_index_for_prefix(i: usize) -> usize {
+    i - i.lsb()
 }
 
 /// # Examples
@@ -181,44 +181,49 @@ pub fn empty<T: Copy>(zero: T) -> Vec<T> {
 }
 
 /// Build a fenwick tree.
-#[inline]
-pub fn init<T>(tree: &mut [T])
+pub fn build<T>(bit: &mut [T])
 where
     T: Copy + AddAssign,
 {
-    assert!(!tree.is_empty());
-    init_from(tree, 0)
+    assert!(!bit.is_empty());
+
+    for i in 1..bit.len() {
+        let j = next_index_for_update(i);
+        if j < bit.len() {
+            bit[j] += bit[i];
+        }
+    }
 }
 
-fn init_from<T>(tree: &mut [T], p: usize)
+pub fn unbuild<T>(bit: &mut [T])
 where
-    T: Copy + AddAssign,
+    T: Copy + SubAssign,
 {
-    assert!(!tree.is_empty());
-    for i in 1..tree.len() {
+    assert!(!bit.is_empty());
+
+    for i in (1..bit.len()).rev() {
         let j = next_index_for_update(i);
-        if p <= j && j < tree.len() {
-            tree[j] += tree[i];
+        if j < bit.len() {
+            bit[j] -= bit[i];
         }
     }
 }
 
 /// Tranforms a tree into an accumulated vector.
 /// e.g. `[1, 2, 0, 4]` => `[1, 2, 2, 4]`.
-#[inline]
-pub fn accumulate<T>(tree: &[T]) -> Vec<u64>
-where
-    T: Copy + Into<u64>,
-{
-    assert!(!tree.is_empty());
-
-    let mut vec = vec![0; tree.len()];
-    for i in 1..tree.len() {
-        let j = next_index_for_prefix(i);
-        vec[i] = tree[i].into() + vec[j];
-    }
-    vec
-}
+// #[inline]
+// pub fn accumulate<T>(tree: &[T]) -> Vec<u64>
+// where
+//     T: Copy + Into<u64>,
+// {
+//     assert!(!tree.is_empty());
+//     let mut vec = vec![0; tree.len()];
+//     for i in 1..tree.len() {
+//         let j = next_index_for_prefix(i);
+//         vec[i] = tree[i].into() + vec[j];
+//     }
+//     vec
+// }
 
 pub fn push<T>(bit: &mut Vec<T>, mut x: T)
 where
