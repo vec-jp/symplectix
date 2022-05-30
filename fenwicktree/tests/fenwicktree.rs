@@ -3,8 +3,7 @@ extern crate quickcheck_macros;
 
 use fenwicktree as fw;
 use fenwicktree::{Incr, Nodes, Prefix, Search};
-use std::num;
-use std::ops::AddAssign;
+use std::{iter, num, ops::AddAssign};
 
 #[test]
 fn next_index_for_prefix() {
@@ -90,6 +89,24 @@ fn update() {
     assert_eq!(indices.next(), Some(7));
     assert_eq!(indices.next(), Some(8));
     assert_eq!(indices.next(), None);
+}
+
+#[test]
+fn children() {
+    let indices = fw::children(1);
+    assert_eq!(indices.collect::<Vec<usize>>(), []);
+
+    let indices = fw::children(2);
+    assert_eq!(indices.collect::<Vec<usize>>(), [1]);
+
+    let indices = fw::children(4);
+    assert_eq!(indices.collect::<Vec<usize>>(), [3, 2]);
+
+    let indices = fw::children(7);
+    assert_eq!(indices.collect::<Vec<usize>>(), []);
+
+    let indices = fw::children(8);
+    assert_eq!(indices.collect::<Vec<usize>>(), [7, 6, 4]);
 }
 
 // #[test]
@@ -184,25 +201,22 @@ fn lower_bound_sum(vec: Vec<u16>) -> bool {
     })
 }
 
-// #[quickcheck]
-// fn push_pop(vec: Vec<u64>) -> bool {
-//     let bit = make_fenwicktree(0, &vec);
-//     assert_eq!(bit.nodes(), vec.len());
+#[quickcheck]
+fn pop_all_then_push_all(vec: Vec<u64>) -> bool {
+    let bit = make_fenwicktree(0, &vec);
 
-//     let mut cloned = bit.clone();
-//     let mut popped = Vec::new();
+    let mut cloned = bit.clone();
+    let mut popped = iter::from_fn(|| fenwicktree::pop(&mut cloned)).collect::<Vec<_>>();
 
-//     for _n in 0..bit.nodes() {
-//         let x = fenwicktree::pop(&mut cloned).unwrap();
-//         popped.push(x);
-//     }
-//     for x in popped {
-//         fenwicktree::push(&mut cloned, x);
-//     }
+    popped.reverse();
+    assert_eq!(vec, popped);
 
-//     assert_eq!(bit, cloned);
-//     bit == cloned
-// }
+    for x in popped.into_iter() {
+        fenwicktree::push(&mut cloned, x);
+    }
+
+    bit == cloned
+}
 
 // #[quickcheck]
 // fn prop_lower_bound(vec: Vec<u64>) -> bool {

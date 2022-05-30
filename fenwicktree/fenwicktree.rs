@@ -22,7 +22,6 @@ fn next_index_for_prefix(d: usize) -> usize {
 /// for i in fenwicktree::prefix(7) {
 /// }
 /// ```
-#[inline]
 pub fn prefix(i: usize) -> Successors<usize, fn(&usize) -> Option<usize>> {
     #[inline]
     fn next_index(&i: &usize) -> Option<usize> {
@@ -34,7 +33,22 @@ pub fn prefix(i: usize) -> Successors<usize, fn(&usize) -> Option<usize>> {
     successors((i > 0).then(|| i), next_index)
 }
 
-#[inline]
+pub fn children(i: usize) -> impl Iterator<Item = usize> {
+    // The number of children that belongs to the node at `i`, including `i`.
+    let nb = i.lsb();
+
+    // Yields `nb`s of each children of `i`. Not an index itself.
+    let next_nb = move |&x: &usize| {
+        let x = x << 1;
+        (x < nb).then(|| x)
+    };
+
+    // Maps children's `nb`s to node indices
+    let to_index = move |d: usize| i - d;
+
+    successors((nb > 1).then(|| 1), next_nb).map(to_index)
+}
+
 pub fn update(i: usize, nodes: usize) -> impl Iterator<Item = usize> {
     let next_index = move |&i: &usize| -> Option<usize> {
         let x = next_index_for_update(i);
@@ -206,36 +220,31 @@ where
     vec
 }
 
-// pub fn push<T>(tree: &mut Vec<T>, mut value: T)
-// where
-//     T: Copy + AddAssign,
-// {
-//     // we can push `x` to an empty tree,
-//     // but tree[0] should be always dummy value.
-//     assert!(!tree.is_empty());
-//     // `tree.len()` points to the index to which `x` belongs when pushed
-//     for i in prefix(tree.len()).skip(1) {
-//         value += tree[i];
-//     }
-//     tree.push(value);
-// }
+pub fn push<T>(bit: &mut Vec<T>, mut x: T)
+where
+    T: Copy + AddAssign,
+{
+    assert!(!bit.is_empty());
+    // `bit.nodes()+1` points to the index to which `x` belongs when pushed
+    for i in children(bit.nodes() + 1) {
+        x += bit[i];
+    }
+    bit.push(x);
+}
 
-// pub fn pop<T>(tree: &mut Vec<T>) -> Option<T>
-// where
-//     T: Copy + SubAssign,
-// {
-//     // tree[0] is dummy value, popping it doesn't make sense.
-//     (tree.len() > 1).then(|| {
-//         let n = tree.len() - 1;
-//         let mut x = tree.pop().expect("len > 1");
-
-//         for i in prefix(n).skip(1) {
-//             x -= tree[i];
-//         }
-
-//         x
-//     })
-// }
+pub fn pop<T>(bit: &mut Vec<T>) -> Option<T>
+where
+    T: Copy + SubAssign,
+{
+    // tree[0] is dummy value, popping it doesn't make sense.
+    (bit.len() > 1).then(|| {
+        let mut x = bit.pop().expect("len > 1");
+        for i in children(bit.nodes() + 1) {
+            x -= bit[i];
+        }
+        x
+    })
+}
 
 impl<T> Nodes for [T] {
     #[inline]
