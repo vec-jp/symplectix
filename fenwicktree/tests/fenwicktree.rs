@@ -95,7 +95,6 @@ fn update() {
 // fn update() {
 //     let mut indices = fw::update(0, 9);
 //     assert_eq!(indices.next(), None);
-
 //     let mut indices = fw::update(6, 9);
 //     assert_eq!(indices.next(), Some(7));
 //     assert_eq!(indices.next(), Some(8));
@@ -115,16 +114,18 @@ where
 }
 
 #[test]
-fn sum() {
+fn lower_bound() {
+    use fw::Sum;
+
     let data: &[u32] = &[1, 0, 3, 5];
     let tree = make_fenwick_tree(0, data);
     assert_eq!(4, fw::nodes(&tree));
 
-    assert_eq!(0, fw::sum(&tree, 0));
-    assert_eq!(1, fw::sum(&tree, 1));
-    assert_eq!(1, fw::sum(&tree, 2));
-    assert_eq!(4, fw::sum(&tree, 3));
-    assert_eq!(9, fw::sum(&tree, 4));
+    assert_eq!(0, tree.sum(0));
+    assert_eq!(1, tree.sum(1));
+    assert_eq!(1, tree.sum(2));
+    assert_eq!(4, tree.sum(3));
+    assert_eq!(9, tree.sum(4));
 
     assert_eq!(tree.lower_bound(None, 0), 0);
     assert_eq!(tree.lower_bound(None, 1), 1);

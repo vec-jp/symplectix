@@ -21,6 +21,7 @@ fn msb() {
     let tests = [
         (0b0000_0000_u8, 0b0000_0000),
         (0b0000_0001_u8, 0b0000_0001),
+        (0b0000_0011_u8, 0b0000_0010),
         (0b0000_1100_u8, 0b0000_1000),
         (0b1001_0100_u8, 0b1000_0000),
         (0b1001_0000_u8, 0b1000_0000),
@@ -29,6 +30,22 @@ fn msb() {
     for (n, want) in tests {
         assert_eq!(n.msb(), want);
     }
+
+    assert_eq!(0u8.msb(), 0);
+    assert_eq!(1u8.msb(), 1);
+    assert_eq!(2u8.msb(), 2);
+    assert_eq!(3u8.msb(), 2);
+    assert_eq!(4u8.msb(), 4);
+    assert_eq!(5u8.msb(), 4);
+    assert_eq!(6u8.msb(), 4);
+    assert_eq!(7u8.msb(), 4);
+
+    assert_eq!(10u8.msb(), 8);
+    assert_eq!(15u8.msb(), 8);
+    assert_eq!(16u8.msb(), 16);
+    assert_eq!(18u8.msb(), 16);
+    assert_eq!(30u8.msb(), 16);
+    assert_eq!(33u8.msb(), 32);
 }
 
 trait Pdep {

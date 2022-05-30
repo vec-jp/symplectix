@@ -52,9 +52,9 @@ pub fn update(i: usize, nodes: usize) -> impl Iterator<Item = usize> {
 // }
 
 #[inline]
-pub fn search(last: usize) -> impl Iterator<Item = usize> {
+pub fn search(nodes: usize) -> impl Iterator<Item = usize> {
     // for x := m.msb(); x > 0; x >>= 1
-    successors((last > 0).then(|| last.msb()), |&i| {
+    successors((nodes > 0).then(|| nodes.msb()), |&i| {
         let x = i >> 1;
         (x > 0).then(|| x)
     })
@@ -119,7 +119,7 @@ pub fn empty<T: Copy>(zero: T) -> Vec<T> {
     vec![zero; 1]
 }
 
-/// Equivalent to [`init_from(0)`](crate::init_from).
+/// Build a fenwick tree.
 #[inline]
 pub fn init<T>(tree: &mut [T])
 where
@@ -129,16 +129,14 @@ where
     init_from(tree, 0)
 }
 
-/// Equivalent to [`init`](self::init), except that skipping nodes `< p`.
-pub fn init_from<T>(tree: &mut [T], p: usize)
+fn init_from<T>(tree: &mut [T], p: usize)
 where
     T: Copy + AddAssign,
 {
     assert!(!tree.is_empty());
-    let n = tree.len();
-    for i in 1..n {
+    for i in 1..tree.len() {
         let j = next_index_for_update(i);
-        if p <= j && j < n {
+        if p <= j && j < tree.len() {
             tree[j] += tree[i];
         }
     }
@@ -207,8 +205,7 @@ impl<T: Copy + Into<u64>> Search for [T] {
 
         let mut i = 0;
         for d in search(hint.unwrap_or_else(|| self.nodes())) {
-            if let Some(&v) = self.get(i + d) {
-                let v = v.into();
+            if let Some(v) = self.get(i + d).copied().map(Into::into) {
                 if v < w {
                     w -= v;
                     i += d; // move to right
