@@ -77,14 +77,14 @@ pub trait Search: Nodes {
     fn lower_bound(&self, hint: Option<usize>, w: u64) -> usize;
 }
 
-pub trait Incr: Nodes {
+pub trait Incr<N>: Nodes {
     /// Corresponds to `T[i] += delta` in `[T]`.
-    fn incr(&mut self, i: usize, delta: u64);
+    fn incr(&mut self, i: usize, delta: N);
 }
 
-pub trait Decr: Nodes {
+pub trait Decr<N>: Nodes {
     /// Corresponds to `T[i] -= delta` in `[T]`.
-    fn decr(&mut self, i: usize, delta: u64);
+    fn decr(&mut self, i: usize, delta: N);
 }
 
 #[inline]
@@ -104,12 +104,12 @@ pub fn sum_all<T: Sum>(tree: &T) -> u64 {
 }
 
 #[inline]
-pub fn incr<T: Incr>(tree: &mut T, index: usize, delta: u64) {
+pub fn incr<T: Incr<U>, U>(tree: &mut T, index: usize, delta: U) {
     tree.incr(index, delta)
 }
 
 #[inline]
-pub fn decr<T: Decr>(tree: &mut T, index: usize, delta: u64) {
+pub fn decr<T: Decr<U>, U>(tree: &mut T, index: usize, delta: U) {
     tree.decr(index, delta)
 }
 
@@ -189,6 +189,7 @@ impl<T: Copy + Into<u64>> Sum for [T] {
     #[inline]
     fn sum(&self, i: usize) -> u64 {
         prefix(i).map(|i| self[i].into()).sum()
+        // prefix(i).map(|i| self[i].into()).sum()
     }
 }
 
@@ -214,22 +215,24 @@ impl<T: Copy + Into<u64>> Search for [T] {
     }
 }
 
-impl<T> Incr for [T]
+impl<T, U> Incr<U> for [T]
 where
-    T: AddAssign<u64>,
+    T: AddAssign<U>,
+    U: Copy,
 {
     #[inline]
-    fn incr(&mut self, i: usize, delta: u64) {
+    fn incr(&mut self, i: usize, delta: U) {
         update(i, self.nodes()).for_each(|p| self[p] += delta)
     }
 }
 
-impl<T> Decr for [T]
+impl<T, U> Decr<U> for [T]
 where
-    T: SubAssign<u64>,
+    T: SubAssign<U>,
+    U: Copy,
 {
     #[inline]
-    fn decr(&mut self, i: usize, delta: u64) {
+    fn decr(&mut self, i: usize, delta: U) {
         update(i, self.nodes()).for_each(|p| self[p] -= delta)
     }
 }
@@ -336,22 +339,22 @@ impl<T> ComplementedQuery<[T]> for Vec<T> {
     }
 }
 
-impl<T> Incr for Vec<T>
+impl<T, U> Incr<U> for Vec<T>
 where
-    [T]: Incr,
+    [T]: Incr<U>,
 {
     #[inline]
-    fn incr(&mut self, i: usize, delta: u64) {
+    fn incr(&mut self, i: usize, delta: U) {
         <[T]>::incr(self, i, delta)
     }
 }
 
-impl<T> Decr for Vec<T>
+impl<T, U> Decr<U> for Vec<T>
 where
-    [T]: Decr,
+    [T]: Decr<U>,
 {
     #[inline]
-    fn decr(&mut self, i: usize, delta: u64) {
+    fn decr(&mut self, i: usize, delta: U) {
         <[T]>::decr(self, i, delta)
     }
 }
