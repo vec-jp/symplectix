@@ -1,7 +1,7 @@
 //! 1-indexed FenwickTree (BinaryIndexedTree).
 
 use bits::Word;
-use std::iter::successors;
+use std::iter::{successors, Successors};
 use std::ops::{AddAssign, SubAssign};
 
 // The next node to be updated can be found by adding the node size `n.lsb()`.
@@ -23,21 +23,26 @@ fn next_index_for_prefix(d: usize) -> usize {
 /// }
 /// ```
 #[inline]
-pub fn prefix(i: usize) -> impl Iterator<Item = usize> {
-    // for x := i; x > 0; x -= lsb(x)
-    successors((i > 0).then(|| i), |&i| {
+pub fn prefix(i: usize) -> Successors<usize, fn(&usize) -> Option<usize>> {
+    #[inline]
+    fn next_index(&i: &usize) -> Option<usize> {
         let x = next_index_for_prefix(i);
         (x > 0).then(|| x)
-    })
+    }
+
+    // for x := i; x > 0; x -= lsb(x)
+    successors((i > 0).then(|| i), next_index)
 }
 
 #[inline]
 pub fn update(i: usize, nodes: usize) -> impl Iterator<Item = usize> {
-    // for x := i; x <= nodes; x += lsb(x)
-    successors((i > 0).then(|| i), move |&i| {
+    let next_index = move |&i: &usize| -> Option<usize> {
         let x = next_index_for_update(i);
         (x <= nodes).then(|| x)
-    })
+    };
+
+    // for x := i; x <= nodes; x += lsb(x)
+    successors((i > 0).then(|| i), next_index)
 }
 
 // #[inline]
@@ -66,9 +71,41 @@ pub trait Nodes {
 }
 
 pub trait Sum: Nodes {
-    /// Sum of the original data within [1..index].
-    /// Sum of the nodes within [0..index).
+    /// Sum of the original data within [0..index).
+    /// Sum of the nodes within [1..index].
     fn sum(&self, index: usize) -> u64;
+}
+
+pub trait Prefix {
+    type Item;
+    type Iter: Iterator<Item = Self::Item>;
+    fn prefix(self, index: usize) -> Self::Iter;
+}
+
+pub struct SlicePrefix<'a, T> {
+    index: Successors<usize, fn(&usize) -> Option<usize>>,
+    slice: &'a [T],
+}
+
+impl<'a, T: Copy> Iterator for SlicePrefix<'a, T> {
+    type Item = T;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.index.next().map(|i| self.slice[i])
+    }
+}
+
+impl<'a, T: Copy> Prefix for &'a [T] {
+    type Item = T;
+    type Iter = SlicePrefix<'a, T>;
+
+    #[inline]
+    fn prefix(self, index: usize) -> Self::Iter {
+        SlicePrefix {
+            index: prefix(index),
+            slice: self,
+        }
+    }
 }
 
 pub trait Search: Nodes {
@@ -189,7 +226,6 @@ impl<T: Copy + Into<u64>> Sum for [T] {
     #[inline]
     fn sum(&self, i: usize) -> u64 {
         prefix(i).map(|i| self[i].into()).sum()
-        // prefix(i).map(|i| self[i].into()).sum()
     }
 }
 

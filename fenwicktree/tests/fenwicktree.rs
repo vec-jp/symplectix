@@ -2,7 +2,7 @@
 extern crate quickcheck_macros;
 
 use fenwicktree as fw;
-use fw::{Nodes, Search, Sum};
+use fw::{Nodes, Prefix, Search, Sum};
 use std::num;
 use std::ops::AddAssign;
 
@@ -120,6 +120,10 @@ fn lower_bound() {
         let data: &[u32] = &[1, 0, 3, 5];
         let bit = make_fenwicktree(0, data);
         assert_eq!(4, fw::nodes(&bit));
+
+        assert_eq!(bit.prefix(2).sum::<u32>(), 1);
+        assert_eq!(bit.prefix(3).sum::<u32>(), 4);
+        assert_eq!(bit.prefix(4).sum::<u32>(), 9);
 
         assert_eq!(0, bit.sum(0));
         assert_eq!(1, bit.sum(1));
