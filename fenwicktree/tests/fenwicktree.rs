@@ -2,7 +2,7 @@
 extern crate quickcheck_macros;
 
 use fenwicktree as fw;
-use fw::{Nodes, Prefix, Search, Sum};
+use fenwicktree::{Incr, Nodes, Prefix, Search};
 use std::num;
 use std::ops::AddAssign;
 
@@ -119,17 +119,17 @@ fn lower_bound() {
     {
         let data: &[u32] = &[1, 0, 3, 5];
         let bit = make_fenwicktree(0, data);
-        assert_eq!(4, fw::nodes(&bit));
+        assert_eq!(4, bit.nodes());
 
         assert_eq!(bit.prefix(2).sum::<u32>(), 1);
         assert_eq!(bit.prefix(3).sum::<u32>(), 4);
         assert_eq!(bit.prefix(4).sum::<u32>(), 9);
 
-        assert_eq!(0, bit.sum(0));
-        assert_eq!(1, bit.sum(1));
-        assert_eq!(1, bit.sum(2));
-        assert_eq!(4, bit.sum(3));
-        assert_eq!(9, bit.sum(4));
+        assert_eq!(0, bit.sum::<u32>(0));
+        assert_eq!(1, bit.sum::<u32>(1));
+        assert_eq!(1, bit.sum::<u32>(2));
+        assert_eq!(4, bit.sum::<u32>(3));
+        assert_eq!(9, bit.sum::<u32>(4));
 
         assert_eq!(bit.lower_bound(None, 0), 0);
         assert_eq!(bit.lower_bound(None, 1), 1);
@@ -140,7 +140,7 @@ fn lower_bound() {
     {
         let data: &[u32] = &[0, 1, 0, 0, 3, 0, 2, 4, 2];
         let bit = make_fenwicktree(0, data);
-        assert_eq!(9, fw::nodes(&bit));
+        assert_eq!(9, bit.nodes());
 
         assert_eq!(bit.lower_bound(None, 0), 0);
         assert_eq!(bit.lower_bound(None, 1), 2);
@@ -156,50 +156,53 @@ fn lower_bound() {
 fn tree_by_incr(vec: Vec<num::Wrapping<u64>>) -> bool {
     let mut bit = vec![num::Wrapping(0); vec.len() + 1];
     for (i, &d) in vec.iter().enumerate() {
-        fw::incr(&mut bit, i + 1, d);
+        bit.incr(i + 1, d);
     }
 
     bit[0] == num::Wrapping(0) && bit == make_fenwicktree(num::Wrapping(0), &vec[..])
 }
 
-// #[quickcheck]
-// fn sum_0_is_always_zero(vec: Vec<num::Wrapping<u64>>) -> bool {
-//     let bit = make_fenwicktree(num::Wrapping(0), &vec[..]);
-//     bit.sum(0) == num::Wrapping(0)
-// }
+#[quickcheck]
+fn sum_0_is_always_zero(vec: Vec<num::Wrapping<u64>>) -> bool {
+    let bit = make_fenwicktree(num::Wrapping(0), &vec[..]);
+    bit.sum::<num::Wrapping<u64>>(0) == num::Wrapping(0)
+}
 
 #[quickcheck]
 fn sum_x_eq_vec_sum(vec: Vec<u64>) -> bool {
     let bit = make_fenwicktree(0, &vec[..]);
-    (0..=vec.len()).all(|i| fw::sum(&bit, i) == vec[..i].iter().sum())
-}
-
-#[quickcheck]
-fn sum_all_eq_vec_sum(vec: Vec<u64>) -> bool {
-    let bit = make_fenwicktree(0, &vec[..]);
-    bit.sum(bit.nodes()) == vec.iter().sum()
+    (0..=bit.nodes()).all(|i| bit.sum::<u64>(i) == vec[..i].iter().sum())
 }
 
 // It takes too long to complete the test when using `Vec<u64>`.
 #[quickcheck]
 fn lower_bound_sum(vec: Vec<u16>) -> bool {
     let bit = make_fenwicktree(0, &vec);
-    (0..vec.iter().sum::<u16>())
-        .map(Into::into)
-        .all(|w| bit.sum(bit.lower_bound(None, w)) >= w)
+    (0..=vec.iter().sum::<u16>()).map(Into::into).all(|w| {
+        let i = bit.lower_bound(None, w);
+        bit.prefix(i).map(Into::<u64>::into).sum::<u64>() >= w
+    })
 }
 
-#[quickcheck]
-fn push_pop(vec: Vec<u64>) -> bool {
-    let bit = make_fenwicktree(0, &vec[..]);
+// #[quickcheck]
+// fn push_pop(vec: Vec<u64>) -> bool {
+//     let bit = make_fenwicktree(0, &vec);
+//     assert_eq!(bit.nodes(), vec.len());
 
-    let mut cloned = bit.clone();
-    if let Some(x) = cloned.pop() {
-        cloned.push(x);
-    }
+//     let mut cloned = bit.clone();
+//     let mut popped = Vec::new();
 
-    bit == cloned
-}
+//     for _n in 0..bit.nodes() {
+//         let x = fenwicktree::pop(&mut cloned).unwrap();
+//         popped.push(x);
+//     }
+//     for x in popped {
+//         fenwicktree::push(&mut cloned, x);
+//     }
+
+//     assert_eq!(bit, cloned);
+//     bit == cloned
+// }
 
 // #[quickcheck]
 // fn prop_lower_bound(vec: Vec<u64>) -> bool {

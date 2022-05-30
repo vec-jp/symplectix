@@ -1,7 +1,7 @@
 //! 1-indexed FenwickTree (BinaryIndexedTree).
 
 use bits::Word;
-use std::iter::{successors, Successors};
+use std::iter::{successors, Successors, Sum};
 use std::ops::{AddAssign, SubAssign};
 
 // The next node to be updated can be found by adding the node size `n.lsb()`.
@@ -70,48 +70,63 @@ pub trait Nodes {
     fn nodes(&self) -> usize;
 }
 
-pub trait Sum: Nodes {
-    /// Sum of the original data within [0..index).
-    /// Sum of the nodes within [1..index].
-    fn sum(&self, index: usize) -> u64;
-}
-
 pub trait Prefix {
     type Item;
     type Iter: Iterator<Item = Self::Item>;
+
     fn prefix(self, index: usize) -> Self::Iter;
-}
 
-pub struct SlicePrefix<'a, T> {
-    index: Successors<usize, fn(&usize) -> Option<usize>>,
-    slice: &'a [T],
-}
-
-impl<'a, T: Copy> Iterator for SlicePrefix<'a, T> {
-    type Item = T;
     #[inline]
-    fn next(&mut self) -> Option<Self::Item> {
-        self.index.next().map(|i| self.slice[i])
+    fn sum<S: Sum<Self::Item>>(self, index: usize) -> S
+    where
+        Self: Sized,
+    {
+        self.prefix(index).sum::<S>()
     }
 }
 
-impl<'a, T: Copy> Prefix for &'a [T] {
-    type Item = T;
-    type Iter = SlicePrefix<'a, T>;
+mod impl_prefix {
+    use crate::Prefix;
+    use core::iter::Successors;
 
-    #[inline]
-    fn prefix(self, index: usize) -> Self::Iter {
-        SlicePrefix {
-            index: prefix(index),
-            slice: self,
+    pub struct SlicePrefix<'a, T> {
+        index: Successors<usize, fn(&usize) -> Option<usize>>,
+        slice: &'a [T],
+    }
+
+    impl<'a, T: Copy> Iterator for SlicePrefix<'a, T> {
+        type Item = T;
+        #[inline]
+        fn next(&mut self) -> Option<Self::Item> {
+            self.index.next().map(|i| self.slice[i])
         }
     }
-}
 
-pub trait Search: Nodes {
-    /// Finds the lowest idnex `i` that satisfies `sum(i) >= w`.
-    /// When we know the result `i` is reside within [..hint].
-    fn lower_bound(&self, hint: Option<usize>, w: u64) -> usize;
+    impl<'a, T: Copy> Prefix for &'a [T] {
+        type Item = T;
+        type Iter = SlicePrefix<'a, T>;
+
+        #[inline]
+        fn prefix(self, index: usize) -> Self::Iter {
+            SlicePrefix {
+                index: crate::prefix(index),
+                slice: self,
+            }
+        }
+    }
+
+    impl<'a, T> Prefix for &'a Vec<T>
+    where
+        &'a [T]: Prefix,
+    {
+        type Item = <&'a [T] as Prefix>::Item;
+        type Iter = <&'a [T] as Prefix>::Iter;
+
+        #[inline]
+        fn prefix(self, index: usize) -> Self::Iter {
+            self.as_slice().prefix(index)
+        }
+    }
 }
 
 pub trait Incr<N>: Nodes {
@@ -124,31 +139,26 @@ pub trait Decr<N>: Nodes {
     fn decr(&mut self, i: usize, delta: N);
 }
 
-#[inline]
-pub fn nodes<T: Nodes>(tree: &T) -> usize {
-    tree.nodes()
+pub trait Search: Nodes {
+    /// Finds the lowest idnex `i` that satisfies `sum(i) >= w`.
+    /// When we know the result `i` is reside within [..hint].
+    fn lower_bound(&self, hint: Option<usize>, w: u64) -> usize;
 }
 
-#[inline]
-pub fn sum<T: Sum>(tree: &T, n: usize) -> u64 {
-    tree.sum(n)
-}
+// #[inline]
+// pub fn nodes<T: Nodes>(tree: &T) -> usize {
+//     tree.nodes()
+// }
 
-/// An utility to sum all of elements.
-#[inline]
-pub fn sum_all<T: Sum>(tree: &T) -> u64 {
-    tree.sum(tree.nodes())
-}
+// #[inline]
+// pub fn incr<T: Incr<U>, U>(tree: &mut T, index: usize, delta: U) {
+//     tree.incr(index, delta)
+// }
 
-#[inline]
-pub fn incr<T: Incr<U>, U>(tree: &mut T, index: usize, delta: U) {
-    tree.incr(index, delta)
-}
-
-#[inline]
-pub fn decr<T: Decr<U>, U>(tree: &mut T, index: usize, delta: U) {
-    tree.decr(index, delta)
-}
+// #[inline]
+// pub fn decr<T: Decr<U>, U>(tree: &mut T, index: usize, delta: U) {
+//     tree.decr(index, delta)
+// }
 
 #[cfg(test)]
 #[inline]
@@ -196,24 +206,36 @@ where
     vec
 }
 
-pub fn push<T>(tree: &mut Vec<T>, mut value: T)
-where
-    T: Copy + AddAssign,
-{
-    // we can push `x` to an empty tree,
-    // but tree[0] should be always dummy value.
-    assert!(!tree.is_empty());
-    // `tree.len()` points to the index to which `x` belongs when pushed
-    for i in prefix(tree.len()).skip(1) {
-        value += tree[i];
-    }
-    tree.push(value);
-}
+// pub fn push<T>(tree: &mut Vec<T>, mut value: T)
+// where
+//     T: Copy + AddAssign,
+// {
+//     // we can push `x` to an empty tree,
+//     // but tree[0] should be always dummy value.
+//     assert!(!tree.is_empty());
+//     // `tree.len()` points to the index to which `x` belongs when pushed
+//     for i in prefix(tree.len()).skip(1) {
+//         value += tree[i];
+//     }
+//     tree.push(value);
+// }
 
-pub fn pop<T>(tree: &mut Vec<T>) -> Option<T> {
-    // tree[0] is dummy value, popping it doesn't make sense.
-    (tree.len() > 1).then(|| tree.pop().expect("len > 1"))
-}
+// pub fn pop<T>(tree: &mut Vec<T>) -> Option<T>
+// where
+//     T: Copy + SubAssign,
+// {
+//     // tree[0] is dummy value, popping it doesn't make sense.
+//     (tree.len() > 1).then(|| {
+//         let n = tree.len() - 1;
+//         let mut x = tree.pop().expect("len > 1");
+
+//         for i in prefix(n).skip(1) {
+//             x -= tree[i];
+//         }
+
+//         x
+//     })
+// }
 
 impl<T> Nodes for [T] {
     #[inline]
@@ -222,12 +244,12 @@ impl<T> Nodes for [T] {
     }
 }
 
-impl<T: Copy + Into<u64>> Sum for [T] {
-    #[inline]
-    fn sum(&self, i: usize) -> u64 {
-        prefix(i).map(|i| self[i].into()).sum()
-    }
-}
+// impl<T: Copy + Into<u64>> Sum for [T] {
+//     #[inline]
+//     fn sum(&self, i: usize) -> u64 {
+//         prefix(i).map(|i| self[i].into()).sum()
+//     }
+// }
 
 impl<T: Copy + Into<u64>> Search for [T] {
     fn lower_bound(&self, hint: Option<usize>, mut w: u64) -> usize {
@@ -301,15 +323,15 @@ where
     }
 }
 
-impl<'a, T> Sum for Complemented<'a, [T]>
-where
-    T: Copy + Into<u64>,
-{
-    #[inline]
-    fn sum(&self, i: usize) -> u64 {
-        (self.bound * i as u64) - self.tree.sum(i)
-    }
-}
+// impl<'a, T> Sum for Complemented<'a, [T]>
+// where
+//     T: Copy + Into<u64>,
+// {
+//     #[inline]
+//     fn sum(&self, i: usize) -> u64 {
+//         (self.bound * i as u64) - self.tree.sum(i)
+//     }
+// }
 
 impl<'a, T> Search for Complemented<'a, [T]>
 where
@@ -348,15 +370,15 @@ where
     }
 }
 
-impl<T> Sum for Vec<T>
-where
-    [T]: Sum,
-{
-    #[inline]
-    fn sum(&self, i: usize) -> u64 {
-        <[T]>::sum(self, i)
-    }
-}
+// impl<T> Sum for Vec<T>
+// where
+//     [T]: Sum,
+// {
+//     #[inline]
+//     fn sum(&self, i: usize) -> u64 {
+//         <[T]>::sum(self, i)
+//     }
+// }
 
 impl<T> Search for Vec<T>
 where
