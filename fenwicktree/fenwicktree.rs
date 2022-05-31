@@ -2,7 +2,7 @@
 
 use bits::Word;
 use std::iter::{successors, Successors, Sum};
-use std::ops::{AddAssign, SubAssign};
+use std::ops::{AddAssign, Sub, SubAssign};
 
 // The next node to be updated can be found by adding the node size `n.lsb()`.
 #[inline]
@@ -90,10 +90,19 @@ pub trait Prefix {
 
     fn prefix(self, index: usize) -> Self::Iter;
 
+    // #[inline]
+    // fn sum<Idx, S: Sum<Self::Item>>(self, index: Idx) -> S
+    // where
+    //     Idx: RangeBounds<usize>,
+    //     S: Sum<Self::Item>,
+    //     Self: Sized,
+    // {
+    //     self.prefix(index).sum::<S>()
+    // }
+
     #[inline]
-    fn sum<Idx, S: Sum<Self::Item>>(self, index: Idx) -> S
+    fn sum<S: Sum<Self::Item>>(self, index: usize) -> S
     where
-        Idx: RangeBounds<usize>,
         S: Sum<Self::Item>,
         Self: Sized,
     {
@@ -101,11 +110,12 @@ pub trait Prefix {
     }
 
     #[inline]
-    fn range_sum<S: Sum<Self::Item>>(self, i: usize, j: usize) -> S
+    fn range_sum<S>(self, i: usize, j: usize) -> S
     where
-        Self: Sized,
+        S: Sum<Self::Item> + Sub<Output = S>,
+        Self: Copy + Sized,
     {
-        self.sum(j) - self.sum(i)
+        self.sum::<S>(j) - self.sum::<S>(i)
     }
 }
 

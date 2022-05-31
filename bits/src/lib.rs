@@ -30,7 +30,7 @@ pub use self::{and::And, not::Not, or::Or, xor::Xor};
 
 use core::{
     cmp::Ordering,
-    ops::{Bound, Div, Range, RangeBounds, Rem},
+    ops::{Div, Range, RangeBounds, Rem},
 };
 
 #[inline]
@@ -46,24 +46,10 @@ fn address<T: Block>(i: usize) -> (usize, usize) {
     divrem(i, T::BITS)
 }
 
-/// A utility to clamp the given range into a valid one.
-/// Panics if debug is enabled and `min <= i && i <= j && j <= max`.
+#[inline]
 fn to_range<R: RangeBounds<usize>>(r: &R, min: usize, max: usize) -> (usize, usize) {
-    let (i, j) = (
-        match r.start_bound() {
-            Bound::Included(&s) => s,
-            Bound::Excluded(&s) => s + 1,
-            Bound::Unbounded => min,
-        },
-        match r.end_bound() {
-            Bound::Included(&e) => e + 1,
-            Bound::Excluded(&e) => e,
-            Bound::Unbounded => max,
-        },
-    );
-
-    debug_assert!(min <= i && i <= j && j <= max);
-    (i, j)
+    let r = indexutil::to_range(r, min, max);
+    (r.start, r.end)
 }
 
 fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
