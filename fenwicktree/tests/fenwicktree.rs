@@ -136,10 +136,10 @@ fn lower_bound() {
         assert_eq!(4, bit.sum::<u32>(3));
         assert_eq!(9, bit.sum::<u32>(4));
 
-        assert_eq!(bit.lower_bound(None, 0), 0);
-        assert_eq!(bit.lower_bound(None, 1), 1);
-        assert_eq!(bit.lower_bound(None, 4), 3);
-        assert_eq!(bit.lower_bound(None, 5), 4);
+        assert_eq!(bit.lower_bound(0), 0);
+        assert_eq!(bit.lower_bound(1), 1);
+        assert_eq!(bit.lower_bound(4), 3);
+        assert_eq!(bit.lower_bound(5), 4);
     }
 
     {
@@ -148,13 +148,13 @@ fn lower_bound() {
 
         assert_eq!(9, bit.nodes());
 
-        assert_eq!(bit.lower_bound(None, 0), 0);
-        assert_eq!(bit.lower_bound(None, 1), 2);
-        assert_eq!(bit.lower_bound(None, 4), 5);
-        assert_eq!(bit.lower_bound(None, 5), 7);
-        assert_eq!(bit.lower_bound(None, 10), 8);
-        assert_eq!(bit.lower_bound(None, 11), 9);
-        assert_eq!(bit.lower_bound(None, 12), 9);
+        assert_eq!(bit.lower_bound(0), 0);
+        assert_eq!(bit.lower_bound(1), 2);
+        assert_eq!(bit.lower_bound(4), 5);
+        assert_eq!(bit.lower_bound(5), 7);
+        assert_eq!(bit.lower_bound(10), 8);
+        assert_eq!(bit.lower_bound(11), 9);
+        assert_eq!(bit.lower_bound(12), 9);
     }
 }
 
@@ -192,7 +192,7 @@ fn sum_x_eq_vec_sum(vec: Vec<num::Wrapping<u64>>) -> bool {
 fn lower_bound_sum(vec: Vec<u16>) -> bool {
     let bit = build(vec.clone(), 0);
     (0..=vec.iter().sum::<u16>()).map(Into::into).all(|w| {
-        let i = bit.lower_bound(None, w);
+        let i = bit.lower_bound(w);
         bit.prefix(i).map(Into::<u64>::into).sum::<u64>() >= w
     })
 }

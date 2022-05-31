@@ -119,8 +119,7 @@ pub trait Decr<N>: Nodes {
 
 pub trait Search: Nodes {
     /// Finds the lowest idnex `i` that satisfies `sum(i) >= w`.
-    /// When we know the result `i` is reside within [..hint].
-    fn lower_bound(&self, hint: Option<usize>, w: u64) -> usize;
+    fn lower_bound(&self, /*hint: Option<usize>,*/ w: u64) -> usize;
 }
 
 // #[inline]
@@ -206,14 +205,6 @@ impl<T> Nodes for [T] {
     }
 }
 
-impl<'a, T: Copy> Iterator for iter::Prefix<&'a [T]> {
-    type Item = T;
-    #[inline]
-    fn next(&mut self) -> Option<Self::Item> {
-        self.index.next().map(|i| self.data[i])
-    }
-}
-
 impl<'a, T: Copy> Prefix for &'a [T] {
     type Item = T;
     type Iter = iter::Prefix<&'a [T]>;
@@ -227,8 +218,16 @@ impl<'a, T: Copy> Prefix for &'a [T] {
     }
 }
 
+impl<'a, T: Copy> Iterator for iter::Prefix<&'a [T]> {
+    type Item = T;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.index.next().map(|i| self.data[i])
+    }
+}
+
 impl<T: Copy + Into<u64>> Search for [T] {
-    fn lower_bound(&self, hint: Option<usize>, mut w: u64) -> usize {
+    fn lower_bound(&self, mut w: u64) -> usize {
         assert!(!self.is_empty());
 
         if w == 0 {
@@ -236,7 +235,7 @@ impl<T: Copy + Into<u64>> Search for [T] {
         }
 
         let mut i = 0;
-        search(hint.unwrap_or_else(|| self.nodes())).for_each(|d| {
+        search(self.nodes()).for_each(|d| {
             if let Some(v) = self.get(i + d).copied().map(Into::into) {
                 if v < w {
                     w -= v;
@@ -317,7 +316,7 @@ impl<'a, T> Search for Complement<'a, [T]>
 where
     T: Copy + Into<u64>,
 {
-    fn lower_bound(&self, hint: Option<usize>, mut w: u64) -> usize {
+    fn lower_bound(&self, mut w: u64) -> usize {
         let bit = self.inner;
         let max = self.max_bound;
         assert!(!bit.is_empty());
@@ -327,7 +326,7 @@ where
 
         let mut i = 0;
         // The size of the segment is halved for each step.
-        for d in search(hint.unwrap_or_else(|| bit.nodes())) {
+        for d in search(bit.nodes()) {
             if let Some(&v) = bit.get(i + d) {
                 let v: u64 = max * (d as u64) - v.into();
                 if v < w {
