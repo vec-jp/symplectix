@@ -3,7 +3,8 @@ extern crate quickcheck_macros;
 
 use fenwicktree as fw;
 use fenwicktree::{Incr, Nodes, Prefix, Search};
-use std::{iter, num, ops::AddAssign};
+use int::Int;
+use std::iter;
 
 #[test]
 fn next_index_for_prefix() {
@@ -109,10 +110,7 @@ fn children() {
     assert_eq!(indices.collect::<Vec<usize>>(), [7, 6, 4]);
 }
 
-fn build<T>(mut vec: Vec<T>, zero: T) -> Vec<T>
-where
-    T: Copy + AddAssign,
-{
+fn build<T: Int>(mut vec: Vec<T>, zero: T) -> Vec<T> {
     vec.insert(0, zero); // ensure vec.len() > 0
     fenwicktree::build(&mut vec);
     vec
@@ -172,25 +170,26 @@ fn build_unbuild(vec: Vec<u32>) -> bool {
 }
 
 #[quickcheck]
-fn tree_by_incr(vec: Vec<num::Wrapping<u64>>) -> bool {
-    let mut bit = vec![num::Wrapping(0); vec.len() + 1];
+// fn tree_by_incr(vec: Vec<num::Wrapping<u64>>) -> bool {
+fn tree_by_incr(vec: Vec<u64>) -> bool {
+    let mut bit = vec![0; vec.len() + 1];
     for (i, &d) in vec.iter().enumerate() {
         bit.incr(i + 1, d);
     }
 
-    bit[0] == num::Wrapping(0) && bit == build(vec, num::Wrapping(0))
+    bit[0] == 0 && bit == build(vec, 0)
 }
 
 #[quickcheck]
-fn sum_0_is_always_zero(vec: Vec<num::Wrapping<u64>>) -> bool {
-    let bit = build(vec, num::Wrapping(0));
-    bit.sum::<num::Wrapping<u64>>(0) == num::Wrapping(0)
+fn sum_0_is_always_zero(vec: Vec<u64>) -> bool {
+    let bit = build(vec, 0);
+    bit.sum::<u64>(0) == 0
 }
 
 #[quickcheck]
-fn sum_x_eq_vec_sum(vec: Vec<num::Wrapping<u64>>) -> bool {
-    let bit = build(vec.clone(), num::Wrapping(0));
-    (0..=bit.nodes()).all(|i| bit.sum::<num::Wrapping<u64>>(i) == vec[..i].iter().sum())
+fn sum_x_eq_vec_sum(vec: Vec<u64>) -> bool {
+    let bit = build(vec.clone(), 0);
+    (0..=bit.nodes()).all(|i| bit.sum::<u64>(i) == vec[..i].iter().sum())
 }
 
 // It takes too long to complete the test when using `Vec<u64>`.

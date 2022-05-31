@@ -6,8 +6,8 @@ pub trait Int:
     Sized
     + Copy
     + PartialEq<Self>
-    + Eq
     + PartialOrd<Self>
+    + Eq
     + Ord
     + Hash
     + ops::Add<Output = Self>
@@ -16,21 +16,21 @@ pub trait Int:
     + ops::Div<Output = Self>
     + ops::Rem<Output = Self>
     + ops::Not<Output = Self>
-    // + ops::AddAssign
-    // + ops::SubAssign
-    // + ops::MulAssign
-    // + ops::DivAssign
-    // + ops::RemAssign
-    // + ops::Shl<usize, Output = Self>
-    // + ops::Shr<usize, Output = Self>
-    // + ops::ShlAssign<usize>
-    // + ops::ShrAssign<usize>
-    + ops::BitAnd<Output = Self>
-    + ops::BitOr<Output = Self>
-    + ops::BitXor<Output = Self>
-    // + ops::BitAndAssign
-    // + ops::BitOrAssign
-    // + ops::BitXorAssign
+    + ops::AddAssign
+    + ops::SubAssign
+    + ops::MulAssign
+    + ops::DivAssign
+    + ops::RemAssign
+// + ops::Shl<usize, Output = Self>
+// + ops::Shr<usize, Output = Self>
+// + ops::ShlAssign<usize>
+// + ops::ShrAssign<usize>
+// + ops::BitAnd<Output = Self>
+// + ops::BitOr<Output = Self>
+// + ops::BitXor<Output = Self>
+// + ops::BitAndAssign
+// + ops::BitOrAssign
+// + ops::BitXorAssign
 {
     const ZERO: Self;
 
@@ -62,6 +62,14 @@ macro_rules! impl_int {
 }
 impl_int!(i8 i16 i32 i64 i128 isize);
 impl_int!(u8 u16 u32 u64 u128 usize);
+
+// impl<T: Int> Int for num::Wrapping<T> {
+//     const ZERO: Self = num::Wrapping(T::ZERO);
+// }
+
+// impl<T: Int> Int for num::Saturating<T> {
+//     const ZERO: Self = num::Saturating(T::ZERO);
+// }
 
 macro_rules! impl_sb {
     ($( $N:ty )*) => ($(

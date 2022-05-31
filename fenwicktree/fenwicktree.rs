@@ -19,10 +19,7 @@ fn next_index_for_prefix(i: usize) -> usize {
 }
 
 /// Build a fenwick tree.
-pub fn build<T>(bit: &mut [T])
-where
-    T: Copy + AddAssign,
-{
+pub fn build<T: Int>(bit: &mut [T]) {
     assert!(!bit.is_empty());
 
     for i in 1..bit.len() {
@@ -33,10 +30,7 @@ where
     }
 }
 
-pub fn unbuild<T>(bit: &mut [T])
-where
-    T: Copy + SubAssign,
-{
+pub fn unbuild<T: Int>(bit: &mut [T]) {
     assert!(!bit.is_empty());
 
     for i in (1..bit.len()).rev() {
@@ -47,10 +41,7 @@ where
     }
 }
 
-pub fn push<T>(bit: &mut Vec<T>, mut x: T)
-where
-    T: Copy + AddAssign,
-{
+pub fn push<T: Int>(bit: &mut Vec<T>, mut x: T) {
     assert!(!bit.is_empty());
     // `bit.nodes()+1` points to the index to which `x` belongs when pushed
     for i in children(bit.nodes() + 1) {
@@ -59,10 +50,7 @@ where
     bit.push(x);
 }
 
-pub fn pop<T>(bit: &mut Vec<T>) -> Option<T>
-where
-    T: Copy + SubAssign,
-{
+pub fn pop<T: Int>(bit: &mut Vec<T>) -> Option<T> {
     // tree[0] is dummy value, popping it doesn't make sense.
     (bit.len() > 1).then(|| {
         let mut x = bit.pop().expect("len > 1");
@@ -211,7 +199,7 @@ impl<T> Nodes for [T] {
     }
 }
 
-impl<'a, T: Copy> Prefix for &'a [T] {
+impl<'a, T: Int> Prefix for &'a [T] {
     type Item = T;
     type Iter = iter::Prefix<&'a [T]>;
 
@@ -224,7 +212,7 @@ impl<'a, T: Copy> Prefix for &'a [T] {
     }
 }
 
-impl<'a, T: Copy> Iterator for iter::Prefix<&'a [T]> {
+impl<'a, T: Int> Iterator for iter::Prefix<&'a [T]> {
     type Item = T;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -232,31 +220,9 @@ impl<'a, T: Copy> Iterator for iter::Prefix<&'a [T]> {
     }
 }
 
-// impl<T: Copy + Into<u64>> Search<u64> for [T] {
-//     fn lower_bound(&self, mut w: u64) -> usize {
-//         assert!(!self.is_empty());
-
-//         if w == 0 {
-//             return 0;
-//         }
-
-//         let mut i = 0;
-//         search(self.nodes()).for_each(|d| {
-//             if let Some(v) = self.get(i + d).copied().map(Into::into) {
-//                 if v < w {
-//                     w -= v;
-//                     i += d;
-//                 }
-//             }
-//         });
-
-//         i + 1
-//     }
-// }
-
 impl<T, U> Search<U> for [T]
 where
-    T: Copy + PartialOrd<U>,
+    T: Int + PartialOrd<U>,
     U: Int + SubAssign<T>,
 {
     fn lower_bound(&self, mut w: U) -> usize {
@@ -282,7 +248,7 @@ where
 
 impl<T, U> Incr<U> for [T]
 where
-    T: AddAssign<U>,
+    T: Int + AddAssign<U>,
     U: Copy,
 {
     #[inline]
@@ -293,7 +259,7 @@ where
 
 impl<T, U> Decr<U> for [T]
 where
-    T: SubAssign<U>,
+    T: Int + SubAssign<U>,
     U: Copy,
 {
     #[inline]
