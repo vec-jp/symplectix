@@ -1,6 +1,6 @@
 //! 1-indexed FenwickTree (BinaryIndexedTree).
 
-use bits::Word;
+use bitop::{Lsb, Msb};
 use std::iter::{successors, Successors, Sum};
 use std::ops::{AddAssign, SubAssign};
 
