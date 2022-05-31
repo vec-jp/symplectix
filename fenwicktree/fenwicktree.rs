@@ -199,9 +199,9 @@ pub trait Decr<N>: Nodes {
     fn decr(&mut self, i: usize, delta: N);
 }
 
-pub trait Search: Nodes {
+pub trait Search<T>: Nodes {
     /// Finds the lowest idnex `i` that satisfies `sum(i) >= w`.
-    fn lower_bound(&self, /*hint: Option<usize>,*/ w: u64) -> usize;
+    fn lower_bound(&self, w: T) -> usize;
 }
 
 impl<T> Nodes for [T] {
@@ -232,7 +232,7 @@ impl<'a, T: Copy> Iterator for iter::Prefix<&'a [T]> {
     }
 }
 
-impl<T: Copy + Into<u64>> Search for [T] {
+impl<T: Copy + Into<u64>> Search<u64> for [T] {
     fn lower_bound(&self, mut w: u64) -> usize {
         assert!(!self.is_empty());
 
@@ -318,7 +318,7 @@ where
 //     }
 // }
 
-impl<'a, T> Search for Complement<'a, [T]>
+impl<'a, T> Search<u64> for Complement<'a, [T]>
 where
     T: Copy + Into<u64>,
 {
