@@ -1,8 +1,10 @@
 //! 1-indexed FenwickTree (BinaryIndexedTree).
 
-use intop::{Lsb, Msb};
-use std::iter::{successors, Successors, Sum};
+use intop::Lsb;
+use std::iter::Sum;
 use std::ops::{AddAssign, SubAssign};
+
+pub use iter::{children, prefix, search, update};
 
 // The next node to be updated can be found by adding the node size `n.lsb()`.
 #[inline]
@@ -14,135 +16,6 @@ fn next_index_for_update(i: usize) -> usize {
 #[inline]
 fn next_index_for_prefix(i: usize) -> usize {
     i - i.lsb()
-}
-
-/// # Examples
-///
-/// ```
-/// for i in fenwicktree::prefix(7) {
-/// }
-/// ```
-pub fn prefix(i: usize) -> Successors<usize, fn(&usize) -> Option<usize>> {
-    #[inline]
-    fn next_index(&i: &usize) -> Option<usize> {
-        let x = next_index_for_prefix(i);
-        (x > 0).then(|| x)
-    }
-
-    // for x := i; x > 0; x -= lsb(x)
-    successors((i > 0).then(|| i), next_index)
-}
-
-pub fn children(i: usize) -> impl Iterator<Item = usize> {
-    // The number of children that belongs to the node at `i`, including `i`.
-    let nb = i.lsb();
-
-    // Yields `nb`s of each children of `i`. Not an index itself.
-    let next_nb = move |&x: &usize| {
-        let x = x << 1;
-        (x < nb).then(|| x)
-    };
-
-    // Maps children's `nb`s to node indices
-    let to_index = move |d: usize| i - d;
-
-    successors((nb > 1).then(|| 1), next_nb).map(to_index)
-}
-
-pub fn update(i: usize, nodes: usize) -> impl Iterator<Item = usize> {
-    let next_index = move |&i: &usize| -> Option<usize> {
-        let x = next_index_for_update(i);
-        (x <= nodes).then(|| x)
-    };
-
-    // for x := i; x <= nodes; x += lsb(x)
-    successors((i > 0).then(|| i), next_index)
-}
-
-// #[inline]
-// pub fn update_(i: usize, slice_len: usize) -> impl Iterator<Item = usize> {
-//     // The next segment to be updated can be found by adding the segment length `n.lsb()`.
-//     #[inline]
-//     fn next(&d: &usize) -> Option<usize> {
-//         Some(next_index_for_update(d))
-//     }
-//     // for x := k+1; x < max; x += lsb(x) { ...
-//     successors(Some(i + 1), next).take_while(move |&x| x < slice_len)
-// }
-
-#[inline]
-pub fn search(nodes: usize) -> impl Iterator<Item = usize> {
-    // for x := m.msb(); x > 0; x >>= 1
-    successors((nodes > 0).then(|| nodes.msb()), |&i| {
-        let x = i >> 1;
-        (x > 0).then(|| x)
-    })
-}
-
-pub trait Nodes {
-    /// The size of fenwick tree.
-    fn nodes(&self) -> usize;
-}
-
-impl<'a, T: ?Sized + Nodes> Nodes for &'a T {
-    fn nodes(&self) -> usize {
-        <T as Nodes>::nodes(self)
-    }
-}
-
-pub trait Prefix: Nodes {
-    type Item;
-    type Iter: Iterator<Item = Self::Item>;
-
-    fn prefix(self, index: usize) -> Self::Iter;
-
-    #[inline]
-    fn sum<S: Sum<Self::Item>>(self, index: usize) -> S
-    where
-        S: Sum<Self::Item>,
-        Self: Sized,
-    {
-        self.prefix(index).sum::<S>()
-    }
-
-    // #[inline]
-    // fn range_sum<S, R>(self, index: R) -> S
-    // where
-    //     S: Sum<Self::Item> + Sub<Output = S>,
-    //     R: RangeBounds<usize>,
-    //     Self: Copy + Sized,
-    // {
-    //     match (
-    //         indexutil::min_index_inclusive(index.start_bound(), 0),
-    //         indexutil::max_index_inclusive(index.end_bound(), self.nodes()),
-    //     ) {
-    //         (0, i) => self.sum::<S>(i),
-    //         (i, j) => self.sum::<S>(j) - self.sum::<S>(i - 1),
-    //     }
-    // }
-}
-
-mod iter {
-    use core::iter::Successors;
-    pub struct Prefix<T> {
-        pub(crate) index: Successors<usize, fn(&usize) -> Option<usize>>,
-        pub(crate) data: T,
-    }
-}
-
-pub trait Incr<N>: Nodes {
-    /// Corresponds to `T[i] += delta` in `[T]`.
-    fn incr(&mut self, i: usize, delta: N);
-}
-
-pub trait Decr<N>: Nodes {
-    /// Corresponds to `T[i] -= delta` in `[T]`.
-    fn decr(&mut self, i: usize, delta: N);
-}
-
-pub trait Search: Nodes {
-    /// Finds the lowest idnex `i` that satisfies `sum(i) >= w`.
-    fn lower_bound(&self, /*hint: Option<usize>,*/ w: u64) -> usize;
 }
 
 /// Build a fenwick tree.
@@ -198,6 +71,137 @@ where
         }
         x
     })
+}
+
+mod iter {
+    use core::iter::{successors, Successors};
+    use intop::{Lsb, Msb};
+
+    pub struct Prefix<T> {
+        pub(crate) index: Successors<usize, fn(&usize) -> Option<usize>>,
+        pub(crate) data: T,
+    }
+
+    /// # Examples
+    ///
+    /// ```
+    /// for i in fenwicktree::prefix(7) {
+    /// }
+    /// ```
+    pub fn prefix(i: usize) -> Successors<usize, fn(&usize) -> Option<usize>> {
+        #[inline]
+        fn next_index(&i: &usize) -> Option<usize> {
+            let x = crate::next_index_for_prefix(i);
+            (x > 0).then(|| x)
+        }
+
+        // for x := i; x > 0; x -= lsb(x)
+        successors((i > 0).then(|| i), next_index)
+    }
+
+    pub fn children(i: usize) -> impl Iterator<Item = usize> {
+        // The number of children that belongs to the node at `i`, including `i`.
+        let nb = i.lsb();
+
+        // Yields `nb`s of each children of `i`. Not an index itself.
+        let next_nb = move |&x: &usize| {
+            let x = x << 1;
+            (x < nb).then(|| x)
+        };
+
+        // Maps children's `nb`s to node indices
+        let to_index = move |d: usize| i - d;
+
+        successors((nb > 1).then(|| 1), next_nb).map(to_index)
+    }
+
+    pub fn update(i: usize, nodes: usize) -> impl Iterator<Item = usize> {
+        let next_index = move |&i: &usize| -> Option<usize> {
+            let x = crate::next_index_for_update(i);
+            (x <= nodes).then(|| x)
+        };
+
+        // for x := i; x <= nodes; x += lsb(x)
+        successors((i > 0).then(|| i), next_index)
+    }
+
+    // #[inline]
+    // pub fn update_(i: usize, slice_len: usize) -> impl Iterator<Item = usize> {
+    //     // The next segment to be updated can be found by adding the segment length `n.lsb()`.
+    //     #[inline]
+    //     fn next(&d: &usize) -> Option<usize> {
+    //         Some(next_index_for_update(d))
+    //     }
+    //     // for x := k+1; x < max; x += lsb(x) { ...
+    //     successors(Some(i + 1), next).take_while(move |&x| x < slice_len)
+    // }
+
+    #[inline]
+    pub fn search(nodes: usize) -> impl Iterator<Item = usize> {
+        // for x := m.msb(); x > 0; x >>= 1
+        successors((nodes > 0).then(|| nodes.msb()), |&i| {
+            let x = i >> 1;
+            (x > 0).then(|| x)
+        })
+    }
+}
+
+pub trait Nodes {
+    /// The size of fenwick tree.
+    fn nodes(&self) -> usize;
+}
+
+impl<'a, T: ?Sized + Nodes> Nodes for &'a T {
+    fn nodes(&self) -> usize {
+        <T as Nodes>::nodes(self)
+    }
+}
+
+pub trait Prefix: Nodes {
+    type Item;
+    type Iter: Iterator<Item = Self::Item>;
+
+    fn prefix(self, index: usize) -> Self::Iter;
+
+    #[inline]
+    fn sum<S: Sum<Self::Item>>(self, index: usize) -> S
+    where
+        S: Sum<Self::Item>,
+        Self: Sized,
+    {
+        self.prefix(index).sum::<S>()
+    }
+
+    // #[inline]
+    // fn range_sum<S, R>(self, index: R) -> S
+    // where
+    //     S: Sum<Self::Item> + Sub<Output = S>,
+    //     R: RangeBounds<usize>,
+    //     Self: Copy + Sized,
+    // {
+    //     match (
+    //         indexutil::min_index_inclusive(index.start_bound(), 0),
+    //         indexutil::max_index_inclusive(index.end_bound(), self.nodes()),
+    //     ) {
+    //         (0, i) => self.sum::<S>(i),
+    //         (i, j) => self.sum::<S>(j) - self.sum::<S>(i - 1),
+    //     }
+    // }
+}
+
+pub trait Incr<N>: Nodes {
+    /// Corresponds to `T[i] += delta` in `[T]`.
+    fn incr(&mut self, i: usize, delta: N);
+}
+
+pub trait Decr<N>: Nodes {
+    /// Corresponds to `T[i] -= delta` in `[T]`.
+    fn decr(&mut self, i: usize, delta: N);
+}
+
+pub trait Search: Nodes {
+    /// Finds the lowest idnex `i` that satisfies `sum(i) >= w`.
+    fn lower_bound(&self, /*hint: Option<usize>,*/ w: u64) -> usize;
 }
 
 impl<T> Nodes for [T] {
