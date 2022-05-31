@@ -91,11 +91,21 @@ pub trait Prefix {
     fn prefix(self, index: usize) -> Self::Iter;
 
     #[inline]
-    fn sum<S: Sum<Self::Item>>(self, index: usize) -> S
+    fn sum<Idx, S: Sum<Self::Item>>(self, index: Idx) -> S
     where
+        Idx: RangeBounds<usize>,
+        S: Sum<Self::Item>,
         Self: Sized,
     {
         self.prefix(index).sum::<S>()
+    }
+
+    #[inline]
+    fn range_sum<S: Sum<Self::Item>>(self, i: usize, j: usize) -> S
+    where
+        Self: Sized,
+    {
+        self.sum(j) - self.sum(i)
     }
 }
 
@@ -120,27 +130,6 @@ pub trait Decr<N>: Nodes {
 pub trait Search: Nodes {
     /// Finds the lowest idnex `i` that satisfies `sum(i) >= w`.
     fn lower_bound(&self, /*hint: Option<usize>,*/ w: u64) -> usize;
-}
-
-// #[inline]
-// pub fn nodes<T: Nodes>(tree: &T) -> usize {
-//     tree.nodes()
-// }
-
-// #[inline]
-// pub fn incr<T: Incr<U>, U>(tree: &mut T, index: usize, delta: U) {
-//     tree.incr(index, delta)
-// }
-
-// #[inline]
-// pub fn decr<T: Decr<U>, U>(tree: &mut T, index: usize, delta: U) {
-//     tree.decr(index, delta)
-// }
-
-#[cfg(test)]
-#[inline]
-pub fn empty<T: Copy>(zero: T) -> Vec<T> {
-    vec![zero; 1]
 }
 
 /// Build a fenwick tree.
