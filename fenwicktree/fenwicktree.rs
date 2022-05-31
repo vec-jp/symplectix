@@ -1,6 +1,6 @@
 //! 1-indexed FenwickTree (BinaryIndexedTree).
 
-use intop::Lsb;
+use int::{Int, Lsb};
 use std::iter::Sum;
 use std::ops::{AddAssign, SubAssign};
 
@@ -75,7 +75,7 @@ where
 
 mod iter {
     use core::iter::{successors, Successors};
-    use intop::{Lsb, Msb};
+    use int::{Lsb, Msb};
 
     pub struct Prefix<T> {
         pub(crate) index: Successors<usize, fn(&usize) -> Option<usize>>,
@@ -232,17 +232,43 @@ impl<'a, T: Copy> Iterator for iter::Prefix<&'a [T]> {
     }
 }
 
-impl<T: Copy + Into<u64>> Search<u64> for [T] {
-    fn lower_bound(&self, mut w: u64) -> usize {
+// impl<T: Copy + Into<u64>> Search<u64> for [T] {
+//     fn lower_bound(&self, mut w: u64) -> usize {
+//         assert!(!self.is_empty());
+
+//         if w == 0 {
+//             return 0;
+//         }
+
+//         let mut i = 0;
+//         search(self.nodes()).for_each(|d| {
+//             if let Some(v) = self.get(i + d).copied().map(Into::into) {
+//                 if v < w {
+//                     w -= v;
+//                     i += d;
+//                 }
+//             }
+//         });
+
+//         i + 1
+//     }
+// }
+
+impl<T, U> Search<U> for [T]
+where
+    T: Copy + PartialOrd<U>,
+    U: Int + SubAssign<T>,
+{
+    fn lower_bound(&self, mut w: U) -> usize {
         assert!(!self.is_empty());
 
-        if w == 0 {
+        if w.is_zero() {
             return 0;
         }
 
         let mut i = 0;
         search(self.nodes()).for_each(|d| {
-            if let Some(v) = self.get(i + d).copied().map(Into::into) {
+            if let Some(v) = self.get(i + d).copied() {
                 if v < w {
                     w -= v;
                     i += d;

@@ -5,7 +5,7 @@ use std::borrow::Cow;
 use std::iter::successors;
 
 use bits::{Bits, Count, Rank, Select, Word};
-use intop::Lsb;
+use int::Lsb;
 
 #[test]
 fn bits_is_implemented() {

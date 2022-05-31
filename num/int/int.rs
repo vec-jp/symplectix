@@ -1,5 +1,45 @@
 #![no_std]
 
+use core::{hash::Hash, ops};
+
+pub trait Int:
+    Sized
+    + Copy
+    + PartialEq<Self>
+    + Eq
+    + PartialOrd<Self>
+    + Ord
+    + Hash
+    + ops::Add<Output = Self>
+    + ops::Sub<Output = Self>
+    + ops::Mul<Output = Self>
+    + ops::Div<Output = Self>
+    + ops::Rem<Output = Self>
+    + ops::Not<Output = Self>
+    // + ops::AddAssign
+    // + ops::SubAssign
+    // + ops::MulAssign
+    // + ops::DivAssign
+    // + ops::RemAssign
+    // + ops::Shl<usize, Output = Self>
+    // + ops::Shr<usize, Output = Self>
+    // + ops::ShlAssign<usize>
+    // + ops::ShrAssign<usize>
+    + ops::BitAnd<Output = Self>
+    + ops::BitOr<Output = Self>
+    + ops::BitXor<Output = Self>
+    // + ops::BitAndAssign
+    // + ops::BitOrAssign
+    // + ops::BitXorAssign
+{
+    const ZERO: Self;
+
+    #[inline]
+    fn is_zero(&self) -> bool {
+        *self == Self::ZERO
+    }
+}
+
 pub trait Lsb {
     /// Least significant set bit (right most set bit).
     fn lsb(self) -> Self;
@@ -13,19 +53,29 @@ pub trait Msb {
 // pub type RightMostSetBit = Lsb;
 // pub type LeftMostSetBit = Msb;
 
-macro_rules! impls {
-    ($( $Word:ty )*) => ($(
-        impl Lsb for $Word {
+macro_rules! impl_int {
+    ($( $N:ty )*) => ($(
+        impl Int for $N {
+            const ZERO: Self = 0;
+        }
+    )*)
+}
+impl_int!(i8 i16 i32 i64 i128 isize);
+impl_int!(u8 u16 u32 u64 u128 usize);
+
+macro_rules! impl_sb {
+    ($( $N:ty )*) => ($(
+        impl Lsb for $N {
             #[inline]
             fn lsb(self) -> Self {
                 self & self.wrapping_neg()
             }
         }
 
-        impl Msb for $Word {
+        impl Msb for $N {
             #[inline]
             fn msb(self) -> Self {
-                if self == 0 {
+                if self.is_zero() {
                     0
                 } else {
                     1 << ((Self::BITS as usize - 1) ^ self.leading_zeros() as usize)
@@ -34,7 +84,7 @@ macro_rules! impls {
         }
     )*)
 }
-impls!(u8 u16 u32 u64 u128 usize);
+impl_sb!(u8 u16 u32 u64 u128 usize);
 
 #[cfg(test)]
 mod tests {

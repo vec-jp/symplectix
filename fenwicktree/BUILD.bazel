@@ -9,7 +9,7 @@ rust_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//num:intop",
+        "//num/int",
     ],
 )
 
@@ -21,7 +21,7 @@ rust_test_suite(
     ],
     deps = [
         ":fenwicktree",
-        "//num:intop",
+        "//num/int",
         "@crates//:quickcheck",
     ],
 )

@@ -3,22 +3,23 @@ load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", 
 package(default_visibility = ["//visibility:private"])
 
 rust_library(
-    name = "indexutil",
-    srcs = ["indexutil.rs"],
+    name = "int",
+    srcs = glob(["*.rs"]),
+    crate_root = "int.rs",
     visibility = ["//visibility:public"],
 )
 
 rust_test(
-    name = "indexutil_cfg_test",
-    crate = ":indexutil",
+    name = "int_cfg_test",
+    crate = ":int",
 )
 
 rust_doc_test(
-    name = "indexutil_doc_test",
-    crate = ":indexutil",
+    name = "int_doc_test",
+    crate = ":int",
 )
 
 rust_doc(
-    name = "indexutil_doc",
-    crate = ":indexutil",
+    name = "int_doc",
+    crate = ":int",
 )

@@ -32,7 +32,7 @@ rust_test_suite(
     ],
     deps = [
         ":bits",
-        "//num:intop",
+        "//num/int",
         "@crates//:quickcheck",
     ],
 )
