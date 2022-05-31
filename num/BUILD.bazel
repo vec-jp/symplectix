@@ -22,3 +22,24 @@ rust_doc(
     name = "indexutil_doc",
     crate = ":indexutil",
 )
+
+rust_library(
+    name = "bitops",
+    srcs = ["bitops.rs"],
+    visibility = ["//visibility:public"],
+)
+
+rust_test(
+    name = "bitops_cfg_test",
+    crate = ":bitops",
+)
+
+rust_doc_test(
+    name = "bitops_doc_test",
+    crate = ":bitops",
+)
+
+rust_doc(
+    name = "bitops_doc",
+    crate = ":bitops",
+)
