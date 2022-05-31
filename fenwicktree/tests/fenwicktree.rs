@@ -182,9 +182,9 @@ fn sum_0_is_always_zero(vec: Vec<num::Wrapping<u64>>) -> bool {
 }
 
 #[quickcheck]
-fn sum_x_eq_vec_sum(vec: Vec<u64>) -> bool {
-    let bit = build(vec.clone(), 0);
-    (0..=bit.nodes()).all(|i| bit.sum::<u64>(i) == vec[..i].iter().sum())
+fn sum_x_eq_vec_sum(vec: Vec<num::Wrapping<u64>>) -> bool {
+    let bit = build(vec.clone(), num::Wrapping(0));
+    (0..=bit.nodes()).all(|i| bit.sum::<num::Wrapping<u64>>(i) == vec[..i].iter().sum())
 }
 
 // It takes too long to complete the test when using `Vec<u64>`.
