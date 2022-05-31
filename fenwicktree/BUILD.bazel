@@ -4,7 +4,9 @@ package(default_visibility = ["//visibility:private"])
 
 rust_library(
     name = "fenwicktree",
-    srcs = ["fenwicktree.rs"],
+    srcs = [
+        "fenwicktree.rs",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         "//bits",

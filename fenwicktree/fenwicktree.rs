@@ -99,47 +99,11 @@ pub trait Prefix {
     }
 }
 
-mod impl_prefix {
-    use crate::Prefix;
+mod iter {
     use core::iter::Successors;
-
-    pub struct SlicePrefix<'a, T> {
-        index: Successors<usize, fn(&usize) -> Option<usize>>,
-        slice: &'a [T],
-    }
-
-    impl<'a, T: Copy> Iterator for SlicePrefix<'a, T> {
-        type Item = T;
-        #[inline]
-        fn next(&mut self) -> Option<Self::Item> {
-            self.index.next().map(|i| self.slice[i])
-        }
-    }
-
-    impl<'a, T: Copy> Prefix for &'a [T] {
-        type Item = T;
-        type Iter = SlicePrefix<'a, T>;
-
-        #[inline]
-        fn prefix(self, index: usize) -> Self::Iter {
-            SlicePrefix {
-                index: crate::prefix(index),
-                slice: self,
-            }
-        }
-    }
-
-    impl<'a, T> Prefix for &'a Vec<T>
-    where
-        &'a [T]: Prefix,
-    {
-        type Item = <&'a [T] as Prefix>::Item;
-        type Iter = <&'a [T] as Prefix>::Iter;
-
-        #[inline]
-        fn prefix(self, index: usize) -> Self::Iter {
-            self.as_slice().prefix(index)
-        }
+    pub struct Prefix<T> {
+        pub(crate) index: Successors<usize, fn(&usize) -> Option<usize>>,
+        pub(crate) data: T,
     }
 }
 
@@ -209,22 +173,6 @@ where
     }
 }
 
-/// Tranforms a tree into an accumulated vector.
-/// e.g. `[1, 2, 0, 4]` => `[1, 2, 2, 4]`.
-// #[inline]
-// pub fn accumulate<T>(tree: &[T]) -> Vec<u64>
-// where
-//     T: Copy + Into<u64>,
-// {
-//     assert!(!tree.is_empty());
-//     let mut vec = vec![0; tree.len()];
-//     for i in 1..tree.len() {
-//         let j = next_index_for_prefix(i);
-//         vec[i] = tree[i].into() + vec[j];
-//     }
-//     vec
-// }
-
 pub fn push<T>(bit: &mut Vec<T>, mut x: T)
 where
     T: Copy + AddAssign,
@@ -258,12 +206,26 @@ impl<T> Nodes for [T] {
     }
 }
 
-// impl<T: Copy + Into<u64>> Sum for [T] {
-//     #[inline]
-//     fn sum(&self, i: usize) -> u64 {
-//         prefix(i).map(|i| self[i].into()).sum()
-//     }
-// }
+impl<'a, T: Copy> Iterator for iter::Prefix<&'a [T]> {
+    type Item = T;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.index.next().map(|i| self.data[i])
+    }
+}
+
+impl<'a, T: Copy> Prefix for &'a [T] {
+    type Item = T;
+    type Iter = iter::Prefix<&'a [T]>;
+
+    #[inline]
+    fn prefix(self, index: usize) -> Self::Iter {
+        iter::Prefix {
+            index: prefix(index),
+            data: self,
+        }
+    }
+}
 
 impl<T: Copy + Into<u64>> Search for [T] {
     fn lower_bound(&self, hint: Option<usize>, mut w: u64) -> usize {
@@ -309,31 +271,24 @@ where
     }
 }
 
-/// Complements the result of a query by its parameter `bound`.
-pub trait ComplementedQuery<T: ?Sized> {
-    fn complemented(&self, bound: u64) -> Complemented<'_, T>;
-}
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub struct Complemented<'a, F: ?Sized> {
-    tree: &'a F,
-    bound: u64,
+pub struct Complement<'a, T: ?Sized, U = u64> {
+    inner: &'a T,
+    max_bound: U,
 }
 
-impl<T> ComplementedQuery<[T]> for [T] {
-    #[inline]
-    fn complemented(&self, bound: u64) -> Complemented<'_, [T]> {
-        Complemented { tree: self, bound }
-    }
+#[inline]
+pub fn complement<T, U>(inner: &T, max_bound: U) -> Complement<'_, T, U> {
+    Complement { inner, max_bound }
 }
 
-impl<'a, T> Nodes for Complemented<'a, [T]>
+impl<'a, T> Nodes for Complement<'a, [T]>
 where
     T: Copy + Into<u64>,
 {
     #[inline]
     fn nodes(&self) -> usize {
-        self.tree.nodes()
+        self.inner.nodes()
     }
 }
 
@@ -347,23 +302,34 @@ where
 //     }
 // }
 
-impl<'a, T> Search for Complemented<'a, [T]>
+// impl<'a, T> Iterator for iter::Prefix<Complement<'a, [T]>>
+// where
+//     T: Copy,
+// {
+//     type Item = T;
+//     #[inline]
+//     fn next(&mut self) -> Option<Self::Item> {
+//         self.index.next().map(|i| self.data.inner[i])
+//     }
+// }
+
+impl<'a, T> Search for Complement<'a, [T]>
 where
     T: Copy + Into<u64>,
 {
     fn lower_bound(&self, hint: Option<usize>, mut w: u64) -> usize {
-        let tree = self.tree;
-        let bound = self.bound;
-        assert!(!tree.is_empty());
+        let bit = self.inner;
+        let max = self.max_bound;
+        assert!(!bit.is_empty());
         if w == 0 {
             return 0;
         }
 
         let mut i = 0;
         // The size of the segment is halved for each step.
-        for d in search(hint.unwrap_or_else(|| tree.nodes())) {
-            if let Some(&v) = tree.get(i + d) {
-                let v: u64 = bound * (d as u64) - v.into();
+        for d in search(hint.unwrap_or_else(|| bit.nodes())) {
+            if let Some(&v) = bit.get(i + d) {
+                let v: u64 = max * (d as u64) - v.into();
                 if v < w {
                     w -= v;
                     i += d; // move to right
@@ -373,88 +339,3 @@ where
         i + 1
     }
 }
-
-impl<T> Nodes for Vec<T>
-where
-    [T]: Nodes,
-{
-    #[inline]
-    fn nodes(&self) -> usize {
-        <[T]>::nodes(self)
-    }
-}
-
-// impl<T> Sum for Vec<T>
-// where
-//     [T]: Sum,
-// {
-//     #[inline]
-//     fn sum(&self, i: usize) -> u64 {
-//         <[T]>::sum(self, i)
-//     }
-// }
-
-impl<T> Search for Vec<T>
-where
-    [T]: Search,
-{
-    #[inline]
-    fn lower_bound(&self, hint: Option<usize>, w: u64) -> usize {
-        <[T]>::lower_bound(self, hint, w)
-    }
-}
-
-impl<T> ComplementedQuery<[T]> for Vec<T> {
-    #[inline]
-    fn complemented(&self, bound: u64) -> Complemented<'_, [T]> {
-        Complemented { tree: self, bound }
-    }
-}
-
-impl<T, U> Incr<U> for Vec<T>
-where
-    [T]: Incr<U>,
-{
-    #[inline]
-    fn incr(&mut self, i: usize, delta: U) {
-        <[T]>::incr(self, i, delta)
-    }
-}
-
-impl<T, U> Decr<U> for Vec<T>
-where
-    [T]: Decr<U>,
-{
-    #[inline]
-    fn decr(&mut self, i: usize, delta: U) {
-        <[T]>::decr(self, i, delta)
-    }
-}
-
-// impl<'a, T> Complemented<'a, Vec<T>>
-// where
-//     T: Copy + Into<u64> + AddAssign<u64> + SubAssign<u64>,
-// {
-//     #[inline]
-//     fn as_ref(&self) -> Complemented<'_, [T]> {
-//         Complemented {
-//             tree: self.tree.as_slice(),
-//             bound: self.bound,
-//         }
-//     }
-
-//     #[inline]
-//     pub fn size(&self) -> usize {
-//         self.as_ref().size()
-//     }
-
-//     #[inline]
-//     pub fn sum(&self, i: usize) -> u64 {
-//         self.as_ref().sum(i)
-//     }
-
-//     #[inline]
-//     pub fn lower_bound(&self, hint: Option<usize>, w: u64) -> usize {
-//         self.as_ref().lower_bound(hint, w)
-//     }
-// }
