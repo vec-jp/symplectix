@@ -143,6 +143,7 @@ fn lower_bound() {
 
         assert_eq!(bit.lower_bound(0), 0);
         assert_eq!(bit.lower_bound(1), 1);
+        assert_eq!(bit.lower_bound(3), 3);
         assert_eq!(bit.lower_bound(4), 3);
         assert_eq!(bit.lower_bound(5), 4);
     }
