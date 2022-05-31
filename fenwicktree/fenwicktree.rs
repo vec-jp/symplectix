@@ -2,7 +2,7 @@
 
 use bits::Word;
 use std::iter::{successors, Successors, Sum};
-use std::ops::{AddAssign, Sub, SubAssign};
+use std::ops::{AddAssign, SubAssign};
 
 // The next node to be updated can be found by adding the node size `n.lsb()`.
 #[inline]
@@ -84,21 +84,17 @@ pub trait Nodes {
     fn nodes(&self) -> usize;
 }
 
-pub trait Prefix {
+impl<'a, T: ?Sized + Nodes> Nodes for &'a T {
+    fn nodes(&self) -> usize {
+        <T as Nodes>::nodes(self)
+    }
+}
+
+pub trait Prefix: Nodes {
     type Item;
     type Iter: Iterator<Item = Self::Item>;
 
     fn prefix(self, index: usize) -> Self::Iter;
-
-    // #[inline]
-    // fn sum<Idx, S: Sum<Self::Item>>(self, index: Idx) -> S
-    // where
-    //     Idx: RangeBounds<usize>,
-    //     S: Sum<Self::Item>,
-    //     Self: Sized,
-    // {
-    //     self.prefix(index).sum::<S>()
-    // }
 
     #[inline]
     fn sum<S: Sum<Self::Item>>(self, index: usize) -> S
@@ -109,14 +105,21 @@ pub trait Prefix {
         self.prefix(index).sum::<S>()
     }
 
-    #[inline]
-    fn range_sum<S>(self, i: usize, j: usize) -> S
-    where
-        S: Sum<Self::Item> + Sub<Output = S>,
-        Self: Copy + Sized,
-    {
-        self.sum::<S>(j) - self.sum::<S>(i)
-    }
+    // #[inline]
+    // fn range_sum<S, R>(self, index: R) -> S
+    // where
+    //     S: Sum<Self::Item> + Sub<Output = S>,
+    //     R: RangeBounds<usize>,
+    //     Self: Copy + Sized,
+    // {
+    //     match (
+    //         indexutil::min_index_inclusive(index.start_bound(), 0),
+    //         indexutil::max_index_inclusive(index.end_bound(), self.nodes()),
+    //     ) {
+    //         (0, i) => self.sum::<S>(i),
+    //         (i, j) => self.sum::<S>(j) - self.sum::<S>(i - 1),
+    //     }
+    // }
 }
 
 mod iter {

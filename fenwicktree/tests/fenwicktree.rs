@@ -132,8 +132,14 @@ fn lower_bound() {
         assert_eq!(4, bit.sum::<u32>(3));
         assert_eq!(9, bit.sum::<u32>(4));
 
-        assert_eq!(3, bit.range_sum::<u32>(1, 3));
-        assert_eq!(8, bit.range_sum::<u32>(1, 4));
+        // assert_eq!(1, bit.range_sum::<u32, _>(1..3));
+        // assert_eq!(4, bit.range_sum::<u32, _>(1..4));
+        // assert_eq!(9, bit.range_sum::<u32, _>(1..=4));
+        // assert_eq!(9, bit.range_sum::<u32, _>(1..5));
+        // assert_eq!(9, bit.range_sum::<u32, _>(..));
+        // assert_eq!(9, bit.range_sum::<u32, _>(0..));
+        // assert_eq!(9, bit.range_sum::<u32, _>(1..));
+        // assert_eq!(0, bit.range_sum::<u32, _>(5..));
 
         assert_eq!(bit.lower_bound(0), 0);
         assert_eq!(bit.lower_bound(1), 1);
