@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", "rust_test", "rust_test_suite")
+load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", "rust_test")
 
 package(default_visibility = ["//visibility:private"])
 
@@ -24,22 +24,22 @@ rust_doc(
 )
 
 rust_library(
-    name = "bitops",
-    srcs = ["bitops.rs"],
+    name = "bitop",
+    srcs = ["bitop.rs"],
     visibility = ["//visibility:public"],
 )
 
 rust_test(
-    name = "bitops_cfg_test",
-    crate = ":bitops",
+    name = "bitop_cfg_test",
+    crate = ":bitop",
 )
 
 rust_doc_test(
-    name = "bitops_doc_test",
-    crate = ":bitops",
+    name = "bitop_doc_test",
+    crate = ":bitop",
 )
 
 rust_doc(
-    name = "bitops_doc",
-    crate = ":bitops",
+    name = "bitop_doc",
+    crate = ":bitop",
 )
