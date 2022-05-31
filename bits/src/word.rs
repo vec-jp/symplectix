@@ -93,14 +93,11 @@ pub trait Word:
     /// Returns the number of leading zeros in the binary representation of self.
     fn count_l0(self) -> usize;
 
+    /// Returns the number of trailing ones in the binary representation of self.
+    fn count_t1(self) -> usize;
+
     /// Returns the number of trailing zeros in the binary representation of self.
     fn count_t0(self) -> usize;
-
-    /// Least significant set bit (right most set bit).
-    fn lsb(self) -> Self;
-
-    /// Most significant set bit (left most set bit).
-    fn msb(self) -> Self;
 }
 
 macro_rules! impls {
@@ -129,22 +126,13 @@ macro_rules! impls {
             }
 
             #[inline]
+            fn count_t1(self) -> usize {
+                self.trailing_ones() as usize
+            }
+
+            #[inline]
             fn count_t0(self) -> usize {
                 self.trailing_zeros() as usize
-            }
-
-            #[inline]
-            fn lsb(self) -> Self {
-                self & self.wrapping_neg()
-            }
-
-            #[inline]
-            fn msb(self) -> Self {
-                if self == 0 {
-                    0
-                } else {
-                    1 << ((<Self as Block>::BITS - 1) ^ self.count_l0())
-                }
             }
         }
 

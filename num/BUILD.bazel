@@ -24,22 +24,22 @@ rust_doc(
 )
 
 rust_library(
-    name = "bitop",
-    srcs = ["bitop.rs"],
+    name = "intop",
+    srcs = ["intop.rs"],
     visibility = ["//visibility:public"],
 )
 
 rust_test(
-    name = "bitop_cfg_test",
-    crate = ":bitop",
+    name = "intop_cfg_test",
+    crate = ":intop",
 )
 
 rust_doc_test(
-    name = "bitop_doc_test",
-    crate = ":bitop",
+    name = "intop_doc_test",
+    crate = ":intop",
 )
 
 rust_doc(
-    name = "bitop_doc",
-    crate = ":bitop",
+    name = "intop_doc",
+    crate = ":intop",
 )

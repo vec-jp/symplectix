@@ -1,12 +1,17 @@
 #![no_std]
 
 pub trait Lsb {
+    /// Least significant set bit (right most set bit).
     fn lsb(self) -> Self;
 }
 
 pub trait Msb {
+    /// Most significant set bit (left most set bit).
     fn msb(self) -> Self;
 }
+
+// pub type RightMostSetBit = Lsb;
+// pub type LeftMostSetBit = Msb;
 
 macro_rules! impls {
     ($( $Word:ty )*) => ($(
@@ -64,5 +69,25 @@ mod tests {
         for (n, want) in tests {
             assert_eq!(n.msb(), want);
         }
+    }
+
+    #[test]
+    fn msb_assertion() {
+        assert_eq!(0u8.msb(), 0);
+        assert_eq!(1u8.msb(), 1);
+        assert_eq!(2u8.msb(), 2);
+        assert_eq!(3u8.msb(), 2);
+        assert_eq!(4u8.msb(), 4);
+        assert_eq!(5u8.msb(), 4);
+        assert_eq!(6u8.msb(), 4);
+        assert_eq!(7u8.msb(), 4);
+        assert_eq!(8u8.msb(), 8);
+        assert_eq!(9u8.msb(), 8);
+        assert_eq!(10u8.msb(), 8);
+        assert_eq!(15u8.msb(), 8);
+        assert_eq!(16u8.msb(), 16);
+        assert_eq!(18u8.msb(), 16);
+        assert_eq!(30u8.msb(), 16);
+        assert_eq!(33u8.msb(), 32);
     }
 }
