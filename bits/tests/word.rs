@@ -33,14 +33,14 @@ impl Pdep for u64 {
 
 fn _pdep<T: Word + Lsb>(data: T, mut mask: T) -> T {
     let mut dest = T::NULL;
-    for i in 0..T::BITS {
+    for i in 0..<T as bits::Block>::BITS {
         if !mask.any() {
             break;
         }
         if data.bit(i).unwrap() {
             dest |= mask.lsb();
         }
-        mask &= mask - T::_1;
+        mask &= mask - T::ONE;
     }
     dest
 }

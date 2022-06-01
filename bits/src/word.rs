@@ -1,5 +1,6 @@
 use crate::*;
 use core::{hash::Hash, ops, ops::RangeBounds};
+use int::Int;
 
 mod private {
     pub trait Sealed {}
@@ -27,22 +28,9 @@ fn mask<T: Word>(i: usize, j: usize) -> T {
 
 /// `Word` is a fixed-length group of bits that the CPU can process.
 pub trait Word:
-    'static
-    + Copy
+    Int
     + Hash
-    + Eq
-    + Ord
     + Block
-    + ops::Add<Output = Self>
-    + ops::Sub<Output = Self>
-    + ops::Mul<Output = Self>
-    + ops::Div<Output = Self>
-    + ops::Rem<Output = Self>
-    + ops::AddAssign
-    + ops::SubAssign
-    + ops::MulAssign
-    + ops::DivAssign
-    + ops::RemAssign
     + ops::BitAnd<Output = Self>
     + ops::BitOr<Output = Self>
     + ops::BitXor<Output = Self>
@@ -63,12 +51,12 @@ pub trait Word:
     + private::Sealed
 {
     /// literal 0
-    #[doc(hidden)]
-    const _0: Self;
+    // #[doc(hidden)]
+    // const _0: Self = <Self as Int>::ZERO;
 
-    /// literal 1
-    #[doc(hidden)]
-    const _1: Self;
+    // /// literal 1
+    // #[doc(hidden)]
+    // const _1: Self = <Self as Int>::ONE;
 
     /// An empty, no bits are enabled, `Word`.
     #[doc(hidden)]
@@ -104,10 +92,10 @@ macro_rules! impls {
     ($( $Word:ty )*) => ($(
         impl Word for $Word {
             #[doc(hidden)]
-            const _0: Self = 0;
+            // const _0: Self = 0;
 
-            #[doc(hidden)]
-            const _1: Self = 1;
+            // #[doc(hidden)]
+            // const _1: Self = 1;
 
             #[doc(hidden)]
             const NULL: Self = 0;

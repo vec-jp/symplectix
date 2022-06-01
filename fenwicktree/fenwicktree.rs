@@ -1,6 +1,6 @@
 //! 1-indexed FenwickTree (BinaryIndexedTree).
 
-use int::{Int, Lsb};
+use int::{Arith, Int, Lsb};
 use std::iter::Sum;
 use std::ops::{AddAssign, SubAssign};
 
@@ -8,13 +8,13 @@ pub use iter::{children, prefix, search, update};
 
 // The next node to be updated can be found by adding the node size `n.lsb()`.
 #[inline]
-fn next_index_for_update(i: usize) -> usize {
+fn next_index_for_update<T: Int + Lsb>(i: T) -> <T as Arith>::Output {
     i + i.lsb()
 }
 
 // The next node to be queried can be found by subtracting the node size `n.lsb()`.
 #[inline]
-fn next_index_for_prefix(i: usize) -> usize {
+fn next_index_for_prefix<T: Int + Lsb>(i: T) -> <T as Arith>::Output {
     i - i.lsb()
 }
 
@@ -187,9 +187,9 @@ pub trait Decr<N>: Nodes {
     fn decr(&mut self, i: usize, delta: N);
 }
 
-pub trait Search<T>: Nodes {
-    /// Finds the lowest idnex `i` that satisfies `sum(i) >= w`.
-    fn lower_bound(&self, w: T) -> usize;
+pub trait LowerBound<S>: Nodes {
+    /// Finds the lowest idnex `i` that satisfies `sum(i) >= threshold`.
+    fn lower_bound(&self, threshold: S) -> usize;
 }
 
 impl<T> Nodes for [T] {
@@ -220,7 +220,7 @@ impl<'a, T: Int> Iterator for iter::Prefix<&'a [T]> {
     }
 }
 
-impl<T, U> Search<U> for [T]
+impl<T, U> LowerBound<U> for [T]
 where
     T: Int + PartialOrd<U>,
     U: Int + SubAssign<T>,
@@ -310,7 +310,7 @@ where
 //     }
 // }
 
-impl<'a, T> Search<u64> for Complement<'a, [T]>
+impl<'a, T> LowerBound<u64> for Complement<'a, [T]>
 where
     T: Copy + Into<u64>,
 {

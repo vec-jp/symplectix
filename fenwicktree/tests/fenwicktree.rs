@@ -2,7 +2,7 @@
 extern crate quickcheck_macros;
 
 use fenwicktree as fw;
-use fenwicktree::{Incr, Nodes, Prefix, Search};
+use fenwicktree::{Incr, LowerBound, Nodes, Prefix};
 use int::Int;
 use std::iter;
 
