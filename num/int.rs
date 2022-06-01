@@ -1,10 +1,12 @@
 #![no_std]
 
-mod arith;
-mod bitpos;
+// mod arith;
+// mod bitwise;
+// mod lsb_msb;
 
-pub use arith::{Arith, ArithAssign};
-pub use bitpos::{Lsb, Msb};
+// pub use arith::{Arith, ArithAssign};
+// pub use bitwise::{Bitwise, BitwiseAssign};
+// pub use lsb_msb::{Lsb, Msb};
 
 pub trait Int: Sized + Copy + Eq + Ord {
     const BITS: u32;

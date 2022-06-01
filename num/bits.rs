@@ -1,5 +1,3 @@
-use crate::Int;
-
 pub trait Lsb {
     /// Least significant set bit (right most set bit).
     fn lsb(self) -> Self;
@@ -31,7 +29,7 @@ macro_rules! impl_msb {
         impl Msb for $N {
             #[inline]
             fn msb(self) -> Self {
-                if self.is_zero() {
+                if self == 0 {
                     0
                 } else {
                     let max = Self::BITS - 1;

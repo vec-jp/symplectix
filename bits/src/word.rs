@@ -1,6 +1,6 @@
 use crate::*;
 use core::{hash::Hash, ops, ops::RangeBounds};
-use int::{Arith, ArithAssign, Int};
+use int::{Arith, ArithAssign, Bitwise, BitwiseAssign, Int};
 
 mod private {
     pub trait Sealed {}
@@ -29,21 +29,23 @@ fn mask<T: Word>(i: usize, j: usize) -> T {
 /// `Word` is a fixed-length group of bits that the CPU can process.
 pub trait Word:
     Int
-    + Arith<Output = Self>
-    + ArithAssign<Self>
+    + Arith
+    + ArithAssign
+    + Bitwise
+    + BitwiseAssign
     + Hash
     + Block
-    + ops::BitAnd<Output = Self>
-    + ops::BitOr<Output = Self>
-    + ops::BitXor<Output = Self>
-    + ops::Shl<usize, Output = Self>
-    + ops::Shr<usize, Output = Self>
+    // + ops::BitAnd<Output = Self>
+    // + ops::BitOr<Output = Self>
+    // + ops::BitXor<Output = Self>
+    // + ops::Shl<usize, Output = Self>
+    // + ops::Shr<usize, Output = Self>
     + ops::Not<Output = Self>
-    + ops::BitAndAssign
-    + ops::BitOrAssign
-    + ops::BitXorAssign
-    + ops::ShlAssign<usize>
-    + ops::ShrAssign<usize>
+    // + ops::BitAndAssign
+    // + ops::BitOrAssign
+    // + ops::BitXorAssign
+    // + ops::ShlAssign<usize>
+    // + ops::ShrAssign<usize>
     + TryFrom<u8>
     + TryFrom<u16>
     + TryFrom<u32>
