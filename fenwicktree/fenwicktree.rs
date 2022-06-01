@@ -1,48 +1,37 @@
 //! 1-indexed FenwickTree (BinaryIndexedTree).
 
-use int::{Arith, Int, Lsb};
+use int::Int;
 use std::iter::Sum;
 use std::ops::{AddAssign, SubAssign};
 
 pub use iter::{children, prefix, search, update};
 
-// The next node to be updated can be found by adding the node size `n.lsb()`.
-#[inline]
-fn next_index_for_update<T: Int + Lsb>(i: T) -> <T as Arith>::Output {
-    i + i.lsb()
-}
-
-// The next node to be queried can be found by subtracting the node size `n.lsb()`.
-#[inline]
-fn next_index_for_prefix<T: Int + Lsb>(i: T) -> <T as Arith>::Output {
-    i - i.lsb()
-}
-
 /// Build a fenwick tree.
-pub fn build<T: Int>(bit: &mut [T]) {
+pub fn build<T: Int + AddAssign>(bit: &mut [T]) {
     assert!(!bit.is_empty());
 
     for i in 1..bit.len() {
-        let j = next_index_for_update(i);
+        let j = iter::next_index_for_update(i);
         if j < bit.len() {
             bit[j] += bit[i];
         }
     }
 }
 
-pub fn unbuild<T: Int>(bit: &mut [T]) {
+pub fn unbuild<T: Int + SubAssign>(bit: &mut [T]) {
     assert!(!bit.is_empty());
 
     for i in (1..bit.len()).rev() {
-        let j = next_index_for_update(i);
+        let j = iter::next_index_for_update(i);
         if j < bit.len() {
             bit[j] -= bit[i];
         }
     }
 }
 
-pub fn push<T: Int>(bit: &mut Vec<T>, mut x: T) {
+pub fn push<T: Int + AddAssign>(bit: &mut Vec<T>, mut x: T) {
     assert!(!bit.is_empty());
+
     // `bit.nodes()+1` points to the index to which `x` belongs when pushed
     for i in children(bit.nodes() + 1) {
         x += bit[i];
@@ -50,7 +39,7 @@ pub fn push<T: Int>(bit: &mut Vec<T>, mut x: T) {
     bit.push(x);
 }
 
-pub fn pop<T: Int>(bit: &mut Vec<T>) -> Option<T> {
+pub fn pop<T: Int + SubAssign>(bit: &mut Vec<T>) -> Option<T> {
     // tree[0] is dummy value, popping it doesn't make sense.
     (bit.len() > 1).then(|| {
         let mut x = bit.pop().expect("len > 1");
@@ -63,7 +52,20 @@ pub fn pop<T: Int>(bit: &mut Vec<T>) -> Option<T> {
 
 mod iter {
     use core::iter::{successors, Successors};
-    use int::{Lsb, Msb};
+    use core::ops::{Add, Sub};
+    use int::{Int, Lsb, Msb};
+
+    // The next node to be updated can be found by adding the node size `n.lsb()`.
+    #[inline]
+    pub(crate) fn next_index_for_update<T: Int + Add + Lsb>(i: T) -> <T as Add>::Output {
+        i + i.lsb()
+    }
+
+    // The next node to be queried can be found by subtracting the node size `n.lsb()`.
+    #[inline]
+    pub(crate) fn next_index_for_prefix<T: Int + Sub + Lsb>(i: T) -> <T as Sub>::Output {
+        i - i.lsb()
+    }
 
     pub struct Prefix<T> {
         pub(crate) index: Successors<usize, fn(&usize) -> Option<usize>>,
@@ -79,7 +81,7 @@ mod iter {
     pub fn prefix(i: usize) -> Successors<usize, fn(&usize) -> Option<usize>> {
         #[inline]
         fn next_index(&i: &usize) -> Option<usize> {
-            let x = crate::next_index_for_prefix(i);
+            let x = next_index_for_prefix(i);
             (x > 0).then(|| x)
         }
 
@@ -105,7 +107,7 @@ mod iter {
 
     pub fn update(i: usize, nodes: usize) -> impl Iterator<Item = usize> {
         let next_index = move |&i: &usize| -> Option<usize> {
-            let x = crate::next_index_for_update(i);
+            let x = next_index_for_update(i);
             (x <= nodes).then(|| x)
         };
 
@@ -228,7 +230,7 @@ where
     fn lower_bound(&self, mut w: U) -> usize {
         assert!(!self.is_empty());
 
-        if w.is_zero() {
+        if Int::is_zero(&w) {
             return 0;
         }
 

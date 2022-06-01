@@ -1,6 +1,6 @@
 use crate::*;
 use core::{hash::Hash, ops, ops::RangeBounds};
-use int::Int;
+use int::{Arith, ArithAssign, Int};
 
 mod private {
     pub trait Sealed {}
@@ -29,6 +29,8 @@ fn mask<T: Word>(i: usize, j: usize) -> T {
 /// `Word` is a fixed-length group of bits that the CPU can process.
 pub trait Word:
     Int
+    + Arith<Output = Self>
+    + ArithAssign<Self>
     + Hash
     + Block
     + ops::BitAnd<Output = Self>

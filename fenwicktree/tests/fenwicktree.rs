@@ -4,7 +4,7 @@ extern crate quickcheck_macros;
 use fenwicktree as fw;
 use fenwicktree::{Incr, LowerBound, Nodes, Prefix};
 use int::Int;
-use std::iter;
+use std::{iter, ops};
 
 #[test]
 fn next_index_for_prefix() {
@@ -110,7 +110,7 @@ fn children() {
     assert_eq!(indices.collect::<Vec<usize>>(), [7, 6, 4]);
 }
 
-fn build<T: Int>(mut vec: Vec<T>, zero: T) -> Vec<T> {
+fn build<T: Int + ops::AddAssign>(mut vec: Vec<T>, zero: T) -> Vec<T> {
     vec.insert(0, zero); // ensure vec.len() > 0
     fenwicktree::build(&mut vec);
     vec

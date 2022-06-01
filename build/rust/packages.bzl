@@ -1,6 +1,11 @@
 load("@rules_rust//crate_universe:defs.bzl", "crate")
 
 packages = {
+    # Types/traits for numbers
+    "num": crate.spec(
+        version = "0.4",
+        default_features = False,
+    ),
     # Testing
     # "arbitrary": crate.spec(
     #     version = "1",
@@ -12,6 +17,7 @@ packages = {
     "quickcheck_macros": crate.spec(
         version = "1",
     ),
+
     # # Async
     # "tokio": crate.spec(
     #     version = "1.17.0",

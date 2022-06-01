@@ -6,7 +6,7 @@ mod bitpos;
 pub use arith::{Arith, ArithAssign};
 pub use bitpos::{Lsb, Msb};
 
-pub trait Int: Sized + Copy + Eq + Ord + Arith<Output = Self> + ArithAssign<Self> {
+pub trait Int: Sized + Copy + Eq + Ord {
     const BITS: u32;
 
     const ZERO: Self;
@@ -43,13 +43,14 @@ impl_int!(u8 u16 u32 u64 u128 usize);
 #[cfg(test)]
 mod tests {
     use super::*;
+    use core::ops::Add;
 
     // use core::iter::Step;
     // fn range<T: Int + Step>(init: T, max: T) -> impl Iterator<Item = T> {
     //     init..max
     // }
 
-    fn range<T: Int>(start: T, end: T) -> impl Iterator<Item = T> {
+    fn range<T: Int + Add<Output = T>>(start: T, end: T) -> impl Iterator<Item = T> {
         use core::iter::successors;
         successors(Some(start), move |&x| (x < end).then(|| x + T::ONE))
     }
