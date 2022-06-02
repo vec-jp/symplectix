@@ -1,4 +1,4 @@
-use crate::{Bits, Block, Word};
+use crate::{Bits, Block, Int};
 
 pub trait BitsMut: Bits {
     fn set_bit(&mut self, i: usize);
@@ -7,7 +7,7 @@ pub trait BitsMut: Bits {
 
     /// Writes `n` bits in `[i, i+n)`.
     #[doc(hidden)]
-    fn put_word<N: Word>(&mut self, i: usize, n: usize, mask: N) {
+    fn put_word<N: Int>(&mut self, i: usize, n: usize, mask: N) {
         for b in i..i + n {
             if mask.bit(b - i).expect("index out of bounds") {
                 self.set_bit(b);
@@ -33,7 +33,7 @@ impl<T: Block> BitsMut for [T] {
 
     #[inline]
     #[doc(hidden)]
-    fn put_word<N: Word>(&mut self, i: usize, n: usize, word: N) {
+    fn put_word<N: Int>(&mut self, i: usize, n: usize, word: N) {
         let mut cur = 0;
         crate::for_each_blocks::<T, _>(i, i + n, |k, r| {
             if k < self.len() {
@@ -73,7 +73,7 @@ macro_rules! impl_bits_mut {
 
         #[doc(hidden)]
         #[inline]
-        fn put_word<W: Word>(&mut self, i: usize, n: usize, word: W) {
+        fn put_word<Input: Int>(&mut self, i: usize, n: usize, word: Input) {
             <$X as BitsMut>::put_word(self$(.$method())?, i, n, word)
         }
     }

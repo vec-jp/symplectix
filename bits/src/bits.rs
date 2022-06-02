@@ -1,4 +1,4 @@
-use crate::{Block, Word};
+use crate::{Block, Int};
 
 pub trait Bits {
     /// Returns the number of binary digits.
@@ -41,7 +41,7 @@ pub trait Bits {
     /// assert_eq!(s.word::<u32>(188, 10), 0b1111);
     /// ```
     #[doc(hidden)]
-    fn word<T: Word>(&self, i: usize, n: usize) -> T {
+    fn word<T: Int>(&self, i: usize, n: usize) -> T {
         let mut w = T::NULL;
         for b in i..i + n {
             if self.bit(b).expect("index out of bounds") {
@@ -66,7 +66,7 @@ impl<T: Block> Bits for [T] {
 
     #[inline]
     #[doc(hidden)]
-    fn word<N: Word>(&self, i: usize, n: usize) -> N {
+    fn word<N: Int>(&self, i: usize, n: usize) -> N {
         let mut cur = 0;
         let mut out = N::NULL;
         crate::for_each_blocks::<T, _>(i, i + n, |k, r| {
@@ -112,7 +112,7 @@ macro_rules! impl_bits {
 
         #[doc(hidden)]
         #[inline]
-        fn word<W: Word>(&self, i: usize, n: usize) -> W {
+        fn word<Output: Int>(&self, i: usize, n: usize) -> Output {
             <$X as Bits>::word(self$(.$method())?, i, n)
         }
     }

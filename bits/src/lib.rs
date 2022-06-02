@@ -10,7 +10,7 @@ mod msb;
 pub mod word;
 pub use self::lsb::Lsb;
 pub use self::msb::Msb;
-pub use self::word::Word;
+pub use self::word::Int;
 
 pub mod bits;
 pub mod bits_mut;

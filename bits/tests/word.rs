@@ -1,6 +1,6 @@
 use core::{arch::x86_64, fmt::Debug};
 
-use bits::{Lsb, Word};
+use bits::{Int, Lsb};
 
 trait Pdep {
     fn pdep(self, mask: Self) -> Self;
@@ -30,7 +30,7 @@ impl Pdep for u64 {
     }
 }
 
-fn _pdep<T: Word + Lsb>(data: T, mut mask: T) -> T {
+fn _pdep<T: Int + Lsb>(data: T, mut mask: T) -> T {
     let mut dest = T::NULL;
     for i in 0..<T as bits::Block>::BITS {
         if !mask.any() {
@@ -46,7 +46,7 @@ fn _pdep<T: Word + Lsb>(data: T, mut mask: T) -> T {
 
 fn pdep_test<T>(s: T, m: T, o: T)
 where
-    T: Word + Lsb + Pdep + Debug,
+    T: Int + Lsb + Pdep + Debug,
 {
     assert_eq!(s.pdep(m), o);
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]

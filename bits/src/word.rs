@@ -15,7 +15,7 @@ mod private {
 }
 
 #[inline]
-fn mask<T: Word>(i: usize, j: usize) -> T {
+fn mask<T: Int>(i: usize, j: usize) -> T {
     // TODO: assert!(i <= j);
     // if i == j {
     if i >= j {
@@ -25,8 +25,8 @@ fn mask<T: Word>(i: usize, j: usize) -> T {
     }
 }
 
-/// `Word` is a fixed-length group of bits that the CPU can process.
-pub trait Word:
+/// `Int` is a fixed-length group of bits that the CPU can process.
+pub trait Int:
     num::Int
     + num::Arith
     + num::ArithAssign
@@ -49,7 +49,7 @@ pub trait Word:
 
 macro_rules! impl_word {
     ($( ($Word:ty, $zero:expr, $full:expr), )*) => ($(
-        impl Word for $Word {
+        impl Int for $Word {
             #[doc(hidden)]
             const NULL: Self = $zero;
 
@@ -106,7 +106,7 @@ macro_rules! impls {
 
             #[doc(hidden)]
             #[inline]
-            fn word<N: Word>(&self, i: usize, n: usize) -> N {
+            fn word<N: Int>(&self, i: usize, n: usize) -> N {
                 num::cast((*self >> i) & mask::<Self>(0, n))
             }
         }
