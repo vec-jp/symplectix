@@ -1,5 +1,9 @@
 use crate::*;
-use core::{hash::Hash, ops, ops::RangeBounds};
+use core::{
+    hash::Hash,
+    ops,
+    ops::{Not, RangeBounds},
+};
 use num::{Arith, ArithAssign, Bitwise, BitwiseAssign, Int};
 
 mod private {
@@ -35,23 +39,7 @@ pub trait Word:
     + BitwiseAssign
     + Hash
     + Block
-    // + ops::BitAnd<Output = Self>
-    // + ops::BitOr<Output = Self>
-    // + ops::BitXor<Output = Self>
-    // + ops::Shl<usize, Output = Self>
-    // + ops::Shr<usize, Output = Self>
-    + ops::Not<Output = Self>
-    // + ops::BitAndAssign
-    // + ops::BitOrAssign
-    // + ops::BitXorAssign
-    // + ops::ShlAssign<usize>
-    // + ops::ShrAssign<usize>
-    // + TryFrom<u8>
-    // + TryFrom<u16>
-    // + TryFrom<u32>
-    // + TryFrom<u64>
-    // + TryFrom<u128>
-    // + TryFrom<usize>
+    + Not<Output = Self>
     + num::TryFromInt
     + private::Sealed
 {
