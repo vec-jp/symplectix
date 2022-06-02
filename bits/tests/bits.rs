@@ -4,7 +4,7 @@ extern crate quickcheck_macros;
 use std::borrow::Cow;
 use std::iter::successors;
 
-use bits::{Bits, Count, Lsb, Rank, Select};
+use bits::{Bits, Count, Lsb, Rank, Select, Varint};
 
 #[test]
 fn bits_is_implemented() {
@@ -26,6 +26,18 @@ fn bits_is_implemented() {
     _test::<&Box<[u8; 4]>>();
     _test::<Cow<[u8; 1000]>>();
     _test::<Cow<Box<[u8; 2000]>>>();
+}
+
+#[test]
+fn varint() {
+    let arr: &[u16] = &[0b_1101_0001_1010_0011, 0b_1001_1110_1110_1001];
+    let len = 4;
+    assert_eq!(arr.varint::<u8>(0, len), 0b0011);
+    assert_eq!(arr.varint::<u8>(4, len), 0b1010);
+    assert_eq!(arr.varint::<u8>(8, len), 0b0001);
+    assert_eq!(arr.varint::<u8>(12, len), 0b1101);
+    assert_eq!(arr.varint::<u8>(14, len), 0b0111);
+    assert_eq!(arr.varint::<u8>(30, len), 0b0010);
 }
 
 #[quickcheck]
@@ -85,7 +97,6 @@ where
 fn bit_rank() {
     rank_for_empty_range::<u8>(&!0);
     rank_for_empty_range::<[u8]>(&[!0, !0, !0, !0]);
-    rank_for_empty_range::<[bool]>(&[true, true, true, true, true, true, true, true]);
 
     rank_0_plus_rank_1::<u64>(&0b_1010_1010, 0..10);
     rank_0_plus_rank_1::<u64>(&0b_1010_1010, 7..20);

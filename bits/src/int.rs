@@ -15,7 +15,7 @@ mod private {
 }
 
 #[inline]
-fn mask<T: Int>(i: usize, j: usize) -> T {
+pub(crate) fn mask<T: Int>(i: usize, j: usize) -> T {
     // TODO: assert!(i <= j);
     // if i == j {
     if i >= j {
@@ -35,6 +35,8 @@ pub trait Int:
     + num::TryFromInt
     + Lsb
     + Msb
+    + Varint
+    + PutVarint
     + Block
     + private::Sealed
 {
@@ -45,6 +47,17 @@ pub trait Int:
     /// A full, all bits are enabled, `Word`.
     #[doc(hidden)]
     const FULL: Self;
+
+    #[inline]
+    fn mask(i: usize, j: usize) -> Self {
+        // TODO: assert!(i <= j);
+        // if i == j {
+        if i >= j {
+            Self::NULL
+        } else {
+            Self::FULL >> (Self::BITS - (j - i)) << i
+        }
+    }
 }
 
 macro_rules! impl_word {
@@ -102,12 +115,6 @@ macro_rules! impls {
             #[inline]
             fn bit(&self, i: usize) -> Option<bool> {
                 (i < self.bits()).then(|| (*self & (1 << i)) != 0)
-            }
-
-            #[doc(hidden)]
-            #[inline]
-            fn word<N: Int>(&self, i: usize, n: usize) -> N {
-                num::cast((*self >> i) & mask::<Self>(0, n))
             }
         }
 

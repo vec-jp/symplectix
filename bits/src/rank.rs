@@ -37,28 +37,6 @@ impl<T: Block> Rank for [T] {
     }
 }
 
-/// ```
-/// # use bits::Rank;
-/// assert_eq!(Rank::rank1(&true, ..1), 1);
-/// assert_eq!(Rank::rank0(&true, ..1), 0);
-///
-/// assert_eq!(Rank::rank1(&true, ..0), 0);
-/// assert_eq!(Rank::rank0(&true, ..0), 0);
-/// ```
-impl Rank for bool {
-    #[inline]
-    fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        let (s, e) = crate::to_range(&r, 0, 1);
-        debug_assert!(s == 0 && e <= 1);
-
-        if s < e {
-            self.count1()
-        } else {
-            0
-        }
-    }
-}
-
 macro_rules! impl_rank {
     ($X:ty $(, $method:ident )?) => {
         #[inline]

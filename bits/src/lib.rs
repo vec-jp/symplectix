@@ -5,12 +5,12 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+mod int;
 mod lsb;
 mod msb;
-pub mod word;
+pub use self::int::Int;
 pub use self::lsb::Lsb;
 pub use self::msb::Msb;
-pub use self::word::Int;
 
 pub mod bits;
 pub mod bits_mut;
@@ -19,6 +19,7 @@ pub mod count;
 pub mod excess;
 pub mod rank;
 pub mod select;
+pub mod varint;
 pub use self::bits::Bits;
 pub use self::bits_mut::BitsMut;
 pub use self::block::Block;
@@ -26,6 +27,7 @@ pub use self::count::Count;
 pub use self::excess::Excess;
 pub use self::rank::Rank;
 pub use self::select::Select;
+pub use self::varint::{PutVarint, Varint};
 
 pub mod and;
 pub mod not;

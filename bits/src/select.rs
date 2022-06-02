@@ -1,4 +1,4 @@
-use crate::{Block, Count, Rank};
+use crate::{Block, Rank};
 
 pub trait Select: Rank {
     /// Returns the position of the n-th 1, indexed starting from zero.
@@ -82,29 +82,6 @@ impl<T: Block> Select for [T] {
     }
 }
 
-/// ```
-/// # use bits::Select;
-/// assert_eq!(Select::select1(&true, 0), Some(0));
-/// assert_eq!(Select::select1(&true, 1), None);
-///
-/// assert_eq!(Select::select1(&false, 0), None);
-/// assert_eq!(Select::select1(&false, 1), None);
-///
-/// assert_eq!(Select::select0(&false, 0), Some(0));
-/// assert_eq!(Select::select0(&false, 1), None);
-/// ```
-impl Select for bool {
-    #[inline]
-    fn select1(&self, n: usize) -> Option<usize> {
-        (n < self.count1()).then(|| 0)
-    }
-
-    #[inline]
-    fn select0(&self, n: usize) -> Option<usize> {
-        (n < self.count0()).then(|| 0)
-    }
-}
-
 macro_rules! impl_select {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
@@ -137,15 +114,15 @@ mod impl_alloc {
     use alloc::boxed::Box;
     use alloc::vec::Vec;
 
-    impl<T: ?Sized + Select> Select for Box<T> {
-        impl_select!(T);
-    }
-
     impl<T> Select for Vec<T>
     where
         [T]: Select,
     {
         impl_select!([T]);
+    }
+
+    impl<T: ?Sized + Select> Select for Box<T> {
+        impl_select!(T);
     }
 
     impl<'a, T> Select for Cow<'a, T>

@@ -98,32 +98,6 @@ impl<T: Block> Count for [T] {
     }
 }
 
-/// ```
-/// assert_eq!(bits::Count::count1(&true),  1);
-/// assert_eq!(bits::Count::count1(&false), 0);
-/// assert_eq!(bits::Count::count0(&true),  0);
-/// assert_eq!(bits::Count::count0(&false), 1);
-/// ```
-impl Count for bool {
-    #[inline]
-    fn count1(&self) -> usize {
-        *self as usize
-    }
-    #[inline]
-    fn count0(&self) -> usize {
-        !self as usize
-    }
-
-    #[inline]
-    fn all(&self) -> bool {
-        *self
-    }
-    #[inline]
-    fn any(&self) -> bool {
-        *self
-    }
-}
-
 macro_rules! impl_count {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
