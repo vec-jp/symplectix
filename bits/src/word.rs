@@ -46,12 +46,13 @@ pub trait Word:
     // + ops::BitXorAssign
     // + ops::ShlAssign<usize>
     // + ops::ShrAssign<usize>
-    + TryFrom<u8>
-    + TryFrom<u16>
-    + TryFrom<u32>
-    + TryFrom<u64>
-    + TryFrom<u128>
-    + TryFrom<usize>
+    // + TryFrom<u8>
+    // + TryFrom<u16>
+    // + TryFrom<u32>
+    // + TryFrom<u64>
+    // + TryFrom<u128>
+    // + TryFrom<usize>
+    + num::TryFromInt
     + private::Sealed
 {
     /// literal 0
@@ -69,15 +70,6 @@ pub trait Word:
     /// A full, all bits are enabled, `Word`.
     #[doc(hidden)]
     const FULL: Self;
-
-    #[doc(hidden)]
-    #[inline]
-    fn cast<N>(self) -> N
-    where
-        N: Word + TryFrom<Self>,
-    {
-        N::try_from(self).ok().unwrap()
-    }
 
     /// Returns the number of leading ones in the binary representation of self.
     fn count_l1(self) -> usize;
@@ -151,7 +143,7 @@ macro_rules! impls {
             #[doc(hidden)]
             #[inline]
             fn word<N: Word>(&self, i: usize, n: usize) -> N {
-                ((*self >> i) & mask::<Self>(0, n)).cast()
+                num::cast((*self >> i) & mask::<Self>(0, n))
             }
         }
 
