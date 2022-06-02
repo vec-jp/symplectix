@@ -1,8 +1,5 @@
 use crate::*;
-use core::{
-    hash::Hash,
-    ops::{Not, RangeBounds},
-};
+use core::ops::RangeBounds;
 
 mod private {
     pub trait Sealed {}
@@ -36,9 +33,9 @@ pub trait Word:
     + num::Bitwise
     + num::BitwiseAssign
     + num::TryFromInt
-    + Hash
+    + Lsb
+    + Msb
     + Block
-    + Not<Output = Self>
     + private::Sealed
 {
     /// An empty, no bits are enabled, `Word`.
