@@ -67,7 +67,7 @@ impl<B: Block + PutVarint> PutVarint for [B] {
     #[doc(hidden)]
     fn put_varint<T: Int>(&mut self, i: usize, n: usize, int: T) {
         let mut cur = 0;
-        crate::for_each_blocks::<T, _>(i, i + n, |k, r| {
+        crate::for_each_blocks::<B, _>(i, i + n, |k, r| {
             if k < self.len() {
                 self[k].put_varint::<T>(r.start, r.len(), int.varint::<T>(cur, r.len()));
                 cur += r.len();
