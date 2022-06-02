@@ -76,7 +76,7 @@ pub trait Count: Bits {
     }
 }
 
-impl<T: Block> Count for [T] {
+impl<B: Block> Count for [B] {
     #[inline]
     fn count1(&self) -> usize {
         self.iter().map(Count::count1).sum()
@@ -139,11 +139,11 @@ mod impl_alloc {
     use alloc::boxed::Box;
     use alloc::vec::Vec;
 
-    impl<T> Count for Vec<T>
+    impl<B> Count for Vec<B>
     where
-        [T]: Count,
+        [B]: Count,
     {
-        impl_count!([T]);
+        impl_count!([B]);
     }
 
     impl<T: ?Sized + Count> Count for Box<T> {

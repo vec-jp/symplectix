@@ -75,11 +75,11 @@ mod impl_alloc {
     use alloc::boxed::Box;
     use alloc::vec::Vec;
 
-    impl<T> Bits for Vec<T>
+    impl<B> Bits for Vec<B>
     where
-        [T]: Bits,
+        [B]: Bits,
     {
-        impl_bits!([T]);
+        impl_bits!([B]);
     }
 
     impl<T: ?Sized + Bits> Bits for Box<T> {

@@ -42,7 +42,7 @@ mod index;
 
 use core::{
     cmp::Ordering,
-    ops::{Div, Range, RangeBounds, Rem},
+    ops::{Div, RangeBounds, Rem},
 };
 
 #[inline]
@@ -62,28 +62,6 @@ fn address<T: Block>(i: usize) -> (usize, usize) {
 fn to_range<R: RangeBounds<usize>>(r: &R, min: usize, max: usize) -> (usize, usize) {
     let r = index::to_range(r, min, max);
     (r.start, r.end)
-}
-
-fn for_each_blocks<T, F>(s: usize, e: usize, mut f: F)
-where
-    T: Block,
-    F: FnMut(usize, Range<usize>),
-{
-    assert!(s <= e);
-    if s == e {
-        return;
-    }
-
-    let (q0, r0) = crate::address::<T>(s);
-    let (q1, r1) = crate::address::<T>(e);
-
-    if q0 == q1 {
-        f(q0, r0..r1);
-    } else {
-        f(q0, r0..T::BITS);
-        (q0 + 1..q1).for_each(|k| f(k, 0..T::BITS));
-        f(q1, 0..r1)
-    }
 }
 
 fn compare_index<T, U>(

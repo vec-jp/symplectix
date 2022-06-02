@@ -56,13 +56,13 @@ mod helper {
     }
 }
 
-impl<T: Block> Select for [T] {
+impl<B: Block> Select for [B] {
     #[inline]
     fn select1(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {
             let count = b.count1();
             if n < count {
-                return Some(i * T::BITS + b.select1(n).expect("BUG"));
+                return Some(i * B::BITS + b.select1(n).expect("BUG"));
             }
             n -= count;
         }
@@ -74,7 +74,7 @@ impl<T: Block> Select for [T] {
         for (i, b) in self.iter().enumerate() {
             let count = b.count0();
             if n < count {
-                return Some(i * T::BITS + b.select0(n).expect("BUG"));
+                return Some(i * B::BITS + b.select0(n).expect("BUG"));
             }
             n -= count;
         }
@@ -100,11 +100,11 @@ impl<'a, T: ?Sized + Select> Select for &'a T {
     impl_select!(T);
 }
 
-impl<T, const N: usize> Select for [T; N]
+impl<B, const N: usize> Select for [B; N]
 where
-    [T]: Select,
+    [B]: Select,
 {
-    impl_select!([T], as_ref);
+    impl_select!([B], as_ref);
 }
 
 #[cfg(feature = "alloc")]
@@ -114,11 +114,11 @@ mod impl_alloc {
     use alloc::boxed::Box;
     use alloc::vec::Vec;
 
-    impl<T> Select for Vec<T>
+    impl<B> Select for Vec<B>
     where
-        [T]: Select,
+        [B]: Select,
     {
-        impl_select!([T]);
+        impl_select!([B]);
     }
 
     impl<T: ?Sized + Select> Select for Box<T> {

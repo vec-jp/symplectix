@@ -17,15 +17,15 @@ pub trait Rank: Count {
     }
 }
 
-impl<T: Block> Rank for [T] {
+impl<B: Block> Rank for [B] {
     #[inline]
     fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         if self.is_empty() {
             0
         } else {
             let (s, e) = crate::to_range(&r, 0, self.bits());
-            let (i, p) = crate::address::<T>(s);
-            let (j, q) = crate::address::<T>(e);
+            let (i, p) = crate::address::<B>(s);
+            let (j, q) = crate::address::<B>(e);
             if i == j {
                 self[i].rank1(p..q)
             } else {
@@ -55,11 +55,11 @@ impl<'a, T: ?Sized + Rank> Rank for &'a T {
     impl_rank!(T);
 }
 
-impl<T, const N: usize> Rank for [T; N]
+impl<B, const N: usize> Rank for [B; N]
 where
-    [T]: Rank,
+    [B]: Rank,
 {
-    impl_rank!([T], as_ref);
+    impl_rank!([B], as_ref);
 }
 
 #[cfg(feature = "alloc")]
@@ -69,11 +69,11 @@ mod impl_alloc {
     use alloc::boxed::Box;
     use alloc::vec::Vec;
 
-    impl<T> Rank for Vec<T>
+    impl<B> Rank for Vec<B>
     where
-        [T]: Rank,
+        [B]: Rank,
     {
-        impl_rank!([T]);
+        impl_rank!([B]);
     }
 
     impl<T: ?Sized + Rank> Rank for Box<T> {
