@@ -4,7 +4,7 @@ extern crate quickcheck_macros;
 use std::borrow::Cow;
 use std::iter::successors;
 
-use bits::{Bits, Count, Lsb, Rank, Select, Word};
+use bits::{Bits, Count, Lsb, Rank, Select};
 
 #[test]
 fn bits_is_implemented() {
@@ -40,7 +40,7 @@ fn next_set_bit(n: u32) -> bool {
         let m = n & !n.lsb();
         m.any().then(|| m)
     })
-    .map(Word::count_t0);
+    .map(|x| u32::trailing_zeros(x) as usize);
 
     for c in 0..n.count1() {
         assert_eq!(set_bit.next(), n.select1(c));

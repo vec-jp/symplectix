@@ -1,10 +1,8 @@
 use crate::*;
 use core::{
     hash::Hash,
-    ops,
     ops::{Not, RangeBounds},
 };
-use num::{Arith, ArithAssign, Bitwise, BitwiseAssign, Int};
 
 mod private {
     pub trait Sealed {}
@@ -32,25 +30,17 @@ fn mask<T: Word>(i: usize, j: usize) -> T {
 
 /// `Word` is a fixed-length group of bits that the CPU can process.
 pub trait Word:
-    Int
-    + Arith
-    + ArithAssign
-    + Bitwise
-    + BitwiseAssign
+    num::Int
+    + num::Arith
+    + num::ArithAssign
+    + num::Bitwise
+    + num::BitwiseAssign
+    + num::TryFromInt
     + Hash
     + Block
     + Not<Output = Self>
-    + num::TryFromInt
     + private::Sealed
 {
-    /// literal 0
-    // #[doc(hidden)]
-    // const _0: Self = <Self as Int>::ZERO;
-
-    // /// literal 1
-    // #[doc(hidden)]
-    // const _1: Self = <Self as Int>::ONE;
-
     /// An empty, no bits are enabled, `Word`.
     #[doc(hidden)]
     const NULL: Self;
@@ -58,55 +48,44 @@ pub trait Word:
     /// A full, all bits are enabled, `Word`.
     #[doc(hidden)]
     const FULL: Self;
-
-    /// Returns the number of leading ones in the binary representation of self.
-    fn count_l1(self) -> usize;
-
-    /// Returns the number of leading zeros in the binary representation of self.
-    fn count_l0(self) -> usize;
-
-    /// Returns the number of trailing ones in the binary representation of self.
-    fn count_t1(self) -> usize;
-
-    /// Returns the number of trailing zeros in the binary representation of self.
-    fn count_t0(self) -> usize;
 }
+
+macro_rules! impl_word {
+    ($( ($Word:ty, $zero:expr, $full:expr), )*) => ($(
+        impl Word for $Word {
+            #[doc(hidden)]
+            const NULL: Self = $zero;
+
+            #[doc(hidden)]
+            const FULL: Self = $full;
+        }
+    )*)
+}
+impl_word!(
+    (i8, 0, -1),
+    (i16, 0, -1),
+    (i32, 0, -1),
+    (i64, 0, -1),
+    (i128, 0, -1),
+    (isize, 0, -1),
+    (u8, 0, !0),
+    (u16, 0, !0),
+    (u32, 0, !0),
+    (u64, 0, !0),
+    (u128, 0, !0),
+    (usize, 0, !0),
+);
 
 macro_rules! impls {
     ($( $Word:ty )*) => ($(
-        impl Word for $Word {
-            #[doc(hidden)]
-            // const _0: Self = 0;
+        // impl Word for $Word {
+        //     #[doc(hidden)]
+        //     #[doc(hidden)]
+        //     const NULL: Self = 0;
 
-            // #[doc(hidden)]
-            // const _1: Self = 1;
-
-            #[doc(hidden)]
-            const NULL: Self = 0;
-
-            #[doc(hidden)]
-            const FULL: Self = !0;
-
-            #[inline]
-            fn count_l1(self) -> usize {
-                self.leading_ones() as usize
-            }
-
-            #[inline]
-            fn count_l0(self) -> usize {
-                self.leading_zeros() as usize
-            }
-
-            #[inline]
-            fn count_t1(self) -> usize {
-                self.trailing_ones() as usize
-            }
-
-            #[inline]
-            fn count_t0(self) -> usize {
-                self.trailing_zeros() as usize
-            }
-        }
+        //     #[doc(hidden)]
+        //     const FULL: Self = !0;
+        // }
 
         impl Block for $Word {
             const BITS: usize = <$Word>::BITS as usize;
@@ -195,6 +174,7 @@ macro_rules! impls {
     )*)
 }
 impls!(u8 u16 u32 u64 u128 usize);
+impls!(i8 i16 i32 i64 i128 isize);
 
 /// A helper trait to implement `Select` for u64.
 trait SelectWord {
@@ -318,3 +298,22 @@ impl SelectWord for usize {
         (self as u128).select_word(c)
     }
 }
+
+macro_rules! impl_select_word_as {
+    ( $( ($T1:ty, $T2:ty), )* ) => ($(
+        impl SelectWord for $T1 {
+            #[inline]
+            fn select_word(self, c: usize) -> Option<usize> {
+                (c < self.count1()).then(|| <$T2 as SelectWord>::select_word(self as $T2, c).unwrap())
+            }
+        }
+    )*)
+}
+impl_select_word_as!(
+    (i8, u8),
+    (i16, u16),
+    (i32, u32),
+    (i64, u64),
+    (i128, u128),
+    (isize, usize),
+);
