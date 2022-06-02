@@ -3,106 +3,22 @@ load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", 
 package(default_visibility = ["//visibility:private"])
 
 rust_library(
-    name = "num_int",
-    srcs = ["int.rs"],
+    name = "num",
+    srcs = glob(["*.rs"]),
     visibility = ["//visibility:public"],
 )
 
 rust_test(
-    name = "num_int_test",
-    crate = ":num_int",
+    name = "num_test",
+    crate = ":num",
 )
 
 rust_doc_test(
-    name = "num_int_doc_test",
-    crate = ":num_int",
+    name = "num_doc_test",
+    crate = ":num",
 )
 
 rust_doc(
-    name = "num_int_doc",
-    crate = ":num_int",
-)
-
-rust_library(
-    name = "num_arith",
-    srcs = ["arith.rs"],
-    visibility = ["//visibility:public"],
-)
-
-rust_test(
-    name = "num_arith_test",
-    crate = ":num_arith",
-)
-
-rust_doc_test(
-    name = "num_arith_doc_test",
-    crate = ":num_arith",
-)
-
-rust_doc(
-    name = "num_arith_doc",
-    crate = ":num_arith",
-)
-
-rust_library(
-    name = "num_bitwise",
-    srcs = ["bitwise.rs"],
-    visibility = ["//visibility:public"],
-)
-
-rust_test(
-    name = "num_bitwise_test",
-    crate = ":num_bitwise",
-)
-
-rust_doc_test(
-    name = "num_bitwise_doc_test",
-    crate = ":num_bitwise",
-)
-
-rust_doc(
-    name = "bitwise_doc",
-    crate = ":num_bitwise",
-)
-
-rust_library(
-    name = "num_bits",
-    srcs = ["bits.rs"],
-    visibility = ["//visibility:public"],
-)
-
-rust_test(
-    name = "num_bits_test",
-    crate = ":num_bits",
-)
-
-rust_doc_test(
-    name = "num_bits_doc_test",
-    crate = ":num_bits",
-)
-
-rust_doc(
-    name = "num_bits_doc",
-    crate = ":num_bits",
-)
-
-rust_library(
-    name = "indexutil",
-    srcs = ["indexutil.rs"],
-    visibility = ["//visibility:public"],
-)
-
-rust_test(
-    name = "indexutil_test",
-    crate = ":indexutil",
-)
-
-rust_doc_test(
-    name = "indexutil_doc_test",
-    crate = ":indexutil",
-)
-
-rust_doc(
-    name = "indexutil_doc",
-    crate = ":indexutil",
+    name = "num_doc",
+    crate = ":num",
 )

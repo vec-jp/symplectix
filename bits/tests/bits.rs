@@ -4,8 +4,7 @@ extern crate quickcheck_macros;
 use std::borrow::Cow;
 use std::iter::successors;
 
-use bits::{Bits, Count, Rank, Select, Word};
-use int::Lsb;
+use bits::{Bits, Count, Lsb, Rank, Select, Word};
 
 #[test]
 fn bits_is_implemented() {

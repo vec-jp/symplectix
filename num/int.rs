@@ -1,16 +1,4 @@
-#![no_std]
-
-// mod arith;
-// mod bitwise;
-// mod lsb_msb;
-
-// pub use arith::{Arith, ArithAssign};
-// pub use bitwise::{Bitwise, BitwiseAssign};
-// pub use lsb_msb::{Lsb, Msb};
-
 pub trait Int: Sized + Copy + Eq + Ord {
-    const BITS: u32;
-
     const ZERO: Self;
 
     const ONE: Self;
@@ -24,8 +12,6 @@ pub trait Int: Sized + Copy + Eq + Ord {
 macro_rules! impl_int {
     ($( $N:ty )*) => ($(
         impl Int for $N {
-            const BITS: u32 = <$N>::BITS;
-
             const ZERO: Self = 0;
 
             const ONE: Self = 1;

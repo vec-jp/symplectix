@@ -10,8 +10,7 @@ rust_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//num:indexutil",
-        "//num/int",
+        "//num",
     ],
 )
 
@@ -21,8 +20,7 @@ rust_library(
     crate_name = "bits",
     visibility = ["//visibility:public"],
     deps = [
-        "//num:indexutil",
-        "//num/int",
+        "//num",
     ],
 )
 
@@ -34,7 +32,7 @@ rust_test_suite(
     ],
     deps = [
         ":bits",
-        "//num/int",
+        "//num",
         "@crates//:quickcheck",
     ],
 )

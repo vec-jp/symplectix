@@ -1,7 +1,6 @@
 use core::{arch::x86_64, fmt::Debug};
 
-use bits::Word;
-use int::Lsb;
+use bits::{Lsb, Word};
 
 trait Pdep {
     fn pdep(self, mask: Self) -> Self;

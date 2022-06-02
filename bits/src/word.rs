@@ -1,6 +1,6 @@
 use crate::*;
 use core::{hash::Hash, ops, ops::RangeBounds};
-use int::{Arith, ArithAssign, Bitwise, BitwiseAssign, Int};
+use num::{Arith, ArithAssign, Bitwise, BitwiseAssign, Int};
 
 mod private {
     pub trait Sealed {}

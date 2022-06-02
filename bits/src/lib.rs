@@ -5,19 +5,20 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-pub mod and;
+mod lsb;
+mod msb;
+pub mod word;
+pub use self::lsb::Lsb;
+pub use self::msb::Msb;
+pub use self::word::Word;
+
 pub mod bits;
 pub mod bits_mut;
 pub mod block;
 pub mod count;
 pub mod excess;
-pub mod not;
-pub mod or;
 pub mod rank;
 pub mod select;
-pub mod word;
-pub mod xor;
-
 pub use self::bits::Bits;
 pub use self::bits_mut::BitsMut;
 pub use self::block::Block;
@@ -25,8 +26,17 @@ pub use self::count::Count;
 pub use self::excess::Excess;
 pub use self::rank::Rank;
 pub use self::select::Select;
-pub use self::word::Word;
-pub use self::{and::And, not::Not, or::Or, xor::Xor};
+
+pub mod and;
+pub mod not;
+pub mod or;
+pub mod xor;
+pub use self::and::And;
+pub use self::not::Not;
+pub use self::or::Or;
+pub use self::xor::Xor;
+
+mod index;
 
 use core::{
     cmp::Ordering,
@@ -48,7 +58,7 @@ fn address<T: Block>(i: usize) -> (usize, usize) {
 
 #[inline]
 fn to_range<R: RangeBounds<usize>>(r: &R, min: usize, max: usize) -> (usize, usize) {
-    let r = indexutil::to_range(r, min, max);
+    let r = index::to_range(r, min, max);
     (r.start, r.end)
 }
 
