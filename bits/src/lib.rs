@@ -44,17 +44,7 @@ use core::cmp::Ordering;
 
 #[inline]
 fn address<T: Block>(i: usize) -> (usize, usize) {
-    use core::ops::{Div, Rem};
-
-    fn divrem<T, U>(t: T, u: U) -> (<T as Div<U>>::Output, <T as Rem<U>>::Output)
-    where
-        T: Copy + Div<U> + Rem<U>,
-        U: Copy,
-    {
-        (t / u, t % u)
-    }
-
-    divrem(i, T::BITS)
+    num::divrem(i, T::BITS)
 }
 
 fn compare_index<T, U>(
