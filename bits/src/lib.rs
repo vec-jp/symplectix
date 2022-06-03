@@ -40,13 +40,12 @@ pub use self::xor::Xor;
 
 mod index;
 
-use core::{
-    cmp::Ordering,
-    ops::{Div, RangeBounds, Rem},
-};
+use core::cmp::Ordering;
 
 #[inline]
 fn address<T: Block>(i: usize) -> (usize, usize) {
+    use core::ops::{Div, Rem};
+
     fn divrem<T, U>(t: T, u: U) -> (<T as Div<U>>::Output, <T as Rem<U>>::Output)
     where
         T: Copy + Div<U> + Rem<U>,
@@ -56,12 +55,6 @@ fn address<T: Block>(i: usize) -> (usize, usize) {
     }
 
     divrem(i, T::BITS)
-}
-
-#[inline]
-fn to_range<R: RangeBounds<usize>>(r: &R, min: usize, max: usize) -> (usize, usize) {
-    let r = index::to_range(r, min, max);
-    (r.start, r.end)
 }
 
 fn compare_index<T, U>(

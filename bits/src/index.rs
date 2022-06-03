@@ -1,4 +1,42 @@
+use crate::Block;
+use core::cmp::Ordering;
+use core::marker;
 use core::ops::{Bound, Range, RangeBounds};
+
+pub(crate) fn between<B: Block>(s: usize, e: usize) -> impl Iterator<Item = (usize, Range<usize>)> {
+    struct Between<B> {
+        pos: (usize, usize),
+        end: (usize, usize),
+        _block: marker::PhantomData<B>,
+    }
+
+    impl<B: Block> Iterator for Between<B> {
+        type Item = (usize, Range<usize>);
+
+        fn next(&mut self) -> Option<Self::Item> {
+            let (i, p) = self.pos; // p is 0 except the first item
+            let (j, q) = self.end; // q is B::BITS except the last item
+
+            match i.cmp(&j) {
+                Ordering::Less => {
+                    self.pos = (i + 1, 0);
+                    Some((i, p..B::BITS))
+                }
+                Ordering::Equal => {
+                    self.pos = (i + 1, 0);
+                    Some((i, p..q))
+                }
+                Ordering::Greater => None,
+            }
+        }
+    }
+
+    Between {
+        pos: crate::address::<B>(s),
+        end: crate::address::<B>(e),
+        _block: marker::PhantomData::<B>,
+    }
+}
 
 /// A utility to clamp the given range into a valid one.
 /// Panics if debug is enabled and `min <= i && i <= j && j <= max`.
@@ -8,7 +46,7 @@ where
 {
     let i = min_index_inclusive(r.start_bound(), min);
     let j = max_index_exclusive(r.end_bound(), max);
-    debug_assert!(min <= i && i <= j && j <= max);
+    assert!(min <= i && i <= j && j <= max);
     i..j
 }
 
