@@ -3,6 +3,11 @@ use core::cmp::Ordering;
 use core::marker;
 use core::ops::{Bound, Range, RangeBounds};
 
+#[inline]
+pub(crate) fn address<T: Block>(i: usize) -> (usize, usize) {
+    num::divrem(i, T::BITS)
+}
+
 pub(crate) fn between<B: Block>(s: usize, e: usize) -> impl Iterator<Item = (usize, Range<usize>)> {
     struct Between<B> {
         pos: (usize, usize),
@@ -31,11 +36,7 @@ pub(crate) fn between<B: Block>(s: usize, e: usize) -> impl Iterator<Item = (usi
         }
     }
 
-    Between {
-        pos: crate::address::<B>(s),
-        end: crate::address::<B>(e),
-        _block: marker::PhantomData::<B>,
-    }
+    Between { pos: address::<B>(s), end: address::<B>(e), _block: marker::PhantomData::<B> }
 }
 
 /// A utility to clamp the given range into a valid one.

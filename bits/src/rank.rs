@@ -32,8 +32,8 @@ impl<B: Block> Rank for [B] {
         // if self.is_empty() {
         //     return 0;
         // }
-        // let (i, p) = crate::address::<B>(s);
-        // let (j, q) = crate::address::<B>(e);
+        // let (i, p) = index::address::<B>(s);
+        // let (j, q) = index::address::<B>(e);
         // if i == j {
         //     self[i].rank1(p..q)
         // } else {

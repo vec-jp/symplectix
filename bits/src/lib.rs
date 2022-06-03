@@ -42,11 +42,6 @@ mod index;
 
 use core::cmp::Ordering;
 
-#[inline]
-fn address<T: Block>(i: usize) -> (usize, usize) {
-    num::divrem(i, T::BITS)
-}
-
 fn compare_index<T, U>(
     x: Option<&(usize, T)>,
     y: Option<&(usize, U)>,
