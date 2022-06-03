@@ -40,21 +40,6 @@ pub use self::xor::Xor;
 
 mod index;
 
-use core::cmp::Ordering;
-
-fn compare_index<T, U>(
-    x: Option<&(usize, T)>,
-    y: Option<&(usize, U)>,
-    when_x_is_none: Ordering,
-    when_y_is_none: Ordering,
-) -> Ordering {
-    match (x, y) {
-        (None, _) => when_x_is_none,
-        (_, None) => when_y_is_none,
-        (Some((i, _)), Some((j, _))) => i.cmp(j),
-    }
-}
-
 // /// `Fold` is an iterator built from `Mask`s.
 // pub struct Fold<'a, B>(Box<dyn Iterator<Item = (usize, B)> + 'a>);
 
