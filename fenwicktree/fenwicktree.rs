@@ -6,8 +6,12 @@ use std::ops::{AddAssign, SubAssign};
 
 pub use iter::{children, prefix, search, update};
 
+pub trait Node: Sized + Copy {}
+
+impl<T> Node for T where T: Sized + Copy {}
+
 /// Build a fenwick tree.
-pub fn build<T: Int + AddAssign>(bit: &mut [T]) {
+pub fn build<T: Node + AddAssign>(bit: &mut [T]) {
     assert!(!bit.is_empty());
 
     for i in 1..bit.len() {
@@ -18,7 +22,7 @@ pub fn build<T: Int + AddAssign>(bit: &mut [T]) {
     }
 }
 
-pub fn unbuild<T: Int + SubAssign>(bit: &mut [T]) {
+pub fn unbuild<T: Node + SubAssign>(bit: &mut [T]) {
     assert!(!bit.is_empty());
 
     for i in (1..bit.len()).rev() {
@@ -29,7 +33,7 @@ pub fn unbuild<T: Int + SubAssign>(bit: &mut [T]) {
     }
 }
 
-pub fn push<T: Int + AddAssign>(bit: &mut Vec<T>, mut x: T) {
+pub fn push<T: Node + AddAssign>(bit: &mut Vec<T>, mut x: T) {
     assert!(!bit.is_empty());
 
     // `bit.nodes()+1` points to the index to which `x` belongs when pushed
@@ -39,7 +43,7 @@ pub fn push<T: Int + AddAssign>(bit: &mut Vec<T>, mut x: T) {
     bit.push(x);
 }
 
-pub fn pop<T: Int + SubAssign>(bit: &mut Vec<T>) -> Option<T> {
+pub fn pop<T: Node + SubAssign>(bit: &mut Vec<T>) -> Option<T> {
     // tree[0] is dummy value, popping it doesn't make sense.
     (bit.len() > 1).then(|| {
         let mut x = bit.pop().expect("len > 1");
@@ -202,7 +206,7 @@ impl<T> Nodes for [T] {
     }
 }
 
-impl<'a, T: Int> Prefix for &'a [T] {
+impl<'a, T: Node> Prefix for &'a [T] {
     type Item = T;
     type Iter = iter::Prefix<&'a [T]>;
 
@@ -212,7 +216,7 @@ impl<'a, T: Int> Prefix for &'a [T] {
     }
 }
 
-impl<'a, T: Int> Iterator for iter::Prefix<&'a [T]> {
+impl<'a, T: Node> Iterator for iter::Prefix<&'a [T]> {
     type Item = T;
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -222,7 +226,7 @@ impl<'a, T: Int> Iterator for iter::Prefix<&'a [T]> {
 
 impl<T, U> LowerBound<U> for [T]
 where
-    T: Int + PartialOrd<U>,
+    T: Node + PartialOrd<U>,
     U: Int + SubAssign<T>,
 {
     fn lower_bound(&self, mut w: U) -> usize {
@@ -248,7 +252,7 @@ where
 
 impl<T, U> Incr<U> for [T]
 where
-    T: Int + AddAssign<U>,
+    T: Node + AddAssign<U>,
     U: Copy,
 {
     #[inline]
@@ -259,7 +263,7 @@ where
 
 impl<T, U> Decr<U> for [T]
 where
-    T: Int + SubAssign<U>,
+    T: Node + SubAssign<U>,
     U: Copy,
 {
     #[inline]
@@ -281,7 +285,7 @@ pub fn complement<T, U>(inner: &T, max_bound: U) -> Complement<'_, T, U> {
 
 impl<'a, T> Nodes for Complement<'a, [T]>
 where
-    T: Copy + Into<u64>,
+    T: Node + Into<u64>,
 {
     #[inline]
     fn nodes(&self) -> usize {
@@ -312,7 +316,7 @@ where
 
 impl<'a, T> LowerBound<u64> for Complement<'a, [T]>
 where
-    T: Copy + Into<u64>,
+    T: Node + Into<u64>,
 {
     fn lower_bound(&self, mut w: u64) -> usize {
         let bit = self.inner;

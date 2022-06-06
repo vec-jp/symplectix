@@ -5,7 +5,7 @@ use std::ops::{Add, AddAssign, Sub, SubAssign};
 /// Interleaves L1[i] and L2[i] into a 64bit unsigned integer.
 #[derive(Copy, Clone, Default, PartialEq, Eq)]
 // #[allow(non_camel_case_types)]
-pub(crate) struct L1L2(u64);
+pub(crate) struct L1L2(pub(crate) u64);
 
 // impl Default for L1L2 {
 //     #[inline]
@@ -113,11 +113,11 @@ impl Sub<u64> for L1L2 {
 impl L1L2 {
     pub(crate) const LEN: usize = 4;
 
-    const L1: u64 = 0b_1111_1111_1111_1111_1111_1111_1111_1111; // lowest 32 bits
-    const L2: u64 = 0b_0000_0000_0000_0000_0000_0011_1111_1111;
-    const L2_0_SHIFT: u64 = 32;
-    const L2_1_SHIFT: u64 = 42;
-    const L2_2_SHIFT: u64 = 52;
+    pub(crate) const L1: u64 = 0b_1111_1111_1111_1111_1111_1111_1111_1111; // lowest 32 bits
+    pub(crate) const L2: u64 = 0b_0000_0000_0000_0000_0000_0011_1111_1111;
+    pub(crate) const L2_0_SHIFT: u64 = 32;
+    pub(crate) const L2_1_SHIFT: u64 = 42;
+    pub(crate) const L2_2_SHIFT: u64 = 52;
 
     #[inline]
     pub(crate) const fn merge(mut arr: [u64; Self::LEN]) -> Self {

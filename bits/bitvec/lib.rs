@@ -5,8 +5,8 @@ mod l1l2;
 mod rank_aux;
 
 use l1l2::L1L2;
+use rank_aux::{Buckets, Uninit};
 use rank_aux::{Pop as L1L2Sum, Rho as L1L2Bit};
-use rank_aux::{RankAux, Uninit};
 
 /// Calculates the minimum number of blocks to store `n` bits.
 const fn blocks(n: usize, b: usize) -> usize {
@@ -58,7 +58,7 @@ pub struct Rho<T>(Imp<T, L1L2Bit>);
 // TODO: implement Debug for Imp, and remove Debug from Buckets
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Imp<T, S> {
-    buckets: RankAux<S>,
+    buckets: Buckets<S>,
     samples: Option<Vec<Vec<u32>>>,
     bit_vec: T,
 }
@@ -76,26 +76,7 @@ struct Imp<T, S> {
 //     }
 // }
 
-// // impl scheme::FenwickSum {
-// //     #[inline]
-// //     fn new(n: usize) -> Buckets<scheme::Uninit> {
-// //         Buckets::new(n)
-// //     }
-// // }
-// // impl scheme::Accumulate {
-// //     #[inline]
-// //     fn new(n: usize) -> Buckets<scheme::Accumulate> {
-// //         Buckets::new(n)
-// //     }
-// // }
-// // impl scheme::Uninit {
-// //     #[inline]
-// //     fn new(n: usize) -> Buckets<scheme::Uninit> {
-// //         Buckets::new(n)
-// //     }
-// // }
-
-// fn build<'a, T, I>(size: usize, super_blocks: I) -> (Buckets<scheme::Uninit>, Vec<Vec<u32>>)
+// fn build<'a, T, I>(size: usize, super_blocks: I) -> (Buckets<Uninit>, Vec<Vec<u32>>)
 // where
 //     T: Word,
 //     I: IntoIterator<Item = Option<&'a [T]>>,
