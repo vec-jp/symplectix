@@ -104,6 +104,12 @@ fn bit_rank() {
 }
 
 #[quickcheck]
+fn repr_bits(vec: Vec<u32>) -> bool {
+    let rho = bitvec::Rho::from(&vec[..]);
+    vec.bits() == rho.bits()
+}
+
+#[quickcheck]
 fn repr_rank(vec: Vec<u32>) -> bool {
     let rho = bitvec::Rho::from(&vec[..]);
     vec.count1() == rho.count1() && vec.count0() == rho.count0()
