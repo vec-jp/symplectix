@@ -15,7 +15,6 @@ const UPPER: usize = 1 << 32;
 const SUPER: usize = 1 << 11;
 const BASIC: usize = 1 << 9;
 const MAXL1: usize = UPPER / SUPER; // 2097152
-
 const SAMPLE: usize = 1 << 13;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -54,6 +53,70 @@ impl Layout for Uninit {}
 //         f.debug_tuple("Buckets").field(&self.hi).finish()
 //     }
 // }
+
+pub(crate) fn build<'a, T, I>(size: usize, super_blocks: I) -> (Buckets<Uninit>, Vec<Vec<u32>>)
+where
+    T: bits::Int + 'a,
+    I: IntoIterator<Item = Option<&'a [T]>>,
+{
+    use bits::{Count, Select};
+    use fenwicktree::Nodes;
+
+    let mut buckets = Buckets::new(size);
+    let mut samples = vec![Vec::new(); buckets.hi.nodes()];
+    let mut ones = 0i64;
+
+    fn bbs<W: bits::Int>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
+        let mut bbs = [0; L1L2::LEN];
+        if let Some(sb) = sb.as_ref() {
+            for (i, bb) in sb.chunks(BASIC / W::BITS).enumerate() {
+                bbs[i] = bb.count1() as u64;
+            }
+        }
+        bbs
+    }
+
+    for (i, sb) in super_blocks.into_iter().enumerate() {
+        let bbs = bbs(sb);
+        let sum = bbs.iter().sum::<u64>();
+
+        let (q, r) = num::divrem(i, MAXL1);
+
+        {
+            // +1 to skip dummy index
+            buckets.hi[q + 1] += sum;
+            buckets.lo_mut(q)[r + 1] = L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
+        }
+
+        {
+            // diff between `ones` and `SAMPLE_BITS * k`
+            let rem = (-ones).rem_euclid(SAMPLE as i64);
+
+            if (rem as u64) < sum {
+                let offset = i * SUPER - q * UPPER;
+                let select = sb.unwrap().select1(rem as usize).unwrap();
+                samples[q].push(num::cast(offset + select));
+            }
+
+            if r == MAXL1 - 1 {
+                ones = 0;
+            } else {
+                ones += sum as i64;
+            }
+        }
+    }
+
+    // fenwick1::init(&mut fws.hi);
+    // for q in 0..fws.hi.size() {
+    //     fenwick1::init(fws.lo_mut(q));
+    // }
+
+    (buckets, samples)
+}
+
+pub(crate) fn sbs_from_words<T: bits::Int>(slice: &[T]) -> impl Iterator<Item = Option<&[T]>> {
+    slice.chunks(SUPER / T::BITS).map(Some)
+}
 
 impl From<Buckets<Uninit>> for Buckets<Rho> {
     fn from(mut uninit: Buckets<Uninit>) -> Buckets<Rho> {

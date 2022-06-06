@@ -77,69 +77,6 @@ struct Imp<T, S> {
 //     }
 // }
 
-// fn build<'a, T, I>(size: usize, super_blocks: I) -> (Buckets<Uninit>, Vec<Vec<u32>>)
-// where
-//     T: Word,
-//     I: IntoIterator<Item = Option<&'a [T]>>,
-// {
-//     use crate::fenwick1::Query;
-
-//     let mut buckets = Buckets::new(size);
-//     let mut samples = vec![Vec::new(); buckets.hi.size()];
-//     let mut ones = 0i64;
-
-//     fn bbs<W: Word>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
-//         let mut bbs = [0; L1L2::LEN];
-//         if let Some(sb) = sb.as_ref() {
-//             for (i, bb) in sb.chunks(BASIC / W::BITS).enumerate() {
-//                 bbs[i] = bb.count1() as u64;
-//             }
-//         }
-//         bbs
-//     }
-
-//     for (i, sb) in super_blocks.into_iter().enumerate() {
-//         let bbs = bbs(sb);
-//         let sum = bbs.iter().sum::<u64>();
-
-//         let (q, r) = divrem!(i, MAXL1);
-
-//         {
-//             // +1 to skip dummy index
-//             buckets.hi[q + 1] += sum;
-//             buckets.lo_mut(q)[r + 1] = L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
-//         }
-
-//         {
-//             // diff between `ones` and `SAMPLE_BITS * k`
-//             let rem = (-ones).rem_euclid(SAMPLE as i64);
-
-//             if (rem as u64) < sum {
-//                 let offset = i * SUPER - q * UPPER;
-//                 let select = sb.unwrap().select1(rem as usize).unwrap();
-//                 samples[q].push((offset + select).cast());
-//             }
-
-//             if r == MAXL1 - 1 {
-//                 ones = 0;
-//             } else {
-//                 ones += sum as i64;
-//             }
-//         }
-//     }
-
-//     // fenwick1::init(&mut fws.hi);
-//     // for q in 0..fws.hi.size() {
-//     //     fenwick1::init(fws.lo_mut(q));
-//     // }
-
-//     (buckets, samples)
-// }
-
-// fn sbs_from_words<T: Word>(slice: &[T]) -> impl Iterator<Item = Option<&[T]>> {
-//     slice.chunks(SUPER / T::BITS).map(Some)
-// }
-
 // fn sbs_from_heaps<T: WordArray>(slice: &[Block<T>]) -> impl Iterator<Item = Option<&[T::Elem]>> {
 //     assert!(Block::<T>::BITS % SUPER == 0 && SUPER <= 65536);
 //     type BoxIter<'a, A> = Box<dyn Iterator<Item = Option<A>> + 'a>;
@@ -169,12 +106,12 @@ impl<T: bits::Block> Rho<Vec<T>> {
 //     }
 // }
 
-// impl<'a, T: Word> From<&'a [T]> for Rho<&'a [T]> {
-//     fn from(dat: &'a [T]) -> Self {
-//         let (buckets, _) = build(Seq::len(dat), sbs_from_words(dat));
-//         Rho(Imp { buckets: buckets.into(), samples: None, bit_vec: dat })
-//     }
-// }
+impl<'a, T: bits::Int> From<&'a [T]> for Rho<&'a [T]> {
+    fn from(dat: &'a [T]) -> Self {
+        let (buckets, _) = rank_aux::build(dat.bits(), rank_aux::sbs_from_words(dat));
+        Rho(Imp { buckets: buckets.into(), samples: None, bit_vec: dat })
+    }
+}
 
 // impl<'a, T: WordArray> From<&'a [Block<T>]> for Rho<&'a [Block<T>]> {
 //     fn from(dat: &'a [Block<T>]) -> Self {
@@ -197,12 +134,17 @@ impl<T: bits::Block> Rho<Vec<T>> {
 //     }
 // }
 
-// impl<T: Seq<bool>> Seq<bool> for Rho<T> {
-//     #[inline]
-//     fn len(this: &Self) -> usize {
-//         Seq::len(&this.0.bit_vec)
-//     }
-// }
+impl<T: bits::Bits> bits::Bits for Rho<T> {
+    #[inline]
+    fn bits(&self) -> usize {
+        self.0.bit_vec.bits()
+    }
+
+    #[inline]
+    fn bit(&self, i: usize) -> Option<bool> {
+        self.0.bit_vec.bit(i)
+    }
+}
 
 // impl<T: Bits> Bits for Rho<T> {
 //     #[inline]
