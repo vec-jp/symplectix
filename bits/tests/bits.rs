@@ -102,3 +102,9 @@ fn bit_rank() {
     rank_0_plus_rank_1::<[u8]>(&[!0, 0b_1010_1010, !0, 0b_1010_1010], 0..10);
     rank_0_plus_rank_1::<[u8]>(&[!0, 0b_1010_1010, !0, 0b_1010_1010], 7..20);
 }
+
+#[quickcheck]
+fn repr_rank(vec: Vec<u32>) -> bool {
+    let rho = bitvec::Rho::from(&vec[..]);
+    vec.count1() == rho.count1() && vec.count0() == rho.count0()
+}

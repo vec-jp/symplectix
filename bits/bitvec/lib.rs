@@ -146,24 +146,25 @@ impl<T: bits::Bits> bits::Bits for Rho<T> {
     }
 }
 
+impl<T: bits::Count> bits::Count for Rho<T> {
+    #[inline]
+    fn count1(&self) -> usize {
+        use fenwicktree::{Nodes, Prefix};
+        let bit = &self.0.buckets.hi;
+        num::cast(bit.prefix(bit.nodes()).sum::<u64>())
+        // fenwicktree::sum(&self.0.buckets.hi).cast()
+        // cast(self.buckets.hi.sum(self.buckets.hi.size()))
+        // let top0 = self.samples.top[0];
+        // #[cfg(test)]
+        // assert_eq!(top0 as usize, self.buf.count1());
+        // cast(top0)
+    }
+}
+
 // impl<T: Bits> Bits for Rho<T> {
-//     #[inline]
-//     fn bit(&self, i: usize) -> bool {
-//         self.0.bit_vec.bit(i)
-//     }
 //     #[inline]
 //     fn word<N: Word>(&self, i: usize, n: usize) -> N {
 //         self.0.bit_vec.word(i, n)
-//     }
-
-//     #[inline]
-//     fn count1(&self) -> usize {
-//         fenwick1::sum(&self.0.buckets.hi).cast()
-//         // cast(self.buckets.hi.sum(self.buckets.hi.size()))
-//         // let top0 = self.samples.top[0];
-//         // #[cfg(test)]
-//         // assert_eq!(top0 as usize, self.buf.count1());
-//         // cast(top0)
 //     }
 
 //     fn rank1<Idx: SeqIndex>(&self, index: Idx) -> usize {

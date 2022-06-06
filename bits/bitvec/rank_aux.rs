@@ -19,8 +19,8 @@ const SAMPLE: usize = 1 << 13;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct Buckets<T> {
-    hi: Vec<u64>,
-    lo: Vec<L1L2>,
+    pub(crate) hi: Vec<u64>,
+    pub(crate) lo: Vec<L1L2>,
     _marker: PhantomData<T>,
 }
 
