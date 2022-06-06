@@ -438,127 +438,129 @@ impl<T: bits::Rank> bits::Rank for Rho<T> {
 //     fn word<N: Word>(&self, i: usize, n: usize) -> N {
 //         self.0.bit_vec.word(i, n)
 //     }
-
-//     fn select1(&self, n: usize) -> Option<usize> {
-//         let Rho(imp) = self;
-//         let mut r = n.cast::<u64>();
-
-//         let (s, e) = {
-//             let p0 = find_l0(&imp.buckets.hi, &mut r)?;
-//             let lo = imp.buckets.lo(p0);
-//             let p1 = find_l1(lo, &mut r);
-//             let ll = lo[p1 + 1];
-//             let l2 = [ll.l2_0(), ll.l2_1(), ll.l2_2()];
-//             let p2 = find_l2(&l2, &mut r);
-
-//             let s = p0 * UPPER + p1 * SUPER + p2 * BASIC;
-//             (s, cmp::min(s + BASIC, Seq::len(self)))
-//         };
-
-//         let mut r = r as usize;
-//         #[cfg(test)]
-//         {
-//             assert!(n - r == self.rank1(..s));
-//             assert!(r < self.rank1(s..e));
-//         }
-
-//         // i + imp.bit_vec[x..y].select1(r).unwrap()
-
-//         const BITS: usize = <u128 as Container>::BITS;
-//         for i in (s..e).step_by(BITS) {
-//             let b = imp.bit_vec.word::<u128>(i, BITS);
-//             let c = b.count1();
-//             if r < c {
-//                 // #[cfg(test)]
-//                 // {
-//                 //     dbg!(l0, l1, l2);
-//                 //     dbg!(lo[l1 + 1]);
-//                 //     dbg!(s, e);
-//                 // }
-//                 return Some(i + b.select1(r).unwrap());
-//             }
-//             r -= c;
-//         }
-//         unreachable!()
-//     }
-
-//     fn select0(&self, n: usize) -> Option<usize> {
-//         let Rho(imp) = self;
-//         let mut r = n.cast::<u64>();
-
-//         let (s, e) = {
-//             const UB: u64 = UPPER as u64;
-//             const SB: u64 = SUPER as u64;
-//             const BB: u64 = BASIC as u64;
-//             let p0 = find_l0(&imp.buckets.hi.complemented(UB), &mut r)?;
-//             let lo = imp.buckets.lo(p0);
-//             let p1 = find_l1(&lo.complemented(SB), &mut r);
-//             let ll = lo[p1 + 1];
-//             let l2 = [BB - ll.l2_0(), BB - ll.l2_1(), BB - ll.l2_2()];
-//             let p2 = find_l2(&l2, &mut r);
-
-//             let s = p0 * UPPER + p1 * SUPER + p2 * BASIC;
-//             (s, cmp::min(s + BASIC, Seq::len(self)))
-//         };
-
-//         let mut r = r as usize;
-//         #[cfg(test)]
-//         {
-//             assert!(n - r == self.rank0(..s));
-//             assert!(r < self.rank0(s..e));
-//         }
-
-//         const BITS: usize = <u128 as Container>::BITS;
-//         for i in (s..e).step_by(BITS) {
-//             let b = imp.bit_vec.word::<u128>(i, BITS);
-//             let c = b.count0();
-//             if r < c {
-//                 return Some(i + b.select0(r).unwrap());
-//             }
-//             r -= c;
-//         }
-//         unreachable!()
-//     }
 // }
 
-// fn find_l0<L0>(l0: &L0, r: &mut u64) -> Option<usize>
-// where
-//     L0: ?Sized + fenwick1::Query,
-// {
-//     // r: +1 because `select1(n)` returns the position of the n-th one, indexed starting from zero.
-//     // i: -1 is safe because lower_bound(x) returns 0 iif x is 0
-//     let p0 = l0.lower_bound(None, *r + 1) - 1;
-//     if p0 >= l0.size() {
-//         None
-//     } else {
-//         *r -= l0.sum(p0);
-//         Some(p0)
-//     }
-// }
+impl<T: bits::Select> bits::Select for Rho<T> {
+    fn select1(&self, n: usize) -> Option<usize> {
+        let Rho(imp) = self;
+        let mut r = num::cast(n);
 
-// fn find_l1<L1>(l1: &L1, r: &mut u64) -> usize
-// where
-//     L1: ?Sized + fenwick1::Query,
-// {
-//     let p1 = l1.lower_bound(None, *r + 1) - 1;
-//     *r -= l1.sum(p1);
-//     p1
-// }
+        let (s, e) = {
+            let p0 = find_l0(&imp.buckets.hi[..], &mut r)?;
+            let lo = imp.buckets.lo(p0);
+            let p1 = find_l1(lo, &mut r);
+            let ll = lo[p1 + 1];
+            let l2 = [ll.l2_0(), ll.l2_1(), ll.l2_2()];
+            let p2 = find_l2(&l2, &mut r);
 
-// fn find_l2<'a, L2>(l2: L2, r: &mut u64) -> usize
-// where
-//     L2: IntoIterator<Item = &'a u64> + 'a,
-// {
-//     let mut p2 = 0;
-//     for &c in l2.into_iter() {
-//         if *r < c {
-//             break;
-//         }
-//         *r -= c;
-//         p2 += 1;
-//     }
-//     p2
-// }
+            let s = p0 * UPPER + p1 * SUPER + p2 * BASIC;
+            (s, cmp::min(s + BASIC, self.bits()))
+        };
+
+        let mut r = r as usize;
+        #[cfg(test)]
+        {
+            assert!(n - r == self.rank1(..s));
+            assert!(r < self.rank1(s..e));
+        }
+
+        // i + imp.bit_vec[x..y].select1(r).unwrap()
+
+        const BITS: usize = <u128 as bits::Block>::BITS;
+        for i in (s..e).step_by(BITS) {
+            let b = imp.bit_vec.word::<u128>(i, BITS);
+            let c = b.count1();
+            if r < c {
+                // #[cfg(test)]
+                // {
+                //     dbg!(l0, l1, l2);
+                //     dbg!(lo[l1 + 1]);
+                //     dbg!(s, e);
+                // }
+                return Some(i + b.select1(r).unwrap());
+            }
+            r -= c;
+        }
+        unreachable!()
+    }
+
+    // fn select0(&self, n: usize) -> Option<usize> {
+    //     let Rho(imp) = self;
+    //     let mut r = n.cast::<u64>();
+
+    //     let (s, e) = {
+    //         const UB: u64 = UPPER as u64;
+    //         const SB: u64 = SUPER as u64;
+    //         const BB: u64 = BASIC as u64;
+    //         let p0 = find_l0(&imp.buckets.hi.complemented(UB), &mut r)?;
+    //         let lo = imp.buckets.lo(p0);
+    //         let p1 = find_l1(&lo.complemented(SB), &mut r);
+    //         let ll = lo[p1 + 1];
+    //         let l2 = [BB - ll.l2_0(), BB - ll.l2_1(), BB - ll.l2_2()];
+    //         let p2 = find_l2(&l2, &mut r);
+
+    //         let s = p0 * UPPER + p1 * SUPER + p2 * BASIC;
+    //         (s, cmp::min(s + BASIC, self.bits()))
+    //     };
+
+    //     let mut r = r as usize;
+    //     #[cfg(test)]
+    //     {
+    //         assert!(n - r == self.rank0(..s));
+    //         assert!(r < self.rank0(s..e));
+    //     }
+
+    //     const BITS: usize = <u128 as bits::Block>::BITS;
+    //     for i in (s..e).step_by(BITS) {
+    //         let b = imp.bit_vec.word::<u128>(i, BITS);
+    //         let c = b.count0();
+    //         if r < c {
+    //             return Some(i + b.select0(r).unwrap());
+    //         }
+    //         r -= c;
+    //     }
+    //     unreachable!()
+    // }
+}
+
+fn find_l0<L0>(l0: &L0, r: &mut u64) -> Option<usize>
+where
+    L0: ?Sized + fenwicktree::Nodes + fenwicktree::LowerBound<u64>,
+{
+    // r: +1 because `select1(n)` returns the position of the n-th one, indexed starting from zero.
+    // i: -1 is safe because lower_bound(x) returns 0 iif x is 0
+    let p0 = l0.lower_bound(*r + 1) - 1;
+    if p0 >= l0.size() {
+        None
+    } else {
+        *r -= l0.sum(p0);
+        Some(p0)
+    }
+}
+
+fn find_l1<L1>(l1: &L1, r: &mut u64) -> usize
+where
+    L1: ?Sized + fenwicktree::Nodes + fenwicktree::LowerBound<u64>,
+{
+    let p1 = l1.lower_bound(*r + 1) - 1;
+    *r -= l1.sum(p1);
+    p1
+}
+
+fn find_l2<'a, L2>(l2: L2, r: &mut u64) -> usize
+where
+    L2: IntoIterator<Item = &'a u64> + 'a,
+{
+    let mut p2 = 0;
+    for &c in l2.into_iter() {
+        if *r < c {
+            break;
+        }
+        *r -= c;
+        p2 += 1;
+    }
+    p2
+}
 
 // impl<T: Bits + BitPut> Rho<T> {
 //     /// Swaps a bit at `i` by `bit` and returns the previous value.

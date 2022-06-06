@@ -157,7 +157,16 @@ pub trait Prefix: Nodes {
     type Iter: Iterator<Item = Self::Item>;
 
     fn prefix(self, index: usize) -> Self::Iter;
+}
 
+pub trait PrefixSum {
+    fn sum<S: Sum<Self::Item>>(&self, index: usize) -> S;
+}
+
+impl<T> PrefixSum for T
+where
+    &T: Prefix,
+{
     #[inline]
     fn sum<S: Sum<Self::Item>>(self, index: usize) -> S
     where
