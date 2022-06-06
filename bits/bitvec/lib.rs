@@ -161,14 +161,9 @@ impl<T: bits::Count> bits::Count for Rho<T> {
     }
 }
 
-// impl<T: Bits> Bits for Rho<T> {
-//     #[inline]
-//     fn word<N: Word>(&self, i: usize, n: usize) -> N {
-//         self.0.bit_vec.word(i, n)
-//     }
-
-//     fn rank1<Idx: SeqIndex>(&self, index: Idx) -> usize {
-//         fn imp<U: Bits>(me: &Rho<U>, p0: usize) -> usize {
+// impl<T: bits::Rank> bits::Rank for Rho<T> {
+//     fn rank1<Idx: RangeBounds<usize>>(&self, index: Idx) -> usize {
+//         fn rank1_impl<U: Bits>(me: &Rho<U>, p0: usize) -> usize {
 //             if p0 == 0 {
 //                 0
 //             } else if p0 == Seq::len(me) {
@@ -188,7 +183,14 @@ impl<T: bits::Count> bits::Count for Rho<T> {
 //             }
 //         }
 //         let (i, j) = self.to_range(&index).expect("out of bounds");
-//         imp(self, j) - imp(self, i)
+//         rank1_impl(self, j) - rank1_impl(self, i)
+//     }
+// }
+
+// impl<T: Bits> Bits for Rho<T> {
+//     #[inline]
+//     fn word<N: Word>(&self, i: usize, n: usize) -> N {
+//         self.0.bit_vec.word(i, n)
 //     }
 
 //     fn select1(&self, n: usize) -> Option<usize> {
