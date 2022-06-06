@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::fmt::{self, Debug, Formatter};
+use std::iter::Sum;
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 /// Interleaves L1[i] and L2[i] into a 64bit unsigned integer.
@@ -92,6 +93,13 @@ impl Sub<u64> for L1L2 {
     fn sub(mut self, delta: u64) -> Self::Output {
         self -= delta;
         self.l1()
+    }
+}
+
+impl Sum<L1L2> for u64 {
+    #[inline]
+    fn sum<I: Iterator<Item = L1L2>>(iter: I) -> Self {
+        iter.map(|l1l2| l1l2.l1()).sum()
     }
 }
 
