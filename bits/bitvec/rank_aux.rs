@@ -1,10 +1,11 @@
 use super::empty;
 use crate::blocks;
 use crate::L1L2;
-use bits::{Bits, Count};
-use fenwicktree::Prefix;
+use bits::{Bits, Count, Rank, Varint};
+use fenwicktree::{LowerBound, Nodes, Prefix};
 use std::cmp;
 use std::fmt::{self, Debug, Formatter};
+use std::iter::Sum;
 use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, RangeBounds, Sub, SubAssign};
 
@@ -394,9 +395,8 @@ impl<T: bits::Bits> bits::Bits for Rho<T> {
 impl<T: bits::Count> bits::Count for Rho<T> {
     #[inline]
     fn count1(&self) -> usize {
-        use fenwicktree::{Nodes, Prefix};
         let bit = &self.0.buckets.hi;
-        num::cast(bit.prefix(bit.nodes()).sum::<u64>())
+        num::cast(bit.sum::<u64>(bit.nodes()))
         // fenwicktree::sum(&self.0.buckets.hi).cast()
         // cast(self.buckets.hi.sum(self.buckets.hi.size()))
         // let top0 = self.samples.top[0];
@@ -440,7 +440,7 @@ impl<T: bits::Rank> bits::Rank for Rho<T> {
 //     }
 // }
 
-impl<T: bits::Select> bits::Select for Rho<T> {
+impl<T: Varint + bits::Select> bits::Select for Rho<T> {
     fn select1(&self, n: usize) -> Option<usize> {
         let Rho(imp) = self;
         let mut r = num::cast(n);
@@ -468,7 +468,7 @@ impl<T: bits::Select> bits::Select for Rho<T> {
 
         const BITS: usize = <u128 as bits::Block>::BITS;
         for i in (s..e).step_by(BITS) {
-            let b = imp.bit_vec.word::<u128>(i, BITS);
+            let b = imp.bit_vec.varint::<u128>(i, BITS);
             let c = b.count1();
             if r < c {
                 // #[cfg(test)]
@@ -525,25 +525,27 @@ impl<T: bits::Select> bits::Select for Rho<T> {
 
 fn find_l0<L0>(l0: &L0, r: &mut u64) -> Option<usize>
 where
-    L0: ?Sized + fenwicktree::Nodes + fenwicktree::LowerBound<u64>,
+    L0: ?Sized + Nodes + Prefix + LowerBound<u64>,
+    u64: Sum<L0::Node>,
 {
     // r: +1 because `select1(n)` returns the position of the n-th one, indexed starting from zero.
     // i: -1 is safe because lower_bound(x) returns 0 iif x is 0
     let p0 = l0.lower_bound(*r + 1) - 1;
-    if p0 >= l0.size() {
+    if p0 >= l0.nodes() {
         None
     } else {
-        *r -= l0.sum(p0);
+        *r -= l0.sum::<u64>(p0);
         Some(p0)
     }
 }
 
 fn find_l1<L1>(l1: &L1, r: &mut u64) -> usize
 where
-    L1: ?Sized + fenwicktree::Nodes + fenwicktree::LowerBound<u64>,
+    L1: ?Sized + Nodes + Prefix + LowerBound<u64>,
+    u64: Sum<L1::Node>,
 {
     let p1 = l1.lower_bound(*r + 1) - 1;
-    *r -= l1.sum(p1);
+    *r -= l1.sum::<u64>(p1);
     p1
 }
 

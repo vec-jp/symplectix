@@ -103,20 +103,20 @@ impl Sum<L1L2> for u64 {
     }
 }
 
-// // not used for now but here to keep symmetric
-// impl AddAssign<L1L2> for u64 {
-//     #[inline]
-//     fn add_assign(&mut self, delta: L1L2) {
-//         *self += delta.l1();
-//     }
-// }
-// // for lower_bound
-// impl SubAssign<L1L2> for u64 {
-//     #[inline]
-//     fn sub_assign(&mut self, delta: L1L2) {
-//         *self -= delta.l1();
-//     }
-// }
+// not used for now but here to keep symmetric
+impl AddAssign<L1L2> for u64 {
+    #[inline]
+    fn add_assign(&mut self, delta: L1L2) {
+        *self += delta.l1();
+    }
+}
+// for lower_bound
+impl SubAssign<L1L2> for u64 {
+    #[inline]
+    fn sub_assign(&mut self, delta: L1L2) {
+        *self -= delta.l1();
+    }
+}
 
 impl L1L2 {
     pub(crate) const LEN: usize = 4;

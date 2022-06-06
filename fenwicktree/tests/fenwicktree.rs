@@ -198,7 +198,7 @@ fn lower_bound_sum(vec: Vec<u16>) -> bool {
     let bit = build(vec.clone(), 0);
     (0..=vec.iter().sum::<u16>()).map(Into::into).all(|w| {
         let i = bit.lower_bound(w);
-        bit.prefix(i).map(Into::<u64>::into).sum::<u64>() >= w.into()
+        fenwicktree::prefix(i).map(|i| Into::<u64>::into(bit[i])).sum::<u64>() >= w.into()
     })
 }
 

@@ -6,10 +6,6 @@ use std::ops::{AddAssign, SubAssign};
 
 pub use iter::{children, prefix, search, update};
 
-pub trait Node: Sized + Copy {}
-
-impl<T> Node for T where T: Sized + Copy {}
-
 /// Build a fenwick tree.
 pub fn build<T: Node + AddAssign>(bit: &mut [T]) {
     assert!(!bit.is_empty());
@@ -141,40 +137,26 @@ mod iter {
     }
 }
 
+pub trait Node: Sized + Copy {}
+
+impl<T> Node for T where T: Sized + Copy {}
+
 pub trait Nodes {
+    type Node: Node;
+
     /// The size of fenwick tree.
     fn nodes(&self) -> usize;
 }
 
 impl<'a, T: ?Sized + Nodes> Nodes for &'a T {
+    type Node = <T as Nodes>::Node;
     fn nodes(&self) -> usize {
         <T as Nodes>::nodes(self)
     }
 }
 
 pub trait Prefix: Nodes {
-    type Item;
-    type Iter: Iterator<Item = Self::Item>;
-
-    fn prefix(self, index: usize) -> Self::Iter;
-}
-
-pub trait PrefixSum {
-    fn sum<S: Sum<Self::Item>>(&self, index: usize) -> S;
-}
-
-impl<T> PrefixSum for T
-where
-    &T: Prefix,
-{
-    #[inline]
-    fn sum<S: Sum<Self::Item>>(self, index: usize) -> S
-    where
-        S: Sum<Self::Item>,
-        Self: Sized,
-    {
-        self.prefix(index).sum::<S>()
-    }
+    fn sum<S: Sum<Self::Node>>(&self, index: usize) -> S;
 
     // #[inline]
     // fn range_sum<S, R>(self, index: R) -> S
@@ -208,20 +190,18 @@ pub trait LowerBound<S>: Nodes {
     fn lower_bound(&self, threshold: S) -> usize;
 }
 
-impl<T> Nodes for [T] {
+impl<T: Node> Nodes for [T] {
+    type Node = T;
     #[inline]
     fn nodes(&self) -> usize {
         self.len() - 1 // self[0] is a dummy node
     }
 }
 
-impl<'a, T: Node> Prefix for &'a [T] {
-    type Item = T;
-    type Iter = iter::Prefix<&'a [T]>;
-
+impl<T: Node> Prefix for [T] {
     #[inline]
-    fn prefix(self, index: usize) -> Self::Iter {
-        iter::Prefix { index: prefix(index), data: self }
+    fn sum<S: Sum<Self::Node>>(&self, index: usize) -> S {
+        prefix(index).map(|i| self[i]).sum()
     }
 }
 
@@ -296,6 +276,7 @@ impl<'a, T> Nodes for Complement<'a, [T]>
 where
     T: Node + Into<u64>,
 {
+    type Node = T;
     #[inline]
     fn nodes(&self) -> usize {
         self.inner.nodes()
