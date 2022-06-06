@@ -1,7 +1,7 @@
 use super::empty;
 use crate::blocks;
 use crate::L1L2;
-use bits::{Bits, Count, Rank, Varint};
+use bits::{index, Bits, Block, Count, Rank, Select, Varint};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 use std::cmp;
 use std::fmt::{self, Debug, Formatter};
@@ -90,7 +90,6 @@ where
     T: bits::Int + 'a,
     I: IntoIterator<Item = Option<&'a [T]>>,
 {
-    use bits::{Count, Select};
     use fenwicktree::Nodes;
 
     let mut buckets = Buckets::new(size);
@@ -266,10 +265,10 @@ impl Buckets<layout::Rho> {
         let (q1, r1) = num::divrem(r0, SUPER);
 
         let hi = &mut self.hi;
-        hi.incr(q0, delta);
+        hi.incr(q0 + 1, delta);
 
         let lo = self.lo_mut(q0);
-        lo.incr(q1, delta);
+        lo.incr(q1 + 1, delta);
 
         // Update L2 array which is interleaved into L1
         let sb = q1 + 1; // +1 because fenwick doesn't use index 0
@@ -290,10 +289,10 @@ impl Buckets<layout::Rho> {
         let (q1, r1) = num::divrem(r0, SUPER);
 
         let hi = &mut self.hi;
-        hi.decr(q0, delta);
+        hi.decr(q0 + 1, delta);
 
         let lo = self.lo_mut(q0);
-        lo.decr(q1, delta);
+        lo.decr(q1 + 1, delta);
 
         let sb = q1 + 1;
         let bb = r1 / BASIC + 1;
@@ -338,7 +337,7 @@ impl Buckets<layout::Rho> {
     // }
 }
 
-impl<T: bits::Block> Rho<Vec<T>> {
+impl<T: Block> Rho<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> Rho<Vec<T>> {
         let dat = empty(n);
@@ -380,7 +379,7 @@ impl<'a, T: bits::Int> From<&'a [T]> for Rho<&'a [T]> {
 //     }
 // }
 
-impl<T: bits::Bits> bits::Bits for Rho<T> {
+impl<T: Bits> Bits for Rho<T> {
     #[inline]
     fn bits(&self) -> usize {
         self.0.bit_vec.bits()
@@ -392,11 +391,11 @@ impl<T: bits::Bits> bits::Bits for Rho<T> {
     }
 }
 
-impl<T: bits::Count> bits::Count for Rho<T> {
+impl<T: Count> Count for Rho<T> {
     #[inline]
     fn count1(&self) -> usize {
         let bit = &self.0.buckets.hi;
-        num::cast(bit.sum::<u64>(bit.nodes()))
+        num::cast::<u64, usize>(bit.sum(bit.nodes()))
         // fenwicktree::sum(&self.0.buckets.hi).cast()
         // cast(self.buckets.hi.sum(self.buckets.hi.size()))
         // let top0 = self.samples.top[0];
@@ -406,9 +405,9 @@ impl<T: bits::Count> bits::Count for Rho<T> {
     }
 }
 
-impl<T: bits::Rank> bits::Rank for Rho<T> {
+impl<T: Rank> Rank for Rho<T> {
     fn rank1<Idx: RangeBounds<usize>>(&self, index: Idx) -> usize {
-        fn rank1_impl<U: bits::Rank>(me: &Rho<U>, p0: usize) -> usize {
+        fn rank1_impl<U: Rank>(me: &Rho<U>, p0: usize) -> usize {
             if p0 == 0 {
                 0
             } else if p0 == me.bits() {
@@ -428,7 +427,7 @@ impl<T: bits::Rank> bits::Rank for Rho<T> {
             }
         }
         use std::ops::Range;
-        let Range { start: i, end: j } = bits::index::to_range(&index, 0, self.bits());
+        let Range { start: i, end: j } = index::to_range(&index, 0, self.bits());
         rank1_impl(self, j) - rank1_impl(self, i)
     }
 }
@@ -440,7 +439,7 @@ impl<T: bits::Rank> bits::Rank for Rho<T> {
 //     }
 // }
 
-impl<T: Varint + bits::Select> bits::Select for Rho<T> {
+impl<T: Varint + Select> Select for Rho<T> {
     fn select1(&self, n: usize) -> Option<usize> {
         let Rho(imp) = self;
         let mut r = num::cast(n);
@@ -458,15 +457,14 @@ impl<T: Varint + bits::Select> bits::Select for Rho<T> {
         };
 
         let mut r = r as usize;
-        #[cfg(test)]
         {
-            assert!(n - r == self.rank1(..s));
-            assert!(r < self.rank1(s..e));
+            debug_assert!(n - r == self.rank1(..s));
+            debug_assert!(r < self.rank1(s..e));
         }
 
         // i + imp.bit_vec[x..y].select1(r).unwrap()
 
-        const BITS: usize = <u128 as bits::Block>::BITS;
+        const BITS: usize = <u128 as Block>::BITS;
         for i in (s..e).step_by(BITS) {
             let b = imp.bit_vec.varint::<u128>(i, BITS);
             let c = b.count1();
@@ -484,48 +482,49 @@ impl<T: Varint + bits::Select> bits::Select for Rho<T> {
         unreachable!()
     }
 
-    // fn select0(&self, n: usize) -> Option<usize> {
-    //     let Rho(imp) = self;
-    //     let mut r = n.cast::<u64>();
+    fn select0(&self, n: usize) -> Option<usize> {
+        let Rho(imp) = self;
+        let mut r = num::cast(n);
 
-    //     let (s, e) = {
-    //         const UB: u64 = UPPER as u64;
-    //         const SB: u64 = SUPER as u64;
-    //         const BB: u64 = BASIC as u64;
-    //         let p0 = find_l0(&imp.buckets.hi.complemented(UB), &mut r)?;
-    //         let lo = imp.buckets.lo(p0);
-    //         let p1 = find_l1(&lo.complemented(SB), &mut r);
-    //         let ll = lo[p1 + 1];
-    //         let l2 = [BB - ll.l2_0(), BB - ll.l2_1(), BB - ll.l2_2()];
-    //         let p2 = find_l2(&l2, &mut r);
+        let (s, e) = {
+            const UB: u64 = UPPER as u64;
+            const SB: u64 = SUPER as u64;
+            const BB: u64 = BASIC as u64;
+            let hi_complemented = fenwicktree::complement(&imp.buckets.hi[..], UB);
+            let p0 = find_l0(&hi_complemented, &mut r)?;
+            let lo = imp.buckets.lo(p0);
+            let lo_complemented = fenwicktree::complement(lo, SB);
+            let p1 = find_l1(&lo_complemented, &mut r);
+            let ll = lo[p1 + 1];
+            let l2 = [BB - ll.l2_0(), BB - ll.l2_1(), BB - ll.l2_2()];
+            let p2 = find_l2(&l2, &mut r);
 
-    //         let s = p0 * UPPER + p1 * SUPER + p2 * BASIC;
-    //         (s, cmp::min(s + BASIC, self.bits()))
-    //     };
+            let s = p0 * UPPER + p1 * SUPER + p2 * BASIC;
+            (s, cmp::min(s + BASIC, self.bits()))
+        };
 
-    //     let mut r = r as usize;
-    //     #[cfg(test)]
-    //     {
-    //         assert!(n - r == self.rank0(..s));
-    //         assert!(r < self.rank0(s..e));
-    //     }
+        let mut r = r as usize;
+        {
+            debug_assert!(n - r == self.rank0(..s));
+            debug_assert!(r < self.rank0(s..e));
+        }
 
-    //     const BITS: usize = <u128 as bits::Block>::BITS;
-    //     for i in (s..e).step_by(BITS) {
-    //         let b = imp.bit_vec.word::<u128>(i, BITS);
-    //         let c = b.count0();
-    //         if r < c {
-    //             return Some(i + b.select0(r).unwrap());
-    //         }
-    //         r -= c;
-    //     }
-    //     unreachable!()
-    // }
+        const BITS: usize = <u128 as Block>::BITS;
+        for i in (s..e).step_by(BITS) {
+            let b = imp.bit_vec.varint::<u128>(i, BITS);
+            let c = b.count0();
+            if r < c {
+                return Some(i + b.select0(r).unwrap());
+            }
+            r -= c;
+        }
+        unreachable!()
+    }
 }
 
 fn find_l0<L0>(l0: &L0, r: &mut u64) -> Option<usize>
 where
-    L0: ?Sized + Nodes + Prefix + LowerBound<u64>,
+    L0: ?Sized + Nodes + Prefix<u64> + LowerBound<u64>,
     u64: Sum<L0::Node>,
 {
     // r: +1 because `select1(n)` returns the position of the n-th one, indexed starting from zero.
@@ -534,18 +533,18 @@ where
     if p0 >= l0.nodes() {
         None
     } else {
-        *r -= l0.sum::<u64>(p0);
+        *r -= l0.sum(p0);
         Some(p0)
     }
 }
 
 fn find_l1<L1>(l1: &L1, r: &mut u64) -> usize
 where
-    L1: ?Sized + Nodes + Prefix + LowerBound<u64>,
+    L1: ?Sized + Nodes + Prefix<u64> + LowerBound<u64>,
     u64: Sum<L1::Node>,
 {
     let p1 = l1.lower_bound(*r + 1) - 1;
-    *r -= l1.sum::<u64>(p1);
+    *r -= l1.sum(p1);
     p1
 }
 
@@ -579,9 +578,9 @@ where
 //     // /// Resizes the `Pop` in-place so that `Pop` has at least `min` bits.
 //     // #[inline]
 //     // pub fn resize(&mut self, new_len: usize) {
-//     //     let cur_len = Bits::len(&self.buf);
+//     //     let cur_len = len(&self.buf);
 //     //     self.buf.resize_with(blocks(new_len, T::BITS), T::empty);
-//     //     self.samples.resize(cur_len, Bits::len(&self.buf));
+//     //     self.samples.resize(cur_len, len(&self.buf));
 //     // }
 // }
 

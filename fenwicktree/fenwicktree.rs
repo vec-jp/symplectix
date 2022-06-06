@@ -2,7 +2,7 @@
 
 use num::Int;
 use std::iter::Sum;
-use std::ops::{AddAssign, SubAssign};
+use std::ops::{AddAssign, Sub, SubAssign};
 
 pub use iter::{children, prefix, search, update};
 
@@ -66,11 +66,6 @@ mod iter {
     #[inline]
     pub(crate) fn next_index_for_prefix<T: Int + Sub + Lsb>(i: T) -> <T as Sub>::Output {
         i - i.lsb()
-    }
-
-    pub struct Prefix<T> {
-        pub(crate) index: Successors<usize, fn(&usize) -> Option<usize>>,
-        pub(crate) data: T,
     }
 
     /// # Examples
@@ -155,24 +150,8 @@ impl<'a, T: ?Sized + Nodes> Nodes for &'a T {
     }
 }
 
-pub trait Prefix: Nodes {
-    fn sum<S: Sum<Self::Node>>(&self, index: usize) -> S;
-
-    // #[inline]
-    // fn range_sum<S, R>(self, index: R) -> S
-    // where
-    //     S: Sum<Self::Item> + Sub<Output = S>,
-    //     R: RangeBounds<usize>,
-    //     Self: Copy + Sized,
-    // {
-    //     match (
-    //         indexutil::min_index_inclusive(index.start_bound(), 0),
-    //         indexutil::max_index_inclusive(index.end_bound(), self.nodes()),
-    //     ) {
-    //         (0, i) => self.sum::<S>(i),
-    //         (i, j) => self.sum::<S>(j) - self.sum::<S>(i - 1),
-    //     }
-    // }
+pub trait Prefix<S>: Nodes {
+    fn sum(&self, index: usize) -> S;
 }
 
 pub trait Incr<N>: Nodes {
@@ -198,18 +177,10 @@ impl<T: Node> Nodes for [T] {
     }
 }
 
-impl<T: Node> Prefix for [T] {
+impl<T: Node, S: Sum<Self::Node>> Prefix<S> for [T] {
     #[inline]
-    fn sum<S: Sum<Self::Node>>(&self, index: usize) -> S {
+    fn sum(&self, index: usize) -> S {
         prefix(index).map(|i| self[i]).sum()
-    }
-}
-
-impl<'a, T: Node> Iterator for iter::Prefix<&'a [T]> {
-    type Item = T;
-    #[inline]
-    fn next(&mut self) -> Option<Self::Item> {
-        self.index.next().map(|i| self.data[i])
     }
 }
 
@@ -268,14 +239,11 @@ pub struct Complement<'a, T: ?Sized, U = u64> {
 }
 
 #[inline]
-pub fn complement<T, U>(inner: &T, max_bound: U) -> Complement<'_, T, U> {
+pub fn complement<T: ?Sized, U>(inner: &T, max_bound: U) -> Complement<'_, T, U> {
     Complement { inner, max_bound }
 }
 
-impl<'a, T> Nodes for Complement<'a, [T]>
-where
-    T: Node + Into<u64>,
-{
+impl<'a, T: Node, U> Nodes for Complement<'a, [T], U> {
     type Node = T;
     #[inline]
     fn nodes(&self) -> usize {
@@ -283,15 +251,15 @@ where
     }
 }
 
-// impl<'a, T> Sum for Complemented<'a, [T]>
-// where
-//     T: Copy + Into<u64>,
-// {
-//     #[inline]
-//     fn sum(&self, i: usize) -> u64 {
-//         (self.bound * i as u64) - self.tree.sum(i)
-//     }
-// }
+impl<'a, T: Node> Prefix<u64> for Complement<'a, [T], u64>
+where
+    [T]: Prefix<u64>,
+{
+    #[inline]
+    fn sum(&self, i: usize) -> u64 {
+        (self.max_bound * i as u64) - self.inner.sum(i)
+    }
+}
 
 // impl<'a, T> Iterator for iter::Prefix<Complement<'a, [T]>>
 // where
@@ -304,9 +272,10 @@ where
 //     }
 // }
 
-impl<'a, T> LowerBound<u64> for Complement<'a, [T]>
+impl<'a, T> LowerBound<u64> for Complement<'a, [T], u64>
 where
-    T: Node + Into<u64>,
+    T: Node,
+    u64: Sub<T, Output = u64>,
 {
     fn lower_bound(&self, mut w: u64) -> usize {
         let bit = self.inner;
@@ -320,7 +289,7 @@ where
         // The size of the segment is halved for each step.
         for d in search(bit.nodes()) {
             if let Some(&v) = bit.get(i + d) {
-                let v: u64 = max * (d as u64) - v.into();
+                let v: u64 = max * (d as u64) - v;
                 if v < w {
                     w -= v;
                     i += d; // move to right

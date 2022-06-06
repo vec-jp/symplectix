@@ -104,13 +104,27 @@ impl Sum<L1L2> for u64 {
 }
 
 // not used for now but here to keep symmetric
+impl Add<L1L2> for u64 {
+    type Output = u64;
+    #[inline]
+    fn add(self, delta: L1L2) -> Self::Output {
+        self + delta.l1()
+    }
+}
 impl AddAssign<L1L2> for u64 {
     #[inline]
     fn add_assign(&mut self, delta: L1L2) {
         *self += delta.l1();
     }
 }
-// for lower_bound
+
+impl Sub<L1L2> for u64 {
+    type Output = u64;
+    #[inline]
+    fn sub(self, delta: L1L2) -> Self::Output {
+        self - delta.l1()
+    }
+}
 impl SubAssign<L1L2> for u64 {
     #[inline]
     fn sub_assign(&mut self, delta: L1L2) {
