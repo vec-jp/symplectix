@@ -4,6 +4,7 @@
 mod l1l2;
 mod rank_aux;
 
+use bits::Bits;
 use l1l2::L1L2;
 use rank_aux::{Buckets, Uninit};
 use rank_aux::{Pop as L1L2Sum, Rho as L1L2Bit};
@@ -152,4 +153,254 @@ struct Imp<T, S> {
 //             |b| Box::new(sbs_from_words(b)) as BoxIter<'_, &'_ [T::Elem]>,
 //         )
 //     })
+// }
+
+impl<T: bits::Block> Rho<Vec<T>> {
+    #[inline]
+    pub fn new(n: usize) -> Rho<Vec<T>> {
+        let dat = empty(n);
+        Rho(Imp { buckets: Buckets::new(dat.bits()), samples: None, bit_vec: dat })
+    }
+}
+
+// impl<'a, T: Clone> From<Rho<&'a [T]>> for Rho<Vec<T>> {
+//     fn from(Rho(imp): Rho<&'a [T]>) -> Self {
+//         Rho(Imp { buckets: imp.buckets, samples: None, bit_vec: imp.bit_vec.to_vec() })
+//     }
+// }
+
+// impl<'a, T: Word> From<&'a [T]> for Rho<&'a [T]> {
+//     fn from(dat: &'a [T]) -> Self {
+//         let (buckets, _) = build(Seq::len(dat), sbs_from_words(dat));
+//         Rho(Imp { buckets: buckets.into(), samples: None, bit_vec: dat })
+//     }
+// }
+
+// impl<'a, T: WordArray> From<&'a [Block<T>]> for Rho<&'a [Block<T>]> {
+//     fn from(dat: &'a [Block<T>]) -> Self {
+//         let (buckets, _) = build(Seq::len(&dat), sbs_from_heaps(&dat));
+//         Rho(Imp { buckets: buckets.into(), samples: None, bit_vec: dat })
+//     }
+// }
+
+// impl<T: Word, U: From<Vec<T>>> From<Vec<T>> for Rho<U> {
+//     fn from(dat: Vec<T>) -> Self {
+//         let (buckets, _) = build(Seq::len(&dat), sbs_from_words(&dat));
+//         Rho(Imp { buckets: buckets.into(), samples: None, bit_vec: dat.into() })
+//     }
+// }
+
+// impl<T: WordArray, U: From<Vec<Block<T>>>> From<Vec<Block<T>>> for Rho<U> {
+//     fn from(dat: Vec<Block<T>>) -> Self {
+//         let (buckets, _) = build(Seq::len(&dat), sbs_from_heaps(&dat));
+//         Rho(Imp { buckets: buckets.into(), samples: None, bit_vec: dat.into() })
+//     }
+// }
+
+// impl<T: Seq<bool>> Seq<bool> for Rho<T> {
+//     #[inline]
+//     fn len(this: &Self) -> usize {
+//         Seq::len(&this.0.bit_vec)
+//     }
+// }
+
+// impl<T: Bits> Bits for Rho<T> {
+//     #[inline]
+//     fn bit(&self, i: usize) -> bool {
+//         self.0.bit_vec.bit(i)
+//     }
+//     #[inline]
+//     fn word<N: Word>(&self, i: usize, n: usize) -> N {
+//         self.0.bit_vec.word(i, n)
+//     }
+
+//     #[inline]
+//     fn count1(&self) -> usize {
+//         fenwick1::sum(&self.0.buckets.hi).cast()
+//         // cast(self.buckets.hi.sum(self.buckets.hi.size()))
+//         // let top0 = self.samples.top[0];
+//         // #[cfg(test)]
+//         // assert_eq!(top0 as usize, self.buf.count1());
+//         // cast(top0)
+//     }
+
+//     fn rank1<Idx: SeqIndex>(&self, index: Idx) -> usize {
+//         fn imp<U: Bits>(me: &Rho<U>, p0: usize) -> usize {
+//             if p0 == 0 {
+//                 0
+//             } else if p0 == Seq::len(me) {
+//                 me.count1()
+//             } else {
+//                 let Rho(me) = me;
+//                 let (q0, r0) = divrem!(p0, UPPER);
+//                 let (q1, r1) = divrem!(r0, SUPER);
+//                 let (q2, r2) = divrem!(r1, BASIC);
+
+//                 let hi = &me.buckets.hi;
+//                 let lo = &me.buckets.lo(q0);
+//                 let c0: u64 = hi.sum(q0); // sum of [0, q0)
+//                 let c1: u64 = lo.sum(q1); // sum of [0, q1)
+//                 let c2 = lo[q1 + 1].l2(q2);
+//                 (c0 + c1 + c2).cast::<usize>() + me.bit_vec.rank1(p0 - r2..p0)
+//             }
+//         }
+//         let (i, j) = self.to_range(&index).expect("out of bounds");
+//         imp(self, j) - imp(self, i)
+//     }
+
+//     fn select1(&self, n: usize) -> Option<usize> {
+//         let Rho(imp) = self;
+//         let mut r = n.cast::<u64>();
+
+//         let (s, e) = {
+//             let p0 = find_l0(&imp.buckets.hi, &mut r)?;
+//             let lo = imp.buckets.lo(p0);
+//             let p1 = find_l1(lo, &mut r);
+//             let ll = lo[p1 + 1];
+//             let l2 = [ll.l2_0(), ll.l2_1(), ll.l2_2()];
+//             let p2 = find_l2(&l2, &mut r);
+
+//             let s = p0 * UPPER + p1 * SUPER + p2 * BASIC;
+//             (s, cmp::min(s + BASIC, Seq::len(self)))
+//         };
+
+//         let mut r = r as usize;
+//         #[cfg(test)]
+//         {
+//             assert!(n - r == self.rank1(..s));
+//             assert!(r < self.rank1(s..e));
+//         }
+
+//         // i + imp.bit_vec[x..y].select1(r).unwrap()
+
+//         const BITS: usize = <u128 as Container>::BITS;
+//         for i in (s..e).step_by(BITS) {
+//             let b = imp.bit_vec.word::<u128>(i, BITS);
+//             let c = b.count1();
+//             if r < c {
+//                 // #[cfg(test)]
+//                 // {
+//                 //     dbg!(l0, l1, l2);
+//                 //     dbg!(lo[l1 + 1]);
+//                 //     dbg!(s, e);
+//                 // }
+//                 return Some(i + b.select1(r).unwrap());
+//             }
+//             r -= c;
+//         }
+//         unreachable!()
+//     }
+
+//     fn select0(&self, n: usize) -> Option<usize> {
+//         let Rho(imp) = self;
+//         let mut r = n.cast::<u64>();
+
+//         let (s, e) = {
+//             const UB: u64 = UPPER as u64;
+//             const SB: u64 = SUPER as u64;
+//             const BB: u64 = BASIC as u64;
+//             let p0 = find_l0(&imp.buckets.hi.complemented(UB), &mut r)?;
+//             let lo = imp.buckets.lo(p0);
+//             let p1 = find_l1(&lo.complemented(SB), &mut r);
+//             let ll = lo[p1 + 1];
+//             let l2 = [BB - ll.l2_0(), BB - ll.l2_1(), BB - ll.l2_2()];
+//             let p2 = find_l2(&l2, &mut r);
+
+//             let s = p0 * UPPER + p1 * SUPER + p2 * BASIC;
+//             (s, cmp::min(s + BASIC, Seq::len(self)))
+//         };
+
+//         let mut r = r as usize;
+//         #[cfg(test)]
+//         {
+//             assert!(n - r == self.rank0(..s));
+//             assert!(r < self.rank0(s..e));
+//         }
+
+//         const BITS: usize = <u128 as Container>::BITS;
+//         for i in (s..e).step_by(BITS) {
+//             let b = imp.bit_vec.word::<u128>(i, BITS);
+//             let c = b.count0();
+//             if r < c {
+//                 return Some(i + b.select0(r).unwrap());
+//             }
+//             r -= c;
+//         }
+//         unreachable!()
+//     }
+// }
+
+// fn find_l0<L0>(l0: &L0, r: &mut u64) -> Option<usize>
+// where
+//     L0: ?Sized + fenwick1::Query,
+// {
+//     // r: +1 because `select1(n)` returns the position of the n-th one, indexed starting from zero.
+//     // i: -1 is safe because lower_bound(x) returns 0 iif x is 0
+//     let p0 = l0.lower_bound(None, *r + 1) - 1;
+//     if p0 >= l0.size() {
+//         None
+//     } else {
+//         *r -= l0.sum(p0);
+//         Some(p0)
+//     }
+// }
+
+// fn find_l1<L1>(l1: &L1, r: &mut u64) -> usize
+// where
+//     L1: ?Sized + fenwick1::Query,
+// {
+//     let p1 = l1.lower_bound(None, *r + 1) - 1;
+//     *r -= l1.sum(p1);
+//     p1
+// }
+
+// fn find_l2<'a, L2>(l2: L2, r: &mut u64) -> usize
+// where
+//     L2: IntoIterator<Item = &'a u64> + 'a,
+// {
+//     let mut p2 = 0;
+//     for &c in l2.into_iter() {
+//         if *r < c {
+//             break;
+//         }
+//         *r -= c;
+//         p2 += 1;
+//     }
+//     p2
+// }
+
+// impl<T: Bits + BitPut> Rho<T> {
+//     /// Swaps a bit at `i` by `bit` and returns the previous value.
+//     fn swap(&mut self, i: usize, bit: bool) -> bool {
+//         let before = self.0.bit_vec.bit(i);
+//         if bit {
+//             self.0.bit_vec.put1(i);
+//         } else {
+//             self.0.bit_vec.put0(i);
+//         }
+//         before
+//     }
+
+//     // /// Resizes the `Pop` in-place so that `Pop` has at least `min` bits.
+//     // #[inline]
+//     // pub fn resize(&mut self, new_len: usize) {
+//     //     let cur_len = Bits::len(&self.buf);
+//     //     self.buf.resize_with(blocks(new_len, T::BITS), T::empty);
+//     //     self.samples.resize(cur_len, Bits::len(&self.buf));
+//     // }
+// }
+
+// impl<T: Bits + BitPut> BitPut for Rho<T> {
+//     #[inline]
+//     fn put1(&mut self, p0: usize) {
+//         if !self.swap(p0, true) {
+//             self.0.buckets.add(p0, 1);
+//         }
+//     }
+//     #[inline]
+//     fn put0(&mut self, p0: usize) {
+//         if self.swap(p0, false) {
+//             self.0.buckets.sub(p0, 1);
+//         }
+//     }
 // }
