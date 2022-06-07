@@ -1,0 +1,11 @@
+[workspace]
+
+members = [
+    "bits",
+    "bits/bitvec",
+    "fenwicktree",
+    "num",
+]
+
+[profile.dev]
+overflow-checks = false
