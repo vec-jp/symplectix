@@ -1,6 +1,6 @@
-use crate::{Bits, Block};
+use crate::{Block, Container};
 
-pub trait Count: Bits {
+pub trait Count: Container {
     /// Counts the occurrences of `1`.
     ///
     /// # Examples

@@ -3,7 +3,7 @@ use crate::*;
 #[cfg(feature = "alloc")]
 pub use impl_std::Blocks;
 
-pub trait Block: Clone + Bits + Count + Rank + Excess + Select + BitsMut {
+pub trait Block: Clone + Container + Count + Rank + Excess + Select + BitsMut {
     const BITS: usize;
 
     #[doc(hidden)]

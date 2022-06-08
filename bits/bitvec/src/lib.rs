@@ -4,7 +4,7 @@
 mod l1l2;
 mod rank_aux;
 
-use bits::Bits;
+use bits::Container;
 use l1l2::L1L2;
 // use rank_aux::{Buckets, Uninit};
 // use rank_aux::{Pop as L1L2Sum, Rho as L1L2Bit};
@@ -21,7 +21,7 @@ const fn blocks(n: usize, b: usize) -> usize {
 /// # Examples
 ///
 /// ```
-/// use bits::Bits;
+/// use bits::Container;
 /// let v = bitvec::with_capacity::<u8>(80);
 /// // v has no bits, but an enough capacity to store 80 bits.
 /// assert_eq!(v.bits(), 0);
@@ -34,7 +34,7 @@ pub fn with_capacity<T: bits::Block>(capacity: usize) -> Vec<T> {
 /// # Examples
 ///
 /// ```
-/// use bits::Bits;
+/// use bits::Container;
 /// let v = bitvec::empty::<u8>(80);
 /// assert_eq!(v.bits(), 80);
 /// assert_eq!(v.len(), 10);

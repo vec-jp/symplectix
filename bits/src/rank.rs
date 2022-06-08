@@ -1,5 +1,5 @@
 use crate::index;
-use crate::{Bits, Block, Count};
+use crate::{Block, Container, Count};
 use core::ops::{Range, RangeBounds};
 
 pub trait Rank: Count {

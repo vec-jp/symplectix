@@ -1,13 +1,13 @@
 use crate::index;
 use crate::Block;
 
-pub trait Bits {
+pub trait Container {
     /// Returns the number of binary digits.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use bits::Bits;
+    /// # use bits::Container;
     /// let v: &[u8] = &[0, 0, 0];
     /// let w: &[u8] = &[];
     /// assert_eq!(v.bits(), 24);
@@ -21,7 +21,7 @@ pub trait Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits::Bits;
+    /// # use bits::Container;
     /// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
     /// assert_eq!(v.bit(0),   Some(true));
     /// assert_eq!(v.bit(64),  Some(true));
@@ -33,7 +33,7 @@ pub trait Bits {
 
 macro_rules! impls {
     ($( $Int:ty )*) => ($(
-        impl Bits for $Int {
+        impl Container for $Int {
             #[inline]
             fn bits(&self) -> usize {
                 <Self as Block>::BITS
@@ -49,7 +49,7 @@ macro_rules! impls {
 impls!(u8 u16 u32 u64 u128 usize);
 impls!(i8 i16 i32 i64 i128 isize);
 
-impl<B: Block> Bits for [B] {
+impl<B: Block> Container for [B] {
     #[inline]
     fn bits(&self) -> usize {
         B::BITS * self.len()
@@ -66,23 +66,23 @@ macro_rules! impl_bits {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn bits(&self) -> usize {
-            <$X as Bits>::bits(self$(.$method())?)
+            <$X as Container>::bits(self$(.$method())?)
         }
 
         #[inline]
         fn bit(&self, i: usize) -> Option<bool> {
-            <$X as Bits>::bit(self$(.$method())?, i)
+            <$X as Container>::bit(self$(.$method())?, i)
         }
     }
 }
 
-impl<'a, T: ?Sized + Bits> Bits for &'a T {
+impl<'a, T: ?Sized + Container> Container for &'a T {
     impl_bits!(T);
 }
 
-impl<T, const N: usize> Bits for [T; N]
+impl<T, const N: usize> Container for [T; N]
 where
-    [T]: Bits,
+    [T]: Container,
 {
     impl_bits!([T], as_ref);
 }
@@ -93,20 +93,20 @@ mod impl_alloc {
     use std::boxed::Box;
     use std::vec::Vec;
 
-    impl<B> Bits for Vec<B>
+    impl<B> Container for Vec<B>
     where
-        [B]: Bits,
+        [B]: Container,
     {
         impl_bits!([B]);
     }
 
-    impl<T: ?Sized + Bits> Bits for Box<T> {
+    impl<T: ?Sized + Container> Container for Box<T> {
         impl_bits!(T);
     }
 
-    impl<'a, T> Bits for Cow<'a, T>
+    impl<'a, T> Container for Cow<'a, T>
     where
-        T: ?Sized + ToOwned + Bits,
+        T: ?Sized + ToOwned + Container,
     {
         impl_bits!(T, as_ref);
     }

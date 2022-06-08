@@ -1,4 +1,4 @@
-use crate::{Bits, BitsMut, Block};
+use crate::{BitsMut, Block, Container};
 
 /// # Examples
 ///
@@ -11,7 +11,7 @@ use crate::{Bits, BitsMut, Block};
 /// assert_eq!(bits.varint::<u8>(14, len), 0b0111);
 /// assert_eq!(bits.varint::<u8>(30, len), 0b0010);
 /// ```
-pub trait Varint: Bits {
+pub trait Varint: Container {
     /// Reads `n` bits from `i`, and returns it as the lowest `n` bits of `Int`.
     #[doc(hidden)]
     fn varint<T: Block>(&self, i: usize, n: usize) -> T {

@@ -1,6 +1,6 @@
-use crate::{index, Bits, Block};
+use crate::{index, Block, Container};
 
-pub trait BitsMut: Bits {
+pub trait BitsMut: Container {
     fn set_bit(&mut self, i: usize);
 
     fn unset_bit(&mut self, i: usize);
@@ -79,7 +79,7 @@ mod impl_alloc {
 
     impl<'a, T> BitsMut for Cow<'a, T>
     where
-        T: ?Sized + ToOwned + Bits,
+        T: ?Sized + ToOwned + Container,
         T::Owned: BitsMut,
     {
         impl_bits_mut!(T::Owned, to_mut);

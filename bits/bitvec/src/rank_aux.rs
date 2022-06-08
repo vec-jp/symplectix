@@ -1,7 +1,7 @@
 use super::empty;
 use crate::blocks;
 use crate::L1L2;
-use bits::{index, Bits, Block, Count, Rank, Select, Varint};
+use bits::{index, Block, Container, Count, Rank, Select, Varint};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 use std::cmp;
 use std::fmt::{self, Debug, Formatter};
@@ -381,7 +381,7 @@ impl<'a, T: num::Int + bits::Block> From<&'a [T]> for Rho<&'a [T]> {
 //     }
 // }
 
-impl<T: Bits> Bits for Rho<T> {
+impl<T: Container> Container for Rho<T> {
     #[inline]
     fn bits(&self) -> usize {
         self.0.bit_vec.bits()
