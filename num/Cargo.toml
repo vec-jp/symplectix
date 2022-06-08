@@ -1,5 +1,5 @@
 [package]
-name    = "num"
+name = "num"
 edition = "2021"
 version = "0.0.0"
 publish = false

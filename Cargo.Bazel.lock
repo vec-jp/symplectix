@@ -1,5 +1,5 @@
 {
-  "checksum": "59a870a78e834430c9f48cb08c9516e5f0a1ebed8812db8a15628e8259409244",
+  "checksum": "001f15f394aa759c25f9c96f3a7afa1ac0c35d555aaea68ebf49d2742b572f2b",
   "crates": {
     "aho-corasick 0.7.18": {
       "name": "aho-corasick",
@@ -46,6 +46,80 @@
         "version": "0.7.18"
       },
       "license": "Unlicense/MIT"
+    },
+    "bits 0.0.0": {
+      "name": "bits",
+      "version": "0.0.0",
+      "repository": null,
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "bits",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "bits",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps_dev": {
+          "common": [
+            {
+              "id": "quickcheck 1.0.3",
+              "target": "quickcheck"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "proc_macro_deps_dev": {
+          "common": [
+            {
+              "id": "quickcheck_macros 1.0.0",
+              "target": "quickcheck_macros"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "0.0.0"
+      },
+      "license": null
+    },
+    "bitvec 0.0.0": {
+      "name": "bitvec",
+      "version": "0.0.0",
+      "repository": null,
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "bitvec",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "bitvec",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2021",
+        "version": "0.0.0"
+      },
+      "license": null
     },
     "cfg-if 1.0.0": {
       "name": "cfg-if",
@@ -103,25 +177,7 @@
         "compile_data_glob": [
           "**"
         ],
-        "deps": {
-          "common": [
-            {
-              "id": "quickcheck 1.0.3",
-              "target": "quickcheck"
-            }
-          ],
-          "selects": {}
-        },
         "edition": "2018",
-        "proc_macro_deps": {
-          "common": [
-            {
-              "id": "quickcheck_macros 1.0.0",
-              "target": "quickcheck_macros"
-            }
-          ],
-          "selects": {}
-        },
         "version": "0.0.1"
       },
       "license": null
@@ -174,6 +230,52 @@
         "version": "0.8.4"
       },
       "license": "MIT/Apache-2.0"
+    },
+    "fenwicktree 0.0.0": {
+      "name": "fenwicktree",
+      "version": "0.0.0",
+      "repository": null,
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "fenwicktree",
+            "crate_root": "fenwicktree.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "fenwicktree",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps_dev": {
+          "common": [
+            {
+              "id": "quickcheck 1.0.3",
+              "target": "quickcheck"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "proc_macro_deps_dev": {
+          "common": [
+            {
+              "id": "quickcheck_macros 1.0.0",
+              "target": "quickcheck_macros"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "0.0.0"
+      },
+      "license": null
     },
     "getrandom 0.2.6": {
       "name": "getrandom",
@@ -418,6 +520,34 @@
       },
       "license": "Unlicense/MIT"
     },
+    "num 0.0.0": {
+      "name": "num",
+      "version": "0.0.0",
+      "repository": null,
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "num",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "num",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2021",
+        "version": "0.0.0"
+      },
+      "license": null
+    },
     "proc-macro2 1.0.39": {
       "name": "proc-macro2",
       "version": "1.0.39",
@@ -581,7 +711,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.95",
+              "id": "syn 1.0.96",
               "target": "syn"
             }
           ],
@@ -822,13 +952,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "syn 1.0.95": {
+    "syn 1.0.96": {
       "name": "syn",
-      "version": "1.0.95",
+      "version": "1.0.96",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/syn/1.0.95/download",
-          "sha256": "fbaf6116ab8924f39d52792136fb74fd60a80194cf1b1c6ffa6453eef1c3f942"
+          "url": "https://crates.io/api/v1/crates/syn/1.0.96/download",
+          "sha256": "0748dd251e24453cb8717f0354206b91557e4ec8703673a4b30208f2abaf1ebf"
         }
       },
       "targets": [
@@ -883,7 +1013,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.95",
+              "id": "syn 1.0.96",
               "target": "build_script_build"
             },
             {
@@ -894,7 +1024,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.95"
+        "version": "1.0.96"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -976,7 +1106,11 @@
   },
   "binary_crates": [],
   "workspace_members": {
-    "direct-cargo-bazel-deps 0.0.1": ""
+    "bits 0.0.0": "bits",
+    "bitvec 0.0.0": "bits/bitvec",
+    "direct-cargo-bazel-deps 0.0.1": "",
+    "fenwicktree 0.0.0": "fenwicktree",
+    "num 0.0.0": "num"
   },
   "conditions": {
     "cfg(target_os = \"wasi\")": [

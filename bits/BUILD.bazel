@@ -1,3 +1,4 @@
+load("@crates//:defs.bzl", "all_crate_deps")
 load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", "rust_test", "rust_test_suite")
 
 package(default_visibility = ["//visibility:private"])
@@ -11,15 +12,16 @@ rust_library(
 rust_test_suite(
     name = "integration",
     srcs = glob(["tests/*.rs"]),
-    proc_macro_deps = [
-        "@crates//:quickcheck_macros",
-    ],
+    proc_macro_deps = all_crate_deps(
+        proc_macro_dev = True,
+    ),
     deps = [
         ":bits",
         "//bits/bitvec",
         "//num",
-        "@crates//:quickcheck",
-    ],
+    ] + all_crate_deps(
+        normal_dev = True,
+    ),
 )
 
 rust_test(
