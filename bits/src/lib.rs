@@ -15,7 +15,7 @@ mod msb;
 pub use self::lsb::Lsb;
 pub use self::msb::Msb;
 
-pub mod block;
+pub mod bits;
 pub mod container;
 pub mod container_mut;
 pub mod count;
@@ -23,7 +23,7 @@ pub mod excess;
 pub mod rank;
 pub mod select;
 pub mod varint;
-pub use self::block::Block;
+pub use self::bits::Bits;
 pub use self::container::Container;
 pub use self::container_mut::ContainerMut;
 pub use self::count::Count;

@@ -27,7 +27,7 @@ const fn blocks(n: usize, b: usize) -> usize {
 /// assert_eq!(v.bits(), 0);
 /// assert_eq!(v.capacity(), 10);
 /// ```
-pub fn with_capacity<T: bits::Block>(capacity: usize) -> Vec<T> {
+pub fn with_capacity<T: bits::Bits>(capacity: usize) -> Vec<T> {
     Vec::with_capacity(blocks(capacity, T::BITS))
 }
 
@@ -39,7 +39,7 @@ pub fn with_capacity<T: bits::Block>(capacity: usize) -> Vec<T> {
 /// assert_eq!(v.bits(), 80);
 /// assert_eq!(v.len(), 10);
 /// ```
-pub fn empty<T: bits::Block>(n: usize) -> Vec<T> {
+pub fn empty<T: bits::Bits>(n: usize) -> Vec<T> {
     use std::iter::from_fn;
     from_fn(|| Some(T::empty())).take(blocks(n, T::BITS)).collect::<Vec<T>>()
 }

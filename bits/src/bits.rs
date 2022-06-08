@@ -3,7 +3,7 @@ use crate::*;
 #[cfg(feature = "alloc")]
 pub use impl_std::Blocks;
 
-pub trait Block: Clone + Container + Count + Rank + Excess + Select + ContainerMut {
+pub trait Bits: Clone + Container + ContainerMut + Count + Rank + Excess + Select {
     const BITS: usize;
 
     #[doc(hidden)]
@@ -14,7 +14,7 @@ pub trait Block: Clone + Container + Count + Rank + Excess + Select + ContainerM
 
 macro_rules! impls {
     ($( $Int:ty )*) => ($(
-        impl Block for $Int {
+        impl Bits for $Int {
             const BITS: usize = <$Int>::BITS as usize;
 
             #[inline]
@@ -28,9 +28,9 @@ macro_rules! impls {
 impls!(u8 u16 u32 u64 u128 usize);
 impls!(i8 i16 i32 i64 i128 isize);
 
-impl<B, const N: usize> Block for [B; N]
+impl<B, const N: usize> Bits for [B; N]
 where
-    B: Copy + Block,
+    B: Copy + Bits,
 {
     const BITS: usize = B::BITS * N;
 
@@ -78,7 +78,7 @@ mod impl_alloc {
     use std::borrow::Cow;
     use std::boxed::Box;
 
-    impl<T: Block> Block for Box<T> {
+    impl<T: Bits> Bits for Box<T> {
         const BITS: usize = T::BITS;
         #[inline]
         fn empty() -> Self {
@@ -86,9 +86,9 @@ mod impl_alloc {
         }
     }
 
-    impl<'a, T> Block for Cow<'a, T>
+    impl<'a, T> Bits for Cow<'a, T>
     where
-        T: ?Sized + Block,
+        T: ?Sized + Bits,
     {
         const BITS: usize = T::BITS;
         #[inline]
@@ -97,7 +97,7 @@ mod impl_alloc {
         }
     }
 
-    impl<'a, T: Block> IntoBlocks for &'a [T] {
+    impl<'a, T: Bits> IntoBlocks for &'a [T] {
         type Block = Cow<'a, T>;
         type Blocks = Blocks<'a, T>;
         fn into_blocks(self) -> Self::Blocks {
@@ -109,7 +109,7 @@ mod impl_alloc {
         blocks: Enumerate<slice::Iter<'a, T>>,
     }
 
-    impl<'a, T: Block> Iterator for Blocks<'a, T> {
+    impl<'a, T: Bits> Iterator for Blocks<'a, T> {
         type Item = (usize, Cow<'a, T>);
         #[inline]
         fn next(&mut self) -> Option<Self::Item> {

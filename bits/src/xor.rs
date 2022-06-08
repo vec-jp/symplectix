@@ -1,4 +1,4 @@
-use crate::{block::IntoBlocks, index};
+use crate::{bits::IntoBlocks, index};
 use core::{
     cmp::Ordering::*,
     iter::{Fuse, Peekable},

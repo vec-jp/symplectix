@@ -1,4 +1,4 @@
-use crate::{index, Block, Container};
+use crate::{index, Bits, Container};
 
 pub trait ContainerMut: Container {
     fn set_bit(&mut self, i: usize);
@@ -23,7 +23,7 @@ macro_rules! impls {
 impls!(u8 u16 u32 u64 u128 usize);
 impls!(i8 i16 i32 i64 i128 isize);
 
-impl<B: Block> ContainerMut for [B] {
+impl<B: Bits> ContainerMut for [B] {
     #[inline]
     fn set_bit(&mut self, i: usize) {
         assert!(i < self.bits());

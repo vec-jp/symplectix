@@ -1,5 +1,5 @@
 use crate::index;
-use crate::Block;
+use crate::Bits;
 
 pub trait Container {
     /// Returns the number of binary digits.
@@ -36,7 +36,7 @@ macro_rules! impls {
         impl Container for $Int {
             #[inline]
             fn bits(&self) -> usize {
-                <Self as Block>::BITS
+                <Self as Bits>::BITS
             }
 
             #[inline]
@@ -49,7 +49,7 @@ macro_rules! impls {
 impls!(u8 u16 u32 u64 u128 usize);
 impls!(i8 i16 i32 i64 i128 isize);
 
-impl<B: Block> Container for [B] {
+impl<B: Bits> Container for [B] {
     #[inline]
     fn bits(&self) -> usize {
         B::BITS * self.len()
