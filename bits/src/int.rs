@@ -97,15 +97,6 @@ macro_rules! impls {
         //     const FULL: Self = !0;
         // }
 
-        impl Block for $Word {
-            const BITS: usize = <$Word>::BITS as usize;
-
-            #[inline]
-            fn empty() -> Self {
-                Self::NULL
-            }
-        }
-
         impl Bits for $Word {
             #[inline]
             fn bits(&self) -> usize {
