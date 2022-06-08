@@ -159,7 +159,7 @@ mod int_select_impl {
 
     impl IntSelectImpl for u128 {
         /// ```
-        /// # use bits::{BitsMut, Select};
+        /// # use bits::{ContainerMut, Select};
         /// let mut n: u128 = 0;
         /// for i in (0..128).step_by(2) {
         ///     n.set_bit(i);

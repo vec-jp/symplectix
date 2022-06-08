@@ -1,4 +1,4 @@
-use crate::{BitsMut, Block, Container};
+use crate::{Block, Container, ContainerMut};
 
 /// # Examples
 ///
@@ -27,7 +27,7 @@ pub trait Varint: Container {
     }
 }
 
-pub trait PutVarint: BitsMut + Varint {
+pub trait PutVarint: ContainerMut + Varint {
     /// Writes `N` bits in `[i, i+N)`.
     #[doc(hidden)]
     fn put_varint<T: Block>(&mut self, i: usize, n: usize, int: T) {
