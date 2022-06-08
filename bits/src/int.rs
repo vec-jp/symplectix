@@ -97,17 +97,6 @@ macro_rules! impls {
         //     const FULL: Self = !0;
         // }
 
-        impl BitsMut for $Word {
-            #[inline]
-            fn set_bit(&mut self, i: usize) {
-                *self |= 1 << i;
-            }
-            #[inline]
-            fn unset_bit(&mut self, i: usize) {
-                *self &= !(1 << i);
-            }
-        }
-
         impl Count for $Word {
             #[inline]
             fn count1(&self) -> usize {
