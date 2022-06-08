@@ -1,8 +1,5 @@
 use crate::*;
 
-#[cfg(feature = "alloc")]
-pub use impl_std::Blocks;
-
 pub trait Bits: Clone + Container + ContainerMut + Count + Rank + Excess + Select {
     const BITS: usize;
 
@@ -12,7 +9,7 @@ pub trait Bits: Clone + Container + ContainerMut + Count + Rank + Excess + Selec
     fn empty() -> Self;
 }
 
-macro_rules! impls {
+macro_rules! impl_bits_for_ints {
     ($( $Int:ty )*) => ($(
         impl Bits for $Int {
             const BITS: usize = <$Int>::BITS as usize;
@@ -25,8 +22,8 @@ macro_rules! impls {
 
     )*)
 }
-impls!(u8 u16 u32 u64 u128 usize);
-impls!(i8 i16 i32 i64 i128 isize);
+impl_bits_for_ints!(u8 u16 u32 u64 u128 usize);
+impl_bits_for_ints!(i8 i16 i32 i64 i128 isize);
 
 impl<B, const N: usize> Bits for [B; N]
 where
@@ -40,43 +37,9 @@ where
     }
 }
 
-pub trait IntoBlocks {
-    type Block;
-
-    type Blocks: Iterator<Item = (usize, Self::Block)>;
-
-    fn into_blocks(self) -> Self::Blocks;
-}
-
-impl<'inner, 'outer, T: ?Sized> IntoBlocks for &'outer &'inner T
-where
-    &'inner T: IntoBlocks,
-{
-    type Block = <&'inner T as IntoBlocks>::Block;
-    type Blocks = <&'inner T as IntoBlocks>::Blocks;
-    #[inline]
-    fn into_blocks(self) -> Self::Blocks {
-        IntoBlocks::into_blocks(*self)
-    }
-}
-
-impl<'a, B, const N: usize> IntoBlocks for &'a [B; N]
-where
-    &'a [B]: IntoBlocks,
-{
-    type Block = <&'a [B] as IntoBlocks>::Block;
-    type Blocks = <&'a [B] as IntoBlocks>::Blocks;
-    #[inline]
-    fn into_blocks(self) -> Self::Blocks {
-        self.as_ref().into_blocks()
-    }
-}
-
-mod impl_alloc {
+mod impl_bits {
     use super::*;
-    use core::{iter::Enumerate, slice};
     use std::borrow::Cow;
-    use std::boxed::Box;
 
     impl<T: Bits> Bits for Box<T> {
         const BITS: usize = T::BITS;
@@ -94,26 +57,6 @@ mod impl_alloc {
         #[inline]
         fn empty() -> Self {
             Cow::Owned(T::empty())
-        }
-    }
-
-    impl<'a, T: Bits> IntoBlocks for &'a [T] {
-        type Block = Cow<'a, T>;
-        type Blocks = Blocks<'a, T>;
-        fn into_blocks(self) -> Self::Blocks {
-            Blocks { blocks: self.iter().enumerate() }
-        }
-    }
-
-    pub struct Blocks<'a, T> {
-        blocks: Enumerate<slice::Iter<'a, T>>,
-    }
-
-    impl<'a, T: Bits> Iterator for Blocks<'a, T> {
-        type Item = (usize, Cow<'a, T>);
-        #[inline]
-        fn next(&mut self) -> Option<Self::Item> {
-            self.blocks.find_map(|(i, b)| b.any().then(|| (i, Cow::Borrowed(b))))
         }
     }
 }

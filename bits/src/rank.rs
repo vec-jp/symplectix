@@ -24,7 +24,7 @@ macro_rules! impls {
             #[inline]
             fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
                 let Range { start: i, end: j } = index::to_range(&r, 0, self.bits());
-                (*self & bitmask!($Int, i, j)).count1()
+                (*self & mask!($Int, i, j)).count1()
             }
 
             #[inline]
