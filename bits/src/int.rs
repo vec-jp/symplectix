@@ -97,18 +97,6 @@ macro_rules! impls {
         //     const FULL: Self = !0;
         // }
 
-        impl Bits for $Word {
-            #[inline]
-            fn bits(&self) -> usize {
-                <Self as Block>::BITS
-            }
-
-            #[inline]
-            fn bit(&self, i: usize) -> Option<bool> {
-                (i < self.bits()).then(|| (*self & (1 << i)) != 0)
-            }
-        }
-
         impl BitsMut for $Word {
             #[inline]
             fn set_bit(&mut self, i: usize) {
