@@ -97,28 +97,6 @@ macro_rules! impls {
         //     const FULL: Self = !0;
         // }
 
-        impl Count for $Word {
-            #[inline]
-            fn count1(&self) -> usize {
-                self.count_ones() as usize
-            }
-
-            #[inline]
-            fn count0(&self) -> usize {
-                self.count_zeros() as usize
-            }
-
-            #[inline]
-            fn all(&self) -> bool {
-                *self == Self::FULL
-            }
-
-            #[inline]
-            fn any(&self) -> bool {
-                *self != Self::NULL
-            }
-        }
-
         impl Rank for $Word {
             #[inline]
             fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
