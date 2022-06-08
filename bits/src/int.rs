@@ -1,5 +1,4 @@
 use crate::*;
-use core::ops::{Range, RangeBounds};
 
 mod private {
     pub trait Sealed {}
@@ -12,17 +11,6 @@ mod private {
 
     impl_for_nums!(u8 u16 u32 u64 u128 usize);
     impl_for_nums!(i8 i16 i32 i64 i128 isize);
-}
-
-#[inline]
-pub(crate) fn mask<T: Int>(i: usize, j: usize) -> T {
-    // TODO: assert!(i <= j);
-    // if i == j {
-    if i >= j {
-        T::NULL
-    } else {
-        T::FULL >> (<T as Block>::BITS - (j - i)) << i
-    }
 }
 
 /// `Int` is a fixed-length group of bits that the CPU can process.
@@ -96,19 +84,6 @@ macro_rules! impls {
         //     #[doc(hidden)]
         //     const FULL: Self = !0;
         // }
-
-        impl Rank for $Word {
-            #[inline]
-            fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                let Range { start: i, end: j } = index::to_range(&r, 0, self.bits());
-                (*self & mask::<Self>(i, j)).count1()
-            }
-
-            #[inline]
-            fn rank0<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                (!*self).rank1(r)
-            }
-        }
 
         impl Select for $Word {
             #[inline]
