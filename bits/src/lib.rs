@@ -30,18 +30,11 @@ pub use self::excess::Excess;
 pub use self::rank::Rank;
 pub use self::select::Select;
 
+pub mod mask;
+pub use self::mask::Mask;
+
 pub mod varint;
 pub use self::varint::{PutVarint, Varint};
-
-pub mod and;
-pub mod mask;
-pub mod not;
-pub mod or;
-pub mod xor;
-pub use self::and::And;
-pub use self::not::Not;
-pub use self::or::Or;
-pub use self::xor::Xor;
 
 // /// `Fold` is an iterator built from `Mask`s.
 // pub struct Fold<'a, B>(Box<dyn Iterator<Item = (usize, B)> + 'a>);

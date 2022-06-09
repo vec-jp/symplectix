@@ -4,10 +4,6 @@ use core::{
     iter::{Fuse, Peekable},
 };
 
-pub trait Not: Sized + Mask {
-    fn not<That: Mask>(self, that: That) -> BitwiseNot<Self, That>;
-}
-
 pub trait NotAssign<That: ?Sized> {
     fn not_assign(a: &mut Self, b: &That);
 }
@@ -20,13 +16,6 @@ pub struct BitwiseNot<A, B> {
 pub struct Difference<A: Iterator, B: Iterator> {
     a: Peekable<Fuse<A>>,
     b: Peekable<Fuse<B>>,
-}
-
-impl<T: Mask> Not for T {
-    #[inline]
-    fn not<That: Mask>(self, that: That) -> BitwiseNot<Self, That> {
-        BitwiseNot { a: self, b: that }
-    }
 }
 
 macro_rules! ints_impl_not_assign {

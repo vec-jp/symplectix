@@ -1,11 +1,38 @@
 use core::cmp::Ordering;
 
-pub trait Mask {
+pub mod and;
+pub mod not;
+pub mod or;
+pub mod xor;
+
+use self::{and::BitwiseAnd, not::BitwiseNot, or::BitwiseOr, xor::BitwiseXor};
+
+pub trait Mask: Sized {
     type Bits;
 
     type Iter: Iterator<Item = (usize, Self::Bits)>;
 
     fn into_mask(self) -> Self::Iter;
+
+    #[inline]
+    fn and<That: Mask>(self, that: That) -> BitwiseAnd<Self, That> {
+        BitwiseAnd { a: self, b: that }
+    }
+
+    #[inline]
+    fn not<That: Mask>(self, that: That) -> BitwiseNot<Self, That> {
+        BitwiseNot { a: self, b: that }
+    }
+
+    #[inline]
+    fn or<That: Mask>(self, that: That) -> BitwiseOr<Self, That> {
+        BitwiseOr { a: self, b: that }
+    }
+
+    #[inline]
+    fn xor<That: Mask>(self, that: That) -> BitwiseXor<Self, That> {
+        BitwiseXor { a: self, b: that }
+    }
 }
 
 impl<'inner, 'outer, T: ?Sized> Mask for &'outer &'inner T

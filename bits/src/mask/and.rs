@@ -4,10 +4,6 @@ use core::{
     iter::{Fuse, Peekable},
 };
 
-pub trait And: Sized + Mask {
-    fn and<That: Mask>(self, that: That) -> BitwiseAnd<Self, That>;
-}
-
 pub trait AndAssign<That: ?Sized> {
     fn and_assign(a: &mut Self, b: &That);
 }
@@ -20,13 +16,6 @@ pub struct BitwiseAnd<A, B> {
 pub struct Intersection<A: Iterator, B: Iterator> {
     a: Peekable<Fuse<A>>,
     b: Peekable<Fuse<B>>,
-}
-
-impl<T: Mask> And for T {
-    #[inline]
-    fn and<That: Mask>(self, that: That) -> BitwiseAnd<Self, That> {
-        BitwiseAnd { a: self, b: that }
-    }
 }
 
 macro_rules! ints_impl_and_assign {
