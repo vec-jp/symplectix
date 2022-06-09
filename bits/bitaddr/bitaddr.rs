@@ -1,6 +1,14 @@
 use core::cmp::Ordering;
 use core::ops::{Bound, Range, RangeBounds};
 
+// TODO: Use type parameters instead of an argument.
+// Type parameters can not be used in const expressions.
+// Blocked by Rust issue #60551.
+// #[inline]
+// pub const fn address<const N: usize>(i: usize) -> (usize, usize) {
+//     (i / N, i % N)
+// }
+
 #[inline]
 pub const fn address(i: usize, b: usize) -> (usize, usize) {
     (i / b, i % b)
@@ -76,9 +84,11 @@ pub const fn between(
 mod tests {
     #[test]
     fn between() {
-        let mut it = super::between(10, 30, 3);
+        let mut it = super::between(10, 20, 3);
         assert_eq!(it.next(), Some((3, 1..3))); // 10..12
         assert_eq!(it.next(), Some((4, 0..3))); // 12..15
         assert_eq!(it.next(), Some((5, 0..3))); // 15..18
+        assert_eq!(it.next(), Some((6, 0..2))); // 18..20
+        assert_eq!(it.next(), None);
     }
 }
