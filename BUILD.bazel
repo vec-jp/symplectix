@@ -30,6 +30,6 @@ buildifier(
 )
 
 exports_files([
-    "clippy.toml",
-    "rustfmt.toml",
+    ".clippy.toml",
+    ".rustfmt.toml",
 ])
