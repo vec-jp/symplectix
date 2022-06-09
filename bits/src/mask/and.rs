@@ -4,13 +4,13 @@ use core::{
     iter::{Fuse, Peekable},
 };
 
-pub trait AndAssign<That: ?Sized> {
-    fn and_assign(a: &mut Self, b: &That);
-}
-
-pub struct BitwiseAnd<A, B> {
+pub struct And<A, B> {
     pub(crate) a: A,
     pub(crate) b: B,
+}
+
+pub trait AndAssign<That: ?Sized> {
+    fn and_assign(a: &mut Self, b: &That);
 }
 
 pub struct Intersection<A: Iterator, B: Iterator> {
@@ -64,7 +64,7 @@ where
 //     }
 // }
 
-impl<A, B> IntoIterator for BitwiseAnd<A, B>
+impl<A, B> IntoIterator for And<A, B>
 where
     Self: Mask,
 {
@@ -76,7 +76,7 @@ where
     }
 }
 
-impl<A: Mask, B: Mask> Mask for BitwiseAnd<A, B>
+impl<A: Mask, B: Mask> Mask for And<A, B>
 where
     A::Bits: AndAssign<B::Bits>,
 {
