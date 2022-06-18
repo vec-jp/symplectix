@@ -1,13 +1,10 @@
-load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", "rust_test", "rust_test_suite")
+load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", "rust_test")
 
 package(default_visibility = ["//visibility:private"])
 
 rust_library(
     name = "bitvec",
-    srcs = glob(
-        ["*.rs"],
-        exclude = ["**/*_test.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     visibility = ["//visibility:public"],
     deps = [
         "//bits",
@@ -15,19 +12,6 @@ rust_library(
         "//bits/bitpacking",
         "//fenwicktree",
         "//num",
-    ],
-)
-
-rust_test_suite(
-    name = "tests",
-    srcs = glob(["*_test.rs"]),
-    proc_macro_deps = [
-        "@crates//:quickcheck_macros",
-    ],
-    deps = [
-        ":bitvec",
-        "//bits",
-        "@crates//:quickcheck",
     ],
 )
 

@@ -6,7 +6,7 @@ rust_library(
     name = "bitpacking",
     srcs = glob(
         ["*.rs"],
-        exclude = ["**/*_test.rs"],
+        exclude = ["*_test.rs"],
     ),
     visibility = ["//visibility:public"],
     deps = ["//bits"],
