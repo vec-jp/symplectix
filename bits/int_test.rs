@@ -28,7 +28,7 @@ unsafe fn pdep_u32_bmi2(n: u32, mask: u32) -> u32 {
     #[cfg(target_arch = "x86_64")]
     use core::arch::x86_64::_pdep_u32;
 
-    unsafe { _pdep_u32(self, mask) }
+    unsafe { _pdep_u32(n, mask) }
 }
 
 impl Pdep for u64 {
@@ -49,7 +49,7 @@ unsafe fn pdep_u64_bmi2(n: u64, mask: u64) -> u64 {
     #[cfg(target_arch = "x86_64")]
     use core::arch::x86_64::_pdep_u64;
 
-    unsafe { _pdep_u64(self, mask) }
+    unsafe { _pdep_u64(n, mask) }
 }
 
 fn _pdep<T: Int + num::Arith + num::BitwiseAssign + bits::Bits + Lsb>(data: T, mut mask: T) -> T {
