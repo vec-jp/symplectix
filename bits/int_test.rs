@@ -36,7 +36,7 @@ impl Pdep for u64 {
         #[cfg(target_arch = "x86_64")]
         {
             if is_x86_feature_detected!("bmi2") {
-                return unsafe { x86_64::_pdep_u64(self, mask) };
+                return unsafe { pdep_u64_bmi2(self, mask) };
             }
         }
         _pdep(self, mask)
