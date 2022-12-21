@@ -44,6 +44,36 @@ const fn max_index_exclusive(bound: Bound<&usize>, max: usize) -> usize {
     }
 }
 
+/// # Examples
+///
+/// ```
+/// let mut it = bitaddr::between(10, 20, 3);
+/// assert_eq!(it.next(), Some((3, 1..3))); // 10..12
+/// assert_eq!(it.next(), Some((4, 0..3))); // 12..15
+/// assert_eq!(it.next(), Some((5, 0..3))); // 15..18
+/// assert_eq!(it.next(), Some((6, 0..2))); // 18..20
+/// assert_eq!(it.next(), None);
+///
+/// let mut it = bitaddr::between(10, 21, 3);
+/// assert_eq!(it.next(), Some((3, 1..3))); // 10..12
+/// assert_eq!(it.next(), Some((4, 0..3))); // 12..15
+/// assert_eq!(it.next(), Some((5, 0..3))); // 15..18
+/// assert_eq!(it.next(), Some((6, 0..3))); // 18..21
+/// assert_eq!(it.next(), Some((7, 0..0))); // 21..21
+/// assert_eq!(it.next(), None);
+///
+/// let mut it = bitaddr::between(10, 10, 3);
+/// assert_eq!(it.next(), Some((3, 1..1))); // 10..10
+/// assert_eq!(it.next(), None);
+///
+/// let mut it = bitaddr::between(10, 12, 3);
+/// assert_eq!(it.next(), Some((3, 1..3))); // 10..12
+/// assert_eq!(it.next(), Some((4, 0..0))); // 12..12
+/// assert_eq!(it.next(), None);
+///
+/// let mut it = bitaddr::between(10, 1, 3);
+/// assert_eq!(it.next(), None);
+/// ```
 pub const fn between(
     start: usize,
     end: usize,
@@ -78,17 +108,4 @@ pub const fn between(
     }
 
     Between { current: address(start, step), end: address(end, step), sep: step }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn between() {
-        let mut it = super::between(10, 20, 3);
-        assert_eq!(it.next(), Some((3, 1..3))); // 10..12
-        assert_eq!(it.next(), Some((4, 0..3))); // 12..15
-        assert_eq!(it.next(), Some((5, 0..3))); // 15..18
-        assert_eq!(it.next(), Some((6, 0..2))); // 18..20
-        assert_eq!(it.next(), None);
-    }
 }
