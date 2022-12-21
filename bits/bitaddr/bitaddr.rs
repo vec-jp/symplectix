@@ -59,16 +59,13 @@ const fn max_index_exclusive(bound: Bound<&usize>, max: usize) -> usize {
 /// assert_eq!(it.next(), Some((4, 0..3))); // 12..15
 /// assert_eq!(it.next(), Some((5, 0..3))); // 15..18
 /// assert_eq!(it.next(), Some((6, 0..3))); // 18..21
-/// assert_eq!(it.next(), Some((7, 0..0))); // 21..21
 /// assert_eq!(it.next(), None);
 ///
 /// let mut it = bitaddr::between(10, 10, 3);
-/// assert_eq!(it.next(), Some((3, 1..1))); // 10..10
 /// assert_eq!(it.next(), None);
 ///
 /// let mut it = bitaddr::between(10, 12, 3);
 /// assert_eq!(it.next(), Some((3, 1..3))); // 10..12
-/// assert_eq!(it.next(), Some((4, 0..0))); // 12..12
 /// assert_eq!(it.next(), None);
 ///
 /// let mut it = bitaddr::between(10, 1, 3);
@@ -89,6 +86,10 @@ pub const fn between(
         type Item = (usize, Range<usize>);
 
         fn next(&mut self) -> Option<Self::Item> {
+            if self.current == self.end {
+                return None;
+            }
+
             let (i, p) = self.current; // p is 0 except the first item
             let (j, q) = self.end; // q is B::BITS except the last item
             let sep = self.sep;
