@@ -29,9 +29,9 @@ jobs:
         with:
           # bazelisk stores a bazel binary in the [UserCacheDir](https://pkg.go.dev/os#UserCacheDir).
           path: |
-            $HOME/Library/bazelisk
-            ~/.cache/bazelisk
             /tmp/trunk
+            ~/.cache/bazelisk
+            ~/Library/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
