@@ -31,7 +31,7 @@ jobs:
           path: |
             /tmp/trunk
             ~/.cache/bazelisk
-            ~/Library/bazelisk
+            ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
