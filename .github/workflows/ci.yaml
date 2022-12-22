@@ -36,17 +36,13 @@ jobs:
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
       - name: Info
-        run: |
-          bazel info
+        run: bazel info
 
-      - name: Format (buildifier)
-        run: |
-          bazel run //:buildifier/check
+      - name: Buildifier
+        run: bazel run //:buildifier/check
 
       - name: Build
-        run: |
-          bazel build --config=ci //...
+        run: bazel build --config=ci //...
 
       - name: Test
-        run: |
-          bazel test --config=ci //...
+        run: bazel test --config=ci //...
