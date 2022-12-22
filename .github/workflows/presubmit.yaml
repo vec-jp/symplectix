@@ -12,7 +12,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  presubmit:
+  reviewdog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: reviewdog/action-setup@v1
+
+      - name: actionlint
+        uses: reviewdog/action-actionlint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+
+      - name: markdownlint
+        uses: reviewdog/action-markdownlint@v0.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+
+  bazel:
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-12]
@@ -32,11 +51,11 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
-      - name: Buildifier
+      - name: bazel run //:buildifier/check
         run: bazel run //:buildifier/check
 
-      - name: Build
+      - name: bazel build //...
         run: bazel build --config=ci //...
 
-      - name: Test
+      - name: bazel test //...
         run: bazel test --config=ci //...
