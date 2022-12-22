@@ -31,7 +31,8 @@ jobs:
             /tmp/trunk
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
-          key: ${{ runner.os }}-${{ env.cache-name }}
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.ref }}
+          restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
       - name: Info
         run: bazel info
