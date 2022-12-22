@@ -9,7 +9,6 @@ on:
     branches:
       - main
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
@@ -32,8 +31,7 @@ jobs:
             /tmp/trunk
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
+          key: ${{ runner.os }}-${{ env.cache-name }}
 
       - name: Info
         run: bazel info
