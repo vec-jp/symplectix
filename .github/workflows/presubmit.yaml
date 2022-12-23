@@ -12,24 +12,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  reviewdog:
+  actionlint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - uses: reviewdog/action-setup@v1
-
-      - name: actionlint
-        uses: reviewdog/action-actionlint@v1
+      - uses: reviewdog/action-actionlint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          reporter: github-check
 
-      - name: markdownlint
-        uses: reviewdog/action-markdownlint@v0.1
+  markdownlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: reviewdog/action-markdownlint@v0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          reporter: github-check
+
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: reviewdog/action-yamllint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-check
 
   bazel:
     strategy:
