@@ -1,8 +1,6 @@
 name: bazel
 
 on:
-  workflow_dispatch:
-
   workflow_call:
     inputs:
       os:
