@@ -6,5 +6,5 @@ on:
       - main
 
 jobs:
-  bazel:
-    uses: ./.github/workflows/bazel.yaml
+  testing:
+    uses: ./.github/workflows/testing.yaml

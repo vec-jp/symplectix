@@ -1,4 +1,4 @@
-name: bazel
+name: testing
 
 on:
   workflow_call:
