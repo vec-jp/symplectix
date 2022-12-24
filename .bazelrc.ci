@@ -3,9 +3,7 @@ startup --output_user_root=/tmp/trunk/
 common --announce_rc
 
 build --verbose_failures
-
 test --test_output=errors
-test --test_verbose_timeout_warnings
 
 build --config=rustfmt
 build --config=clippy
