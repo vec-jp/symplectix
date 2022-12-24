@@ -5,7 +5,6 @@ on:
     inputs:
       os:
         default: 'ubuntu-22.04'
-        required: true
         type: string
 
 jobs:
