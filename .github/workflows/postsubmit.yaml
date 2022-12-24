@@ -6,10 +6,10 @@ on:
       - main
 
 jobs:
-  presubmit:
+  testing:
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-12]
-    uses: ./.github/workflows/presubmit.yaml
+    uses: ./.github/workflows/testing.yaml
     with:
       os: ${{ matrix.os }}
