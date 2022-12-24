@@ -12,9 +12,11 @@ jobs:
     name: Bazel
     runs-on: ${{ inputs.os }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - uses: actions/cache@v3
+      - name: Cache
+        uses: actions/cache@v3
         env:
           cache-name: bazel-cache
         with:
@@ -26,11 +28,11 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
-      - name: bazel run //:buildifier/check
+      - name: Format (buildifier)
         run: bazel --bazelrc=.bazelrc --bazelrc=.bazelrc.ci run //:buildifier/check
 
-      - name: bazel build //...
+      - name: Build
         run: bazel --bazelrc=.bazelrc --bazelrc=.bazelrc.ci build //...
 
-      - name: bazel test //...
+      - name: Test
         run: bazel --bazelrc=.bazelrc --bazelrc=.bazelrc.ci test //...
