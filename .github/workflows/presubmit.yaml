@@ -7,6 +7,6 @@ on:
 
 jobs:
   bazel:
-    uses: ./.github/workflows/bazel.yml
+    uses: ./.github/workflows/bazel.yaml
     with:
       os: ubuntu-22.04

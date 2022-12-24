@@ -10,6 +10,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-12]
-    uses: ./.github/workflows/bazel.yml
+    uses: ./.github/workflows/bazel.yaml
     with:
       os: ${{ matrix.os }}
