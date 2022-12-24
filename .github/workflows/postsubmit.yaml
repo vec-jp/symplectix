@@ -5,8 +5,11 @@ on:
     branches:
       - main
 
-  workflow_dispatch:
-
 jobs:
-  presubmit:
-    uses: ./.github/workflows/presubmit.yml
+  bazel:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-12]
+    uses: ./.github/workflows/bazel.yml
+    with:
+      os: ${{ matrix.os }}
