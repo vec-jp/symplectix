@@ -8,3 +8,5 @@ on:
 jobs:
   testing:
     uses: ./.github/workflows/testing.yaml
+    with:
+      os: ubuntu-22.04
