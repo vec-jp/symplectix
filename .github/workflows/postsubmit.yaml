@@ -1,0 +1,12 @@
+name: postsubmit
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  presubmit:
+    uses: ./.github/workflows/presubmit.yml
