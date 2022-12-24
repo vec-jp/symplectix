@@ -1,4 +1,4 @@
-name: postsubmit
+name: Postsubmit
 
 on:
   push:

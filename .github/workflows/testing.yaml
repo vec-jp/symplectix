@@ -1,4 +1,4 @@
-name: testing
+name: Testing
 
 on:
   workflow_call:
@@ -9,6 +9,7 @@ on:
 
 jobs:
   bazel:
+    name: Bazel
     runs-on: ${{ inputs.os }}
     steps:
       - uses: actions/checkout@v3
