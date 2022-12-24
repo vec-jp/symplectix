@@ -7,6 +7,7 @@ on:
 
 jobs:
   testing:
+    name: Testing
     uses: ./.github/workflows/testing.yaml
     with:
       os: ubuntu-22.04
