@@ -53,10 +53,6 @@ build --sandbox_fake_username
 # rustc flags for proc-macros, cargo_build_script, etc.
 build --@rules_rust//:extra_exec_rustc_flags=-Copt-level=3
 
-# rust-analyzer
-# Ensure rust source code is available to `rust-analyzer`.
-build --repo_env=RULES_RUST_TOOLCHAIN_INCLUDE_RUSTC_SRCS=true
-
 # rustfmt
 # Run `bazel run @rules_rust//tools/rustfmt` to format.
 build:rustfmt --aspects=@rules_rust//rust:defs.bzl%rustfmt_aspect
