@@ -1,3 +1,19 @@
+# Whether to announce rc options.
+# https://bazel.build/reference/command-line-reference#flag--announce_rc
+common:verbose --announce_rc
+
+# If a command fails, print out the full command line.
+# https://bazel.build/reference/command-line-reference#flag--verbose_failures
+build:verbose --verbose_failures
+
+# Specifies desired output mode. Valid values are
+# - 'summary' to output only test status summary
+# - 'errors' to also print test logs for failed tests
+# - 'all' to print logs for all tests
+# - 'streamed' to output logs for all tests in real time
+# https://bazel.build/reference/command-line-reference#flag--test_output
+test:verbose --test_output=errors
+
 # Bazel picks up host-OS-specific config lines from bazelrc files.
 # https://bazel.build/reference/command-line-reference#flag--enable_platform_specific_config
 common --enable_platform_specific_config
@@ -51,5 +67,22 @@ build:rustfmt --@rules_rust//:rustfmt.toml=//:.rustfmt.toml
 build:clippy --aspects=@rules_rust//rust:defs.bzl%rust_clippy_aspect
 build:clippy --output_groups=+clippy_checks
 build:clippy --@rules_rust//:clippy.toml=//:.clippy.toml
+
+# compilation_mode to rustc codegen options
+# fastbuild: -Copt-level=0 -Cdebuginfo=0
+# dbg:       -Copt-level=0 -Cdebuginfo=2
+# opt:       -Copt-level=3 -Cdebuginfo=0
+build:release --compilation_mode=opt
+build:release --@rules_rust//:extra_rustc_flag=-Cdebug-assertions=off
+build:release --@rules_rust//:extra_rustc_flag=-Cstrip=debuginfo
+build:release --@rules_rust//:extra_rustc_flag=-Coverflow-checks=off
+build:release --@rules_rust//:extra_rustc_flag=-Cpanic=unwind
+build:release --@rules_rust//:extra_rustc_flag=-Clto=fat
+build:release --@rules_rust//:extra_rustc_flag=-Ccodegen-units=1
+
+build:ci --config=verbose
+build:ci --config=rustfmt
+build:ci --config=clippy
+build:ci --config=release
 
 try-import %workspace%/.bazelrc.user
