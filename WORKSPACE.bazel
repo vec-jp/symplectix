@@ -32,6 +32,16 @@ load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_depende
 # https://bazelbuild.github.io/rules_foreign_cc/0.9.0/flatten.html#rules_foreign_cc_dependencies
 rules_foreign_cc_dependencies()
 
+# Thirdparty
+
+load("@//thirdparty:repositories.bzl", thirdparty_repositories = "repositories")
+
+thirdparty_repositories()
+
+load("@//thirdparty:setup.bzl", thirdparty_setup = "setup")
+
+thirdparty_setup()
+
 # Rust
 
 http_archive(
@@ -65,15 +75,19 @@ crate_universe_dependencies(
     rust_version = _RUST_VERSION,
 )
 
-load("@rules_rust//crate_universe:defs.bzl", "crates_repository")
-load("//build/rust:crates.bzl", "crates")
+load("@//:crates.bzl", "crates")
+load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "splicing_config")
 
 crates_repository(
     name = "crates",
-    cargo_lockfile = "//build/rust:Cargo.lock",
-    lockfile = "//build/rust:Cargo.Bazel.lock",
-    packages = crates,
+    annotations = crates.annotations,
+    cargo_lockfile = "//:Cargo.Bazel.lock",
+    lockfile = "//:cargo-bazel-lock.json",
+    packages = crates.packages,
     rust_version = _RUST_VERSION,
+    splicing_config = splicing_config(
+        resolver_version = "2",
+    ),
 )
 
 load("@crates//:defs.bzl", "crate_repositories")
