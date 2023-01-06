@@ -2,14 +2,14 @@ load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 exports_files(
     [
-        "BUILD.openssl.bazel",
+        "BUILD.libssh2.bazel",
     ],
     visibility = ["//visibility:public"],
 )
 
 rust_binary(
-    name = "version",
-    srcs = ["version.rs"],
+    name = "agent",
+    srcs = ["agent.rs"],
     visibility = ["//visibility:public"],
-    deps = ["@crates//:openssl"],
+    deps = ["@crates//:ssh2"],
 )

@@ -14,15 +14,23 @@ _annotations = {
         data = ["@openssl"],
         deps = ["@openssl"],
     )],
+    "libssh2-sys": [crate.annotation(
+        gen_build_script = False,
+        deps = ["@libssh2"],
+    )],
 }
 
 _packages = {
-    # OpenSSL
+    # openssl
     "openssl": crate.spec(
         version = "0.10.45",
     ),
 
-    # Testing
+    # libssh2
+    "ssh2": crate.spec(
+        version = "0.9",
+    ),
+
     # "arbitrary": crate.spec(
     #     version = "1",
     #     features = ["derive"],
@@ -34,7 +42,6 @@ _packages = {
         version = "1",
     ),
 
-    # Generates random numbers
     # "rand": crate.spec(
     #     version = "0.8.5",
     # ),
