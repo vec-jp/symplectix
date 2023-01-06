@@ -3,12 +3,12 @@ load("@rules_rust//crate_universe:defs.bzl", "crate")
 _annotations = {
     "openssl-sys": [crate.annotation(
         build_script_data = [
-            "@openssl//:gen_dir",
+            "@openssl//:openssl_dir",
             "@openssl//:openssl",
         ],
         build_script_data_glob = ["build/**/*.c"],
         build_script_env = {
-            "OPENSSL_DIR": "$(execpath @openssl//:gen_dir)",
+            "OPENSSL_DIR": "$(execpath @openssl//:openssl_dir)",
             "OPENSSL_STATIC": "1",
         },
         data = ["@openssl"],

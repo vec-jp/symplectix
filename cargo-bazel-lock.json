@@ -1,5 +1,5 @@
 {
-  "checksum": "2d924f01e26cdd8247624edd7d019ca8cdce79ab243f924a51e293e8f290e296",
+  "checksum": "9df00e4a750611d97d15e33cb32026601749a9f839e2f512bff9d97bb75da12e",
   "crates": {
     "aho-corasick 0.7.20": {
       "name": "aho-corasick",
@@ -1100,8 +1100,8 @@
       "build_script_attrs": {
         "data": {
           "common": [
-            "@openssl//:gen_dir",
-            "@openssl//:openssl"
+            "@openssl//:openssl",
+            "@openssl//:openssl_dir"
           ],
           "selects": {}
         },
@@ -1135,7 +1135,7 @@
         },
         "build_script_env": {
           "common": {
-            "OPENSSL_DIR": "$(execpath @openssl//:gen_dir)",
+            "OPENSSL_DIR": "$(execpath @openssl//:openssl_dir)",
             "OPENSSL_STATIC": "1"
           },
           "selects": {}

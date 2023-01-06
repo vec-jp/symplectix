@@ -95,7 +95,7 @@ configure_make(
 )
 
 filegroup(
-    name = "gen_dir",
+    name = "openssl_dir",
     srcs = [":openssl"],
     output_group = "gen_dir",
     visibility = ["//visibility:public"],
