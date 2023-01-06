@@ -18,6 +18,10 @@ _annotations = {
         gen_build_script = False,
         deps = ["@libssh2"],
     )],
+    "libz-sys": [crate.annotation(
+        gen_build_script = False,
+        deps = ["@zlib"],
+    )],
 }
 
 _packages = {

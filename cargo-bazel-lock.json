@@ -1,5 +1,5 @@
 {
-  "checksum": "83fd2813c7d44aa310a953f6286283e49d06c1249fc07ae0cce9541d7c70a0b5",
+  "checksum": "2d924f01e26cdd8247624edd7d019ca8cdce79ab243f924a51e293e8f290e296",
   "crates": {
     "aho-corasick 0.7.20": {
       "name": "aho-corasick",
@@ -609,18 +609,6 @@
               "exclude": []
             }
           }
-        },
-        {
-          "BuildScript": {
-            "crate_name": "build_script_build",
-            "crate_root": "build.rs",
-            "srcs": {
-              "include": [
-                "**/*.rs"
-              ],
-              "exclude": []
-            }
-          }
         }
       ],
       "library_target_name": "libz_sys",
@@ -636,42 +624,15 @@
             {
               "id": "libc 0.2.139",
               "target": "libc"
-            },
-            {
-              "id": "libz-sys 1.1.8",
-              "target": "build_script_build"
             }
           ],
           "selects": {}
         },
+        "extra_deps": [
+          "@zlib"
+        ],
         "edition": "2018",
         "version": "1.1.8"
-      },
-      "build_script_attrs": {
-        "data_glob": [
-          "**"
-        ],
-        "deps": {
-          "common": [
-            {
-              "id": "cc 1.0.78",
-              "target": "cc"
-            },
-            {
-              "id": "pkg-config 0.3.26",
-              "target": "pkg_config"
-            }
-          ],
-          "selects": {
-            "cfg(target_env = \"msvc\")": [
-              {
-                "id": "vcpkg 0.2.15",
-                "target": "vcpkg"
-              }
-            ]
-          }
-        },
-        "links": "z"
       },
       "license": "MIT OR Apache-2.0"
     },
