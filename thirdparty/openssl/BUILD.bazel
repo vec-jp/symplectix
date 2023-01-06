@@ -1,15 +1,13 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 
-exports_files(
-    [
-        "BUILD.openssl.bazel",
-    ],
-    visibility = ["//visibility:public"],
-)
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "BUILD.openssl.bazel",
+])
 
 rust_binary(
     name = "version",
     srcs = ["version.rs"],
-    visibility = ["//visibility:public"],
     deps = ["@crates//:openssl"],
 )

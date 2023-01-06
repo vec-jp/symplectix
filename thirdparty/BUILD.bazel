@@ -8,5 +8,4 @@ build_test(
         "@libssh2//:libssh2",
         "@openssl//:openssl",
     ],
-    visibility = ["//:__pkg__"],
 )

@@ -1,6 +1,5 @@
-exports_files(
-    [
-        "BUILD.zlib.bazel",
-    ],
-    visibility = ["//visibility:public"],
-)
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "BUILD.zlib.bazel",
+])

@@ -1,4 +1,4 @@
-load("//thirdparty/openssl:openssl_setup.bzl", "openssl_setup")
+load("//thirdparty/crates:crates_setup.bzl", "crates_setup")
 
 def setup():
-    openssl_setup()
+    crates_setup()

@@ -1,5 +1,6 @@
 workspace(name = "com_symplectik_trunk")
 
+load("@//:toolchain.bzl", "GO_VERSION", "RUST_EDITION", "RUST_VERSION")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Skylib
@@ -17,6 +18,49 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
+# Protocol Buffers
+
+http_archive(
+    name = "rules_proto",
+    sha256 = "80d3a4ec17354cccc898bfe32118edd934f851b03029d63ef3fc7c8663a7415c",
+    strip_prefix = "rules_proto-5.3.0-21.5",
+    urls = [
+        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.5.tar.gz",
+    ],
+)
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+
+rules_proto_dependencies()
+
+rules_proto_toolchains()
+
+# Rust
+
+http_archive(
+    name = "rules_rust",
+    sha256 = "5c2b6745236f8ce547f82eeacbbcc81d736734cc8bd92e60d3e3cdfa6e167bb5",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.15.0/rules_rust-v0.15.0.tar.gz"],
+)
+
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
+load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
+
+rules_rust_dependencies()
+
+rust_register_toolchains(
+    edition = RUST_EDITION,
+    version = RUST_VERSION,
+)
+
+# load("@rules_rust//bindgen:repositories.bzl", "rust_bindgen_repositories")
+# rust_bindgen_repositories()
+
+# load("@rules_rust//wasm_bindgen:repositories.bzl", "rust_wasm_bindgen_repositories")
+# rust_wasm_bindgen_repositories()
+
+rust_analyzer_dependencies()
+
 # CC
 
 http_archive(
@@ -32,71 +76,22 @@ load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_depende
 # https://bazelbuild.github.io/rules_foreign_cc/0.9.0/flatten.html#rules_foreign_cc_dependencies
 rules_foreign_cc_dependencies()
 
-# Thirdparty
-
-load("@//thirdparty:repositories.bzl", thirdparty_repositories = "repositories")
-
-thirdparty_repositories()
-
-load("@//thirdparty:setup.bzl", thirdparty_setup = "setup")
-
-thirdparty_setup()
-
-# Rust
+# Perl
 
 http_archive(
-    name = "rules_rust",
-    sha256 = "5c2b6745236f8ce547f82eeacbbcc81d736734cc8bd92e60d3e3cdfa6e167bb5",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.15.0/rules_rust-v0.15.0.tar.gz"],
+    name = "rules_perl",
+    sha256 = "391edb08802860ba733d402c6376cfe1002b598b90d2240d9d302ecce2289a64",
+    strip_prefix = "rules_perl-7f10dada09fcba1dc79a6a91da2facc25e72bd7d",
+    urls = [
+        "https://github.com/bazelbuild/rules_perl/archive/7f10dada09fcba1dc79a6a91da2facc25e72bd7d.tar.gz",
+    ],
 )
 
-load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
+load("@rules_perl//perl:deps.bzl", "perl_register_toolchains", "perl_rules_dependencies")
 
-_RUST_VERSION = "1.66.0"
+perl_rules_dependencies()
 
-_RUST_EDITION = "2021"
-
-rules_rust_dependencies()
-
-rust_register_toolchains(
-    edition = _RUST_EDITION,
-    version = _RUST_VERSION,
-)
-
-# load("@rules_rust//bindgen:repositories.bzl", "rust_bindgen_repositories")
-# rust_bindgen_repositories()
-
-# load("@rules_rust//wasm_bindgen:repositories.bzl", "rust_wasm_bindgen_repositories")
-# rust_wasm_bindgen_repositories()
-
-load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
-
-crate_universe_dependencies(
-    rust_version = _RUST_VERSION,
-)
-
-load("@//:crates.bzl", "crates")
-load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "splicing_config")
-
-crates_repository(
-    name = "crates",
-    annotations = crates.annotations,
-    cargo_lockfile = "//:Cargo.Bazel.lock",
-    lockfile = "//:cargo-bazel-lock.json",
-    packages = crates.packages,
-    rust_version = _RUST_VERSION,
-    splicing_config = splicing_config(
-        resolver_version = "2",
-    ),
-)
-
-load("@crates//:defs.bzl", "crate_repositories")
-
-crate_repositories()
-
-load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
-
-rust_analyzer_dependencies()
+perl_register_toolchains()
 
 # Go
 
@@ -123,26 +118,9 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 
 go_rules_dependencies()
 
-go_register_toolchains(version = "1.19.4")
+go_register_toolchains(version = GO_VERSION)
 
 gazelle_dependencies(go_repository_default_config = "//:WORKSPACE.bazel")
-
-# Protocol Buffers
-
-http_archive(
-    name = "rules_proto",
-    sha256 = "80d3a4ec17354cccc898bfe32118edd934f851b03029d63ef3fc7c8663a7415c",
-    strip_prefix = "rules_proto-5.3.0-21.5",
-    urls = [
-        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.5.tar.gz",
-    ],
-)
-
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
-
-rules_proto_dependencies()
-
-rules_proto_toolchains()
 
 # Docker
 
@@ -168,9 +146,19 @@ _rust_image_repos()
 
 http_archive(
     name = "com_github_bazelbuild_buildtools",
-    sha256 = "ae34c344514e08c23e90da0e2d6cb700fcd28e80c02e23e4d5715dddcb42f7b3",
+    sha256 = "e3bb0dc8b0274ea1aca75f1f8c0c835adbe589708ea89bf698069d0790701ea3",
     strip_prefix = "buildtools-5.1.0",
     urls = [
         "https://github.com/bazelbuild/buildtools/archive/refs/tags/5.1.0.tar.gz",
     ],
 )
+
+# Thirdparty
+
+load("@//thirdparty:repositories.bzl", thirdparty_repositories = "repositories")
+
+thirdparty_repositories()
+
+load("@//thirdparty:setup.bzl", thirdparty_setup = "setup")
+
+thirdparty_setup()
