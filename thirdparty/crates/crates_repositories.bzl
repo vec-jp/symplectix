@@ -40,10 +40,10 @@ def crates_repositories():
         cargo_lockfile = "//thirdparty/crates:cargo.lock",
         lockfile = "//thirdparty/crates:cargo-bazel-lock.json",
         packages = {
-            # "cargo-audit": crate.spec(
-            #     version = "0.17",
-            #     # gen_binaries = True,
-            # ),
+            "cargo-audit": crate.spec(
+                version = "0.17",
+                # gen_binaries = True,
+            ),
             "openssl": crate.spec(
                 version = "0.10.45",
             ),

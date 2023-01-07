@@ -24,16 +24,17 @@ filegroup(
 )
 
 _CACHE_ENTRIES = {
-    "BUILD_SHARED_LIBS": "off",
-    "BUILD_TESTS": "off",
     "BUILD_CLI": "off",
     "BUILD_EXAMPLES": "off",
     "BUILD_FUZZERS": "off",
-    # "EMBED_SSH_PATH": "$(location @libssh2//:libssh2)",
+    "BUILD_SHARED_LIBS": "off",
+    "BUILD_TESTS": "off",
     "USE_SSH": "on",
     "USE_HTTPS": "on",
     "USE_HTTP_PARSER": "builtin",
     "REGEX_BACKEND": "builtin",
+    "EMBED_SSH_PATH": "$(location @libssh2//:libssh2)",
+    "CMAKE_FIND_DEBUG_MODE": "on",
     # https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html
     # "CMAKE_PREFIX_PATH": "$EXT_BUILD_DEPS/pcre;$EXT_BUILD_DEPS/openssl;$EXT_BUILD_DEPS/libssh2;$EXT_BUILD_DEPS/zlib;${CMAKE_PREFIX_PATH:-}",
     "CMAKE_PREFIX_PATH": "$EXT_BUILD_DEPS/openssl;$EXT_BUILD_DEPS/libssh2;$EXT_BUILD_DEPS/zlib;${CMAKE_PREFIX_PATH:-}",
@@ -59,9 +60,9 @@ cmake(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "@libssh2",
+        # "@libssh2",
+        # "@openssl",
         "@zlib",
-        "@openssl",
     ] + select({
         # "@platforms//os:linux": ["@pcre"],
         "@platforms//os:linux": [],
