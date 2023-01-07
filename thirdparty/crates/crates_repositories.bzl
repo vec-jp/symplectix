@@ -24,6 +24,10 @@ def crates_repositories():
                 data = ["@openssl"],
                 deps = ["@openssl"],
             )],
+            "libgit2-sys": [crate.annotation(
+                gen_build_script = False,
+                deps = ["@libgit2"],
+            )],
             "libssh2-sys": [crate.annotation(
                 gen_build_script = False,
                 deps = ["@libssh2"],
@@ -36,11 +40,18 @@ def crates_repositories():
         cargo_lockfile = "//thirdparty/crates:cargo.lock",
         lockfile = "//thirdparty/crates:cargo-bazel-lock.json",
         packages = {
+            # "cargo-audit": crate.spec(
+            #     version = "0.17",
+            #     # gen_binaries = True,
+            # ),
             "openssl": crate.spec(
                 version = "0.10.45",
             ),
             "ssh2": crate.spec(
                 version = "0.9",
+            ),
+            "git2": crate.spec(
+                version = "0.15",
             ),
 
             # "arbitrary": crate.spec(
