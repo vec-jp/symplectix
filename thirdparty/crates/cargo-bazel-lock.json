@@ -1,5 +1,5 @@
 {
-  "checksum": "abb74ffa83f614f818e6decb376caae813ca53bf1515027417bc9d471a371ce5",
+  "checksum": "83391778b75d63193a24869a7d49b0ee8e25acad6c769cf3cf4682a5c254b73f",
   "crates": {
     "abscissa_core 0.6.0": {
       "name": "abscissa_core",
@@ -3114,6 +3114,10 @@
           "@libgit2"
         ],
         "edition": "2018",
+        "rustc_flags": [
+          "-lframework=Security",
+          "-lframework=CoreFoundation"
+        ],
         "version": "0.14.0+1.5.0"
       },
       "license": "MIT OR Apache-2.0"

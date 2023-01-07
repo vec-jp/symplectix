@@ -26,6 +26,10 @@ def crates_repositories():
             )],
             "libgit2-sys": [crate.annotation(
                 gen_build_script = False,
+                rustc_flags = [
+                    "-lframework=Security",
+                    "-lframework=CoreFoundation",
+                ],
                 deps = ["@libgit2"],
             )],
             "libssh2-sys": [crate.annotation(
