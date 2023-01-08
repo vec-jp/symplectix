@@ -1,5 +1,5 @@
 {
-  "checksum": "83391778b75d63193a24869a7d49b0ee8e25acad6c769cf3cf4682a5c254b73f",
+  "checksum": "2b7a23cca4a294c03168477b2df1bed5725ddb09d4b45e607f184bc217c01af6",
   "crates": {
     "abscissa_core 0.6.0": {
       "name": "abscissa_core",
@@ -3057,7 +3057,10 @@
       "repository": {
         "Http": {
           "url": "https://crates.io/api/v1/crates/libgit2-sys/0.14.0+1.5.0/download",
-          "sha256": "47a00859c70c8a4f7218e6d1cc32875c4b55f6799445b842b0d8ed5e4c3d959b"
+          "sha256": "47a00859c70c8a4f7218e6d1cc32875c4b55f6799445b842b0d8ed5e4c3d959b",
+          "patches": [
+            "@//thirdparty/crates/patch:libgit2-sys.patch"
+          ]
         }
       },
       "targets": [
@@ -3065,6 +3068,18 @@
           "Library": {
             "crate_name": "libgit2_sys",
             "crate_root": "lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
             "srcs": {
               "include": [
                 "**/*.rs"
@@ -3093,6 +3108,10 @@
               "target": "libc"
             },
             {
+              "id": "libgit2-sys 0.14.0+1.5.0",
+              "target": "build_script_build"
+            },
+            {
               "id": "libssh2-sys 0.2.23",
               "target": "libssh2_sys"
             },
@@ -3114,11 +3133,26 @@
           "@libgit2"
         ],
         "edition": "2018",
-        "rustc_flags": [
-          "-lframework=Security",
-          "-lframework=CoreFoundation"
-        ],
         "version": "0.14.0+1.5.0"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "cc 1.0.78",
+              "target": "cc"
+            },
+            {
+              "id": "pkg-config 0.3.26",
+              "target": "pkg_config"
+            }
+          ],
+          "selects": {}
+        },
+        "links": "git2"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -3128,7 +3162,10 @@
       "repository": {
         "Http": {
           "url": "https://crates.io/api/v1/crates/libssh2-sys/0.2.23/download",
-          "sha256": "b094a36eb4b8b8c8a7b4b8ae43b2944502be3e59cd87687595cf6b0a71b3f4ca"
+          "sha256": "b094a36eb4b8b8c8a7b4b8ae43b2944502be3e59cd87687595cf6b0a71b3f4ca",
+          "patches": [
+            "@//thirdparty/crates/patch:libssh2-sys.patch"
+          ]
         }
       },
       "targets": [
@@ -3136,6 +3173,18 @@
           "Library": {
             "crate_name": "libssh2_sys",
             "crate_root": "lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
             "srcs": {
               "include": [
                 "**/*.rs"
@@ -3157,6 +3206,10 @@
               "target": "libc"
             },
             {
+              "id": "libssh2-sys 0.2.23",
+              "target": "build_script_build"
+            },
+            {
               "id": "libz-sys 1.1.8",
               "target": "libz_sys"
             }
@@ -3175,6 +3228,32 @@
         ],
         "edition": "2015",
         "version": "0.2.23"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "cc 1.0.78",
+              "target": "cc"
+            },
+            {
+              "id": "pkg-config 0.3.26",
+              "target": "pkg_config"
+            }
+          ],
+          "selects": {
+            "cfg(target_env = \"msvc\")": [
+              {
+                "id": "vcpkg 0.2.15",
+                "target": "vcpkg"
+              }
+            ]
+          }
+        },
+        "links": "ssh2"
       },
       "license": "MIT/Apache-2.0"
     },

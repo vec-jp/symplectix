@@ -25,15 +25,11 @@ def crates_repositories():
                 deps = ["@openssl"],
             )],
             "libgit2-sys": [crate.annotation(
-                gen_build_script = False,
-                rustc_flags = [
-                    "-lframework=Security",
-                    "-lframework=CoreFoundation",
-                ],
+                patches = ["@//thirdparty/crates/patch:libgit2-sys.patch"],
                 deps = ["@libgit2"],
             )],
             "libssh2-sys": [crate.annotation(
-                gen_build_script = False,
+                patches = ["@//thirdparty/crates/patch:libssh2-sys.patch"],
                 deps = ["@libssh2"],
             )],
             "libz-sys": [crate.annotation(
