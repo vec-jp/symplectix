@@ -18,8 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Cache
-        uses: actions/cache@v3
+      - uses: actions/cache@v3
         env:
           cache-name: bazel-cache
         with:
@@ -28,6 +27,14 @@ jobs:
             /tmp/trunk
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
+
+      - uses: actions/cache@v3
+        env:
+          cache-name: advisory-db-cache
+        with:
+          path: ~/.cargo/advisory-db
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
