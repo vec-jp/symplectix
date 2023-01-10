@@ -1,5 +1,5 @@
 {
-  "checksum": "4c9c68d55e7fd5185d8112fd47b15e59ef141eabedf1c4c6274983fdbb0bf545",
+  "checksum": "22c718c59ab9af1bb7226377a3b690b071397b6faeb1765b1c52462697eda192",
   "crates": {
     "abscissa_core 0.6.0": {
       "name": "abscissa_core",
@@ -3180,7 +3180,6 @@
           }
         },
         "extra_deps": [
-          "@//thirdparty/crates:build_libssh2_sys",
           "@libssh2"
         ],
         "edition": "2015",

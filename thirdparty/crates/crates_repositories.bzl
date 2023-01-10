@@ -33,10 +33,7 @@ def crates_repositories():
             )],
             "libssh2-sys": [crate.annotation(
                 gen_build_script = False,
-                deps = [
-                    "@libssh2",
-                    "@//thirdparty/crates:build_libssh2_sys",
-                ],
+                deps = ["@libssh2"],
             )],
             "libz-sys": [crate.annotation(
                 gen_build_script = False,
