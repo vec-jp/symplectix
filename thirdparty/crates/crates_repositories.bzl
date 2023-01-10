@@ -25,12 +25,18 @@ def crates_repositories():
                 deps = ["@openssl"],
             )],
             "libgit2-sys": [crate.annotation(
-                patches = ["@//thirdparty/crates/patch:libgit2-sys.patch"],
-                deps = ["@libgit2"],
+                gen_build_script = False,
+                deps = [
+                    "@libgit2",
+                    "@//thirdparty/crates:build_libgit2_sys",
+                ],
             )],
             "libssh2-sys": [crate.annotation(
-                patches = ["@//thirdparty/crates/patch:libssh2-sys.patch"],
-                deps = ["@libssh2"],
+                gen_build_script = False,
+                deps = [
+                    "@libssh2",
+                    "@//thirdparty/crates:build_libssh2_sys",
+                ],
             )],
             "libz-sys": [crate.annotation(
                 gen_build_script = False,
@@ -45,13 +51,22 @@ def crates_repositories():
                 # gen_binaries = True,
             ),
             "openssl": crate.spec(
-                version = "0.10.45",
+                version = "0.10",
+            ),
+            "openssl-sys": crate.spec(
+                version = "0.9",
             ),
             "ssh2": crate.spec(
                 version = "0.9",
             ),
+            "libssh2-sys": crate.spec(
+                version = "0.2",
+            ),
             "git2": crate.spec(
                 version = "0.15",
+            ),
+            "libgit2-sys": crate.spec(
+                version = "0.14.0+1.5.0",
             ),
 
             # "arbitrary": crate.spec(

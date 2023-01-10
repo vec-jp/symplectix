@@ -59,13 +59,13 @@ configure_make(
         "libssl.a",
         "libcrypto.a",
     ],
-    targets = MAKE_TARGETS,
-    toolchains = ["@rules_perl//:current_toolchain"],
     target_compatible_with = select({
         "@platforms//os:linux": [],
         "@platforms//os:macos": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+    targets = MAKE_TARGETS,
+    toolchains = ["@rules_perl//:current_toolchain"],
 )
 
 configure_make_variant(
@@ -94,12 +94,12 @@ configure_make_variant(
         "libssl.lib",
         "libcrypto.lib",
     ],
-    targets = MAKE_TARGETS,
-    toolchain = "@rules_foreign_cc//toolchains:preinstalled_nmake_toolchain",
-    toolchains = ["@rules_perl//:current_toolchain"],
     target_compatible_with = [
         "@platforms//os:windows",
     ],
+    targets = MAKE_TARGETS,
+    toolchain = "@rules_foreign_cc//toolchains:preinstalled_nmake_toolchain",
+    toolchains = ["@rules_perl//:current_toolchain"],
 )
 
 filegroup(
