@@ -2,13 +2,13 @@ sh_binary(
     name = "audit",
     srcs = ["audit.sh"],
     args = [
-        "$(location //thirdparty/crates:cargo.lock)",
+        "$(rootpath //thirdparty/crates:cargo.lock)",
     ],
     data = [
-        "//thirdparty/crates:cargo.lock",
+        "@//thirdparty/crates:cargo.lock",
         "@crates//:cargo-audit__cargo-audit",
     ],
     env = {
-        "CARGO_AUDIT_BIN": "$(location @crates//:cargo-audit__cargo-audit)",
+        "CARGO_AUDIT_BIN": "$(rootpath @crates//:cargo-audit__cargo-audit)",
     },
 )
