@@ -15,7 +15,7 @@ pub const fn addr(i: usize, b: usize) -> (usize, usize) {
 }
 
 /// A utility to clamp the given range, which is possibly unbounded, into a bounded one.
-/// Panics when debug is enabled and if `min <= i && i <= j && j <= max`.
+/// Panics when debug is enabled and if `!(min <= i && i <= j && j <= max)`.
 pub fn bounded<R>(r: &R, min: usize, max: usize) -> Range<usize>
 where
     R: RangeBounds<usize>,
