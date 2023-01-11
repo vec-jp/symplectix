@@ -2,14 +2,14 @@ use crate::{Bits, Rank};
 
 pub trait Select: Rank {
     /// Returns the position of the n-th 1, indexed starting from zero.
-    /// `n` must be less than `self.count1()`, orherwise returns `None`.
+    /// `n` must be less than `self.count1()`, otherwise returns `None`.
     #[inline]
     fn select1(&self, n: usize) -> Option<usize> {
         helper::search1(self, n)
     }
 
     /// Returns the position of the n-th 0, indexed starting from zero.
-    /// `n` must be less than `self.count0()`, orherwise returns `None`.
+    /// `n` must be less than `self.count0()`, otherwise returns `None`.
     #[inline]
     fn select0(&self, n: usize) -> Option<usize> {
         helper::search0(self, n)
