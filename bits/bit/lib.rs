@@ -14,6 +14,12 @@ pub const fn addr(i: usize, b: usize) -> (usize, usize) {
     (i / b, i % b)
 }
 
+/// Calculates the minimum number of blocks to store `n` bits.
+#[inline]
+pub const fn blocks(n: usize, b: usize) -> usize {
+    n / b + (n % b > 0) as usize
+}
+
 /// A utility to clamp the given range, which is possibly unbounded, into a bounded one.
 /// Panics when debug is enabled and if `!(min <= i && i <= j && j <= max)`.
 pub fn bounded<R>(r: &R, min: usize, max: usize) -> Range<usize>
