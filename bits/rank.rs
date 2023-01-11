@@ -42,9 +42,9 @@ impl<B: Bits> Rank for [B] {
     fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         let Range { start, end } = bit::bounded(&r, 0, self.bits());
 
-        bit::chunks_aligned(start, end, B::BITS)
+        bit::chunks(start, end, B::BITS)
             .map(|(index, len)| {
-                let (i, p) = bit::address(index, B::BITS);
+                let (i, p) = bit::addr(index, B::BITS);
                 self.get(i)
                     .map_or(0, |b| if len == B::BITS { b.count1() } else { b.rank1(p..p + len) })
             })
