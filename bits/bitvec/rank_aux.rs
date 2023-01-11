@@ -430,7 +430,7 @@ impl<T: Rank> Rank for Rho<T> {
             }
         }
         use std::ops::Range;
-        let Range { start: i, end: j } = bitaddr::bounded(&index, 0, self.bits());
+        let Range { start: i, end: j } = bit::bounded(&index, 0, self.bits());
         rank1_impl(self, j) - rank1_impl(self, i)
     }
 }
