@@ -4,8 +4,3 @@ exports_files([
     ".clippy.toml",
     ".rustfmt.toml",
 ])
-
-alias(
-    name = "cargo_audit",
-    actual = "@crates//:cargo-audit__cargo-audit",
-)
