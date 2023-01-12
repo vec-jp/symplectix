@@ -42,6 +42,7 @@ pub use self::{
     excess::{excess, excess0, excess1},
     lsb::lsb,
     msb::msb,
+    rank::{rank0, rank1},
 };
 
 /// Returns an empty `Vec<T>` with the at least specified capacity in bits.
