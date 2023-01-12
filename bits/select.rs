@@ -148,7 +148,7 @@ mod int_select_helper {
         /// # use bits::{ContainerMut, Select};
         /// let mut n: u128 = 0;
         /// for i in (0..128).step_by(2) {
-        ///     n.set_bit(i);
+        ///     n.bit_set(i);
         /// }
         /// assert_eq!(n.select1(60), Some(120));
         /// assert_eq!(n.select1(61), Some(122));
