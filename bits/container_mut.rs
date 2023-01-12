@@ -6,6 +6,16 @@ pub trait ContainerMut: Container {
     fn unset_bit(&mut self, i: usize);
 }
 
+#[inline]
+pub fn set<T: ContainerMut>(c: &mut T, i: usize) {
+    T::set_bit(c, i)
+}
+
+#[inline]
+pub fn clear<T: ContainerMut>(c: &mut T, i: usize) {
+    T::unset_bit(c, i)
+}
+
 macro_rules! ints_impl_container_mut {
     ($( $Int:ty )*) => ($(
         impl ContainerMut for $Int {

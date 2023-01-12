@@ -35,15 +35,19 @@ pub use self::rank::Rank;
 pub use self::select::Select;
 pub use self::{lsb::Lsb, msb::Msb};
 
+pub use self::{
+    container::{get, is_empty, len},
+    container_mut::{clear, set},
+};
+
 /// Returns an empty `Vec<T>` with the at least specified capacity in bits.
 ///
 /// # Examples
 ///
 /// ```
-/// # use bits::Container;
 /// let v = bits::with_capacity::<u8>(80);
 /// // v has no bits, but an enough capacity to store 80 bits.
-/// assert_eq!(v.bits(), 0);
+/// assert_eq!(bits::len(&v), 0);
 /// assert_eq!(v.capacity(), 10);
 /// ```
 pub fn with_capacity<T: Bits>(capacity: usize) -> Vec<T> {
@@ -53,9 +57,8 @@ pub fn with_capacity<T: Bits>(capacity: usize) -> Vec<T> {
 /// # Examples
 ///
 /// ```
-/// # use bits::Container;
 /// let v = bits::empty::<u8>(80);
-/// assert_eq!(v.bits(), 80);
+/// assert_eq!(bits::len(&v), 80);
 /// assert_eq!(v.len(), 10);
 /// ```
 pub fn empty<T: Bits>(n: usize) -> Vec<T> {
