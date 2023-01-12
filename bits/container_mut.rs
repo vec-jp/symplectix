@@ -8,12 +8,12 @@ pub trait ContainerMut: Container {
 
 #[inline]
 pub fn set<T: ContainerMut>(c: &mut T, i: usize) {
-    T::bit_set(c, i)
+    ContainerMut::bit_set(c, i)
 }
 
 #[inline]
 pub fn clear<T: ContainerMut>(c: &mut T, i: usize) {
-    T::bit_clear(c, i)
+    ContainerMut::bit_clear(c, i)
 }
 
 macro_rules! ints_impl_container_mut {

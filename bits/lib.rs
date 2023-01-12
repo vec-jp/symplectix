@@ -38,6 +38,7 @@ pub use self::{lsb::Lsb, msb::Msb};
 pub use self::{
     container::{get, is_empty, len},
     container_mut::{clear, set},
+    count::{all, any, count0, count1},
 };
 
 /// Returns an empty `Vec<T>` with the at least specified capacity in bits.

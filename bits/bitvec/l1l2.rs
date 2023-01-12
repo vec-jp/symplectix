@@ -144,7 +144,7 @@ impl L1L2 {
     pub(crate) const fn merge(mut arr: [u64; Self::LEN]) -> Self {
         #[cfg(test)]
         {
-            assert!(arr[0] < Self::L1 as u64);
+            assert!(arr[0] < Self::L1);
             assert!(arr[1] < 1024 && arr[2] < 1024 && arr[3] < 1024);
         }
 

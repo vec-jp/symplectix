@@ -32,7 +32,7 @@ pub trait Container {
 
 #[inline]
 pub fn len<T: Container>(c: &T) -> usize {
-    T::bits(c)
+    Container::bits(c)
 }
 
 #[inline]
@@ -42,7 +42,7 @@ pub fn is_empty<T: Container>(c: &T) -> bool {
 
 #[inline]
 pub fn get<T: Container>(c: &T, i: usize) -> Option<bool> {
-    T::bit(c, i)
+    Container::bit(c, i)
 }
 
 macro_rules! ints_impl_container {
