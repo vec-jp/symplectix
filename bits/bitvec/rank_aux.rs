@@ -1,6 +1,6 @@
 use crate::L1L2;
 use bitpacking::Unpack;
-use bits::empty;
+use bits::new;
 use bits::{Bits, Container, Count, Rank, Select};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 use std::cmp;
@@ -342,7 +342,7 @@ impl Buckets<layout::Rho> {
 impl<T: Bits> Rho<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> Rho<Vec<T>> {
-        let dat = empty(n);
+        let dat = new(n);
         Rho(Imp { buckets: Buckets::new(dat.bits()), samples: None, bit_vec: dat })
     }
 }

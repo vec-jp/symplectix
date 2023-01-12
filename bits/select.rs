@@ -26,6 +26,16 @@ pub trait Select: Rank {
     // }
 }
 
+#[inline]
+pub fn select1<T: ?Sized + Select>(c: &T, n: usize) -> Option<usize> {
+    c.select1(n)
+}
+
+#[inline]
+pub fn select0<T: ?Sized + Select>(c: &T, n: usize) -> Option<usize> {
+    c.select0(n)
+}
+
 mod helper {
     use crate::Rank;
 

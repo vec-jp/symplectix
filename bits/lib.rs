@@ -40,12 +40,27 @@ pub use self::{
     container_mut::{clear, set},
     count::{all, any, count0, count1},
     excess::{excess, excess0, excess1},
-    lsb::lsb,
-    msb::msb,
     rank::{rank0, rank1},
+    select::{select0, select1},
 };
 
-/// Returns an empty `Vec<T>` with the at least specified capacity in bits.
+pub use self::{lsb::lsb, msb::msb};
+
+/// Constructs a new, empty `Vec<T>`.
+///
+/// # Examples
+///
+/// ```
+/// let v = bits::new::<u8>(80);
+/// assert_eq!(bits::len(&v), 80);
+/// assert_eq!(v.len(), 10);
+/// ```
+pub fn new<T: Bits>(n: usize) -> Vec<T> {
+    use std::iter::from_fn;
+    from_fn(|| Some(T::empty())).take(bit::blocks(n, T::BITS)).collect::<Vec<T>>()
+}
+
+/// Returns a `Vec<T>` with the at least specified capacity in bits.
 ///
 /// # Examples
 ///
@@ -57,18 +72,6 @@ pub use self::{
 /// ```
 pub fn with_capacity<T: Bits>(capacity: usize) -> Vec<T> {
     Vec::with_capacity(bit::blocks(capacity, T::BITS))
-}
-
-/// # Examples
-///
-/// ```
-/// let v = bits::empty::<u8>(80);
-/// assert_eq!(bits::len(&v), 80);
-/// assert_eq!(v.len(), 10);
-/// ```
-pub fn empty<T: Bits>(n: usize) -> Vec<T> {
-    use std::iter::from_fn;
-    from_fn(|| Some(T::empty())).take(bit::blocks(n, T::BITS)).collect::<Vec<T>>()
 }
 
 pub trait Bits: Clone + Container + ContainerMut + Count + Rank + Excess + Select {
