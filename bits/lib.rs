@@ -40,6 +40,8 @@ pub use self::{
     container_mut::{clear, set},
     count::{all, any, count0, count1},
     excess::{excess, excess0, excess1},
+    lsb::lsb,
+    msb::msb,
 };
 
 /// Returns an empty `Vec<T>` with the at least specified capacity in bits.
