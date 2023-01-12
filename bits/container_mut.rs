@@ -7,12 +7,12 @@ pub trait ContainerMut: Container {
 }
 
 #[inline]
-pub fn set<T: ContainerMut>(c: &mut T, i: usize) {
+pub fn set<T: ?Sized + ContainerMut>(c: &mut T, i: usize) {
     ContainerMut::bit_set(c, i)
 }
 
 #[inline]
-pub fn clear<T: ContainerMut>(c: &mut T, i: usize) {
+pub fn clear<T: ?Sized + ContainerMut>(c: &mut T, i: usize) {
     ContainerMut::bit_clear(c, i)
 }
 
