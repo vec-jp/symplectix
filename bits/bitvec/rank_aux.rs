@@ -1,6 +1,6 @@
-use super::empty;
 use crate::L1L2;
 use bitpacking::Unpack;
+use bits::empty;
 use bits::{Bits, Container, Count, Rank, Select};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 use std::cmp;
@@ -62,14 +62,14 @@ mod layout {
     ///
     /// L1[i] and L2[i] are interleaved into one word.
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub(crate) struct Pop {}
+    pub(crate) struct Pop;
 
     /// Builds a [`FenwickTree`] to compute prefix sum instead of accumulating.
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub(crate) struct Rho {}
+    pub(crate) struct Rho;
 
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub(crate) struct Uninit {}
+    pub(crate) struct Uninit;
 
     impl Layout for Pop {}
     impl Layout for Rho {}

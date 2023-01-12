@@ -35,6 +35,34 @@ pub use self::rank::Rank;
 pub use self::select::Select;
 pub use self::{lsb::Lsb, msb::Msb};
 
+/// Returns an empty `Vec<T>` with the at least specified capacity in bits.
+///
+/// # Examples
+///
+/// ```
+/// # use bits::Container;
+/// let v = bits::with_capacity::<u8>(80);
+/// // v has no bits, but an enough capacity to store 80 bits.
+/// assert_eq!(v.bits(), 0);
+/// assert_eq!(v.capacity(), 10);
+/// ```
+pub fn with_capacity<T: Bits>(capacity: usize) -> Vec<T> {
+    Vec::with_capacity(bit::blocks(capacity, T::BITS))
+}
+
+/// # Examples
+///
+/// ```
+/// # use bits::Container;
+/// let v = bits::empty::<u8>(80);
+/// assert_eq!(v.bits(), 80);
+/// assert_eq!(v.len(), 10);
+/// ```
+pub fn empty<T: Bits>(n: usize) -> Vec<T> {
+    use std::iter::from_fn;
+    from_fn(|| Some(T::empty())).take(bit::blocks(n, T::BITS)).collect::<Vec<T>>()
+}
+
 pub trait Bits: Clone + Container + ContainerMut + Count + Rank + Excess + Select {
     const BITS: usize;
 
