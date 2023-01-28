@@ -115,6 +115,15 @@ def crates_repositories():
                 version = "2.0.0-rc.1",
             ),
 
+            # TODO: Use std::cell::OnceCell
+            # https://doc.rust-lang.org/std/cell/struct.OnceCell.html
+            "once_cell": crate.spec(
+                version = "1.17",
+            ),
+            "tempfile": crate.spec(
+                version = "3",
+            ),
+
             # "rand": crate.spec(
             #     version = "0.8.5",
             # ),

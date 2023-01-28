@@ -1,5 +1,5 @@
 {
-  "checksum": "88ba02b695034f554534b2b54763160963c54e85e487bf32e634222feb79e2f1",
+  "checksum": "e6e0ed8ba48039e5da316af26d84ac49e4efeac154ff781f5ce198c1430cb139",
   "crates": {
     "abscissa_core 0.6.0": {
       "name": "abscissa_core",
@@ -2034,6 +2034,10 @@
               "target": "libssh2_sys"
             },
             {
+              "id": "once_cell 1.17.0",
+              "target": "once_cell"
+            },
+            {
               "id": "openssl 0.10.45",
               "target": "openssl"
             },
@@ -2048,6 +2052,10 @@
             {
               "id": "ssh2 0.9.3",
               "target": "ssh2"
+            },
+            {
+              "id": "tempfile 3.3.0",
+              "target": "tempfile"
             },
             {
               "id": "thiserror 1.0.38",
@@ -2358,6 +2366,47 @@
         ]
       },
       "license": "MIT OR Apache-2.0"
+    },
+    "fastrand 1.8.0": {
+      "name": "fastrand",
+      "version": "1.8.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/fastrand/1.8.0/download",
+          "sha256": "a7a407cfaa3385c4ae6b23e84623d48c2798d06e3e6a1878f7f59f17b3f86499"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "fastrand",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "fastrand",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [],
+          "selects": {
+            "cfg(target_arch = \"wasm32\")": [
+              {
+                "id": "instant 0.1.12",
+                "target": "instant"
+              }
+            ]
+          }
+        },
+        "edition": "2018",
+        "version": "1.8.0"
+      },
+      "license": "Apache-2.0 OR MIT"
     },
     "fixedbitset 0.4.2": {
       "name": "fixedbitset",
@@ -6490,6 +6539,47 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "remove_dir_all 0.5.3": {
+      "name": "remove_dir_all",
+      "version": "0.5.3",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/remove_dir_all/0.5.3/download",
+          "sha256": "3acd125665422973a33ac9d3dd2df85edad0f4ae9b00dafb1a05e43a9f5ef8e7"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "remove_dir_all",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "remove_dir_all",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [],
+          "selects": {
+            "cfg(windows)": [
+              {
+                "id": "winapi 0.3.9",
+                "target": "winapi"
+              }
+            ]
+          }
+        },
+        "edition": "2015",
+        "version": "0.5.3"
+      },
+      "license": "MIT/Apache-2.0"
+    },
     "rustc-demangle 0.1.21": {
       "name": "rustc-demangle",
       "version": "0.1.21",
@@ -7680,6 +7770,72 @@
         "version": "0.12.6"
       },
       "license": "MIT"
+    },
+    "tempfile 3.3.0": {
+      "name": "tempfile",
+      "version": "3.3.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/tempfile/3.3.0/download",
+          "sha256": "5cdb1ef4eaeeaddc8fbd371e5017057064af0911902ef36b39801f67cc6d79e4"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "tempfile",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "tempfile",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "cfg-if 1.0.0",
+              "target": "cfg_if"
+            },
+            {
+              "id": "fastrand 1.8.0",
+              "target": "fastrand"
+            },
+            {
+              "id": "remove_dir_all 0.5.3",
+              "target": "remove_dir_all"
+            }
+          ],
+          "selects": {
+            "cfg(any(unix, target_os = \"wasi\"))": [
+              {
+                "id": "libc 0.2.139",
+                "target": "libc"
+              }
+            ],
+            "cfg(target_os = \"redox\")": [
+              {
+                "id": "redox_syscall 0.2.16",
+                "target": "syscall"
+              }
+            ],
+            "cfg(windows)": [
+              {
+                "id": "winapi 0.3.9",
+                "target": "winapi"
+              }
+            ]
+          }
+        },
+        "edition": "2018",
+        "version": "3.3.0"
+      },
+      "license": "MIT OR Apache-2.0"
     },
     "termcolor 1.1.3": {
       "name": "termcolor",
@@ -9771,6 +9927,28 @@
       "x86_64-pc-windows-msvc",
       "x86_64-unknown-freebsd"
     ],
+    "cfg(any(unix, target_os = \"wasi\"))": [
+      "aarch64-apple-darwin",
+      "aarch64-apple-ios",
+      "aarch64-apple-ios-sim",
+      "aarch64-linux-android",
+      "aarch64-unknown-linux-gnu",
+      "arm-unknown-linux-gnueabi",
+      "armv7-linux-androideabi",
+      "armv7-unknown-linux-gnueabi",
+      "i686-apple-darwin",
+      "i686-linux-android",
+      "i686-unknown-freebsd",
+      "i686-unknown-linux-gnu",
+      "powerpc-unknown-linux-gnu",
+      "s390x-unknown-linux-gnu",
+      "wasm32-wasi",
+      "x86_64-apple-darwin",
+      "x86_64-apple-ios",
+      "x86_64-linux-android",
+      "x86_64-unknown-freebsd",
+      "x86_64-unknown-linux-gnu"
+    ],
     "cfg(docsrs)": [],
     "cfg(not(any(target_arch = \"wasm32\", target_arch = \"wasm64\")))": [
       "aarch64-apple-darwin",
@@ -9846,6 +10024,10 @@
       "x86_64-linux-android",
       "x86_64-unknown-freebsd",
       "x86_64-unknown-linux-gnu"
+    ],
+    "cfg(target_arch = \"wasm32\")": [
+      "wasm32-unknown-unknown",
+      "wasm32-wasi"
     ],
     "cfg(target_env = \"msvc\")": [
       "aarch64-pc-windows-msvc",

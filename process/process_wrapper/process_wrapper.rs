@@ -12,6 +12,10 @@ use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
 
 mod fsutil;
+
+#[cfg(test)]
+mod tests;
+
 use Error::*;
 
 pub fn parse_args() -> Options {
@@ -50,13 +54,19 @@ pub struct Options {
     command_args: Vec<String>,
 }
 
+/// ProcessWrapper errors.
+pub type Result<T = ()> = std::result::Result<T, Error>;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("{0}")]
     Io(io::Error),
 
-    #[error("error file present at {0}")]
-    ErrFilePresent(PathBuf),
+    #[error("error file exists at {0}")]
+    ErrFileExists(PathBuf),
+
+    #[error("error files exists at {err} but also found {ok}")]
+    Ambiguous { ok: PathBuf, err: PathBuf },
 
     #[error("failed to spawn the child process: {0}")]
     NotSpawned(io::Error),
@@ -77,7 +87,7 @@ pub enum Error {
         command = %opts.command,
     )
 )]
-pub async fn run(opts: &Options) -> Result<(), Error> {
+pub async fn run(opts: &Options) -> Result {
     // #[cfg(target_os = "linux")]
     // unsafe {
     //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
@@ -134,22 +144,22 @@ pub async fn run(opts: &Options) -> Result<(), Error> {
 }
 
 #[tracing::instrument(skip(opts))]
-async fn wait(opts: &Options) -> Result<(), Error> {
+async fn wait(opts: &Options) -> Result {
     let wait_files = opts.wait_files.iter().map(|ok_file| async move {
         let err_file = ok_file.with_extension("err");
 
         loop {
             tracing::trace!(wait_for = %ok_file.display());
 
+            if err_file.try_exists().map_err(Error::Io)? {
+                return Err(Error::ErrFileExists(err_file));
+            }
+
             if ok_file.try_exists().map_err(Error::Io)? {
                 return Ok(());
             }
 
-            if err_file.try_exists().map_err(Error::Io)? {
-                return Err(Error::ErrFilePresent(err_file));
-            }
-
-            time::sleep(Duration::from_millis(500)).await;
+            time::sleep(Duration::from_millis(1000)).await;
         }
     });
 
@@ -157,7 +167,7 @@ async fn wait(opts: &Options) -> Result<(), Error> {
 }
 
 #[tracing::instrument(skip(opts, result))]
-async fn post(opts: &Options, result: Result<(), Error>) -> Result<(), Error> {
+async fn post(opts: &Options, result: Result) -> Result {
     let Some(path) = opts.post_file.as_ref() else {
         return Ok(());
     };
@@ -176,7 +186,7 @@ async fn post(opts: &Options, result: Result<(), Error>) -> Result<(), Error> {
     result
 }
 
-async fn spawn(opts: &Options) -> Result<Child, Error> {
+async fn spawn(opts: &Options) -> Result<Child> {
     let mut cmd = StdCommand::new(opts.command.as_str());
 
     cmd.args(&opts.command_args);
@@ -208,7 +218,7 @@ fn timer(opts: &Options) -> future::Either<future::Pending<()>, time::Sleep> {
     }
 }
 
-fn into_process_result(status: ExitStatus) -> Result<(), Error> {
+fn into_process_result(status: ExitStatus) -> Result {
     if status.success() {
         Ok(())
     } else if let Some(code) = status.code() {
