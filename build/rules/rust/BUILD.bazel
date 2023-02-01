@@ -1,0 +1,26 @@
+load(":defs.bzl", "rust_fuzzing")
+
+rust_fuzzing(
+    name = "stack_buffer_overflow",
+    srcs = ["stack_buffer_overflow.rs"],
+    sanitizer = "address",
+)
+
+rust_fuzzing(
+    name = "stack_use_after_scope",
+    srcs = ["stack_use_after_scope.rs"],
+    sanitizer = "address",
+)
+
+# ASAN_OPTIONS=detect_leaks=1
+rust_fuzzing(
+    name = "memory_leaks",
+    srcs = ["memory_leaks.rs"],
+    sanitizer = "address",
+)
+
+rust_fuzzing(
+    name = "data_race",
+    srcs = ["data_race.rs"],
+    sanitizer = "thread",
+)
