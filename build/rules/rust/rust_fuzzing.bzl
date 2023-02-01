@@ -1,4 +1,4 @@
-def rust_fuzz_binary(
+def rust_fuzzing(
         **bin_kwargs):
     """Helps to fuzzing.
     """
