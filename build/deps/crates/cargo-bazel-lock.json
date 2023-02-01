@@ -1,5 +1,5 @@
 {
-  "checksum": "74b5297d9c88cbf6fec9b4dba3ea022ed7bdf64f030169b54eca00610c92199f",
+  "checksum": "ef9788a108d29c9db78cb7e4314ab73212f7875d293e6483fa0181cfef6e2585",
   "crates": {
     "abscissa_core 0.6.0": {
       "name": "abscissa_core",
@@ -4208,7 +4208,7 @@
           }
         },
         "extra_deps": [
-          "@//thirdparty/crates:build_libgit2_sys",
+          "@//build/deps/crates:build_libgit2_sys",
           "@libgit2"
         ],
         "edition": "2018",

@@ -21,7 +21,7 @@ _annotations = {
         gen_build_script = False,
         deps = [
             "@libgit2",
-            "@//thirdparty/crates:build_libgit2_sys",
+            "@//build/deps/crates:build_libgit2_sys",
         ],
     )],
     "libssh2-sys": [crate.annotation(
@@ -146,8 +146,8 @@ def crates_repositories():
     # https://bazelbuild.github.io/rules_rust/crate_universe.html#repinning--updating-dependencies
     crates_repository(
         name = "crates",
-        cargo_lockfile = "//thirdparty/crates:cargo.lock",
-        lockfile = "//thirdparty/crates:cargo-bazel-lock.json",
+        cargo_lockfile = "//build/deps/crates:cargo.lock",
+        lockfile = "//build/deps/crates:cargo-bazel-lock.json",
         annotations = _annotations,
         packages = _packages,
         # The version of Rust the currently registered toolchain is using.

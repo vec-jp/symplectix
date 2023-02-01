@@ -1,6 +1,6 @@
-def rust_fuzz_binary():
-    """
-    Helps to fuzzing.
+def rust_fuzz_binary(
+        **bin_kwargs):
+    """Helps to fuzzing.
     """
 
-    pass
+    return
