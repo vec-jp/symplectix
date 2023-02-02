@@ -60,6 +60,15 @@ _packages = {
         version = "0.14.2+1.5.1",
     ),
 
+    # For fuzzing
+    "arbitrary": crate.spec(
+        version = "1",
+        features = ["derive"],
+    ),
+    "libfuzzer-sys": crate.spec(
+        version = "0.4",
+    ),
+
     # Result/Error helpers
     "anyhow": crate.spec(
         version = "1",
@@ -119,11 +128,6 @@ _packages = {
     # "rand": crate.spec(
     #     version = "0.8.5",
     # ),
-
-    # "arbitrary": crate.spec(
-    #     version = "1",
-    #     features = ["derive"],
-    # },
     "quickcheck": crate.spec(
         version = "1",
     ),

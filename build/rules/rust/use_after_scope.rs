@@ -1,7 +1,5 @@
 #![no_main]
 
-use std::thread;
-
 use libfuzzer_sys::{fuzz_target, Corpus};
 
 fuzz_target!(|data: &[u8]| -> Corpus {
@@ -9,11 +7,15 @@ fuzz_target!(|data: &[u8]| -> Corpus {
         return Corpus::Reject;
     }
 
-    static mut ANSWER: i32 = 0;
-    let t1 = thread::spawn(|| unsafe { ANSWER = 42 });
+    static mut P: *mut u8 = std::ptr::null_mut();
+
     unsafe {
-        ANSWER = 24;
+        {
+            let mut x = data[0];
+            P = &mut x;
+        }
+        std::ptr::write_volatile(P, 123);
     }
-    t1.join().ok();
+
     Corpus::Keep
 });

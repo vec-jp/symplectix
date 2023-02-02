@@ -1,18 +1,14 @@
-use std::cell::RefCell;
-use std::rc::Rc;
+#![no_main]
 
-#[derive(Clone)]
-struct Cycle {
-    cell: RefCell<Option<Rc<Cycle>>>,
-}
+use libfuzzer_sys::{fuzz_target, Corpus};
 
-impl Drop for Cycle {
-    fn drop(&mut self) {
-        println!("freed");
+fuzz_target!(|data: &[u8]| -> Corpus {
+    if data.is_empty() {
+        return Corpus::Reject;
     }
-}
 
-fn main() {
-    let cycle = Rc::new(Cycle { cell: RefCell::new(None) });
-    *cycle.cell.borrow_mut() = Some(cycle.clone());
-}
+    let data = Vec::from(data);
+    std::mem::forget(data);
+
+    Corpus::Keep
+});
