@@ -157,6 +157,6 @@ load("@//build/deps:repositories.bzl", build_deps_repositories = "repositories")
 
 build_deps_repositories()
 
-load("@//build/deps:setup.bzl", build_deps_setup = "setup")
+load("@//build/deps:init.bzl", build_deps_init = "init")
 
-build_deps_setup()
+build_deps_init()
