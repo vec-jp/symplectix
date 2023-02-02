@@ -1,4 +1,4 @@
-load("//build/deps/crates:crates_setup.bzl", "crates_setup")
+load("@crates//:defs.bzl", "crate_repositories")
 
 def setup():
-    crates_setup()
+    crate_repositories()
