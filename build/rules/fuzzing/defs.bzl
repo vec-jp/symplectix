@@ -73,6 +73,12 @@ _fuzzing = rule(
     },
 )
 
+def fuzzing_run(**kwargs):
+    _fuzzing(
+        command = "run",
+        **kwargs
+    )
+
 def rust_fuzz_binary(
         name,
         sanitizer,
@@ -106,9 +112,8 @@ def rust_fuzz_binary(
         **bin_kwargs
     )
 
-    _fuzzing(
+    fuzzing_run(
         name = name,
-        command = "run",
         envs = envs,
         target = target_name,
     )
