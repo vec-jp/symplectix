@@ -1,20 +1,29 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary")
-load("//build/rules/fuzzing/private:fuzzing.bzl", "fuzzing_run")
+load("//build/rules/fuzzing/private:fuzzing.bzl", "fuzzing_binary", "fuzzing_corpus")
 
 def rust_fuzz_binary(
         name,
         sanitizer,
+        corpus = None,
         envs = None,
         **kwargs):
     """Helps to fuzzing.
     """
 
-    target_name = name + "_bin"
+    target_name = name + "_target"
+    corpus_name = name + "_corpus"
 
-    fuzzing_run(
+    fuzzing_binary(
         name = name,
         envs = envs,
+        corpus = corpus_name,
         target = target_name,
+        tags = ["manual"],
+    )
+
+    fuzzing_corpus(
+        name = corpus_name,
+        srcs = corpus,
         tags = ["manual"],
     )
 

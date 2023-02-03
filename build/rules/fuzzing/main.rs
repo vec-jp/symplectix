@@ -2,15 +2,23 @@ use clap::Parser;
 
 mod cmd;
 
-#[derive(Clone, Debug, Parser)]
-pub enum Fuzzing {
+#[derive(Clone, Debug, clap::Parser)]
+pub struct Fuzzing {
+    #[clap(subcommand)]
+    command: Command,
+}
+
+#[derive(Clone, Debug, clap::Subcommand)]
+enum Command {
     Run(cmd::Run),
+    Prep(cmd::Prep),
 }
 
 impl Fuzzing {
-    async fn run(&self) -> entrypoint::Result {
-        match self {
-            Fuzzing::Run(f) => f.run().await,
+    async fn run(&self) -> anyhow::Result<()> {
+        match &self.command {
+            Command::Run(f) => f.run().await,
+            Command::Prep(p) => p.run().await,
         }
     }
 }
@@ -24,5 +32,5 @@ async fn main() -> anyhow::Result<()> {
         .compact()
         .init();
 
-    Fuzzing::parse().run().await.map_err(anyhow::Error::from)
+    Fuzzing::parse().run().await
 }
