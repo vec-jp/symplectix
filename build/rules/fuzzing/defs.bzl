@@ -87,7 +87,7 @@ def rust_fuzz_binary(
     """Helps to fuzzing.
     """
 
-    rustc_flags = [
+    bin_kwargs.setdefault("rustc_flags", []).extend([
         "--cfg=fuzzing",
         "-Cinstrument-coverage",
         "-Cpasses=sancov-module",
@@ -96,16 +96,13 @@ def rust_fuzz_binary(
         "-Cllvm-args=-sanitizer-coverage-pc-table",
         "-Cllvm-args=-sanitizer-coverage-trace-compares",
         "-Zsanitizer={}".format(sanitizer),
-    ]
+    ])
 
     target_name = name + "_bin"
 
     rust_binary(
         name = target_name,
-        rustc_flags = select({
-            "@rules_rust//rust/toolchain/channel:nightly": rustc_flags,
-            "//conditions:default": [],
-        }),
+        # TODO: do not compile on stable
         # target_compatible_with = [
         #     "@rules_rust//rust/platform/channel:nightly",
         # ],
