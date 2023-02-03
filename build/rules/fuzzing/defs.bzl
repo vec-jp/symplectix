@@ -93,6 +93,7 @@ def rust_fuzz_binary(
         name = name,
         envs = envs,
         target = target_name,
+        tags = ["manual"],
     )
 
     kwargs.setdefault("rustc_flags", []).extend([
