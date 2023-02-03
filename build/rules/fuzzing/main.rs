@@ -8,7 +8,7 @@ pub enum Fuzz {
 }
 
 impl Fuzz {
-    async fn run(&self) -> process_wrapper::Result {
+    async fn run(&self) -> entrypoint::Result {
         match self {
             Fuzz::Run(f) => f.run().await,
         }

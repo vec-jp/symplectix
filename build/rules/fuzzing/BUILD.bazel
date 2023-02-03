@@ -1,13 +1,16 @@
-load(":defs.bzl", "rust_fuzzing")
 load("@rules_rust//rust:defs.bzl", "rust_binary")
+load(":defs.bzl", "rust_fuzzing")
 
 package(default_visibility = ["//:__subpackages__"])
 
 rust_binary(
     name = "fuzz",
-    srcs = glob(["main.rs", "cmd/*.rs"]),
+    srcs = glob([
+        "main.rs",
+        "cmd/*.rs",
+    ]),
     deps = [
-        "//process/process_wrapper",
+        "//process/entrypoint",
         "@crates//:anyhow",
         "@crates//:clap",
         "@crates//:tokio",

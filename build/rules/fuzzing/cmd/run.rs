@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::Parser;
-use process_wrapper::ProcessWrapper;
+use entrypoint::Entrypoint;
 
 #[derive(Clone, Debug, Parser)]
 pub struct Run {
@@ -16,13 +16,13 @@ pub struct Run {
     #[arg(long = "dict", value_name = "PATH")]
     dicts: Vec<PathBuf>,
 
-    /// A fuzzing target.
+    /// A fuzzing entrypoint.
     #[clap(flatten)]
-    process_wrapper: ProcessWrapper,
+    entrypoint: Entrypoint,
 }
 
 impl Run {
-    pub(crate) async fn run(&self) -> process_wrapper::Result {
-        self.process_wrapper.run().await
+    pub(crate) async fn run(&self) -> entrypoint::Result {
+        self.entrypoint.run().await
     }
 }

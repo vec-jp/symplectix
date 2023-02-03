@@ -3,7 +3,7 @@ load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_doc_test", "rust_library", 
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
-    name = "process_wrapper",
+    name = "entrypoint",
     srcs = glob([
         "*.rs",
         "tests/*.rs",
@@ -27,21 +27,21 @@ rust_library(
 )
 
 rust_test(
-    name = "process_wrapper_test",
+    name = "entrypoint_test",
     size = "small",
-    crate = ":process_wrapper",
+    crate = ":entrypoint",
     deps = [
         "//testing",
     ],
 )
 
 rust_doc_test(
-    name = "process_wrapper_doc_test",
+    name = "entrypoint_doc_test",
     size = "small",
-    crate = ":process_wrapper",
+    crate = ":entrypoint",
 )
 
 rust_doc(
-    name = "process_wrapper_doc",
-    crate = ":process_wrapper",
+    name = "entrypoint_doc",
+    crate = ":entrypoint",
 )

@@ -19,7 +19,7 @@ mod tests;
 use Error::*;
 
 #[derive(Debug, Clone, Parser)]
-pub struct ProcessWrapper {
+pub struct Entrypoint {
     /// List of paths to wait for before spawning the child process.
     #[arg(long = "wait-file", value_name = "PATH")]
     wait_files: Vec<PathBuf>,
@@ -77,7 +77,7 @@ pub enum Error {
     ExitedUnsuccessfully(i32),
 }
 
-impl ProcessWrapper {
+impl Entrypoint {
     #[tracing::instrument(
         skip(self),
         fields(
@@ -142,7 +142,7 @@ impl ProcessWrapper {
 }
 
 #[tracing::instrument(skip(opts))]
-async fn wait(opts: &ProcessWrapper) -> Result {
+async fn wait(opts: &Entrypoint) -> Result {
     let wait_files = opts.wait_files.iter().map(|ok_file| async move {
         let err_file = ok_file.with_extension("err");
 
@@ -165,7 +165,7 @@ async fn wait(opts: &ProcessWrapper) -> Result {
 }
 
 #[tracing::instrument(skip(opts, result))]
-async fn post(opts: &ProcessWrapper, result: Result) -> Result {
+async fn post(opts: &Entrypoint, result: Result) -> Result {
     let Some(path) = opts.post_file.as_ref() else {
         return Ok(());
     };
@@ -184,7 +184,7 @@ async fn post(opts: &ProcessWrapper, result: Result) -> Result {
     result
 }
 
-async fn spawn(opts: &ProcessWrapper) -> Result<Child> {
+async fn spawn(opts: &Entrypoint) -> Result<Child> {
     let mut cmd = StdCommand::new(opts.command.as_str());
 
     cmd.args(&opts.command_args);
@@ -209,7 +209,7 @@ async fn spawn(opts: &ProcessWrapper) -> Result<Child> {
     Command::from(cmd).spawn().map_err(NotSpawned)
 }
 
-fn timer(opts: &ProcessWrapper) -> future::Either<future::Pending<()>, time::Sleep> {
+fn timer(opts: &Entrypoint) -> future::Either<future::Pending<()>, time::Sleep> {
     match opts.timeout.as_ref() {
         None => future::pending().left_future(),
         Some(&dur) => time::sleep(dur.into()).right_future(),
