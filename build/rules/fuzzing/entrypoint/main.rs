@@ -1,3 +1,16 @@
+use std::path::PathBuf;
+
+use clap::Parser;
+
+#[derive(Debug, clap::Parser)]
+struct EntrypointOptions {
+    #[arg(long = "corpus", value_name = "DIR")]
+    corpus: Option<PathBuf>,
+
+    #[clap(flatten)]
+    process_wrapper_options: process_wrapper::Options,
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
@@ -7,6 +20,6 @@ async fn main() -> anyhow::Result<()> {
         .compact()
         .init();
 
-    let opts = process_wrapper::parse_args();
-    process_wrapper::run(&opts).await.map_err(anyhow::Error::from)
+    let opts = EntrypointOptions::parse();
+    process_wrapper::run(&opts.process_wrapper_options).await.map_err(anyhow::Error::from)
 }

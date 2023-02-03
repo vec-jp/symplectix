@@ -8,6 +8,7 @@ rust_binary(
     deps = [
         "//process/process_wrapper",
         "@crates//:anyhow",
+        "@crates//:clap",
         "@crates//:tokio",
         "@crates//:tracing",
         "@crates//:tracing-subscriber",
