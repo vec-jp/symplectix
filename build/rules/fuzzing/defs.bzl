@@ -21,7 +21,7 @@ exec "{fuzzing}" "{command}" \
         fuzzing = ctx.executable._fuzzing.short_path,
         command = ctx.attr.command,
         envs = " ".join([
-            "\"--env\" \"%s\"" % key
+            "\"--env\" '%s'" % key
             for key in ctx.attr.envs.keys()
         ]),
         target = ctx.executable.target.short_path,
@@ -104,6 +104,10 @@ def rust_fuzz_binary(
         "-Cllvm-args=-sanitizer-coverage-pc-table",
         "-Cllvm-args=-sanitizer-coverage-trace-compares",
         "-Zsanitizer={}".format(sanitizer),
+    ])
+
+    kwargs.setdefault("tags", []).extend([
+        "manual",
     ])
 
     rust_binary(
