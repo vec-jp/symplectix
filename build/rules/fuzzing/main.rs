@@ -4,7 +4,7 @@ use clap::Parser;
 use process_wrapper::ProcessWrapper;
 
 #[derive(Debug, Parser)]
-struct Fuzzing {
+struct Fuzz {
     /// Corpus.
     #[arg(long = "corpus", value_name = "DIR")]
     corpus: Option<PathBuf>,
@@ -30,6 +30,6 @@ async fn main() -> anyhow::Result<()> {
         .compact()
         .init();
 
-    let fuzz = Fuzzing::parse();
+    let fuzz = Fuzz::parse();
     fuzz.process_wrapper.run().await.map_err(anyhow::Error::from)
 }

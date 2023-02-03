@@ -1,4 +1,20 @@
 load(":defs.bzl", "rust_fuzzing")
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+package(default_visibility = ["//:__subpackages__"])
+
+rust_binary(
+    name = "fuzz",
+    srcs = ["main.rs"],
+    deps = [
+        "//process/process_wrapper",
+        "@crates//:anyhow",
+        "@crates//:clap",
+        "@crates//:tokio",
+        "@crates//:tracing",
+        "@crates//:tracing-subscriber",
+    ],
+)
 
 rust_fuzzing(
     name = "buffer_overflow",
