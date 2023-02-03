@@ -3,10 +3,10 @@ use std::path::{Path, PathBuf};
 use testing::TempDirExt;
 use tokio::task;
 
-use crate::Options;
+use crate::ProcessWrapper;
 
-fn sleep<S: Into<String>>(duration: S) -> Options {
-    Options {
+fn sleep<S: Into<String>>(duration: S) -> ProcessWrapper {
+    ProcessWrapper {
         wait_files: vec![],
         post_file: None,
         stdout: None,

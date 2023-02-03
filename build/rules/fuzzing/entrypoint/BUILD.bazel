@@ -3,7 +3,7 @@ load("@rules_rust//rust:defs.bzl", "rust_binary")
 package(default_visibility = ["//visibility:public"])
 
 rust_binary(
-    name = "entrypoint",
+    name = "fuzzing",
     srcs = ["main.rs"],
     deps = [
         "//process/process_wrapper",

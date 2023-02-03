@@ -1,14 +1,24 @@
 use std::path::PathBuf;
 
 use clap::Parser;
+use process_wrapper::ProcessWrapper;
 
-#[derive(Debug, clap::Parser)]
-struct EntrypointOptions {
+#[derive(Debug, Parser)]
+struct Fuzzing {
+    /// Corpus.
     #[arg(long = "corpus", value_name = "DIR")]
     corpus: Option<PathBuf>,
 
+    /// Provide a dictionary of input keywords.
+    ///
+    /// For some input languages using a dictionary may significantly improve
+    /// the search speed.
+    #[arg(long = "dict", value_name = "PATH")]
+    dicts: Vec<PathBuf>,
+
+    /// A fuzzing target.
     #[clap(flatten)]
-    process_wrapper_options: process_wrapper::Options,
+    process_wrapper: ProcessWrapper,
 }
 
 #[tokio::main]
@@ -20,6 +30,6 @@ async fn main() -> anyhow::Result<()> {
         .compact()
         .init();
 
-    let opts = EntrypointOptions::parse();
-    process_wrapper::run(&opts.process_wrapper_options).await.map_err(anyhow::Error::from)
+    let fuzz = Fuzzing::parse();
+    fuzz.process_wrapper.run().await.map_err(anyhow::Error::from)
 }
