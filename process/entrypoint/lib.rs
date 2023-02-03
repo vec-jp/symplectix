@@ -1,3 +1,4 @@
+use std::env;
 use std::io;
 use std::os::unix::process::{CommandExt, ExitStatusExt};
 use std::path::PathBuf;
@@ -35,6 +36,10 @@ pub struct Entrypoint {
     /// Redirect the child process stderr.
     #[arg(long, value_name = "PATH")]
     stderr: Option<PathBuf>,
+
+    /// Environment variables visible to the spawned process.
+    #[arg(long = "env", value_name = "KEY")]
+    envs: Vec<String>,
 
     /// Kill the spawned child process after the specified duration.
     ///
@@ -201,7 +206,7 @@ async fn spawn(opts: &Entrypoint) -> Result<Child> {
         Stdio::inherit()
     });
 
-    cmd.env_clear();
+    cmd.env_clear().envs(env::vars().filter(|(key, _)| opts.envs.contains(key)));
 
     // Put the child into a new process group.
     cmd.process_group(0);

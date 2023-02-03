@@ -11,6 +11,7 @@ fn sleep<S: Into<String>>(duration: S) -> Entrypoint {
         post_file: None,
         stdout: None,
         stderr: None,
+        envs: vec![],
         timeout: None,
         command: "sleep".into(),
         command_args: vec![duration.into()],
