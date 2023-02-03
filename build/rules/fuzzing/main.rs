@@ -3,14 +3,14 @@ use clap::Parser;
 mod cmd;
 
 #[derive(Clone, Debug, Parser)]
-pub enum Fuzz {
+pub enum Fuzzing {
     Run(cmd::Run),
 }
 
-impl Fuzz {
+impl Fuzzing {
     async fn run(&self) -> entrypoint::Result {
         match self {
-            Fuzz::Run(f) => f.run().await,
+            Fuzzing::Run(f) => f.run().await,
         }
     }
 }
@@ -24,5 +24,5 @@ async fn main() -> anyhow::Result<()> {
         .compact()
         .init();
 
-    Fuzz::parse().run().await.map_err(anyhow::Error::from)
+    Fuzzing::parse().run().await.map_err(anyhow::Error::from)
 }
