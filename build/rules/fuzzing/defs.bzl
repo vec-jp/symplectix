@@ -83,11 +83,19 @@ def rust_fuzz_binary(
         name,
         sanitizer,
         envs = None,
-        **bin_kwargs):
+        **kwargs):
     """Helps to fuzzing.
     """
 
-    bin_kwargs.setdefault("rustc_flags", []).extend([
+    target_name = name + "_bin"
+
+    fuzzing_run(
+        name = name,
+        envs = envs,
+        target = target_name,
+    )
+
+    kwargs.setdefault("rustc_flags", []).extend([
         "--cfg=fuzzing",
         "-Cinstrument-coverage",
         "-Cpasses=sancov-module",
@@ -98,19 +106,11 @@ def rust_fuzz_binary(
         "-Zsanitizer={}".format(sanitizer),
     ])
 
-    target_name = name + "_bin"
-
     rust_binary(
         name = target_name,
         # TODO: do not compile on stable
         # target_compatible_with = [
         #     "@rules_rust//rust/platform/channel:nightly",
         # ],
-        **bin_kwargs
-    )
-
-    fuzzing_run(
-        name = name,
-        envs = envs,
-        target = target_name,
+        **kwargs
     )
