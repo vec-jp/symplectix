@@ -5,7 +5,7 @@ package(default_visibility = ["//:__subpackages__"])
 
 rust_binary(
     name = "fuzz",
-    srcs = ["main.rs"],
+    srcs = glob(["main.rs", "cmd/*.rs"]),
     deps = [
         "//process/process_wrapper",
         "@crates//:anyhow",
