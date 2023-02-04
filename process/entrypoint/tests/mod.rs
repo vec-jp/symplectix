@@ -22,7 +22,7 @@ fn sleep<S: Into<String>>(duration: S) -> Entrypoint {
 }
 
 #[tokio::test]
-async fn run_commands() {
+async fn run_entrypoints() {
     assert!(entrypoint(vec!["date"]).run().await.is_ok());
     assert!(entrypoint(vec!["unknown_command"]).run().await.is_err());
     assert!(sleep("0.1").run().await.is_ok());
