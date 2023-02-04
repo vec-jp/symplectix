@@ -7,7 +7,7 @@ use anyhow::Context as _;
 /// Prepares for fuzzing.
 #[derive(Clone, Debug, clap::Parser)]
 pub struct Prep {
-    #[clap(subcommand)]
+    #[command(subcommand)]
     command: Command,
 }
 

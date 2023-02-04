@@ -3,7 +3,7 @@ use entrypoint::Entrypoint;
 /// An entrypoint for fuzzing.
 #[derive(Clone, Debug, clap::Parser)]
 pub struct Run {
-    #[clap(flatten)]
+    #[command(flatten)]
     entrypoint: Entrypoint,
 }
 

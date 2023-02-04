@@ -1,10 +1,10 @@
-def _fuzzing_impl(ctx):
+def _fuzz_impl(ctx):
     entrypoint = ctx.actions.declare_file(ctx.label.name)
 
     entrypoint_template = """\
 {exports}
 RUNFILES_DIR="$0.runfiles" \
-exec "{fuzzing}" "{command}" \
+exec "{fuzz}" "{command}" \
 {envs} \
 -- \
 "{target}" \
@@ -17,7 +17,7 @@ exec "{fuzzing}" "{command}" \
             "export %s='%s'" % (key, val)
             for key, val in ctx.attr.envs.items()
         ]),
-        fuzzing = ctx.executable._fuzzing.short_path,
+        fuzz = ctx.executable._fuzz.short_path,
         command = ctx.attr.command,
         corpus = ctx.file.corpus.short_path,
         envs = " ".join([
@@ -34,8 +34,8 @@ exec "{fuzzing}" "{command}" \
     )
 
     runfiles = ctx.runfiles(files = [ctx.file.corpus]) \
-        .merge(ctx.attr._fuzzing[DefaultInfo].default_runfiles) \
-        .merge(ctx.attr._fuzzing[DefaultInfo].data_runfiles) \
+        .merge(ctx.attr._fuzz[DefaultInfo].default_runfiles) \
+        .merge(ctx.attr._fuzz[DefaultInfo].data_runfiles) \
         .merge(ctx.attr.target[DefaultInfo].default_runfiles) \
         .merge(ctx.attr.target[DefaultInfo].data_runfiles)
 
@@ -46,12 +46,12 @@ exec "{fuzzing}" "{command}" \
         ),
     ]
 
-_fuzzing = rule(
-    implementation = _fuzzing_impl,
+_fuzz = rule(
+    implementation = _fuzz_impl,
     executable = True,
     attrs = {
-        "_fuzzing": attr.label(
-            default = Label("@//build/rules/fuzzing:fuzzing"),
+        "_fuzz": attr.label(
+            default = Label("@//build/rules/fuzzing:fuzz"),
             executable = True,
             cfg = "exec",
         ),
@@ -76,13 +76,13 @@ _fuzzing = rule(
     },
 )
 
-def fuzzing_binary(**kwargs):
-    _fuzzing(
+def fuzz_binary(**kwargs):
+    _fuzz(
         command = "run",
         **kwargs
     )
 
-def _fuzzing_corpus_impl(ctx):
+def _fuzz_corpus_impl(ctx):
     output = ctx.actions.declare_directory(ctx.attr.name)
 
     corpus_list_args = ctx.actions.args()
@@ -94,7 +94,7 @@ def _fuzzing_corpus_impl(ctx):
     output_args.add("--output=" + output.path)
 
     ctx.actions.run(
-        executable = ctx.executable._fuzzing,
+        executable = ctx.executable._fuzz,
         arguments = ["prep", "corpus", output_args, corpus_list_args],
         inputs = ctx.files.srcs,
         outputs = [output],
@@ -105,15 +105,15 @@ def _fuzzing_corpus_impl(ctx):
         files = depset([output]),
     )]
 
-fuzzing_corpus = rule(
-    implementation = _fuzzing_corpus_impl,
+fuzz_corpus = rule(
+    implementation = _fuzz_corpus_impl,
     doc = """
 This rule creates a directory collecting all the corpora files
 specified in the srcs attribute.
 """,
     attrs = {
-        "_fuzzing": attr.label(
-            default = Label("@//build/rules/fuzzing:fuzzing"),
+        "_fuzz": attr.label(
+            default = Label("@//build/rules/fuzzing:fuzz"),
             executable = True,
             cfg = "exec",
         ),

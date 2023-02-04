@@ -3,8 +3,8 @@ use clap::Parser;
 mod cmd;
 
 #[derive(Clone, Debug, clap::Parser)]
-pub struct Fuzzing {
-    #[clap(subcommand)]
+pub struct Fuzz {
+    #[command(subcommand)]
     command: Command,
 }
 
@@ -14,7 +14,7 @@ enum Command {
     Prep(cmd::Prep),
 }
 
-impl Fuzzing {
+impl Fuzz {
     async fn run(&self) -> anyhow::Result<()> {
         match &self.command {
             Command::Run(f) => f.run().await,
@@ -32,5 +32,5 @@ async fn main() -> anyhow::Result<()> {
         .compact()
         .init();
 
-    Fuzzing::parse().run().await
+    Fuzz::parse().run().await
 }

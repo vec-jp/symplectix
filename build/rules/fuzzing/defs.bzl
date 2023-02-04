@@ -1,5 +1,5 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary")
-load("//build/rules/fuzzing/private:fuzzing.bzl", "fuzzing_binary", "fuzzing_corpus")
+load("//build/rules/fuzzing/private:fuzzing.bzl", "fuzz_binary", "fuzz_corpus")
 
 def rust_fuzz_binary(
         name,
@@ -13,7 +13,7 @@ def rust_fuzz_binary(
     target_name = name + "_target"
     corpus_name = name + "_corpus"
 
-    fuzzing_binary(
+    fuzz_binary(
         name = name,
         envs = envs,
         corpus = corpus_name,
@@ -21,7 +21,7 @@ def rust_fuzz_binary(
         tags = ["manual"],
     )
 
-    fuzzing_corpus(
+    fuzz_corpus(
         name = corpus_name,
         srcs = corpus,
         tags = ["manual"],
