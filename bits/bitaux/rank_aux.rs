@@ -20,7 +20,7 @@ use std::ops::{Add, AddAssign, RangeBounds, Sub, SubAssign};
 /// [`rank`]: crate::bits::Bits
 /// [`select`]: crate::bits::Bits
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Rho<T>(Aux<T, layout::FenwickTree>);
+pub struct FenwickTree<T>(BitAux<T, layout::FenwickTree>);
 
 // /// `T` + auxiliary indices to compute [`bits::Rank`](bits::Rank) and [`bits::Select`](bits::Select).
 // ///
@@ -31,9 +31,9 @@ pub struct Rho<T>(Aux<T, layout::FenwickTree>);
 
 // TODO: implement Debug for Imp, and remove Debug from Buckets
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct Aux<T, S> {
-    buckets: Buckets<S>,
-    samples: Option<Vec<Vec<u32>>>,
+struct BitAux<T, L> {
+    rank_aux: RankAux<L>,
+    select_aux: Option<Vec<Vec<u32>>>,
     bits: T,
 }
 
@@ -48,34 +48,34 @@ const MAXL1_SIZE: usize = UPPER_BLOCK / SUPER_BLOCK;
 const SAMPLE_SIZE: usize = 1 << 13;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct Buckets<T> {
+pub(crate) struct RankAux<L> {
     pub(crate) upper_blocks: Vec<u64>,
     pub(crate) lower_blocks: Vec<L1L2>,
-    _marker: PhantomData<T>,
+    _lb_layout: PhantomData<L>,
 }
 
 mod layout {
     /// Defines how to handle `prefix sum` of the population.
     pub(crate) trait Layout {}
 
-    /// Accumulates the number of bits as follows.
-    ///
-    /// L0: Cumulative absolute counts, per `UPPER` bits.
-    /// L1: Cumulative     relative counts
-    /// L2: Non-cumulative relative counts
-    ///
-    /// L1[i] and L2[i] are interleaved into one word.
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub(crate) struct Poppy;
-
     /// Builds a [`FenwickTree`] to compute prefix sum instead of accumulating.
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub(crate) struct FenwickTree;
 
+    /// Accumulates the number of bits as follows.
+    ///
+    /// L0: Cumulative absolute counts, per `UPPER` bits.
+    /// L1: Cumulative relative counts
+    /// L2: Non-cumulative relative counts
+    ///
+    /// L1[i] and L2[i] are interleaved into one word.
+    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+    pub(crate) struct Accumulated;
+
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub(crate) struct Uninit;
 
-    impl Layout for Poppy {}
+    impl Layout for Accumulated {}
     impl Layout for FenwickTree {}
     impl Layout for Uninit {}
 }
@@ -86,23 +86,23 @@ mod layout {
 //     }
 // }
 
-impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for Rho<&'a [T]> {
-    fn from(dat: &'a [T]) -> Self {
-        let (buckets, _) = build(dat.bits(), sbs_from_words(dat));
-        Rho(Aux { buckets: buckets.into(), samples: None, bits: dat })
+impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for FenwickTree<&'a [T]> {
+    fn from(bits: &'a [T]) -> Self {
+        let (buckets, _) = build(bits.bits(), super_blocks_from_words(bits));
+        FenwickTree(BitAux { rank_aux: buckets.into(), select_aux: None, bits })
     }
 }
 
-impl From<Buckets<layout::Uninit>> for Buckets<layout::FenwickTree> {
-    fn from(mut uninit: Buckets<layout::Uninit>) -> Buckets<layout::FenwickTree> {
+impl From<RankAux<layout::Uninit>> for RankAux<layout::FenwickTree> {
+    fn from(mut uninit: RankAux<layout::Uninit>) -> RankAux<layout::FenwickTree> {
         fenwicktree::build(&mut uninit.upper_blocks);
         for q in 0..uninit.lo_parts() {
             fenwicktree::build(uninit.lo_mut(q));
         }
-        Buckets {
+        RankAux {
             upper_blocks: uninit.upper_blocks,
             lower_blocks: uninit.lower_blocks,
-            _marker: PhantomData,
+            _lb_layout: PhantomData,
         }
     }
 }
@@ -110,14 +110,14 @@ impl From<Buckets<layout::Uninit>> for Buckets<layout::FenwickTree> {
 pub(crate) fn build<'a, T, I>(
     size: usize,
     super_blocks: I,
-) -> (Buckets<layout::Uninit>, Vec<Vec<u32>>)
+) -> (RankAux<layout::Uninit>, Vec<Vec<u32>>)
 where
     T: num::Int + bits::Bits + 'a,
     I: IntoIterator<Item = Option<&'a [T]>>,
 {
     use fenwicktree::Nodes;
 
-    let mut buckets = Buckets::new(size);
+    let mut buckets = RankAux::new(size);
     let mut samples = vec![Vec::new(); buckets.upper_blocks.nodes()];
     let mut ones = 0i64;
 
@@ -169,7 +169,7 @@ where
     (buckets, samples)
 }
 
-pub(crate) fn sbs_from_words<T: num::Int + bits::Bits>(
+pub(crate) fn super_blocks_from_words<T: num::Int + bits::Bits>(
     slice: &[T],
 ) -> impl Iterator<Item = Option<&[T]>> {
     slice.chunks(SUPER_BLOCK / T::BITS).map(Some)
@@ -240,11 +240,11 @@ fn lolen(n: usize) -> usize {
     }
 }
 
-impl<S> Buckets<S> {
-    pub(crate) fn new(n: usize) -> Buckets<S> {
+impl<L> RankAux<L> {
+    pub(crate) fn new(n: usize) -> RankAux<L> {
         let hi = vec![0; hilen(n)];
         let lo = vec![L1L2(0); lolen(n)];
-        Buckets { upper_blocks: hi, lower_blocks: lo, _marker: std::marker::PhantomData }
+        RankAux { upper_blocks: hi, lower_blocks: lo, _lb_layout: std::marker::PhantomData }
     }
 
     #[inline]
@@ -274,7 +274,7 @@ impl<S> Buckets<S> {
     }
 }
 
-impl Buckets<layout::FenwickTree> {
+impl RankAux<layout::FenwickTree> {
     pub(crate) fn add(&mut self, p0: usize, delta: u64) {
         use fenwicktree::Incr;
 
@@ -354,11 +354,11 @@ impl Buckets<layout::FenwickTree> {
     // }
 }
 
-impl<T: Bits> Rho<Vec<T>> {
+impl<T: Bits> FenwickTree<Vec<T>> {
     #[inline]
-    pub fn new(n: usize) -> Rho<Vec<T>> {
+    pub fn new(n: usize) -> FenwickTree<Vec<T>> {
         let dat = new(n);
-        Rho(Aux { buckets: Buckets::new(dat.bits()), samples: None, bits: dat })
+        FenwickTree(BitAux { rank_aux: RankAux::new(dat.bits()), select_aux: None, bits: dat })
     }
 }
 
@@ -389,7 +389,7 @@ impl<T: Bits> Rho<Vec<T>> {
 //     }
 // }
 
-impl<T: Container> Container for Rho<T> {
+impl<T: Container> Container for FenwickTree<T> {
     #[inline]
     fn bits(&self) -> usize {
         self.0.bits.bits()
@@ -401,10 +401,10 @@ impl<T: Container> Container for Rho<T> {
     }
 }
 
-impl<T: Count> Count for Rho<T> {
+impl<T: Count> Count for FenwickTree<T> {
     #[inline]
     fn count1(&self) -> usize {
-        let bit = &self.0.buckets.upper_blocks;
+        let bit = &self.0.rank_aux.upper_blocks;
         num::cast::<u64, usize>(bit.sum(bit.nodes()))
         // fenwicktree::sum(&self.0.buckets.hi).cast()
         // cast(self.buckets.hi.sum(self.buckets.hi.size()))
@@ -415,21 +415,21 @@ impl<T: Count> Count for Rho<T> {
     }
 }
 
-impl<T: Rank> Rank for Rho<T> {
+impl<T: Rank> Rank for FenwickTree<T> {
     fn rank1<Idx: RangeBounds<usize>>(&self, index: Idx) -> usize {
-        fn rank1_impl<U: Rank>(me: &Rho<U>, p0: usize) -> usize {
+        fn rank1_impl<U: Rank>(me: &FenwickTree<U>, p0: usize) -> usize {
             if p0 == 0 {
                 0
             } else if p0 == me.bits() {
                 me.count1()
             } else {
-                let Rho(me) = me;
+                let FenwickTree(me) = me;
                 let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
                 let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
                 let (q2, r2) = num::divrem(r1, BASIC_BLOCK);
 
-                let hi = &me.buckets.upper_blocks;
-                let lo = &me.buckets.lo(q0);
+                let hi = &me.rank_aux.upper_blocks;
+                let lo = &me.rank_aux.lo(q0);
                 let c0: u64 = hi.sum(q0);
                 let c1: u64 = lo.sum(q1);
                 let c2 = lo[q1 + 1].l2(q2);
@@ -449,14 +449,14 @@ impl<T: Rank> Rank for Rho<T> {
 //     }
 // }
 
-impl<T: Unpack + Select> Select for Rho<T> {
+impl<T: Unpack + Select> Select for FenwickTree<T> {
     fn select1(&self, n: usize) -> Option<usize> {
-        let Rho(imp) = self;
+        let FenwickTree(imp) = self;
         let mut r = num::cast(n);
 
         let (s, e) = {
-            let p0 = find_l0(&imp.buckets.upper_blocks[..], &mut r)?;
-            let lo = imp.buckets.lo(p0);
+            let p0 = find_l0(&imp.rank_aux.upper_blocks[..], &mut r)?;
+            let lo = imp.rank_aux.lo(p0);
             let p1 = find_l1(lo, &mut r);
             let ll = lo[p1 + 1];
             let l2 = [ll.l2_0(), ll.l2_1(), ll.l2_2()];
@@ -493,16 +493,16 @@ impl<T: Unpack + Select> Select for Rho<T> {
     }
 
     fn select0(&self, n: usize) -> Option<usize> {
-        let Rho(imp) = self;
+        let FenwickTree(imp) = self;
         let mut r = num::cast(n);
 
         let (s, e) = {
             const UB: u64 = UPPER_BLOCK as u64;
             const SB: u64 = SUPER_BLOCK as u64;
             const BB: u64 = BASIC_BLOCK as u64;
-            let hi_complemented = fenwicktree::complement(&imp.buckets.upper_blocks[..], UB);
+            let hi_complemented = fenwicktree::complement(&imp.rank_aux.upper_blocks[..], UB);
             let p0 = find_l0(&hi_complemented, &mut r)?;
-            let lo = imp.buckets.lo(p0);
+            let lo = imp.rank_aux.lo(p0);
             let lo_complemented = fenwicktree::complement(lo, SB);
             let p1 = find_l1(&lo_complemented, &mut r);
             let ll = lo[p1 + 1];

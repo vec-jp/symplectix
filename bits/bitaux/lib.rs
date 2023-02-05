@@ -9,7 +9,7 @@ use l1l2::L1L2;
 // use rank_aux::{Buckets, Uninit};
 // use rank_aux::{Pop as L1L2Sum, Rho as L1L2Bit};
 
-pub use rank_aux::Rho;
+pub use rank_aux::FenwickTree;
 
 // // impl<T: Container, S> From<Imp<Box<[T]>, S>> for Imp<Vec<T>, S> {
 // //     #[inline]

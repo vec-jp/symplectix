@@ -102,24 +102,24 @@ fn bit_rank() {
 
 #[quickcheck]
 fn repr_bits(vec: Vec<u32>) -> bool {
-    let rho = bitaux::Rho::from(&vec[..]);
+    let rho = bitaux::FenwickTree::from(&vec[..]);
     vec.bits() == rho.bits()
 }
 
 #[quickcheck]
 fn repr_rank(vec: Vec<u32>) -> bool {
-    let rho = bitaux::Rho::from(&vec[..]);
+    let rho = bitaux::FenwickTree::from(&vec[..]);
     vec.count1() == rho.count1() && vec.count0() == rho.count0()
 }
 
 #[quickcheck]
 fn repr_select1(vec: Vec<u32>) -> bool {
-    let rho = bitaux::Rho::from(&vec[..]);
+    let rho = bitaux::FenwickTree::from(&vec[..]);
     (0..vec.count1()).all(|i| vec.select1(i) == rho.select1(i))
 }
 
 #[quickcheck]
 fn repr_select0(vec: Vec<u32>) -> bool {
-    let rho = bitaux::Rho::from(&vec[..]);
+    let rho = bitaux::FenwickTree::from(&vec[..]);
     (0..vec.count0()).all(|i| vec.select0(i) == rho.select0(i))
 }
