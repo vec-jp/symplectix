@@ -1,54 +1,37 @@
-use crate::L1L2;
-use bitpacking::Unpack;
-use bits::new;
-use bits::{Bits, Container, Count, Rank, Select};
-use fenwicktree::{LowerBound, Nodes, Prefix};
 use std::cmp;
 use std::fmt::{self, Debug, Formatter};
 use std::iter::Sum;
 use std::marker::PhantomData;
 use std::ops::{Add, AddAssign, RangeBounds, Sub, SubAssign};
 
+use bitpacking::Unpack;
+use bits::new;
+use bits::{Bits, Container, Count, Rank, Select};
+use fenwicktree::{LowerBound, Nodes, Prefix};
+
+use crate::L1L2;
+
 // mod buckets;
 // mod pop;
 // mod rho;
-
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub struct BitAux<T>(BitAuxInner<T>);
-
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// enum BitAuxInner<T> {
-//     FenwickTree(Imp<T, layout::FenwickTree>),
-//     Accumulated(Imp<T, layout::Accumulated>),
-// }
 
 /// `T` + auxiliary indices to compute [`bits::Rank`] and [`bits::Select`].
 ///
 /// [`rank`]: crate::bits::Bits
 /// [`select`]: crate::bits::Bits
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct FenwickTree<T>(Imp<T, layout::FenwickTree>);
+pub struct FenwickTree<T>(BitAux<T, layout::FenwickTree>);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Pop<T>(Imp<T, layout::Accumulated>);
+pub struct Pop<T>(BitAux<T, layout::Accumulated>);
 
 // TODO: implement Debug for Imp, and remove Debug from Buckets
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct Imp<T, L> {
+struct BitAux<T, L> {
     rank_aux: RankAux<L>,
     select_samples: Option<Vec<Vec<u32>>>,
     bits: T,
 }
-
-const UPPER_BLOCK: usize = 1 << 32;
-
-const SUPER_BLOCK: usize = 1 << 11;
-
-const BASIC_BLOCK: usize = 1 << 9;
-
-const MAXL1_SIZE: usize = UPPER_BLOCK / SUPER_BLOCK;
-
-const SAMPLE_SIZE: usize = 1 << 13;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct RankAux<L> {
@@ -56,6 +39,11 @@ pub(crate) struct RankAux<L> {
     pub(crate) lower_blocks: Vec<L1L2>,
     _lb_layout: PhantomData<L>,
 }
+
+// #[derive(Debug, Clone, PartialEq, Eq)]
+// pub(crate) struct SelectAux<L> {
+//     select_samples: Option<Vec<Vec<u32>>>,
+// }
 
 mod layout {
     /// Defines how to handle `prefix sum` of the population.
@@ -83,16 +71,20 @@ mod layout {
     impl Layout for Uninit {}
 }
 
-// impl<S> fmt::Debug for Buckets<S> {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         f.debug_tuple("Buckets").field(&self.hi).finish()
-//     }
-// }
+const UPPER_BLOCK: usize = 1 << 32;
+
+const SUPER_BLOCK: usize = 1 << 11;
+
+const BASIC_BLOCK: usize = 1 << 9;
+
+const MAXL1_SIZE: usize = UPPER_BLOCK / SUPER_BLOCK;
+
+const SAMPLE_SIZE: usize = 1 << 13;
 
 impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for FenwickTree<&'a [T]> {
     fn from(bits: &'a [T]) -> Self {
         let (buckets, _) = build(bits.bits(), super_blocks_from_words(bits));
-        FenwickTree(Imp { rank_aux: buckets.into(), select_samples: None, bits })
+        FenwickTree(BitAux { rank_aux: buckets.into(), select_samples: None, bits })
     }
 }
 
@@ -361,7 +353,7 @@ impl<T: Bits> FenwickTree<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> FenwickTree<Vec<T>> {
         let dat = new(n);
-        FenwickTree(Imp { rank_aux: RankAux::new(dat.bits()), select_samples: None, bits: dat })
+        FenwickTree(BitAux { rank_aux: RankAux::new(dat.bits()), select_samples: None, bits: dat })
     }
 }
 
