@@ -34,19 +34,23 @@ pub struct Rho<T>(Aux<T, layout::FenwickTree>);
 struct Aux<T, S> {
     buckets: Buckets<S>,
     samples: Option<Vec<Vec<u32>>>,
-    bit_vec: T,
+    bits: T,
 }
 
-const UPPER: usize = 1 << 32;
-const SUPER: usize = 1 << 11;
-const BASIC: usize = 1 << 9;
-const MAXL1: usize = UPPER / SUPER; // 2097152
-const SAMPLE: usize = 1 << 13;
+const UPPER_BLOCK: usize = 1 << 32;
+
+const SUPER_BLOCK: usize = 1 << 11;
+
+const BASIC_BLOCK: usize = 1 << 9;
+
+const MAXL1_SIZE: usize = UPPER_BLOCK / SUPER_BLOCK;
+
+const SAMPLE_SIZE: usize = 1 << 13;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct Buckets<T> {
-    pub(crate) hi: Vec<u64>,
-    pub(crate) lo: Vec<L1L2>,
+    pub(crate) upper_blocks: Vec<u64>,
+    pub(crate) lower_blocks: Vec<L1L2>,
     _marker: PhantomData<T>,
 }
 
@@ -85,17 +89,21 @@ mod layout {
 impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for Rho<&'a [T]> {
     fn from(dat: &'a [T]) -> Self {
         let (buckets, _) = build(dat.bits(), sbs_from_words(dat));
-        Rho(Aux { buckets: buckets.into(), samples: None, bit_vec: dat })
+        Rho(Aux { buckets: buckets.into(), samples: None, bits: dat })
     }
 }
 
 impl From<Buckets<layout::Uninit>> for Buckets<layout::FenwickTree> {
     fn from(mut uninit: Buckets<layout::Uninit>) -> Buckets<layout::FenwickTree> {
-        fenwicktree::build(&mut uninit.hi);
+        fenwicktree::build(&mut uninit.upper_blocks);
         for q in 0..uninit.lo_parts() {
             fenwicktree::build(uninit.lo_mut(q));
         }
-        Buckets { hi: uninit.hi, lo: uninit.lo, _marker: PhantomData }
+        Buckets {
+            upper_blocks: uninit.upper_blocks,
+            lower_blocks: uninit.lower_blocks,
+            _marker: PhantomData,
+        }
     }
 }
 
@@ -110,13 +118,13 @@ where
     use fenwicktree::Nodes;
 
     let mut buckets = Buckets::new(size);
-    let mut samples = vec![Vec::new(); buckets.hi.nodes()];
+    let mut samples = vec![Vec::new(); buckets.upper_blocks.nodes()];
     let mut ones = 0i64;
 
     fn bbs<W: num::Int + bits::Bits>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
         let mut bbs = [0; L1L2::LEN];
         if let Some(sb) = sb.as_ref() {
-            for (i, bb) in sb.chunks(BASIC / W::BITS).enumerate() {
+            for (i, bb) in sb.chunks(BASIC_BLOCK / W::BITS).enumerate() {
                 bbs[i] = bb.count1() as u64;
             }
         }
@@ -127,25 +135,25 @@ where
         let bbs = bbs(sb);
         let sum = bbs.iter().sum::<u64>();
 
-        let (q, r) = num::divrem(i, MAXL1);
+        let (q, r) = num::divrem(i, MAXL1_SIZE);
 
         {
             // +1 to skip dummy index
-            buckets.hi[q + 1] += sum;
+            buckets.upper_blocks[q + 1] += sum;
             buckets.lo_mut(q)[r + 1] = L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
         }
 
         {
             // diff between `ones` and `SAMPLE_BITS * k`
-            let rem = (-ones).rem_euclid(SAMPLE as i64);
+            let rem = (-ones).rem_euclid(SAMPLE_SIZE as i64);
 
             if (rem as u64) < sum {
-                let offset = i * SUPER - q * UPPER;
+                let offset = i * SUPER_BLOCK - q * UPPER_BLOCK;
                 let select = sb.unwrap().select1(rem as usize).unwrap();
                 samples[q].push(num::cast(offset + select));
             }
 
-            if r == MAXL1 - 1 {
+            if r == MAXL1_SIZE - 1 {
                 ones = 0;
             } else {
                 ones += sum as i64;
@@ -164,7 +172,7 @@ where
 pub(crate) fn sbs_from_words<T: num::Int + bits::Bits>(
     slice: &[T],
 ) -> impl Iterator<Item = Option<&[T]>> {
-    slice.chunks(SUPER / T::BITS).map(Some)
+    slice.chunks(SUPER_BLOCK / T::BITS).map(Some)
 }
 
 // impl From<Buckets<layout::Uninit>> for Buckets<layout::Poppy> {
@@ -214,7 +222,7 @@ pub(crate) fn sbs_from_words<T: num::Int + bits::Bits>(
 
 #[inline]
 fn hilen(n: usize) -> usize {
-    bit::blocks(n, UPPER) + 1
+    bit::blocks(n, UPPER_BLOCK) + 1
 }
 
 #[inline]
@@ -223,10 +231,10 @@ fn lolen(n: usize) -> usize {
         1
     } else {
         // A minimum and a *logical* length of a vector to store `LL`.
-        let supers = bit::blocks(n, SUPER);
+        let supers = bit::blocks(n, SUPER_BLOCK);
         // Computes how many fenwicks do we need actually.
         // Remenber that fenwicks for L1 and L2 is logically `Vec<Vec<LL>>` but flattened.
-        let (q, r) = num::divrem(supers, MAXL1);
+        let (q, r) = num::divrem(supers, MAXL1_SIZE);
         // Need additional space for each fenwicks because of its 1-based indexing.
         supers + q + (r > 0) as usize
     }
@@ -236,21 +244,21 @@ impl<S> Buckets<S> {
     pub(crate) fn new(n: usize) -> Buckets<S> {
         let hi = vec![0; hilen(n)];
         let lo = vec![L1L2(0); lolen(n)];
-        Buckets { hi, lo, _marker: std::marker::PhantomData }
+        Buckets { upper_blocks: hi, lower_blocks: lo, _marker: std::marker::PhantomData }
     }
 
     #[inline]
     pub(crate) fn lo(&self, i: usize) -> &[L1L2] {
-        let s = (MAXL1 + 1) * i;
-        let e = cmp::min(s + (MAXL1 + 1), self.lo.len());
-        &self.lo[s..e]
+        let s = (MAXL1_SIZE + 1) * i;
+        let e = cmp::min(s + (MAXL1_SIZE + 1), self.lower_blocks.len());
+        &self.lower_blocks[s..e]
     }
 
     #[inline]
     pub(crate) fn lo_mut(&mut self, i: usize) -> &mut [L1L2] {
-        let s = (MAXL1 + 1) * i;
-        let e = cmp::min(s + (MAXL1 + 1), self.lo.len());
-        &mut self.lo[s..e]
+        let s = (MAXL1_SIZE + 1) * i;
+        let e = cmp::min(s + (MAXL1_SIZE + 1), self.lower_blocks.len());
+        &mut self.lower_blocks[s..e]
     }
 
     // The logical number of fenwicks hiding at `lo`.
@@ -262,7 +270,7 @@ impl<S> Buckets<S> {
         // } else {
         //     blocks(self.low.len(), MAXL1 + 1)
         // }
-        bit::blocks(self.lo.len(), MAXL1 + 1)
+        bit::blocks(self.lower_blocks.len(), MAXL1_SIZE + 1)
     }
 }
 
@@ -270,10 +278,10 @@ impl Buckets<layout::FenwickTree> {
     pub(crate) fn add(&mut self, p0: usize, delta: u64) {
         use fenwicktree::Incr;
 
-        let (q0, r0) = num::divrem(p0, UPPER);
-        let (q1, r1) = num::divrem(r0, SUPER);
+        let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
+        let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
 
-        let hi = &mut self.hi;
+        let hi = &mut self.upper_blocks;
         hi.incr(q0 + 1, delta);
 
         let lo = self.lo_mut(q0);
@@ -281,7 +289,7 @@ impl Buckets<layout::FenwickTree> {
 
         // Update L2 array which is interleaved into L1
         let sb = q1 + 1; // +1 because fenwick doesn't use index 0
-        let bb = r1 / BASIC + 1; // +1 to skip index 0 which is for L1
+        let bb = r1 / BASIC_BLOCK + 1; // +1 to skip index 0 which is for L1
         if bb < L1L2::LEN {
             lo[sb] = {
                 let mut arr = L1L2::split(lo[sb]);
@@ -294,17 +302,17 @@ impl Buckets<layout::FenwickTree> {
     pub(crate) fn sub(&mut self, p0: usize, delta: u64) {
         use fenwicktree::Decr;
 
-        let (q0, r0) = num::divrem(p0, UPPER);
-        let (q1, r1) = num::divrem(r0, SUPER);
+        let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
+        let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
 
-        let hi = &mut self.hi;
+        let hi = &mut self.upper_blocks;
         hi.decr(q0 + 1, delta);
 
         let lo = self.lo_mut(q0);
         lo.decr(q1 + 1, delta);
 
         let sb = q1 + 1;
-        let bb = r1 / BASIC + 1;
+        let bb = r1 / BASIC_BLOCK + 1;
         if bb < L1L2::LEN {
             lo[sb] = {
                 let mut arr = L1L2::split(lo[sb]);
@@ -350,7 +358,7 @@ impl<T: Bits> Rho<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> Rho<Vec<T>> {
         let dat = new(n);
-        Rho(Aux { buckets: Buckets::new(dat.bits()), samples: None, bit_vec: dat })
+        Rho(Aux { buckets: Buckets::new(dat.bits()), samples: None, bits: dat })
     }
 }
 
@@ -384,19 +392,19 @@ impl<T: Bits> Rho<Vec<T>> {
 impl<T: Container> Container for Rho<T> {
     #[inline]
     fn bits(&self) -> usize {
-        self.0.bit_vec.bits()
+        self.0.bits.bits()
     }
 
     #[inline]
     fn bit(&self, i: usize) -> Option<bool> {
-        self.0.bit_vec.bit(i)
+        self.0.bits.bit(i)
     }
 }
 
 impl<T: Count> Count for Rho<T> {
     #[inline]
     fn count1(&self) -> usize {
-        let bit = &self.0.buckets.hi;
+        let bit = &self.0.buckets.upper_blocks;
         num::cast::<u64, usize>(bit.sum(bit.nodes()))
         // fenwicktree::sum(&self.0.buckets.hi).cast()
         // cast(self.buckets.hi.sum(self.buckets.hi.size()))
@@ -416,16 +424,16 @@ impl<T: Rank> Rank for Rho<T> {
                 me.count1()
             } else {
                 let Rho(me) = me;
-                let (q0, r0) = num::divrem(p0, UPPER);
-                let (q1, r1) = num::divrem(r0, SUPER);
-                let (q2, r2) = num::divrem(r1, BASIC);
+                let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
+                let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
+                let (q2, r2) = num::divrem(r1, BASIC_BLOCK);
 
-                let hi = &me.buckets.hi;
+                let hi = &me.buckets.upper_blocks;
                 let lo = &me.buckets.lo(q0);
                 let c0: u64 = hi.sum(q0);
                 let c1: u64 = lo.sum(q1);
                 let c2 = lo[q1 + 1].l2(q2);
-                num::cast::<_, usize>(c0 + c1 + c2) + me.bit_vec.rank1(p0 - r2..p0)
+                num::cast::<_, usize>(c0 + c1 + c2) + me.bits.rank1(p0 - r2..p0)
             }
         }
         use std::ops::Range;
@@ -447,15 +455,15 @@ impl<T: Unpack + Select> Select for Rho<T> {
         let mut r = num::cast(n);
 
         let (s, e) = {
-            let p0 = find_l0(&imp.buckets.hi[..], &mut r)?;
+            let p0 = find_l0(&imp.buckets.upper_blocks[..], &mut r)?;
             let lo = imp.buckets.lo(p0);
             let p1 = find_l1(lo, &mut r);
             let ll = lo[p1 + 1];
             let l2 = [ll.l2_0(), ll.l2_1(), ll.l2_2()];
             let p2 = find_l2(&l2, &mut r);
 
-            let s = p0 * UPPER + p1 * SUPER + p2 * BASIC;
-            (s, cmp::min(s + BASIC, self.bits()))
+            let s = p0 * UPPER_BLOCK + p1 * SUPER_BLOCK + p2 * BASIC_BLOCK;
+            (s, cmp::min(s + BASIC_BLOCK, self.bits()))
         };
 
         let mut r = r as usize;
@@ -468,7 +476,7 @@ impl<T: Unpack + Select> Select for Rho<T> {
 
         const BITS: usize = <u128 as Bits>::BITS;
         for i in (s..e).step_by(BITS) {
-            let b = imp.bit_vec.unpack::<u128>(i, BITS);
+            let b = imp.bits.unpack::<u128>(i, BITS);
             let c = b.count1();
             if r < c {
                 // #[cfg(test)]
@@ -489,10 +497,10 @@ impl<T: Unpack + Select> Select for Rho<T> {
         let mut r = num::cast(n);
 
         let (s, e) = {
-            const UB: u64 = UPPER as u64;
-            const SB: u64 = SUPER as u64;
-            const BB: u64 = BASIC as u64;
-            let hi_complemented = fenwicktree::complement(&imp.buckets.hi[..], UB);
+            const UB: u64 = UPPER_BLOCK as u64;
+            const SB: u64 = SUPER_BLOCK as u64;
+            const BB: u64 = BASIC_BLOCK as u64;
+            let hi_complemented = fenwicktree::complement(&imp.buckets.upper_blocks[..], UB);
             let p0 = find_l0(&hi_complemented, &mut r)?;
             let lo = imp.buckets.lo(p0);
             let lo_complemented = fenwicktree::complement(lo, SB);
@@ -501,8 +509,8 @@ impl<T: Unpack + Select> Select for Rho<T> {
             let l2 = [BB - ll.l2_0(), BB - ll.l2_1(), BB - ll.l2_2()];
             let p2 = find_l2(&l2, &mut r);
 
-            let s = p0 * UPPER + p1 * SUPER + p2 * BASIC;
-            (s, cmp::min(s + BASIC, self.bits()))
+            let s = p0 * UPPER_BLOCK + p1 * SUPER_BLOCK + p2 * BASIC_BLOCK;
+            (s, cmp::min(s + BASIC_BLOCK, self.bits()))
         };
 
         let mut r = r as usize;
@@ -513,7 +521,7 @@ impl<T: Unpack + Select> Select for Rho<T> {
 
         const BITS: usize = <u128 as Bits>::BITS;
         for i in (s..e).step_by(BITS) {
-            let b = imp.bit_vec.unpack::<u128>(i, BITS);
+            let b = imp.bits.unpack::<u128>(i, BITS);
             let c = b.count0();
             if r < c {
                 return Some(i + b.select0(r).unwrap());
