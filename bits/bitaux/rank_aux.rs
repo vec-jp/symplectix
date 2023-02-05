@@ -13,27 +13,30 @@ use std::ops::{Add, AddAssign, RangeBounds, Sub, SubAssign};
 // mod pop;
 // mod rho;
 
-// pub use accumulate::BitArray;
+// #[derive(Debug, Clone, PartialEq, Eq)]
+// pub struct BitAux<T>(BitAuxInner<T>);
+
+// #[derive(Debug, Clone, PartialEq, Eq)]
+// enum BitAuxInner<T> {
+//     FenwickTree(Imp<T, layout::FenwickTree>),
+//     Accumulated(Imp<T, layout::Accumulated>),
+// }
 
 /// `T` + auxiliary indices to compute [`bits::Rank`] and [`bits::Select`].
 ///
 /// [`rank`]: crate::bits::Bits
 /// [`select`]: crate::bits::Bits
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct FenwickTree<T>(BitAux<T, layout::FenwickTree>);
+pub struct FenwickTree<T>(Imp<T, layout::FenwickTree>);
 
-// /// `T` + auxiliary indices to compute [`bits::Rank`](bits::Rank) and [`bits::Select`](bits::Select).
-// ///
-// /// [`rank`]: crate::bits::Bits
-// /// [`select`]: crate::bits::Bits
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub struct Pop<T>(Imp<T, layout::Pop>);
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Pop<T>(Imp<T, layout::Accumulated>);
 
 // TODO: implement Debug for Imp, and remove Debug from Buckets
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct BitAux<T, L> {
+struct Imp<T, L> {
     rank_aux: RankAux<L>,
-    select_aux: Option<Vec<Vec<u32>>>,
+    select_samples: Option<Vec<Vec<u32>>>,
     bits: T,
 }
 
@@ -89,7 +92,7 @@ mod layout {
 impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for FenwickTree<&'a [T]> {
     fn from(bits: &'a [T]) -> Self {
         let (buckets, _) = build(bits.bits(), super_blocks_from_words(bits));
-        FenwickTree(BitAux { rank_aux: buckets.into(), select_aux: None, bits })
+        FenwickTree(Imp { rank_aux: buckets.into(), select_samples: None, bits })
     }
 }
 
@@ -358,7 +361,7 @@ impl<T: Bits> FenwickTree<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> FenwickTree<Vec<T>> {
         let dat = new(n);
-        FenwickTree(BitAux { rank_aux: RankAux::new(dat.bits()), select_aux: None, bits: dat })
+        FenwickTree(Imp { rank_aux: RankAux::new(dat.bits()), select_samples: None, bits: dat })
     }
 }
 
