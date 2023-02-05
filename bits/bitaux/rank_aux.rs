@@ -15,12 +15,12 @@ use std::ops::{Add, AddAssign, RangeBounds, Sub, SubAssign};
 
 // pub use accumulate::BitArray;
 
-/// `T` + auxiliary indices to compute [`bits::Rank`](bits::Rank) and [`bits::Select`](bits::Select).
+/// `T` + auxiliary indices to compute [`bits::Rank`] and [`bits::Select`].
 ///
 /// [`rank`]: crate::bits::Bits
 /// [`select`]: crate::bits::Bits
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Rho<T>(Imp<T, layout::Rho>);
+pub struct Rho<T>(Aux<T, layout::FenwickTree>);
 
 // /// `T` + auxiliary indices to compute [`bits::Rank`](bits::Rank) and [`bits::Select`](bits::Select).
 // ///
@@ -31,7 +31,7 @@ pub struct Rho<T>(Imp<T, layout::Rho>);
 
 // TODO: implement Debug for Imp, and remove Debug from Buckets
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct Imp<T, S> {
+struct Aux<T, S> {
     buckets: Buckets<S>,
     samples: Option<Vec<Vec<u32>>>,
     bit_vec: T,
@@ -62,17 +62,17 @@ mod layout {
     ///
     /// L1[i] and L2[i] are interleaved into one word.
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub(crate) struct Pop;
+    pub(crate) struct Poppy;
 
     /// Builds a [`FenwickTree`] to compute prefix sum instead of accumulating.
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub(crate) struct Rho;
+    pub(crate) struct FenwickTree;
 
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub(crate) struct Uninit;
 
-    impl Layout for Pop {}
-    impl Layout for Rho {}
+    impl Layout for Poppy {}
+    impl Layout for FenwickTree {}
     impl Layout for Uninit {}
 }
 
@@ -81,6 +81,23 @@ mod layout {
 //         f.debug_tuple("Buckets").field(&self.hi).finish()
 //     }
 // }
+
+impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for Rho<&'a [T]> {
+    fn from(dat: &'a [T]) -> Self {
+        let (buckets, _) = build(dat.bits(), sbs_from_words(dat));
+        Rho(Aux { buckets: buckets.into(), samples: None, bit_vec: dat })
+    }
+}
+
+impl From<Buckets<layout::Uninit>> for Buckets<layout::FenwickTree> {
+    fn from(mut uninit: Buckets<layout::Uninit>) -> Buckets<layout::FenwickTree> {
+        fenwicktree::build(&mut uninit.hi);
+        for q in 0..uninit.lo_parts() {
+            fenwicktree::build(uninit.lo_mut(q));
+        }
+        Buckets { hi: uninit.hi, lo: uninit.lo, _marker: PhantomData }
+    }
+}
 
 pub(crate) fn build<'a, T, I>(
     size: usize,
@@ -150,40 +167,30 @@ pub(crate) fn sbs_from_words<T: num::Int + bits::Bits>(
     slice.chunks(SUPER / T::BITS).map(Some)
 }
 
-impl From<Buckets<layout::Uninit>> for Buckets<layout::Rho> {
-    fn from(mut uninit: Buckets<layout::Uninit>) -> Buckets<layout::Rho> {
-        fenwicktree::build(&mut uninit.hi);
-        for q in 0..uninit.lo_parts() {
-            fenwicktree::build(uninit.lo_mut(q));
-        }
-        Buckets { hi: uninit.hi, lo: uninit.lo, _marker: PhantomData }
-    }
-}
+// impl From<Buckets<layout::Uninit>> for Buckets<layout::Poppy> {
+//     fn from(mut flat: Buckets<layout::Uninit>) -> Buckets<layout::Poppy> {
+//         use fenwicktree::Nodes;
 
-impl From<Buckets<layout::Uninit>> for Buckets<layout::Pop> {
-    fn from(mut flat: Buckets<layout::Uninit>) -> Buckets<layout::Pop> {
-        use fenwicktree::Nodes;
+//         let mut sum = 0;
+//         for acc in flat.hi[1..].iter_mut() {
+//             sum += *acc;
+//             *acc = sum;
+//         }
 
-        let mut sum = 0;
-        for acc in flat.hi[1..].iter_mut() {
-            sum += *acc;
-            *acc = sum;
-        }
+//         for q in 0..flat.hi.nodes() {
+//             let lo = flat.lo_mut(q);
 
-        for q in 0..flat.hi.nodes() {
-            let lo = flat.lo_mut(q);
+//             let mut sum = 0;
+//             for L1L2(acc) in lo[1..].iter_mut() {
+//                 let cur = *acc & L1L2::L1;
+//                 *acc = (*acc & !L1L2::L1) | sum;
+//                 sum += cur;
+//             }
+//         }
 
-            let mut sum = 0;
-            for L1L2(acc) in lo[1..].iter_mut() {
-                let cur = *acc & L1L2::L1;
-                *acc = (*acc & !L1L2::L1) | sum;
-                sum += cur;
-            }
-        }
-
-        Buckets { hi: flat.hi, lo: flat.lo, _marker: PhantomData }
-    }
-}
+//         Buckets { hi: flat.hi, lo: flat.lo, _marker: PhantomData }
+//     }
+// }
 
 // impl From<Buckets<Rho>> for Buckets<Pop> {
 //     fn from(mut f: Buckets<Rho>) -> Buckets<Pop> {
@@ -259,7 +266,7 @@ impl<S> Buckets<S> {
     }
 }
 
-impl Buckets<layout::Rho> {
+impl Buckets<layout::FenwickTree> {
     pub(crate) fn add(&mut self, p0: usize, delta: u64) {
         use fenwicktree::Incr;
 
@@ -343,7 +350,7 @@ impl<T: Bits> Rho<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> Rho<Vec<T>> {
         let dat = new(n);
-        Rho(Imp { buckets: Buckets::new(dat.bits()), samples: None, bit_vec: dat })
+        Rho(Aux { buckets: Buckets::new(dat.bits()), samples: None, bit_vec: dat })
     }
 }
 
@@ -352,13 +359,6 @@ impl<T: Bits> Rho<Vec<T>> {
 //         Rho(Imp { buckets: imp.buckets, samples: None, bit_vec: imp.bit_vec.to_vec() })
 //     }
 // }
-
-impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for Rho<&'a [T]> {
-    fn from(dat: &'a [T]) -> Self {
-        let (buckets, _) = build(dat.bits(), sbs_from_words(dat));
-        Rho(Imp { buckets: buckets.into(), samples: None, bit_vec: dat })
-    }
-}
 
 // impl<'a, T: WordArray> From<&'a [Block<T>]> for Rho<&'a [Block<T>]> {
 //     fn from(dat: &'a [Block<T>]) -> Self {
