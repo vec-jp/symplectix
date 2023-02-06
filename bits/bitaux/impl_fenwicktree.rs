@@ -3,8 +3,12 @@ use super::*;
 impl<T: Bits> FenwickTree<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> FenwickTree<Vec<T>> {
-        let dat = new(n);
-        FenwickTree(BitAux { rank_aux: RankAux::new(dat.bits()), select_samples: None, bits: dat })
+        let dat = bits::new(n);
+        FenwickTree(BitAux {
+            rank_aux: RankAux::new(bits::len(&dat)),
+            select_samples: None,
+            bits: dat,
+        })
     }
 }
 
