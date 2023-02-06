@@ -32,25 +32,26 @@ impl<'a, T: ?Sized + Nodes> Nodes for &'a T {
     }
 }
 
-/// Build a fenwick tree.
-pub fn build<T: Node + AddAssign>(bit: &mut [T]) {
-    assert!(!bit.is_empty());
+/// Builds a fenwick tree.
+pub fn build<T: Node + AddAssign>(tr: &mut [T]) {
+    assert!(!tr.is_empty());
 
-    for i in 1..bit.len() {
+    for i in 1..tr.len() {
         let j = iter::next_index_for_update(i);
-        if j < bit.len() {
-            bit[j] += bit[i];
+        if j < tr.len() {
+            tr[j] += tr[i];
         }
     }
 }
 
-pub fn unbuild<T: Node + SubAssign>(bit: &mut [T]) {
-    assert!(!bit.is_empty());
+/// Resets a fenwick tree.
+pub fn reset<T: Node + SubAssign>(tr: &mut [T]) {
+    assert!(!tr.is_empty());
 
-    for i in (1..bit.len()).rev() {
+    for i in (1..tr.len()).rev() {
         let j = iter::next_index_for_update(i);
-        if j < bit.len() {
-            bit[j] -= bit[i];
+        if j < tr.len() {
+            tr[j] -= tr[i];
         }
     }
 }

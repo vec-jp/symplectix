@@ -158,9 +158,9 @@ fn lower_bound() {
 }
 
 #[quickcheck]
-fn build_unbuild(vec: Vec<u32>) -> bool {
+fn build_reset(vec: Vec<u32>) -> bool {
     let mut bit = build(vec.clone());
-    fenwicktree::unbuild(&mut bit);
+    fenwicktree::reset(&mut bit);
     bit[1..] == vec
 }
 
