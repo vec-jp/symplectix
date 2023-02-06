@@ -66,7 +66,7 @@ where
 
 fn basic_blocks<W: Word>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
     let mut bbs = [0; L1L2::LEN];
-    if let Some(sb) = sb.as_ref() {
+    if let Some(sb) = sb {
         for (i, bb) in sb.chunks(BASIC_BLOCK / W::BITS).enumerate() {
             bbs[i] = bb.count1() as u64;
         }
@@ -141,12 +141,6 @@ impl<T: Count> Count for BitAux<T> {
     fn count1(&self) -> usize {
         let bit = &self.poppy.ubs;
         num::cast::<u64, usize>(bit.sum(bit.nodes()))
-        // fenwicktree::sum(&self.0.buckets.hi).cast()
-        // cast(self.buckets.hi.sum(self.buckets.hi.size()))
-        // let top0 = self.samples.top[0];
-        // #[cfg(test)]
-        // assert_eq!(top0 as usize, self.buf.count1());
-        // cast(top0)
     }
 }
 
@@ -163,7 +157,7 @@ impl<T: Rank> Rank for BitAux<T> {
                 let (q2, r2) = num::divrem(r1, BASIC_BLOCK);
 
                 let hi = &me.poppy.ubs;
-                let lo = &me.poppy.lb(q0);
+                let lo = me.poppy.lb(q0);
                 let c0: u64 = hi.sum(q0);
                 let c1: u64 = lo.sum(q1);
                 let c2 = lo[q1 + 1].l2(q2);
