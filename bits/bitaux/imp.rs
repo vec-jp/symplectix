@@ -1,50 +1,41 @@
 use super::*;
 
-impl<T: Bits> FenwickTree<Vec<T>> {
+impl<T: Bits> BitAux<Vec<T>> {
     #[inline]
-    pub fn new(n: usize) -> FenwickTree<Vec<T>> {
+    pub fn new(n: usize) -> BitAux<Vec<T>> {
         let dat = bits::new(n);
-        FenwickTree(BitAux {
-            rank_aux: RankAux::new(bits::len(&dat)),
-            select_samples: None,
-            bits: dat,
-        })
+        BitAux { rank_aux: RankAux::new(bits::len(&dat)), bits: dat }
     }
 }
 
-impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for FenwickTree<&'a [T]> {
+impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for BitAux<&'a [T]> {
     fn from(bits: &'a [T]) -> Self {
-        let (buckets, _) = build(bits.bits(), super_blocks_from_words(bits));
-        FenwickTree(BitAux { rank_aux: buckets.into(), select_samples: None, bits })
-    }
-}
-
-impl From<RankAux<layout::Uninit>> for RankAux<layout::FenwickTree> {
-    fn from(mut uninit: RankAux<layout::Uninit>) -> RankAux<layout::FenwickTree> {
-        fenwicktree::build(&mut uninit.ub);
-        for q in 0..uninit.lo_parts() {
-            fenwicktree::build(uninit.lo_mut(q));
+        let (mut buckets, _) = build(bits.bits(), super_blocks_from_words(bits));
+        fenwicktree::build(&mut buckets.ub);
+        for q in 0..buckets.lo_parts() {
+            fenwicktree::build(buckets.lo_mut(q));
         }
-        RankAux { ub: uninit.ub, lb: uninit.lb, _lb_layout: PhantomData }
+
+        BitAux { rank_aux: buckets, bits }
     }
 }
 
-impl<T: Container> Container for FenwickTree<T> {
+impl<T: Container> Container for BitAux<T> {
     #[inline]
     fn bits(&self) -> usize {
-        self.0.bits.bits()
+        self.bits.bits()
     }
 
     #[inline]
     fn bit(&self, i: usize) -> Option<bool> {
-        self.0.bits.bit(i)
+        self.bits.bit(i)
     }
 }
 
-impl<T: Count> Count for FenwickTree<T> {
+impl<T: Count> Count for BitAux<T> {
     #[inline]
     fn count1(&self) -> usize {
-        let bit = &self.0.rank_aux.ub;
+        let bit = &self.rank_aux.ub;
         num::cast::<u64, usize>(bit.sum(bit.nodes()))
         // fenwicktree::sum(&self.0.buckets.hi).cast()
         // cast(self.buckets.hi.sum(self.buckets.hi.size()))
@@ -55,15 +46,14 @@ impl<T: Count> Count for FenwickTree<T> {
     }
 }
 
-impl<T: Rank> Rank for FenwickTree<T> {
+impl<T: Rank> Rank for BitAux<T> {
     fn rank1<Idx: RangeBounds<usize>>(&self, index: Idx) -> usize {
-        fn rank1_impl<U: Rank>(me: &FenwickTree<U>, p0: usize) -> usize {
+        fn rank1_impl<U: Rank>(me: &BitAux<U>, p0: usize) -> usize {
             if p0 == 0 {
                 0
             } else if p0 == me.bits() {
                 me.count1()
             } else {
-                let FenwickTree(me) = me;
                 let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
                 let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
                 let (q2, r2) = num::divrem(r1, BASIC_BLOCK);
@@ -82,21 +72,13 @@ impl<T: Rank> Rank for FenwickTree<T> {
     }
 }
 
-// impl<T: Bits> Bits for Rho<T> {
-//     #[inline]
-//     fn word<N: Word>(&self, i: usize, n: usize) -> N {
-//         self.0.bit_vec.word(i, n)
-//     }
-// }
-
-impl<T: Unpack + Select> Select for FenwickTree<T> {
+impl<T: Unpack + Select> Select for BitAux<T> {
     fn select1(&self, n: usize) -> Option<usize> {
-        let FenwickTree(imp) = self;
         let mut r = num::cast(n);
 
         let (s, e) = {
-            let p0 = find_l0(&imp.rank_aux.ub[..], &mut r)?;
-            let lo = imp.rank_aux.lo(p0);
+            let p0 = find_l0(&self.rank_aux.ub[..], &mut r)?;
+            let lo = self.rank_aux.lo(p0);
             let p1 = find_l1(lo, &mut r);
             let ll = lo[p1 + 1];
             let l2 = [ll.l2_0(), ll.l2_1(), ll.l2_2()];
@@ -116,7 +98,7 @@ impl<T: Unpack + Select> Select for FenwickTree<T> {
 
         const BITS: usize = <u128 as Bits>::BITS;
         for i in (s..e).step_by(BITS) {
-            let b = imp.bits.unpack::<u128>(i, BITS);
+            let b = self.bits.unpack::<u128>(i, BITS);
             let c = b.count1();
             if r < c {
                 // #[cfg(test)]
@@ -133,16 +115,15 @@ impl<T: Unpack + Select> Select for FenwickTree<T> {
     }
 
     fn select0(&self, n: usize) -> Option<usize> {
-        let FenwickTree(imp) = self;
         let mut r = num::cast(n);
 
         let (s, e) = {
             const UB: u64 = UPPER_BLOCK as u64;
             const SB: u64 = SUPER_BLOCK as u64;
             const BB: u64 = BASIC_BLOCK as u64;
-            let hi_complemented = fenwicktree::complement(&imp.rank_aux.ub[..], UB);
+            let hi_complemented = fenwicktree::complement(&self.rank_aux.ub[..], UB);
             let p0 = find_l0(&hi_complemented, &mut r)?;
-            let lo = imp.rank_aux.lo(p0);
+            let lo = self.rank_aux.lo(p0);
             let lo_complemented = fenwicktree::complement(lo, SB);
             let p1 = find_l1(&lo_complemented, &mut r);
             let ll = lo[p1 + 1];
@@ -161,7 +142,7 @@ impl<T: Unpack + Select> Select for FenwickTree<T> {
 
         const BITS: usize = <u128 as Bits>::BITS;
         for i in (s..e).step_by(BITS) {
-            let b = imp.bits.unpack::<u128>(i, BITS);
+            let b = self.bits.unpack::<u128>(i, BITS);
             let c = b.count0();
             if r < c {
                 return Some(i + b.select0(r).unwrap());
@@ -213,38 +194,31 @@ where
     p2
 }
 
-// impl<T: Bits + BitPut> Rho<T> {
-//     /// Swaps a bit at `i` by `bit` and returns the previous value.
-//     fn swap(&mut self, i: usize, bit: bool) -> bool {
-//         let before = self.0.bit_vec.bit(i);
-//         if bit {
-//             self.0.bit_vec.put1(i);
-//         } else {
-//             self.0.bit_vec.put0(i);
-//         }
-//         before
-//     }
+impl<T: ContainerMut> BitAux<T> {
+    /// Swaps a bit at `i` by `bit` and returns the previous value.
+    fn swap(&mut self, i: usize, bit: bool) -> bool {
+        let before = self.bits.bit(i);
+        if bit {
+            self.bits.bit_set(i);
+        } else {
+            self.bits.bit_clear(i);
+        }
+        before.unwrap_or(false)
+    }
+}
 
-//     // /// Resizes the `Pop` in-place so that `Pop` has at least `min` bits.
-//     // #[inline]
-//     // pub fn resize(&mut self, new_len: usize) {
-//     //     let cur_len = len(&self.buf);
-//     //     self.buf.resize_with(blocks(new_len, T::BITS), T::empty);
-//     //     self.samples.resize(cur_len, len(&self.buf));
-//     // }
-// }
+impl<T: Container + ContainerMut> ContainerMut for BitAux<T> {
+    #[inline]
+    fn bit_set(&mut self, p0: usize) {
+        if !self.swap(p0, true) {
+            self.rank_aux.add(p0, 1);
+        }
+    }
 
-// impl<T: Bits + BitPut> BitPut for Rho<T> {
-//     #[inline]
-//     fn put1(&mut self, p0: usize) {
-//         if !self.swap(p0, true) {
-//             self.0.buckets.add(p0, 1);
-//         }
-//     }
-//     #[inline]
-//     fn put0(&mut self, p0: usize) {
-//         if self.swap(p0, false) {
-//             self.0.buckets.sub(p0, 1);
-//         }
-//     }
-// }
+    #[inline]
+    fn bit_clear(&mut self, p0: usize) {
+        if self.swap(p0, false) {
+            self.rank_aux.sub(p0, 1);
+        }
+    }
+}

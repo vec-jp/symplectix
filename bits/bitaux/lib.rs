@@ -9,68 +9,34 @@ use std::ops::{Add, AddAssign, RangeBounds, Sub, SubAssign};
 
 use bitpacking::Unpack;
 use bits::new;
-use bits::{Bits, Container, Count, Rank, Select};
+use bits::{Bits, Container, ContainerMut, Count, Rank, Select};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 
-mod impl_accumulated;
-mod impl_fenwicktree;
+mod imp;
 mod l1l2;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct FenwickTree<T>(BitAux<T, layout::FenwickTree>);
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Accumulated<T>(BitAux<T, layout::Accumulated>);
 
 /// `BitAux<T>` stores auxiliary indices to compute `Rank` and `Select` for T.
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct BitAux<T, L> {
-    rank_aux: RankAux<L>,
-    select_samples: Option<Vec<Vec<u32>>>,
+pub struct BitAux<T> {
+    // Builds a [`FenwickTree`] to compute prefix sum instead of accumulating.
+    //
+    // L0: Cumulative absolute counts, per `UPPER` bits.
+    // L1: Cumulative relative counts
+    // L2: Non-cumulative relative counts
+    //
+    // Interleaves `L1[i]` and `L2[i]` into a 64bit unsigned integer.
+    rank_aux: RankAux,
     bits: T,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct RankAux<L> {
+struct RankAux {
     ub: Vec<u64>,
     lb: Vec<L1L2>,
-    _lb_layout: PhantomData<L>,
 }
 
-/// Interleaves L1[i] and L2[i] into a 64bit unsigned integer.
 #[derive(Copy, Clone, Default, PartialEq, Eq)]
 struct L1L2(u64);
-
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub(crate) struct SelectAux<L> {
-//     select_samples: Option<Vec<Vec<u32>>>,
-// }
-
-mod layout {
-    /// Defines how to handle `prefix sum` of the population.
-    pub(crate) trait Layout {}
-
-    /// Builds a [`FenwickTree`] to compute prefix sum instead of accumulating.
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub(crate) struct FenwickTree;
-
-    /// Accumulates the number of bits as follows.
-    ///
-    /// L0: Cumulative absolute counts, per `UPPER` bits.
-    /// L1: Cumulative relative counts
-    /// L2: Non-cumulative relative counts
-    ///
-    /// `L1[i]` and `L2[i]` are interleaved into one u64.
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub(crate) struct Accumulated;
-
-    #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub(crate) struct Uninit;
-
-    impl Layout for Accumulated {}
-    impl Layout for FenwickTree {}
-    impl Layout for Uninit {}
-}
 
 const UPPER_BLOCK: usize = 1 << 32;
 
@@ -82,28 +48,7 @@ const MAXL1_SIZE: usize = UPPER_BLOCK / SUPER_BLOCK;
 
 const SAMPLE_SIZE: usize = 1 << 13;
 
-// impl From<Buckets<Rho>> for Buckets<Pop> {
-//     fn from(mut f: Buckets<Rho>) -> Buckets<Pop> {
-//         let hi = fenwicktree::accumulate(&f.hi);
-//
-//         for q in 0..f.hi.nodes() {
-//             let lo = f.lo_mut(q);
-//             for (i, l1) in fenwicktree::accumulate(lo).iter().enumerate() {
-//                 if i + 1 < lo.len() {
-//                     let L1L2(ll) = lo[i + 1];
-//                     lo[i + 1] = L1L2((ll & !L1L2::L1) | l1);
-//                 }
-//             }
-//         }
-//
-//         Buckets { hi, lo: f.lo, _marker: PhantomData }
-//     }
-// }
-
-pub(crate) fn build<'a, T, I>(
-    size: usize,
-    super_blocks: I,
-) -> (RankAux<layout::Uninit>, Vec<Vec<u32>>)
+pub(crate) fn build<'a, T, I>(size: usize, super_blocks: I) -> (RankAux, Vec<Vec<u32>>)
 where
     T: num::Int + bits::Bits + 'a,
     I: IntoIterator<Item = Option<&'a [T]>>,
@@ -188,11 +133,11 @@ fn lolen(n: usize) -> usize {
     }
 }
 
-impl<L> RankAux<L> {
-    pub(crate) fn new(n: usize) -> RankAux<L> {
+impl RankAux {
+    pub(crate) fn new(n: usize) -> RankAux {
         let hi = vec![0; hilen(n)];
         let lo = vec![L1L2(0); lolen(n)];
-        RankAux { ub: hi, lb: lo, _lb_layout: std::marker::PhantomData }
+        RankAux { ub: hi, lb: lo }
     }
 
     #[inline]
@@ -220,9 +165,7 @@ impl<L> RankAux<L> {
         // }
         bit::blocks(self.lb.len(), MAXL1_SIZE + 1)
     }
-}
 
-impl RankAux<layout::FenwickTree> {
     pub(crate) fn add(&mut self, p0: usize, delta: u64) {
         use fenwicktree::Incr;
 
