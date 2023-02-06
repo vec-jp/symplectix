@@ -23,7 +23,7 @@ use crate::L1L2;
 pub struct FenwickTree<T>(BitAux<T, layout::FenwickTree>);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Pop<T>(BitAux<T, layout::Accumulated>);
+pub struct Accumulated<T>(BitAux<T, layout::Accumulated>);
 
 // TODO: implement Debug for Imp, and remove Debug from Buckets
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -102,6 +102,53 @@ impl From<RankAux<layout::Uninit>> for RankAux<layout::FenwickTree> {
     }
 }
 
+impl From<RankAux<layout::Uninit>> for RankAux<layout::Accumulated> {
+    fn from(mut flat: RankAux<layout::Uninit>) -> RankAux<layout::Accumulated> {
+        use fenwicktree::Nodes;
+
+        let mut sum = 0;
+        for acc in flat.upper_blocks[1..].iter_mut() {
+            sum += *acc;
+            *acc = sum;
+        }
+
+        for q in 0..flat.upper_blocks.nodes() {
+            let lo = flat.lo_mut(q);
+
+            let mut sum = 0;
+            for L1L2(acc) in lo[1..].iter_mut() {
+                let cur = *acc & L1L2::L1;
+                *acc = (*acc & !L1L2::L1) | sum;
+                sum += cur;
+            }
+        }
+
+        RankAux {
+            upper_blocks: flat.upper_blocks,
+            lower_blocks: flat.lower_blocks,
+            _lb_layout: PhantomData,
+        }
+    }
+}
+
+// impl From<Buckets<Rho>> for Buckets<Pop> {
+//     fn from(mut f: Buckets<Rho>) -> Buckets<Pop> {
+//         let hi = fenwicktree::accumulate(&f.hi);
+//
+//         for q in 0..f.hi.nodes() {
+//             let lo = f.lo_mut(q);
+//             for (i, l1) in fenwicktree::accumulate(lo).iter().enumerate() {
+//                 if i + 1 < lo.len() {
+//                     let L1L2(ll) = lo[i + 1];
+//                     lo[i + 1] = L1L2((ll & !L1L2::L1) | l1);
+//                 }
+//             }
+//         }
+//
+//         Buckets { hi, lo: f.lo, _marker: PhantomData }
+//     }
+// }
+
 pub(crate) fn build<'a, T, I>(
     size: usize,
     super_blocks: I,
@@ -169,51 +216,6 @@ pub(crate) fn super_blocks_from_words<T: num::Int + bits::Bits>(
 ) -> impl Iterator<Item = Option<&[T]>> {
     slice.chunks(SUPER_BLOCK / T::BITS).map(Some)
 }
-
-// impl From<Buckets<layout::Uninit>> for Buckets<layout::Poppy> {
-//     fn from(mut flat: Buckets<layout::Uninit>) -> Buckets<layout::Poppy> {
-//         use fenwicktree::Nodes;
-
-//         let mut sum = 0;
-//         for acc in flat.hi[1..].iter_mut() {
-//             sum += *acc;
-//             *acc = sum;
-//         }
-
-//         for q in 0..flat.hi.nodes() {
-//             let lo = flat.lo_mut(q);
-
-//             let mut sum = 0;
-//             for L1L2(acc) in lo[1..].iter_mut() {
-//                 let cur = *acc & L1L2::L1;
-//                 *acc = (*acc & !L1L2::L1) | sum;
-//                 sum += cur;
-//             }
-//         }
-
-//         Buckets { hi: flat.hi, lo: flat.lo, _marker: PhantomData }
-//     }
-// }
-
-// impl From<Buckets<Rho>> for Buckets<Pop> {
-//     fn from(mut f: Buckets<Rho>) -> Buckets<Pop> {
-//         use fenwicktree::Nodes;
-
-//         let hi = fenwicktree::accumulate(&f.hi);
-
-//         for q in 0..f.hi.nodes() {
-//             let lo = f.lo_mut(q);
-//             for (i, l1) in fenwicktree::accumulate(lo).iter().enumerate() {
-//                 if i + 1 < lo.len() {
-//                     let L1L2(ll) = lo[i + 1];
-//                     lo[i + 1] = L1L2((ll & !L1L2::L1) | l1);
-//                 }
-//             }
-//         }
-
-//         Buckets { hi, lo: f.lo, _marker: PhantomData }
-//     }
-// }
 
 #[inline]
 fn hilen(n: usize) -> usize {
