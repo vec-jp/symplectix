@@ -5,12 +5,12 @@ impl From<RankAux<layout::Uninit>> for RankAux<layout::Accumulated> {
         use fenwicktree::Nodes;
 
         let mut sum = 0;
-        for acc in flat.upper_blocks[1..].iter_mut() {
+        for acc in flat.ub[1..].iter_mut() {
             sum += *acc;
             *acc = sum;
         }
 
-        for q in 0..flat.upper_blocks.nodes() {
+        for q in 0..flat.ub.nodes() {
             let lo = flat.lo_mut(q);
 
             let mut sum = 0;
@@ -21,10 +21,6 @@ impl From<RankAux<layout::Uninit>> for RankAux<layout::Accumulated> {
             }
         }
 
-        RankAux {
-            upper_blocks: flat.upper_blocks,
-            lower_blocks: flat.lower_blocks,
-            _lb_layout: PhantomData,
-        }
+        RankAux { ub: flat.ub, lb: flat.lb, _lb_layout: PhantomData }
     }
 }

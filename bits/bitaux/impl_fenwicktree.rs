@@ -21,15 +21,11 @@ impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for FenwickTree<&'a [T]> {
 
 impl From<RankAux<layout::Uninit>> for RankAux<layout::FenwickTree> {
     fn from(mut uninit: RankAux<layout::Uninit>) -> RankAux<layout::FenwickTree> {
-        fenwicktree::build(&mut uninit.upper_blocks);
+        fenwicktree::build(&mut uninit.ub);
         for q in 0..uninit.lo_parts() {
             fenwicktree::build(uninit.lo_mut(q));
         }
-        RankAux {
-            upper_blocks: uninit.upper_blocks,
-            lower_blocks: uninit.lower_blocks,
-            _lb_layout: PhantomData,
-        }
+        RankAux { ub: uninit.ub, lb: uninit.lb, _lb_layout: PhantomData }
     }
 }
 
@@ -48,7 +44,7 @@ impl<T: Container> Container for FenwickTree<T> {
 impl<T: Count> Count for FenwickTree<T> {
     #[inline]
     fn count1(&self) -> usize {
-        let bit = &self.0.rank_aux.upper_blocks;
+        let bit = &self.0.rank_aux.ub;
         num::cast::<u64, usize>(bit.sum(bit.nodes()))
         // fenwicktree::sum(&self.0.buckets.hi).cast()
         // cast(self.buckets.hi.sum(self.buckets.hi.size()))
@@ -72,7 +68,7 @@ impl<T: Rank> Rank for FenwickTree<T> {
                 let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
                 let (q2, r2) = num::divrem(r1, BASIC_BLOCK);
 
-                let hi = &me.rank_aux.upper_blocks;
+                let hi = &me.rank_aux.ub;
                 let lo = &me.rank_aux.lo(q0);
                 let c0: u64 = hi.sum(q0);
                 let c1: u64 = lo.sum(q1);
@@ -99,7 +95,7 @@ impl<T: Unpack + Select> Select for FenwickTree<T> {
         let mut r = num::cast(n);
 
         let (s, e) = {
-            let p0 = find_l0(&imp.rank_aux.upper_blocks[..], &mut r)?;
+            let p0 = find_l0(&imp.rank_aux.ub[..], &mut r)?;
             let lo = imp.rank_aux.lo(p0);
             let p1 = find_l1(lo, &mut r);
             let ll = lo[p1 + 1];
@@ -144,7 +140,7 @@ impl<T: Unpack + Select> Select for FenwickTree<T> {
             const UB: u64 = UPPER_BLOCK as u64;
             const SB: u64 = SUPER_BLOCK as u64;
             const BB: u64 = BASIC_BLOCK as u64;
-            let hi_complemented = fenwicktree::complement(&imp.rank_aux.upper_blocks[..], UB);
+            let hi_complemented = fenwicktree::complement(&imp.rank_aux.ub[..], UB);
             let p0 = find_l0(&hi_complemented, &mut r)?;
             let lo = imp.rank_aux.lo(p0);
             let lo_complemented = fenwicktree::complement(lo, SB);

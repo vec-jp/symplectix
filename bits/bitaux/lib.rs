@@ -32,8 +32,8 @@ struct BitAux<T, L> {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct RankAux<L> {
-    upper_blocks: Vec<u64>,
-    lower_blocks: Vec<L1L2>,
+    ub: Vec<u64>,
+    lb: Vec<L1L2>,
     _lb_layout: PhantomData<L>,
 }
 
@@ -111,7 +111,7 @@ where
     use fenwicktree::Nodes;
 
     let mut buckets = RankAux::new(size);
-    let mut samples = vec![Vec::new(); buckets.upper_blocks.nodes()];
+    let mut samples = vec![Vec::new(); buckets.ub.nodes()];
     let mut ones = 0i64;
 
     fn basic_blocks<W: num::Int + bits::Bits>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
@@ -132,7 +132,7 @@ where
 
         {
             // +1 to skip dummy index
-            buckets.upper_blocks[q + 1] += sum;
+            buckets.ub[q + 1] += sum;
             buckets.lo_mut(q)[r + 1] = L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
         }
 
@@ -192,21 +192,21 @@ impl<L> RankAux<L> {
     pub(crate) fn new(n: usize) -> RankAux<L> {
         let hi = vec![0; hilen(n)];
         let lo = vec![L1L2(0); lolen(n)];
-        RankAux { upper_blocks: hi, lower_blocks: lo, _lb_layout: std::marker::PhantomData }
+        RankAux { ub: hi, lb: lo, _lb_layout: std::marker::PhantomData }
     }
 
     #[inline]
     pub(crate) fn lo(&self, i: usize) -> &[L1L2] {
         let s = (MAXL1_SIZE + 1) * i;
-        let e = cmp::min(s + (MAXL1_SIZE + 1), self.lower_blocks.len());
-        &self.lower_blocks[s..e]
+        let e = cmp::min(s + (MAXL1_SIZE + 1), self.lb.len());
+        &self.lb[s..e]
     }
 
     #[inline]
     pub(crate) fn lo_mut(&mut self, i: usize) -> &mut [L1L2] {
         let s = (MAXL1_SIZE + 1) * i;
-        let e = cmp::min(s + (MAXL1_SIZE + 1), self.lower_blocks.len());
-        &mut self.lower_blocks[s..e]
+        let e = cmp::min(s + (MAXL1_SIZE + 1), self.lb.len());
+        &mut self.lb[s..e]
     }
 
     // The logical number of fenwicks hiding at `lo`.
@@ -218,7 +218,7 @@ impl<L> RankAux<L> {
         // } else {
         //     blocks(self.low.len(), MAXL1 + 1)
         // }
-        bit::blocks(self.lower_blocks.len(), MAXL1_SIZE + 1)
+        bit::blocks(self.lb.len(), MAXL1_SIZE + 1)
     }
 }
 
@@ -229,7 +229,7 @@ impl RankAux<layout::FenwickTree> {
         let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
         let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
 
-        let hi = &mut self.upper_blocks;
+        let hi = &mut self.ub;
         hi.incr(q0 + 1, delta);
 
         let lo = self.lo_mut(q0);
@@ -253,7 +253,7 @@ impl RankAux<layout::FenwickTree> {
         let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
         let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
 
-        let hi = &mut self.upper_blocks;
+        let hi = &mut self.ub;
         hi.decr(q0 + 1, delta);
 
         let lo = self.lo_mut(q0);
