@@ -61,11 +61,6 @@ where
         poppy.lb_mut(q)[r + 1] = L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
     }
 
-    // fenwick1::init(&mut fws.hi);
-    // for q in 0..fws.hi.size() {
-    //     fenwick1::init(fws.lo_mut(q));
-    // }
-
     poppy
 }
 
