@@ -15,10 +15,14 @@ pub struct BitAux<T> {
     inner: T,
 }
 
-// Implementations are based on https://www.cs.cmu.edu/~dga/papers/zhou-sea2013.pdf
-// but modified to build a binary indexed tree, instead of accumulating.
+// * [Space-Efficient, High-Performance Rank & Select Structures on Uncompressed Bit Sequences](https://www.cs.cmu.edu/~dga/papers/zhou-sea2013.pdf)
+// * [Engineering Compact Data Structures for Rank and Select Queries on Bit Vectors](https://arxiv.org/pdf/2206.01149)
 //
-// Possible improvements: https://arxiv.org/pdf/2206.01149
+// Current implementations are based on the former,
+// but modified a little to build a binary indexed tree, instead of accumulating.
+//
+// It seems good to try the latter to see if efficiency improves.
+// At least space efficiency is likely to improve.
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Poppy {
     ubs: Vec<u64>,
@@ -36,22 +40,15 @@ const BASIC_BLOCK: usize = 1 << 9;
 
 const MAX_SB_LEN: usize = UPPER_BLOCK / SUPER_BLOCK;
 
-pub(crate) fn build<'a, T, I>(size: usize, super_blocks: I) -> Poppy
+trait Word: num::Int + bits::Bits {}
+impl<T> Word for T where T: num::Int + bits::Bits {}
+
+fn build<'a, T, I>(size: usize, super_blocks: I) -> Poppy
 where
-    T: num::Int + bits::Bits + 'a,
+    T: Word + 'a,
     I: IntoIterator<Item = Option<&'a [T]>>,
 {
     let mut poppy = Poppy::new(size);
-
-    fn basic_blocks<W: num::Int + bits::Bits>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
-        let mut bbs = [0; L1L2::LEN];
-        if let Some(sb) = sb.as_ref() {
-            for (i, bb) in sb.chunks(BASIC_BLOCK / W::BITS).enumerate() {
-                bbs[i] = bb.count1() as u64;
-            }
-        }
-        bbs
-    }
 
     for (i, sb) in super_blocks.into_iter().enumerate() {
         let bbs = basic_blocks(sb);
@@ -72,18 +69,24 @@ where
     poppy
 }
 
-pub(crate) fn super_blocks_from_words<T: num::Int + bits::Bits>(
-    slice: &[T],
-) -> impl Iterator<Item = Option<&[T]>> {
+fn basic_blocks<W: Word>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
+    let mut bbs = [0; L1L2::LEN];
+    if let Some(sb) = sb.as_ref() {
+        for (i, bb) in sb.chunks(BASIC_BLOCK / W::BITS).enumerate() {
+            bbs[i] = bb.count1() as u64;
+        }
+    }
+    bbs
+}
+
+fn super_blocks_from_words<T: Word>(slice: &[T]) -> impl Iterator<Item = Option<&[T]>> {
     slice.chunks(SUPER_BLOCK / T::BITS).map(Some)
 }
 
-#[inline]
 fn ubs_len(n: usize) -> usize {
     bit::blocks(n, UPPER_BLOCK) + 1
 }
 
-#[inline]
 fn lbs_len(n: usize) -> usize {
     if n == 0 {
         1
@@ -107,10 +110,14 @@ impl<T: Bits> BitAux<Vec<T>> {
     }
 }
 
-impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for BitAux<&'a [T]> {
+impl<'a, T: Word> From<&'a [T]> for BitAux<&'a [T]> {
     fn from(inner: &'a [T]) -> Self {
         let mut poppy = build(inner.bits(), super_blocks_from_words(inner));
+
+        // initialize upper_blocks as a binary index tree
         fenwicktree::build(&mut poppy.ubs);
+
+        // initialize lower_blocks as a binary index tree
         for q in 0..poppy.lb_parts() {
             fenwicktree::build(poppy.lb_mut(q));
         }
@@ -308,45 +315,36 @@ impl<T: ContainerMut> BitAux<T> {
 
 impl<T: Container + ContainerMut> ContainerMut for BitAux<T> {
     #[inline]
-    fn bit_set(&mut self, p0: usize) {
-        if !self.swap(p0, true) {
-            self.poppy.add(p0, 1);
+    fn bit_set(&mut self, index: usize) {
+        if !self.swap(index, true) {
+            self.poppy.add(index, 1);
         }
     }
 
     #[inline]
-    fn bit_clear(&mut self, p0: usize) {
-        if self.swap(p0, false) {
-            self.poppy.sub(p0, 1);
+    fn bit_clear(&mut self, index: usize) {
+        if self.swap(index, false) {
+            self.poppy.sub(index, 1);
         }
     }
 }
+
 impl Poppy {
-    pub(crate) fn new(n: usize) -> Poppy {
+    fn new(n: usize) -> Poppy {
         let ubs = vec![0; ubs_len(n)];
         let lbs = vec![L1L2(0); lbs_len(n)];
         Poppy { ubs, lbs }
     }
 
-    // #[inline]
-    // pub(crate) fn ub(&self, i: usize) -> &u64 {
-    //     &self.ubs[i + 1]
-    // }
-
-    // #[inline]
-    // pub(crate) fn ub_mut(&mut self, i: usize) -> &mut u64 {
-    //     &mut self.ubs[i + 1]
-    // }
-
     #[inline]
-    pub(crate) fn lb(&self, i: usize) -> &[L1L2] {
+    fn lb(&self, i: usize) -> &[L1L2] {
         let s = (MAX_SB_LEN + 1) * i;
         let e = cmp::min(s + (MAX_SB_LEN + 1), self.lbs.len());
         &self.lbs[s..e]
     }
 
     #[inline]
-    pub(crate) fn lb_mut(&mut self, i: usize) -> &mut [L1L2] {
+    fn lb_mut(&mut self, i: usize) -> &mut [L1L2] {
         let s = (MAX_SB_LEN + 1) * i;
         let e = cmp::min(s + (MAX_SB_LEN + 1), self.lbs.len());
         &mut self.lbs[s..e]
@@ -355,7 +353,7 @@ impl Poppy {
     // The logical number of fenwicks hiding at `lo`.
     // #[cfg(test)]
     #[inline]
-    pub(crate) fn lb_parts(&self) -> usize {
+    fn lb_parts(&self) -> usize {
         // if self.low.len() == 1 {
         //     0
         // } else {
@@ -364,7 +362,7 @@ impl Poppy {
         bit::blocks(self.lbs.len(), MAX_SB_LEN + 1)
     }
 
-    pub(crate) fn add(&mut self, p0: usize, delta: u64) {
+    fn add(&mut self, p0: usize, delta: u64) {
         use fenwicktree::Incr;
 
         let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
@@ -387,7 +385,7 @@ impl Poppy {
         }
     }
 
-    pub(crate) fn sub(&mut self, p0: usize, delta: u64) {
+    fn sub(&mut self, p0: usize, delta: u64) {
         use fenwicktree::Decr;
 
         let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
