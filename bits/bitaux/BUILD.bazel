@@ -21,6 +21,12 @@ rust_library(
 rust_test(
     name = "cfg_test",
     crate = ":bitaux",
+    rustc_flags = [
+        "-Copt-level=3",
+    ],
+    deps = [
+        "@crates//:quickcheck",
+    ],
 )
 
 rust_doc_test(
