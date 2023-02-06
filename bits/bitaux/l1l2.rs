@@ -3,9 +3,7 @@ use std::fmt::{self, Debug, Formatter};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
-/// Interleaves L1[i] and L2[i] into a 64bit unsigned integer.
-#[derive(Copy, Clone, Default, PartialEq, Eq)]
-pub(crate) struct L1L2(pub(crate) u64);
+use super::*;
 
 // impl Default for L1L2 {
 //     #[inline]
