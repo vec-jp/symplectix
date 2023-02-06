@@ -114,7 +114,7 @@ where
     let mut samples = vec![Vec::new(); buckets.upper_blocks.nodes()];
     let mut ones = 0i64;
 
-    fn bbs<W: num::Int + bits::Bits>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
+    fn basic_blocks<W: num::Int + bits::Bits>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
         let mut bbs = [0; L1L2::LEN];
         if let Some(sb) = sb.as_ref() {
             for (i, bb) in sb.chunks(BASIC_BLOCK / W::BITS).enumerate() {
@@ -125,7 +125,7 @@ where
     }
 
     for (i, sb) in super_blocks.into_iter().enumerate() {
-        let bbs = bbs(sb);
+        let bbs = basic_blocks(sb);
         let sum = bbs.iter().sum::<u64>();
 
         let (q, r) = num::divrem(i, MAXL1_SIZE);
