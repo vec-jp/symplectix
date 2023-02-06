@@ -28,8 +28,8 @@ pub struct BitAux<T> {
 // Possible improvements: https://arxiv.org/pdf/2206.01149
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Poppy {
-    ub: Vec<u64>,
-    lb: Vec<L1L2>,
+    ubs: Vec<u64>,
+    lbs: Vec<L1L2>,
 }
 
 #[derive(Copy, Clone, Default, PartialEq, Eq)]
@@ -41,9 +41,7 @@ const SUPER_BLOCK: usize = 1 << 11;
 
 const BASIC_BLOCK: usize = 1 << 9;
 
-const MAXL1_SIZE: usize = UPPER_BLOCK / SUPER_BLOCK;
-
-const SAMPLE_SIZE: usize = 1 << 13;
+const MAX_SB_LEN: usize = UPPER_BLOCK / SUPER_BLOCK;
 
 pub(crate) fn build<'a, T, I>(size: usize, super_blocks: I) -> Poppy
 where
@@ -68,11 +66,11 @@ where
         let bbs = basic_blocks(sb);
         let sum = bbs.iter().sum::<u64>();
 
-        let (q, r) = num::divrem(i, MAXL1_SIZE);
+        let (q, r) = num::divrem(i, MAX_SB_LEN);
 
         // +1 to skip dummy index
-        poppy.ub[q + 1] += sum;
-        poppy.lo_mut(q)[r + 1] = L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
+        poppy.ubs[q + 1] += sum;
+        poppy.lb_mut(q)[r + 1] = L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
     }
 
     // fenwick1::init(&mut fws.hi);
@@ -90,56 +88,67 @@ pub(crate) fn super_blocks_from_words<T: num::Int + bits::Bits>(
 }
 
 #[inline]
-fn hilen(n: usize) -> usize {
+fn ubs_len(n: usize) -> usize {
     bit::blocks(n, UPPER_BLOCK) + 1
 }
 
 #[inline]
-fn lolen(n: usize) -> usize {
+fn lbs_len(n: usize) -> usize {
     if n == 0 {
         1
     } else {
-        // A minimum and a *logical* length of a vector to store `LL`.
+        // A minimum and a *logical* length of a vector to store `L1L2`.
         let supers = bit::blocks(n, SUPER_BLOCK);
-        // Computes how many fenwicks do we need actually.
-        // Remenber that fenwicks for L1 and L2 is logically `Vec<Vec<LL>>` but flattened.
-        let (q, r) = num::divrem(supers, MAXL1_SIZE);
-        // Need additional space for each fenwicks because of its 1-based indexing.
-        supers + q + (r > 0) as usize
+        supers + {
+            // Remenber that fenwicks for L1 and L2 is logically `Vec<Vec<LL>>` but flattened.
+            // Need additional space for each fenwicks because of its 1-based indexing.
+            let (q, r) = num::divrem(supers, MAX_SB_LEN);
+            q + (r > 0) as usize
+        }
     }
 }
 
 impl Poppy {
     pub(crate) fn new(n: usize) -> Poppy {
-        let ub = vec![0; hilen(n)];
-        let lb = vec![L1L2(0); lolen(n)];
-        Poppy { ub, lb }
+        let ubs = vec![0; ubs_len(n)];
+        let lbs = vec![L1L2(0); lbs_len(n)];
+        Poppy { ubs, lbs }
     }
 
     #[inline]
-    pub(crate) fn lo(&self, i: usize) -> &[L1L2] {
-        let s = (MAXL1_SIZE + 1) * i;
-        let e = cmp::min(s + (MAXL1_SIZE + 1), self.lb.len());
-        &self.lb[s..e]
+    pub(crate) fn ub(&self, i: usize) -> &u64 {
+        &self.ubs[i + 1]
     }
 
     #[inline]
-    pub(crate) fn lo_mut(&mut self, i: usize) -> &mut [L1L2] {
-        let s = (MAXL1_SIZE + 1) * i;
-        let e = cmp::min(s + (MAXL1_SIZE + 1), self.lb.len());
-        &mut self.lb[s..e]
+    pub(crate) fn ub_mut(&mut self, i: usize) -> &mut u64 {
+        &mut self.ubs[i + 1]
+    }
+
+    #[inline]
+    pub(crate) fn lb(&self, i: usize) -> &[L1L2] {
+        let s = (MAX_SB_LEN + 1) * i;
+        let e = cmp::min(s + (MAX_SB_LEN + 1), self.lbs.len());
+        &self.lbs[s..e]
+    }
+
+    #[inline]
+    pub(crate) fn lb_mut(&mut self, i: usize) -> &mut [L1L2] {
+        let s = (MAX_SB_LEN + 1) * i;
+        let e = cmp::min(s + (MAX_SB_LEN + 1), self.lbs.len());
+        &mut self.lbs[s..e]
     }
 
     // The logical number of fenwicks hiding at `lo`.
     // #[cfg(test)]
     #[inline]
-    pub(crate) fn lo_parts(&self) -> usize {
+    pub(crate) fn lb_parts(&self) -> usize {
         // if self.low.len() == 1 {
         //     0
         // } else {
         //     blocks(self.low.len(), MAXL1 + 1)
         // }
-        bit::blocks(self.lb.len(), MAXL1_SIZE + 1)
+        bit::blocks(self.lbs.len(), MAX_SB_LEN + 1)
     }
 
     pub(crate) fn add(&mut self, p0: usize, delta: u64) {
@@ -148,9 +157,9 @@ impl Poppy {
         let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
         let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
 
-        self.ub.incr(q0 + 1, delta);
+        self.ubs.incr(q0 + 1, delta);
 
-        let lo = self.lo_mut(q0);
+        let lo = self.lb_mut(q0);
         lo.incr(q1 + 1, delta);
 
         // Update L2 array which is interleaved into L1
@@ -171,10 +180,10 @@ impl Poppy {
         let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
         let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
 
-        let hi = &mut self.ub;
+        let hi = &mut self.ubs;
         hi.decr(q0 + 1, delta);
 
-        let lo = self.lo_mut(q0);
+        let lo = self.lb_mut(q0);
         lo.decr(q1 + 1, delta);
 
         let sb = q1 + 1;

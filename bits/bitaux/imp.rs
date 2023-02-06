@@ -11,9 +11,9 @@ impl<T: Bits> BitAux<Vec<T>> {
 impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for BitAux<&'a [T]> {
     fn from(inner: &'a [T]) -> Self {
         let mut poppy = build(inner.bits(), super_blocks_from_words(inner));
-        fenwicktree::build(&mut poppy.ub);
-        for q in 0..poppy.lo_parts() {
-            fenwicktree::build(poppy.lo_mut(q));
+        fenwicktree::build(&mut poppy.ubs);
+        for q in 0..poppy.lb_parts() {
+            fenwicktree::build(poppy.lb_mut(q));
         }
 
         BitAux { poppy, inner }
@@ -35,7 +35,7 @@ impl<T: Container> Container for BitAux<T> {
 impl<T: Count> Count for BitAux<T> {
     #[inline]
     fn count1(&self) -> usize {
-        let bit = &self.poppy.ub;
+        let bit = &self.poppy.ubs;
         num::cast::<u64, usize>(bit.sum(bit.nodes()))
         // fenwicktree::sum(&self.0.buckets.hi).cast()
         // cast(self.buckets.hi.sum(self.buckets.hi.size()))
@@ -58,8 +58,8 @@ impl<T: Rank> Rank for BitAux<T> {
                 let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
                 let (q2, r2) = num::divrem(r1, BASIC_BLOCK);
 
-                let hi = &me.poppy.ub;
-                let lo = &me.poppy.lo(q0);
+                let hi = &me.poppy.ubs;
+                let lo = &me.poppy.lb(q0);
                 let c0: u64 = hi.sum(q0);
                 let c1: u64 = lo.sum(q1);
                 let c2 = lo[q1 + 1].l2(q2);
@@ -77,8 +77,8 @@ impl<T: Unpack + Select> Select for BitAux<T> {
         let mut r = num::cast(n);
 
         let (s, e) = {
-            let p0 = find_l0(&self.poppy.ub[..], &mut r)?;
-            let lo = self.poppy.lo(p0);
+            let p0 = find_l0(&self.poppy.ubs[..], &mut r)?;
+            let lo = self.poppy.lb(p0);
             let p1 = find_l1(lo, &mut r);
             let ll = lo[p1 + 1];
             let l2 = [ll.l2_0(), ll.l2_1(), ll.l2_2()];
@@ -121,9 +121,9 @@ impl<T: Unpack + Select> Select for BitAux<T> {
             const UB: u64 = UPPER_BLOCK as u64;
             const SB: u64 = SUPER_BLOCK as u64;
             const BB: u64 = BASIC_BLOCK as u64;
-            let hi_complemented = fenwicktree::complement(&self.poppy.ub[..], UB);
+            let hi_complemented = fenwicktree::complement(&self.poppy.ubs[..], UB);
             let p0 = find_l0(&hi_complemented, &mut r)?;
-            let lo = self.poppy.lo(p0);
+            let lo = self.poppy.lb(p0);
             let lo_complemented = fenwicktree::complement(lo, SB);
             let p1 = find_l1(&lo_complemented, &mut r);
             let ll = lo[p1 + 1];
