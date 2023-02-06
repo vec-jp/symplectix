@@ -102,27 +102,30 @@ fn lbs_len(n: usize) -> usize {
     }
 }
 
+impl<'a, T: Word> From<&'a [T]> for BitAux<&'a [T]> {
+    fn from(inner: &'a [T]) -> Self {
+        let mut poppy = build(inner.bits(), super_blocks_from_words(inner));
+
+        // TODO: should be in the [`build`] loop.
+        {
+            // initialize upper_blocks as a binary index tree
+            fenwicktree::build(&mut poppy.ubs);
+
+            // initialize lower_blocks as a binary index tree
+            for q in 0..poppy.lb_parts() {
+                fenwicktree::build(poppy.lb_mut(q));
+            }
+        }
+
+        BitAux { poppy, inner }
+    }
+}
+
 impl<T: Bits> BitAux<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> BitAux<Vec<T>> {
         let dat = bits::new(n);
         BitAux { poppy: Poppy::new(bits::len(&dat)), inner: dat }
-    }
-}
-
-impl<'a, T: Word> From<&'a [T]> for BitAux<&'a [T]> {
-    fn from(inner: &'a [T]) -> Self {
-        let mut poppy = build(inner.bits(), super_blocks_from_words(inner));
-
-        // initialize upper_blocks as a binary index tree
-        fenwicktree::build(&mut poppy.ubs);
-
-        // initialize lower_blocks as a binary index tree
-        for q in 0..poppy.lb_parts() {
-            fenwicktree::build(poppy.lb_mut(q));
-        }
-
-        BitAux { poppy, inner }
     }
 }
 
