@@ -4,38 +4,38 @@ impl<T: Bits> BitAux<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> BitAux<Vec<T>> {
         let dat = bits::new(n);
-        BitAux { rank_aux: RankAux::new(bits::len(&dat)), bits: dat }
+        BitAux { poppy: Poppy::new(bits::len(&dat)), inner: dat }
     }
 }
 
 impl<'a, T: num::Int + bits::Bits> From<&'a [T]> for BitAux<&'a [T]> {
-    fn from(bits: &'a [T]) -> Self {
-        let (mut buckets, _) = build(bits.bits(), super_blocks_from_words(bits));
-        fenwicktree::build(&mut buckets.ub);
-        for q in 0..buckets.lo_parts() {
-            fenwicktree::build(buckets.lo_mut(q));
+    fn from(inner: &'a [T]) -> Self {
+        let mut poppy = build(inner.bits(), super_blocks_from_words(inner));
+        fenwicktree::build(&mut poppy.ub);
+        for q in 0..poppy.lo_parts() {
+            fenwicktree::build(poppy.lo_mut(q));
         }
 
-        BitAux { rank_aux: buckets, bits }
+        BitAux { poppy, inner }
     }
 }
 
 impl<T: Container> Container for BitAux<T> {
     #[inline]
     fn bits(&self) -> usize {
-        self.bits.bits()
+        self.inner.bits()
     }
 
     #[inline]
     fn bit(&self, i: usize) -> Option<bool> {
-        self.bits.bit(i)
+        self.inner.bit(i)
     }
 }
 
 impl<T: Count> Count for BitAux<T> {
     #[inline]
     fn count1(&self) -> usize {
-        let bit = &self.rank_aux.ub;
+        let bit = &self.poppy.ub;
         num::cast::<u64, usize>(bit.sum(bit.nodes()))
         // fenwicktree::sum(&self.0.buckets.hi).cast()
         // cast(self.buckets.hi.sum(self.buckets.hi.size()))
@@ -58,12 +58,12 @@ impl<T: Rank> Rank for BitAux<T> {
                 let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
                 let (q2, r2) = num::divrem(r1, BASIC_BLOCK);
 
-                let hi = &me.rank_aux.ub;
-                let lo = &me.rank_aux.lo(q0);
+                let hi = &me.poppy.ub;
+                let lo = &me.poppy.lo(q0);
                 let c0: u64 = hi.sum(q0);
                 let c1: u64 = lo.sum(q1);
                 let c2 = lo[q1 + 1].l2(q2);
-                num::cast::<_, usize>(c0 + c1 + c2) + me.bits.rank1(p0 - r2..p0)
+                num::cast::<_, usize>(c0 + c1 + c2) + me.inner.rank1(p0 - r2..p0)
             }
         }
         use std::ops::Range;
@@ -77,8 +77,8 @@ impl<T: Unpack + Select> Select for BitAux<T> {
         let mut r = num::cast(n);
 
         let (s, e) = {
-            let p0 = find_l0(&self.rank_aux.ub[..], &mut r)?;
-            let lo = self.rank_aux.lo(p0);
+            let p0 = find_l0(&self.poppy.ub[..], &mut r)?;
+            let lo = self.poppy.lo(p0);
             let p1 = find_l1(lo, &mut r);
             let ll = lo[p1 + 1];
             let l2 = [ll.l2_0(), ll.l2_1(), ll.l2_2()];
@@ -98,7 +98,7 @@ impl<T: Unpack + Select> Select for BitAux<T> {
 
         const BITS: usize = <u128 as Bits>::BITS;
         for i in (s..e).step_by(BITS) {
-            let b = self.bits.unpack::<u128>(i, BITS);
+            let b = self.inner.unpack::<u128>(i, BITS);
             let c = b.count1();
             if r < c {
                 // #[cfg(test)]
@@ -121,9 +121,9 @@ impl<T: Unpack + Select> Select for BitAux<T> {
             const UB: u64 = UPPER_BLOCK as u64;
             const SB: u64 = SUPER_BLOCK as u64;
             const BB: u64 = BASIC_BLOCK as u64;
-            let hi_complemented = fenwicktree::complement(&self.rank_aux.ub[..], UB);
+            let hi_complemented = fenwicktree::complement(&self.poppy.ub[..], UB);
             let p0 = find_l0(&hi_complemented, &mut r)?;
-            let lo = self.rank_aux.lo(p0);
+            let lo = self.poppy.lo(p0);
             let lo_complemented = fenwicktree::complement(lo, SB);
             let p1 = find_l1(&lo_complemented, &mut r);
             let ll = lo[p1 + 1];
@@ -142,7 +142,7 @@ impl<T: Unpack + Select> Select for BitAux<T> {
 
         const BITS: usize = <u128 as Bits>::BITS;
         for i in (s..e).step_by(BITS) {
-            let b = self.bits.unpack::<u128>(i, BITS);
+            let b = self.inner.unpack::<u128>(i, BITS);
             let c = b.count0();
             if r < c {
                 return Some(i + b.select0(r).unwrap());
@@ -197,11 +197,11 @@ where
 impl<T: ContainerMut> BitAux<T> {
     /// Swaps a bit at `i` by `bit` and returns the previous value.
     fn swap(&mut self, i: usize, bit: bool) -> bool {
-        let before = self.bits.bit(i);
+        let before = self.inner.bit(i);
         if bit {
-            self.bits.bit_set(i);
+            self.inner.bit_set(i);
         } else {
-            self.bits.bit_clear(i);
+            self.inner.bit_clear(i);
         }
         before.unwrap_or(false)
     }
@@ -211,14 +211,14 @@ impl<T: Container + ContainerMut> ContainerMut for BitAux<T> {
     #[inline]
     fn bit_set(&mut self, p0: usize) {
         if !self.swap(p0, true) {
-            self.rank_aux.add(p0, 1);
+            self.poppy.add(p0, 1);
         }
     }
 
     #[inline]
     fn bit_clear(&mut self, p0: usize) {
         if self.swap(p0, false) {
-            self.rank_aux.sub(p0, 1);
+            self.poppy.sub(p0, 1);
         }
     }
 }

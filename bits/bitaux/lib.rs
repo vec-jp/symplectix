@@ -15,22 +15,19 @@ use fenwicktree::{LowerBound, Nodes, Prefix};
 mod imp;
 mod l1l2;
 
-/// `BitAux<T>` stores auxiliary indices to compute `Rank` and `Select` for T.
+/// `BitAux<T>` stores auxiliary data to compute `Rank` and `Select` more efficiently.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BitAux<T> {
-    // Builds a [`FenwickTree`] to compute prefix sum instead of accumulating.
-    //
-    // L0: Cumulative absolute counts, per `UPPER` bits.
-    // L1: Cumulative relative counts
-    // L2: Non-cumulative relative counts
-    //
-    // Interleaves `L1[i]` and `L2[i]` into a 64bit unsigned integer.
-    rank_aux: RankAux,
-    bits: T,
+    poppy: Poppy,
+    inner: T,
 }
 
+// Implementations are based on https://www.cs.cmu.edu/~dga/papers/zhou-sea2013.pdf
+// but modified to build a binary indexed tree, instead of accumulating.
+//
+// Possible improvements: https://arxiv.org/pdf/2206.01149
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct RankAux {
+struct Poppy {
     ub: Vec<u64>,
     lb: Vec<L1L2>,
 }
@@ -48,16 +45,14 @@ const MAXL1_SIZE: usize = UPPER_BLOCK / SUPER_BLOCK;
 
 const SAMPLE_SIZE: usize = 1 << 13;
 
-pub(crate) fn build<'a, T, I>(size: usize, super_blocks: I) -> (RankAux, Vec<Vec<u32>>)
+pub(crate) fn build<'a, T, I>(size: usize, super_blocks: I) -> Poppy
 where
     T: num::Int + bits::Bits + 'a,
     I: IntoIterator<Item = Option<&'a [T]>>,
 {
     use fenwicktree::Nodes;
 
-    let mut buckets = RankAux::new(size);
-    let mut samples = vec![Vec::new(); buckets.ub.nodes()];
-    let mut ones = 0i64;
+    let mut poppy = Poppy::new(size);
 
     fn basic_blocks<W: num::Int + bits::Bits>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
         let mut bbs = [0; L1L2::LEN];
@@ -75,28 +70,9 @@ where
 
         let (q, r) = num::divrem(i, MAXL1_SIZE);
 
-        {
-            // +1 to skip dummy index
-            buckets.ub[q + 1] += sum;
-            buckets.lo_mut(q)[r + 1] = L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
-        }
-
-        {
-            // diff between `ones` and `SAMPLE_BITS * k`
-            let rem = (-ones).rem_euclid(SAMPLE_SIZE as i64);
-
-            if (rem as u64) < sum {
-                let offset = i * SUPER_BLOCK - q * UPPER_BLOCK;
-                let select = sb.unwrap().select1(rem as usize).unwrap();
-                samples[q].push(num::cast(offset + select));
-            }
-
-            if r == MAXL1_SIZE - 1 {
-                ones = 0;
-            } else {
-                ones += sum as i64;
-            }
-        }
+        // +1 to skip dummy index
+        poppy.ub[q + 1] += sum;
+        poppy.lo_mut(q)[r + 1] = L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
     }
 
     // fenwick1::init(&mut fws.hi);
@@ -104,7 +80,7 @@ where
     //     fenwick1::init(fws.lo_mut(q));
     // }
 
-    (buckets, samples)
+    poppy
 }
 
 pub(crate) fn super_blocks_from_words<T: num::Int + bits::Bits>(
@@ -133,11 +109,11 @@ fn lolen(n: usize) -> usize {
     }
 }
 
-impl RankAux {
-    pub(crate) fn new(n: usize) -> RankAux {
-        let hi = vec![0; hilen(n)];
-        let lo = vec![L1L2(0); lolen(n)];
-        RankAux { ub: hi, lb: lo }
+impl Poppy {
+    pub(crate) fn new(n: usize) -> Poppy {
+        let ub = vec![0; hilen(n)];
+        let lb = vec![L1L2(0); lolen(n)];
+        Poppy { ub, lb }
     }
 
     #[inline]
@@ -172,8 +148,7 @@ impl RankAux {
         let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
         let (q1, r1) = num::divrem(r0, SUPER_BLOCK);
 
-        let hi = &mut self.ub;
-        hi.incr(q0 + 1, delta);
+        self.ub.incr(q0 + 1, delta);
 
         let lo = self.lo_mut(q0);
         lo.incr(q1 + 1, delta);
