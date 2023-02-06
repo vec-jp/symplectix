@@ -20,10 +20,7 @@ pub struct FenwickTree<T>(BitAux<T, layout::FenwickTree>);
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Accumulated<T>(BitAux<T, layout::Accumulated>);
 
-/// `T` + auxiliary indices to compute [`bits::Rank`] and [`bits::Select`].
-///
-/// [`rank`]: crate::bits::Bits
-/// [`select`]: crate::bits::Bits
+/// `BitAux<T>` stores auxiliary indices to compute `Rank` and `Select` for T.
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct BitAux<T, L> {
     rank_aux: RankAux<L>,
