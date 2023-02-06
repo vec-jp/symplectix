@@ -320,14 +320,14 @@ impl<T: Container + ContainerMut> ContainerMut for BitAux<T> {
     #[inline]
     fn bit_set(&mut self, index: usize) {
         if !self.swap(index, true) {
-            self.poppy.add(index, 1);
+            self.poppy.incr(index, 1);
         }
     }
 
     #[inline]
     fn bit_clear(&mut self, index: usize) {
         if self.swap(index, false) {
-            self.poppy.sub(index, 1);
+            self.poppy.decr(index, 1);
         }
     }
 }
@@ -365,7 +365,7 @@ impl Poppy {
         bit::blocks(self.lbs.len(), MAX_SB_LEN + 1)
     }
 
-    fn add(&mut self, p0: usize, delta: u64) {
+    fn incr(&mut self, p0: usize, delta: u64) {
         use fenwicktree::Incr;
 
         let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
@@ -388,7 +388,7 @@ impl Poppy {
         }
     }
 
-    fn sub(&mut self, p0: usize, delta: u64) {
+    fn decr(&mut self, p0: usize, delta: u64) {
         use fenwicktree::Decr;
 
         let (q0, r0) = num::divrem(p0, UPPER_BLOCK);
