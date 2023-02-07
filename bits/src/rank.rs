@@ -1,4 +1,4 @@
-use crate::{Bits, Container, Count};
+use crate::{Block, Container, Count};
 use core::ops::{Range, RangeBounds};
 
 pub trait Rank: Count {
@@ -47,7 +47,7 @@ macro_rules! ints_impl_rank {
 ints_impl_rank!(u8 u16 u32 u64 u128 usize);
 ints_impl_rank!(i8 i16 i32 i64 i128 isize);
 
-impl<B: Bits> Rank for [B] {
+impl<B: Block> Rank for [B] {
     #[inline]
     fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
         let Range { start, end } = bit::bounded(&r, 0, self.bits());

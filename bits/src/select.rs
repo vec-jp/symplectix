@@ -1,4 +1,4 @@
-use crate::{Bits, Rank};
+use crate::{Block, Rank};
 
 pub trait Select: Rank {
     /// Returns the position of the n-th 1, indexed starting from zero.
@@ -216,7 +216,7 @@ mod int_select_helper {
     );
 }
 
-impl<B: Bits> Select for [B] {
+impl<B: Block> Select for [B] {
     #[inline]
     fn select1(&self, mut n: usize) -> Option<usize> {
         for (i, b) in self.iter().enumerate() {

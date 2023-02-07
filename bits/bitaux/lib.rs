@@ -3,7 +3,7 @@ use std::iter::Sum;
 use std::ops::RangeBounds;
 
 use bitpacking::Unpack;
-use bits::{Bits, Container, ContainerMut, Count, Rank, Select};
+use bits::{Block, Container, ContainerMut, Count, Rank, Select};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 
 mod l1l2;
@@ -40,8 +40,8 @@ const BASIC_BLOCK: usize = 1 << 9;
 
 const MAX_SB_LEN: usize = UPPER_BLOCK / SUPER_BLOCK;
 
-trait Word: num::Int + bits::Bits {}
-impl<T> Word for T where T: num::Int + bits::Bits {}
+trait Word: num::Int + bits::Block {}
+impl<T> Word for T where T: num::Int + bits::Block {}
 
 fn build<'a, T, I>(size: usize, super_blocks: I) -> Poppy
 where
@@ -116,7 +116,7 @@ impl<'a, T: Word> From<&'a [T]> for BitAux<&'a [T]> {
     }
 }
 
-impl<T: Bits> BitAux<Vec<T>> {
+impl<T: Block> BitAux<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> BitAux<Vec<T>> {
         let dat = bits::new(n);
@@ -194,7 +194,7 @@ impl<T: Unpack + Select> Select for BitAux<T> {
 
         // i + imp.bit_vec[x..y].select1(r).unwrap()
 
-        const BITS: usize = <u128 as Bits>::BITS;
+        const BITS: usize = <u128 as Block>::BITS;
         for i in (s..e).step_by(BITS) {
             let b = self.inner.unpack::<u128>(i, BITS);
             let c = b.count1();
@@ -238,7 +238,7 @@ impl<T: Unpack + Select> Select for BitAux<T> {
             debug_assert!(r < self.rank0(s..e));
         }
 
-        const BITS: usize = <u128 as Bits>::BITS;
+        const BITS: usize = <u128 as Block>::BITS;
         for i in (s..e).step_by(BITS) {
             let b = self.inner.unpack::<u128>(i, BITS);
             let c = b.count0();
@@ -465,7 +465,7 @@ mod tests {
 
     use quickcheck::quickcheck;
 
-    fn none<T: Bits>(n: usize) -> BitAux<Vec<T>> {
+    fn none<T: Block>(n: usize) -> BitAux<Vec<T>> {
         BitAux::new(n)
     }
 
@@ -482,7 +482,7 @@ mod tests {
         bits
     }
 
-    fn check<T: Bits + Unpack>(size: usize, bits: Vec<usize>) -> bool {
+    fn check<T: Block + Unpack>(size: usize, bits: Vec<usize>) -> bool {
         let mut aux = none::<T>(size);
 
         for &b in &bits {

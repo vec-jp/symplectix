@@ -55,7 +55,7 @@ pub use self::{lsb::lsb, msb::msb};
 /// assert_eq!(bits::len(&v), 80);
 /// assert_eq!(v.len(), 10);
 /// ```
-pub fn new<T: Bits>(n: usize) -> Vec<T> {
+pub fn new<T: Block>(n: usize) -> Vec<T> {
     use std::iter::from_fn;
     from_fn(|| Some(T::empty())).take(bit::blocks(n, T::BITS)).collect::<Vec<T>>()
 }
@@ -70,11 +70,11 @@ pub fn new<T: Bits>(n: usize) -> Vec<T> {
 /// assert_eq!(bits::len(&v), 0);
 /// assert_eq!(v.capacity(), 10);
 /// ```
-pub fn with_capacity<T: Bits>(capacity: usize) -> Vec<T> {
+pub fn with_capacity<T: Block>(capacity: usize) -> Vec<T> {
     Vec::with_capacity(bit::blocks(capacity, T::BITS))
 }
 
-pub trait Bits: Clone + Container + ContainerMut + Count + Rank + Excess + Select {
+pub trait Block: Clone + Container + ContainerMut + Count + Rank + Excess + Select {
     const BITS: usize;
 
     #[doc(hidden)]
@@ -83,9 +83,9 @@ pub trait Bits: Clone + Container + ContainerMut + Count + Rank + Excess + Selec
     fn empty() -> Self;
 }
 
-macro_rules! ints_impl_bits {
+macro_rules! ints_impl_block {
     ($( $Int:ty )*) => ($(
-        impl Bits for $Int {
+        impl Block for $Int {
             const BITS: usize = <$Int>::BITS as usize;
 
             #[inline]
@@ -96,12 +96,12 @@ macro_rules! ints_impl_bits {
 
     )*)
 }
-ints_impl_bits!(u8 u16 u32 u64 u128 usize);
-ints_impl_bits!(i8 i16 i32 i64 i128 isize);
+ints_impl_block!(u8 u16 u32 u64 u128 usize);
+ints_impl_block!(i8 i16 i32 i64 i128 isize);
 
-impl<B, const N: usize> Bits for [B; N]
+impl<B, const N: usize> Block for [B; N]
 where
-    B: Copy + Bits,
+    B: Copy + Block,
 {
     const BITS: usize = B::BITS * N;
 
@@ -115,7 +115,7 @@ mod impl_bits {
     use super::*;
     use std::borrow::Cow;
 
-    impl<B: Bits> Bits for Box<B> {
+    impl<B: Block> Block for Box<B> {
         const BITS: usize = B::BITS;
         #[inline]
         fn empty() -> Self {
@@ -123,9 +123,9 @@ mod impl_bits {
         }
     }
 
-    impl<'a, B> Bits for Cow<'a, B>
+    impl<'a, B> Block for Cow<'a, B>
     where
-        B: ?Sized + Bits,
+        B: ?Sized + Block,
     {
         const BITS: usize = B::BITS;
         #[inline]
