@@ -26,6 +26,8 @@ pub mod not;
 pub mod or;
 pub mod xor;
 
+use std::ops::RangeBounds;
+
 pub use self::container::Container;
 pub use self::container_mut::ContainerMut;
 pub use self::count::Count;
@@ -73,6 +75,188 @@ pub fn new<T: Block>(n: usize) -> Vec<T> {
 pub fn with_capacity<T: Block>(capacity: usize) -> Vec<T> {
     Vec::with_capacity(bit::blocks(capacity, T::BITS))
 }
+
+pub trait Bits {
+    /// Returns the number of binary digits.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u8] = &[0, 0, 0];
+    /// let w: &[u8] = &[];
+    /// assert_eq!(v.bits(), 24);
+    /// assert_eq!(w.bits(), 0);
+    /// ```
+    fn bits(&self) -> usize;
+
+    /// Returns a bit at the given index `i`.
+    /// When i is out of bounds, returns **None**.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
+    /// assert_eq!(v.bit(0),   Some(true));
+    /// assert_eq!(v.bit(64),  Some(true));
+    /// assert_eq!(v.bit(128), Some(false));
+    /// assert_eq!(v.bit(200), None);
+    /// ```
+    fn bit(&self, i: usize) -> Option<bool>;
+
+    /// Counts the occurrences of `1`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Count;
+    /// let a: &[u64] = &[];
+    /// let b: &[u64] = &[0, 0, 0];
+    /// let c: &[u64] = &[0, 1, 3];
+    /// assert_eq!(a.count1(), 0);
+    /// assert_eq!(b.count1(), 0);
+    /// assert_eq!(c.count1(), 3);
+    /// ```
+    #[inline]
+    fn count1(&self) -> usize {
+        self.bits() - self.count0()
+    }
+
+    /// Counts the occurrences of `0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Count;
+    /// let a: &[u64] = &[];
+    /// let b: &[u64] = &[0, 0, 0];
+    /// let c: &[u64] = &[0, 1, 3];
+    /// assert_eq!(a.count0(), 0);
+    /// assert_eq!(b.count0(), 192);
+    /// assert_eq!(c.count0(), 189);
+    /// ```
+    #[inline]
+    fn count0(&self) -> usize {
+        self.bits() - self.count1()
+    }
+
+    /// Returns true if all bits are enabled. An empty bits should return true.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Count;
+    /// let a: &[u64] = &[0, 0, 0];
+    /// let b: &[u64] = &[];
+    /// let c: &[u64] = &[!0, !0, !0];
+    /// assert!(!a.all());
+    /// assert!( b.all());
+    /// assert!( c.all());
+    /// ```
+    #[inline]
+    fn all(&self) -> bool {
+        self.bits() == 0 || self.count0() == 0
+    }
+
+    /// Returns true if any bits are enabled. An empty bits should return false.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Count;
+    /// let b1: &[u64] = &[];
+    /// let b2: &[u64] = &[0, 0, 0];
+    /// let b3: &[u64] = &[!0, !0, !0];
+    /// let b4: &[u64] = &[0, 0, 1];
+    /// assert!(!b1.any());
+    /// assert!(!b2.any());
+    /// assert!( b3.any());
+    /// assert!( b4.any());
+    /// ```
+    #[inline]
+    fn any(&self) -> bool {
+        self.bits() != 0 && self.count1() > 0
+    }
+
+    /// Counts occurrences of `1` in the given range.
+    #[inline]
+    fn rank1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
+        let r = bit::bounded(&index, 0, self.bits());
+        r.len() - self.rank0(r)
+    }
+
+    /// Counts occurrences of `0` in the given range.
+    #[inline]
+    fn rank0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
+        let r = bit::bounded(&index, 0, self.bits());
+        r.len() - self.rank1(r)
+    }
+
+    /// Returns the position of the n-th 1, indexed starting from zero.
+    /// `n` must be less than `self.count1()`, otherwise returns `None`.
+    #[inline]
+    fn select1(&self, n: usize) -> Option<usize> {
+        helper::search1(self, n)
+    }
+
+    /// Returns the position of the n-th 0, indexed starting from zero.
+    /// `n` must be less than `self.count0()`, otherwise returns `None`.
+    #[inline]
+    fn select0(&self, n: usize) -> Option<usize> {
+        helper::search0(self, n)
+    }
+
+    // #[inline]
+    // fn select1_from(&self, i: usize, n: usize) -> Option<usize> {
+    //     self.select1(self.rank1(..i) + n).map(|pos| pos - i)
+    // }
+
+    // #[inline]
+    // fn select0_from(&self, i: usize, n: usize) -> Option<usize> {
+    //     self.select0(self.rank0(..i) + n).map(|pos| pos - i)
+    // }
+}
+
+mod helper {
+    use crate::Bits;
+
+    /// Binary search to find and return the smallest index k in `[i, j)` at which f(k) is true,
+    /// assuming that on the range `[i, j)`, f(k) == true implies f(k+1) == true.
+    ///
+    /// Returns the first true index, if there is no such index, returns `j`.
+    fn binary_search<P: Fn(usize) -> bool>(mut l: usize, mut r: usize, f: P) -> usize {
+        while l < r {
+            let m = l + (r - l) / 2;
+            if f(m) {
+                r = m; // -> f(r) == true
+            } else {
+                l = m + 1; // -> f(l-1) == false
+            }
+        }
+        l // f(l-1) == false && f(l) (= f(r)) == true
+    }
+
+    #[inline]
+    pub fn search1<T: ?Sized + Bits>(bs: &T, n: usize) -> Option<usize> {
+        (n < bs.count1()).then(|| binary_search(0, bs.bits(), |k| bs.rank1(..k) > n) - 1)
+    }
+
+    #[inline]
+    pub fn search0<T: ?Sized + Bits>(bs: &T, n: usize) -> Option<usize> {
+        (n < bs.count0()).then(|| binary_search(0, bs.bits(), |k| bs.rank0(..k) > n) - 1)
+    }
+}
+
+pub trait BitsMut {
+    /// Enables the bit at the given index `i`.
+    fn bit_set(&mut self, i: usize);
+
+    /// Disables the bit at the given index `i`.
+    fn bit_clear(&mut self, i: usize);
+}
+
+// pub trait Int {}
 
 pub trait Block: Clone + Container + ContainerMut + Count + Rank + Excess + Select {
     const BITS: usize;
