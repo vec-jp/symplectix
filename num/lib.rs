@@ -2,20 +2,16 @@
 
 use core::ops::{Div, Rem};
 
-mod arith;
-pub use arith::{Arith, ArithAssign};
-
-mod bitwise;
-pub use bitwise::{Bitwise, BitwiseAssign};
-
-mod float;
-pub use float::Float;
-
 mod int;
-pub use int::Int;
+pub use int::{Int, TryFromInt, TryFromSint, TryFromUint};
 
-mod cast;
-pub use cast::{cast, TryFromInt, TryFromSint, TryFromUint};
+#[inline]
+pub fn cast<T, N>(this: T) -> N
+where
+    N: Int + TryFrom<T>,
+{
+    N::try_from(this).ok().expect("num::cast failed")
+}
 
 #[inline]
 pub fn divrem<T, U>(t: T, u: U) -> (<T as Div<U>>::Output, <T as Rem<U>>::Output)

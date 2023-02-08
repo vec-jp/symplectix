@@ -225,15 +225,6 @@ pub trait Block: Clone + Bits + BitsMut {
     fn empty() -> Self;
 }
 
-/// Integer with a fixed-sized bits.
-pub trait Int: num::Int + Block {
-    /// Least significant set bit (right most set bit).
-    fn lsb(self) -> Self;
-
-    /// Most significant set bit (left most set bit).
-    fn msb(self) -> Self;
-}
-
 mod excess_helper {
     use crate::Bits;
     use std::ops::RangeBounds;
@@ -514,23 +505,6 @@ macro_rules! ints_impl {
             #[inline]
             fn empty() -> Self {
                 0
-            }
-        }
-
-        impl Int for $Int {
-            #[inline]
-            fn lsb(self) -> Self {
-                self & self.wrapping_neg()
-            }
-
-            #[inline]
-            fn msb(self) -> Self {
-                if self == 0 {
-                    0
-                } else {
-                    let max = Self::BITS - 1;
-                    1 << (max - self.leading_zeros())
-                }
             }
         }
     )*)
