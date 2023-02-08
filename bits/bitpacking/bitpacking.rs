@@ -2,7 +2,8 @@
 //! This library should not be used to compress/decompress a large array.
 //! Consider using [`quickwit-oss/bitpacking`](https://github.com/quickwit-oss/bitpacking) in such cases.
 
-use bits::{Bits, BitsMut, Int};
+use bits::{Bits, BitsMut};
+use num::Int;
 
 pub trait Pack: BitsMut {
     /// Writes `N` bits in `[i, i+N)`.

@@ -1,9 +1,11 @@
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
 
-use bits::{Bits, Int};
 use std::borrow::Cow;
 use std::iter::successors;
+
+use bits::Bits;
+use num::Int;
 
 #[test]
 fn bits_is_implemented() {

@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 
-use bits::Int;
+use num::Int;
 
 #[test]
 fn lsb() {
