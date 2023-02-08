@@ -2,13 +2,13 @@
 //! This library should not be used to compress/decompress a large array.
 //! Consider using [`quickwit-oss/bitpacking`](https://github.com/quickwit-oss/bitpacking) in such cases.
 
-use bits::{Container, ContainerMut};
+use bits::{Bits, BitsMut};
 use num::Int;
 
 pub trait Word: Int + bits::Block {}
 impl<T: Int + bits::Block> Word for T {}
 
-pub trait Pack: ContainerMut {
+pub trait Pack: BitsMut {
     /// Writes `N` bits in `[i, i+N)`.
     #[doc(hidden)]
     fn pack<T: Word>(&mut self, i: usize, n: usize, bits: T) {
@@ -22,7 +22,7 @@ pub trait Pack: ContainerMut {
     }
 }
 
-pub trait Unpack: Container {
+pub trait Unpack: Bits {
     /// Reads `n` bits from `i`, and returns it as the lowest `n` bits of `Int`.
     ///
     /// # Examples

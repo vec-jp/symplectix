@@ -1,7 +1,7 @@
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
 
-use bits::{Container, Count, Lsb, Rank, Select};
+use bits::{Bits, Lsb};
 use std::borrow::Cow;
 use std::iter::successors;
 
@@ -9,7 +9,7 @@ use std::iter::successors;
 fn bits_is_implemented() {
     fn _test<T>()
     where
-        T: ?Sized + bits::Container + bits::Count + bits::Rank + bits::Select,
+        T: ?Sized + bits::Bits,
     {
     }
 
@@ -60,7 +60,7 @@ fn bits_rank0_rank1(vec: Vec<u32>) -> bool {
 
 fn rank_for_empty_range<T>(bits: &T)
 where
-    T: ?Sized + bits::Rank,
+    T: ?Sized + Bits,
 {
     assert_eq!(bits.rank0(0..0), 0);
     assert_eq!(bits.rank0(1..1), 0);
@@ -75,7 +75,7 @@ where
 
 fn rank_0_plus_rank_1<T>(bits: &T, r: core::ops::Range<usize>)
 where
-    T: ?Sized + bits::Rank,
+    T: ?Sized + Bits,
 {
     assert_eq!(bits.rank0(r.clone()) + bits.rank1(r.clone()), r.len());
 }

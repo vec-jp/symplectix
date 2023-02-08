@@ -3,11 +3,10 @@ use std::iter::Sum;
 use std::ops::RangeBounds;
 
 use bitpacking::Unpack;
-use bits::{Block, Container, ContainerMut, Count, Rank, Select};
+use bits::{Bits, BitsMut, Block};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 
 mod l1l2;
-
 /// `BitAux<T>` stores auxiliary data to compute `Rank` and `Select` more efficiently.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BitAux<T> {
@@ -120,11 +119,11 @@ impl<T: Block> BitAux<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> BitAux<Vec<T>> {
         let dat = bits::new(n);
-        BitAux { poppy: Poppy::new(bits::len(&dat)), inner: dat }
+        BitAux { poppy: Poppy::new(dat.bits()), inner: dat }
     }
 }
 
-impl<T: Container> Container for BitAux<T> {
+impl<T: Unpack + Bits> Bits for BitAux<T> {
     #[inline]
     fn bits(&self) -> usize {
         self.inner.bits()
@@ -134,19 +133,15 @@ impl<T: Container> Container for BitAux<T> {
     fn bit(&self, i: usize) -> Option<bool> {
         self.inner.bit(i)
     }
-}
 
-impl<T: Count> Count for BitAux<T> {
     #[inline]
     fn count1(&self) -> usize {
         let bit = &self.poppy.ubs;
         num::cast::<u64, usize>(bit.sum(bit.nodes()))
     }
-}
 
-impl<T: Rank> Rank for BitAux<T> {
     fn rank1<Idx: RangeBounds<usize>>(&self, index: Idx) -> usize {
-        fn rank1_impl<U: Rank>(me: &BitAux<U>, p0: usize) -> usize {
+        fn rank1_impl<U: Unpack + Bits>(me: &BitAux<U>, p0: usize) -> usize {
             if p0 == 0 {
                 0
             } else if p0 == me.bits() {
@@ -168,9 +163,7 @@ impl<T: Rank> Rank for BitAux<T> {
         let Range { start: i, end: j } = bit::bounded(&index, 0, self.bits());
         rank1_impl(self, j) - rank1_impl(self, i)
     }
-}
 
-impl<T: Unpack + Select> Select for BitAux<T> {
     fn select1(&self, n: usize) -> Option<usize> {
         let mut r = num::cast(n);
 
@@ -292,7 +285,7 @@ where
     p2
 }
 
-impl<T: ContainerMut> BitAux<T> {
+impl<T: BitsMut> BitAux<T> {
     /// Swaps a bit at `i` by `bit` and returns the previous value.
     fn swap(&mut self, i: usize, bit: bool) -> bool {
         let before = self.inner.bit(i);
@@ -305,7 +298,7 @@ impl<T: ContainerMut> BitAux<T> {
     }
 }
 
-impl<T: Container + ContainerMut> ContainerMut for BitAux<T> {
+impl<T: Unpack + BitsMut> BitsMut for BitAux<T> {
     #[inline]
     fn bit_set(&mut self, index: usize) {
         if !self.swap(index, true) {
