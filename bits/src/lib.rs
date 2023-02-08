@@ -10,13 +10,6 @@ macro_rules! mask {
     )*)
 }
 
-// mod container;
-// mod container_mut;
-// mod count;
-// mod excess;
-// mod rank;
-// mod select;
-
 mod lsb;
 mod msb;
 
@@ -29,25 +22,9 @@ pub mod xor;
 
 use std::ops::{Range, RangeBounds};
 
-// pub use self::container::Container;
-// pub use self::container_mut::ContainerMut;
-// pub use self::count::Count;
-// pub use self::excess::Excess;
-// pub use self::rank::Rank;
-// pub use self::select::Select;
 pub use self::mask::Mask;
-pub use self::{lsb::Lsb, msb::Msb};
-
-// pub use self::{
-//     container::{get, is_empty, len},
-//     container_mut::{clear, set},
-//     count::{all, any, count0, count1},
-//     excess::{excess, excess0, excess1},
-//     rank::{rank0, rank1},
-//     select::{select0, select1},
-// };
-
 pub use self::{lsb::lsb, msb::msb};
+pub use self::{lsb::Lsb, msb::Msb};
 
 /// Constructs a new, empty `Vec<T>`.
 ///
