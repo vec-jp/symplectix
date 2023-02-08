@@ -26,6 +26,7 @@ rust_test(
         "//:.rustfmt.toml",
     ],
     deps = [
+        "//testing",
         "@rules_rust//tools/runfiles",
     ],
 )
