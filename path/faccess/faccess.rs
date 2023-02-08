@@ -45,23 +45,23 @@ mod test {
     use runfiles::Runfiles;
 
     #[test]
-    fn rustfmt_toml() {
+    fn faccessat_runfiles() {
         let r = Runfiles::create().expect("runfiles can not be created");
 
         assert!(check(r.rlocation("trunk/.rustfmt.toml"), Mode::EXISTS).is_ok());
         assert!(check(r.rlocation("trunk/.clippy.toml"), Mode::EXISTS).is_ok());
-        assert!(check(r.rlocation("trunk/path/faccess/faccess_unix.rs"), Mode::EXISTS).is_ok());
+        assert!(check(r.rlocation("trunk/path/faccess/faccess.rs"), Mode::EXISTS).is_ok());
 
         assert!(check(r.rlocation("trunk/.rustfmt.toml"), Mode::READ).is_ok());
         assert!(check(r.rlocation("trunk/.clippy.toml"), Mode::READ).is_ok());
-        assert!(check(r.rlocation("trunk/path/faccess/faccess_unix.rs"), Mode::READ).is_ok());
+        assert!(check(r.rlocation("trunk/path/faccess/faccess.rs"), Mode::READ).is_ok());
 
         assert!(check(r.rlocation("trunk/.rustfmt.toml"), Mode::WRITE).is_err());
         assert!(check(r.rlocation("trunk/.clippy.toml"), Mode::WRITE).is_err());
-        assert!(check(r.rlocation("trunk/path/faccess/faccess_unix.rs"), Mode::WRITE).is_err());
+        assert!(check(r.rlocation("trunk/path/faccess/faccess.rs"), Mode::WRITE).is_err());
 
         assert!(check(r.rlocation("trunk/.rustfmt.toml"), Mode::EXECUTE).is_err());
         assert!(check(r.rlocation("trunk/.clippy.toml"), Mode::EXECUTE).is_err());
-        assert!(check(r.rlocation("trunk/path/faccess/faccess_unix.rs"), Mode::EXECUTE).is_err());
+        assert!(check(r.rlocation("trunk/path/faccess/faccess.rs"), Mode::EXECUTE).is_err());
     }
 }
