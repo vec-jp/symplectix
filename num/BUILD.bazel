@@ -8,10 +8,10 @@ rust_library(
         ["*.rs"],
         exclude = ["*_test.rs"],
     ),
+    visibility = ["//visibility:public"],
     deps = [
         "//bits",
     ],
-    visibility = ["//visibility:public"],
 )
 
 rust_test(
