@@ -311,10 +311,6 @@ mod select_helper {
     {
         (n < bs.count0()).then(|| binary_search(0, bs.bits(), |k| bs.rank0(..k) > n) - 1)
     }
-}
-
-mod int_select_helper {
-    use crate::Bits;
 
     /// A helper trait to implement `Select` for u64.
     pub(crate) trait IntSelectHelper {
@@ -491,12 +487,12 @@ macro_rules! ints_impl {
 
             #[inline]
             fn select1(&self, n: usize) -> Option<usize> {
-                <Self as int_select_helper::IntSelectHelper>::select1(*self, n)
+                <Self as select_helper::IntSelectHelper>::select1(*self, n)
             }
 
             #[inline]
             fn select0(&self, n: usize) -> Option<usize> {
-                <Self as int_select_helper::IntSelectHelper>::select1(!self, n)
+                <Self as select_helper::IntSelectHelper>::select1(!self, n)
             }
         }
 
