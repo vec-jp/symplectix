@@ -30,7 +30,6 @@ rust_test_suite(
     deps = [
         ":bits",
         "//bits/bitaux",
-        "//num",
         "@crates//:quickcheck",
     ],
 )

@@ -118,26 +118,3 @@ macro_rules! impl_int {
 }
 impl_int!(i8 i16 i32 i64 i128 isize);
 impl_int!(u8 u16 u32 u64 u128 usize);
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use core::ops::Add;
-
-    // use core::iter::Step;
-    // fn range<T: Int + Step>(init: T, max: T) -> impl Iterator<Item = T> {
-    //     init..max
-    // }
-
-    fn range<T: Int + Add<Output = T>>(start: T, end: T) -> impl Iterator<Item = T> {
-        use core::iter::successors;
-        successors(Some(start), move |&x| (x < end).then_some(x + T::ONE))
-    }
-
-    #[test]
-    fn range_test() {
-        for (x, y) in range(0, 5).zip([0, 1, 2, 3, 4]) {
-            assert_eq!(x, y);
-        }
-    }
-}

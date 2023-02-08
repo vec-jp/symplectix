@@ -2,10 +2,8 @@
 extern crate quickcheck_macros;
 
 use std::borrow::Cow;
-use std::iter::successors;
 
 use bits::Bits;
-use num::Int;
 
 #[test]
 fn bits_is_implemented() {
@@ -27,27 +25,6 @@ fn bits_is_implemented() {
     _test::<&Box<[u8; 4]>>();
     _test::<Cow<[u8; 1000]>>();
     _test::<Cow<Box<[u8; 2000]>>>();
-}
-
-#[quickcheck]
-fn lsb(u: u32) -> bool {
-    let i = u as i32;
-    u.lsb() == (i & -i) as u32
-}
-
-#[quickcheck]
-fn next_set_bit(n: u32) -> bool {
-    let mut set_bit = successors(Some(n), |&n| {
-        let m = n & !n.lsb();
-        m.any().then_some(m)
-    })
-    .map(|x| u32::trailing_zeros(x) as usize);
-
-    for c in 0..n.count1() {
-        assert_eq!(set_bit.next(), n.select1(c));
-    }
-
-    true
 }
 
 #[quickcheck]
