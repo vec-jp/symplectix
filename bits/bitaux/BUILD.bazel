@@ -19,22 +19,11 @@ rust_library(
 )
 
 rust_test(
-    name = "cfg_test",
+    name = "bitaux_unit_test",
     crate = ":bitaux",
-    rustc_flags = [
-        "-Copt-level=3",
-    ],
-    deps = [
-        "@crates//:quickcheck",
-    ],
 )
 
 rust_doc_test(
-    name = "doc_test",
-    crate = ":bitaux",
-)
-
-rust_doc(
-    name = "doc",
+    name = "bitaux_doc_test",
     crate = ":bitaux",
 )

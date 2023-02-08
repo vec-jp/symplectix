@@ -27,9 +27,13 @@ rust_test_suite(
     proc_macro_deps = [
         "@crates//:quickcheck_macros",
     ],
+    rustc_flags = [
+        "-Copt-level=3",
+    ],
     deps = [
         ":bits",
         "//bits/bitaux",
+        "//bits/bitpacking",
         "@crates//:quickcheck",
     ],
 )
