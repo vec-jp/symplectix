@@ -1,7 +1,7 @@
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
 
-use bits::{Bits, Lsb};
+use bits::{Bits, Int};
 use std::borrow::Cow;
 use std::iter::successors;
 

@@ -2,16 +2,12 @@
 //! This library should not be used to compress/decompress a large array.
 //! Consider using [`quickwit-oss/bitpacking`](https://github.com/quickwit-oss/bitpacking) in such cases.
 
-use bits::{Bits, BitsMut};
-use num::Int;
-
-pub trait Word: Int + bits::Block {}
-impl<T: Int + bits::Block> Word for T {}
+use bits::{Bits, BitsMut, Int};
 
 pub trait Pack: BitsMut {
     /// Writes `N` bits in `[i, i+N)`.
     #[doc(hidden)]
-    fn pack<T: Word>(&mut self, i: usize, n: usize, bits: T) {
+    fn pack<T: Int>(&mut self, i: usize, n: usize, bits: T) {
         debug_assert!(i < self.bits() && n <= T::BITS);
 
         for b in i..i + n {
@@ -37,7 +33,7 @@ pub trait Unpack: Bits {
     /// assert_eq!(bits.unpack::<u8>(30, len), 0b0010);
     /// ```
     #[doc(hidden)]
-    fn unpack<T: Word>(&self, i: usize, n: usize) -> T {
+    fn unpack<T: Int>(&self, i: usize, n: usize) -> T {
         debug_assert!(i < self.bits() && n <= T::BITS);
 
         let mut bits = T::empty();
@@ -103,7 +99,7 @@ impl<B: bits::Block + Pack> Pack for [B] {
 macro_rules! impl_unpack {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn unpack<I: Word>(&self, i: usize, n: usize) -> I {
+        fn unpack<I: Int>(&self, i: usize, n: usize) -> I {
             <$X as Unpack>::unpack(self$(.$method())?, i, n)
         }
     }
@@ -112,7 +108,7 @@ macro_rules! impl_unpack {
 macro_rules! impl_pack {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn pack<I: Word>(&mut self, i: usize, n: usize, int: I) {
+        fn pack<I: Int>(&mut self, i: usize, n: usize, int: I) {
             <$X as Pack>::pack(self$(.$method())?, i, n, int)
         }
     }

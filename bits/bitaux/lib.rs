@@ -3,7 +3,7 @@ use std::iter::Sum;
 use std::ops::RangeBounds;
 
 use bitpacking::Unpack;
-use bits::{Bits, BitsMut, Block};
+use bits::{Bits, BitsMut, Block, Int};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 
 mod l1l2;
@@ -39,12 +39,9 @@ const BASIC_BLOCK: usize = 1 << 9;
 
 const MAX_SB_LEN: usize = UPPER_BLOCK / SUPER_BLOCK;
 
-trait Word: num::Int + bits::Block {}
-impl<T> Word for T where T: num::Int + bits::Block {}
-
 fn build<'a, T, I>(size: usize, super_blocks: I) -> Poppy
 where
-    T: Word + 'a,
+    T: Int + 'a,
     I: IntoIterator<Item = Option<&'a [T]>>,
 {
     let mut poppy = Poppy::new(size);
@@ -63,7 +60,7 @@ where
     poppy
 }
 
-fn basic_blocks<W: Word>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
+fn basic_blocks<W: Int>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
     let mut bbs = [0; L1L2::LEN];
     if let Some(sb) = sb {
         for (i, bb) in sb.chunks(BASIC_BLOCK / W::BITS).enumerate() {
@@ -73,7 +70,7 @@ fn basic_blocks<W: Word>(sb: Option<&[W]>) -> [u64; L1L2::LEN] {
     bbs
 }
 
-fn super_blocks_from_words<T: Word>(slice: &[T]) -> impl Iterator<Item = Option<&[T]>> {
+fn super_blocks_from_words<T: Int>(slice: &[T]) -> impl Iterator<Item = Option<&[T]>> {
     slice.chunks(SUPER_BLOCK / T::BITS).map(Some)
 }
 
@@ -96,7 +93,7 @@ fn lbs_len(n: usize) -> usize {
     }
 }
 
-impl<'a, T: Word> From<&'a [T]> for BitAux<&'a [T]> {
+impl<'a, T: Int> From<&'a [T]> for BitAux<&'a [T]> {
     fn from(inner: &'a [T]) -> Self {
         let mut poppy = build(inner.bits(), super_blocks_from_words(inner));
 

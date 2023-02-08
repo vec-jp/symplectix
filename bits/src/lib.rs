@@ -10,21 +10,15 @@ macro_rules! mask {
     )*)
 }
 
-mod lsb;
-mod msb;
-
-mod mask;
-
 pub mod and;
 pub mod not;
 pub mod or;
 pub mod xor;
 
-use std::ops::{Range, RangeBounds};
-
+mod mask;
 pub use self::mask::Mask;
-pub use self::{lsb::lsb, msb::msb};
-pub use self::{lsb::Lsb, msb::Msb};
+
+use std::ops::{Range, RangeBounds};
 
 /// Constructs a new, empty `Vec<T>`.
 ///
@@ -231,7 +225,14 @@ pub trait Block: Clone + Bits + BitsMut {
     fn empty() -> Self;
 }
 
-// pub trait Int {}
+/// Integer with a fixed-sized bits.
+pub trait Int: num::Int + Block {
+    /// Least significant set bit (right most set bit).
+    fn lsb(self) -> Self;
+
+    /// Most significant set bit (left most set bit).
+    fn msb(self) -> Self;
+}
 
 mod excess_helper {
     use crate::Bits;
@@ -513,6 +514,23 @@ macro_rules! ints_impl {
             #[inline]
             fn empty() -> Self {
                 0
+            }
+        }
+
+        impl Int for $Int {
+            #[inline]
+            fn lsb(self) -> Self {
+                self & self.wrapping_neg()
+            }
+
+            #[inline]
+            fn msb(self) -> Self {
+                if self == 0 {
+                    0
+                } else {
+                    let max = Self::BITS - 1;
+                    1 << (max - self.leading_zeros())
+                }
             }
         }
     )*)
