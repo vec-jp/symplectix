@@ -11,6 +11,16 @@ rust_library(
     ],
 )
 
+rust_test(
+    name = "bits_unit_test",
+    crate = ":bits",
+)
+
+rust_doc_test(
+    name = "bits_doc_test",
+    crate = ":bits",
+)
+
 rust_test_suite(
     name = "integration",
     srcs = glob(["tests/**/*.rs"]),
@@ -23,19 +33,4 @@ rust_test_suite(
         "//num",
         "@crates//:quickcheck",
     ],
-)
-
-rust_test(
-    name = "cfg_test",
-    crate = ":bits",
-)
-
-rust_doc_test(
-    name = "doc_test",
-    crate = ":bits",
-)
-
-rust_doc(
-    name = "doc",
-    crate = ":bits",
 )
