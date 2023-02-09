@@ -1,7 +1,7 @@
 use std::env;
 use std::io;
 use std::os::unix::process::{CommandExt, ExitStatusExt};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command as StdCommand, ExitStatus, Stdio};
 use std::time::Duration;
 
@@ -93,7 +93,7 @@ impl Entrypoint {
         //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
         // }
 
-        wait(self).await?;
+        wait(&self.wait_files).await?;
 
         let mut interrupt = signal(SignalKind::interrupt()).map_err(Error::Io)?;
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
@@ -138,7 +138,7 @@ impl Entrypoint {
             Err(err) => Err(WaitFailed(err)),
         };
 
-        post(self, result).await
+        post(&self.post_file, result).await
     }
 }
 
@@ -153,9 +153,9 @@ fn into_process_result(status: ExitStatus) -> Result {
     }
 }
 
-#[tracing::instrument(skip(opts))]
-async fn wait(opts: &Entrypoint) -> Result {
-    let wait_files = opts.wait_files.iter().map(|ok_file| async move {
+#[tracing::instrument]
+async fn wait(wait_files: &[PathBuf]) -> Result {
+    let wait_files = wait_files.iter().map(|ok_file| async move {
         let err_file = ok_file.with_extension("err");
 
         loop {
@@ -176,9 +176,9 @@ async fn wait(opts: &Entrypoint) -> Result {
     future::try_join_all(wait_files).map_ok(|_| ()).await
 }
 
-#[tracing::instrument(skip(opts, result))]
-async fn post(opts: &Entrypoint, result: Result) -> Result {
-    let Some(path) = opts.post_file.as_ref() else {
+#[tracing::instrument(skip(post_file))]
+async fn post<P: AsRef<Path>>(post_file: &Option<P>, result: Result) -> Result {
+    let Some(path) = post_file.as_ref() else {
         return Ok(());
     };
 
@@ -187,7 +187,7 @@ async fn post(opts: &Entrypoint, result: Result) -> Result {
     if result.is_ok() {
         fsutil::create_file(path, true).await.map_err(Error::Io)?;
     } else {
-        let path = path.with_extension("err");
+        let path = path.as_ref().with_extension("err");
         fsutil::create_file(path, true).await.map_err(Error::Io)?;
     }
 
