@@ -1,10 +1,10 @@
-use entrypoint::Entrypoint;
+use entrypoint::ProcessWrapper;
 
 /// An entrypoint for fuzzing.
 #[derive(Clone, Debug, clap::Parser)]
 pub struct Run {
     #[command(flatten)]
-    entrypoint: Entrypoint,
+    entrypoint: ProcessWrapper,
 }
 
 impl Run {
