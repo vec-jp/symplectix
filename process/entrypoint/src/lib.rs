@@ -95,8 +95,6 @@ impl Entrypoint {
 
         wait(self).await?;
 
-        let timer = timer(self);
-
         let mut interrupt = signal(SignalKind::interrupt()).map_err(Error::Io)?;
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
 
@@ -111,7 +109,7 @@ impl Entrypoint {
             ) => {
                 tracing::trace!(id, branch = "signaled");
             }
-            _ = timer => {
+            _ = timer(self) => {
                 tracing::trace!(id, branch = "timedout");
             }
             wait_result = child.wait() => match wait_result {
