@@ -44,7 +44,7 @@ pub struct Entrypoint {
     /// Kill the spawned child process after the specified duration.
     ///
     /// The timeout clock does not tick until the child spawns.
-    /// So the operations before spawning, for example waiting for `wait-file`s, never times out.
+    /// So the operations before spawning, i.e., while waiting for `wait-file`s, never times out.
     #[arg(long, value_name = "DURATION")]
     timeout: Option<humantime::Duration>,
 
@@ -142,6 +142,17 @@ impl Entrypoint {
     }
 }
 
+fn into_process_result(status: ExitStatus) -> Result {
+    if status.success() {
+        Ok(())
+    } else if let Some(code) = status.code() {
+        Err(ExitedUnsuccessfully(code))
+    } else {
+        // because `status.code()` returns `None`
+        Err(KilledBySignal(status.signal().expect("WIFSIGNALED is true")))
+    }
+}
+
 #[tracing::instrument(skip(opts))]
 async fn wait(opts: &Entrypoint) -> Result {
     let wait_files = opts.wait_files.iter().map(|ok_file| async move {
@@ -174,11 +185,9 @@ async fn post(opts: &Entrypoint, result: Result) -> Result {
     fsutil::ensure_path_is_writable(path).await.map_err(Error::Io)?;
 
     if result.is_ok() {
-        tracing::trace!(post_file = %path.display());
         fsutil::create_file(path, true).await.map_err(Error::Io)?;
     } else {
         let path = path.with_extension("err");
-        tracing::trace!(post_file = %path.display());
         fsutil::create_file(path, true).await.map_err(Error::Io)?;
     }
 
@@ -214,17 +223,6 @@ fn timer(opts: &Entrypoint) -> future::Either<future::Pending<()>, time::Sleep> 
     match opts.timeout.as_ref() {
         None => future::pending().left_future(),
         Some(&dur) => time::sleep(dur.into()).right_future(),
-    }
-}
-
-fn into_process_result(status: ExitStatus) -> Result {
-    if status.success() {
-        Ok(())
-    } else if let Some(code) = status.code() {
-        Err(ExitedUnsuccessfully(code))
-    } else {
-        // because `status.code()` returns `None`
-        Err(KilledBySignal(status.signal().expect("WIFSIGNALED is true")))
     }
 }
 
