@@ -31,9 +31,6 @@ pub struct ProcessWrapper {
     envs: Vec<String>,
 
     /// Kill the spawned child process after the specified duration.
-    ///
-    /// The timeout clock does not tick until the child spawns.
-    /// So the operations before spawning, i.e., while waiting for `wait-file`s, never times out.
     #[arg(long, value_name = "DURATION")]
     timeout: Option<humantime::Duration>,
 

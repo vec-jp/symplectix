@@ -13,6 +13,9 @@ use crate::{Error, Result};
 #[derive(Debug, Clone, Parser)]
 pub struct Coordinator {
     /// List of paths to wait for before spawning the child process.
+    ///
+    /// The timeout clock does not tick until the child spawns.
+    /// So the operations before spawning, i.e., while waiting for `wait-file`s, never times out.
     #[arg(long = "wait-file", value_name = "PATH")]
     wait_files: Vec<PathBuf>,
 
