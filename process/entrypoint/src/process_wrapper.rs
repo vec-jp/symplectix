@@ -20,26 +20,26 @@ use crate::{Error, Result};
 pub struct ProcessWrapper {
     /// Redirect the child process stdout.
     #[arg(long, value_name = "PATH")]
-    pub stdout: Option<PathBuf>,
+    stdout: Option<PathBuf>,
 
     /// Redirect the child process stderr.
     #[arg(long, value_name = "PATH")]
-    pub stderr: Option<PathBuf>,
+    stderr: Option<PathBuf>,
 
     /// Environment variables visible to the spawned process.
     #[arg(long = "env", value_name = "KEY")]
-    pub envs: Vec<String>,
+    envs: Vec<String>,
 
     /// Kill the spawned child process after the specified duration.
     ///
     /// The timeout clock does not tick until the child spawns.
     /// So the operations before spawning, i.e., while waiting for `wait-file`s, never times out.
     #[arg(long, value_name = "DURATION")]
-    pub timeout: Option<humantime::Duration>,
+    timeout: Option<humantime::Duration>,
 
     /// The entrypoint of the child process.
     #[arg(last = true)]
-    pub command: Vec<String>,
+    command: Vec<String>,
 }
 
 impl ProcessWrapper {

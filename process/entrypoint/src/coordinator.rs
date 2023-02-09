@@ -14,18 +14,24 @@ use crate::{Error, Result};
 pub struct Coordinator {
     /// List of paths to wait for before spawning the child process.
     #[arg(long = "wait-file", value_name = "PATH")]
-    pub wait_files: Vec<PathBuf>,
+    wait_files: Vec<PathBuf>,
 
     /// Create a file after the child process exits successfully.
     #[arg(long, value_name = "PATH")]
-    pub post_file: Option<PathBuf>,
+    post_file: Option<PathBuf>,
 
     #[command(flatten)]
-    pub entrypoint: ProcessWrapper,
+    entrypoint: ProcessWrapper,
 }
 
 impl Coordinator {
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(
+        skip(self),
+        fields(
+            wait_files = ?self.wait_files,
+            post_file = ?self.post_file,
+        )
+    )]
     pub async fn run(&self) -> Result {
         wait(&self.wait_files).await?;
         let result = self.entrypoint.run().await;
@@ -56,8 +62,8 @@ async fn wait(wait_files: &[PathBuf]) -> Result {
     future::try_join_all(wait_files).map_ok(|_| ()).await
 }
 
-#[tracing::instrument(skip(post_file))]
-async fn post<P: AsRef<Path>>(post_file: &Option<P>, result: Result) -> Result {
+#[tracing::instrument]
+async fn post(post_file: &Option<PathBuf>, result: Result) -> Result {
     let Some(path) = post_file.as_ref() else {
         return Ok(());
     };
@@ -67,7 +73,7 @@ async fn post<P: AsRef<Path>>(post_file: &Option<P>, result: Result) -> Result {
     if result.is_ok() {
         fsutil::create_file(path, true).await.map_err(Error::Io)?;
     } else {
-        let path = path.as_ref().with_extension("err");
+        let path = path.with_extension("err");
         fsutil::create_file(path, true).await.map_err(Error::Io)?;
     }
 
@@ -82,12 +88,12 @@ mod tests {
     use testing::TempDirExt;
     use tokio::task;
 
-    fn create_files<P, T>(temp_dir: &testing::TempDir, paths: T) -> (Vec<fs::File>, Vec<PathBuf>)
+    fn create_files<P, T>(temp_dir: &testing::TempDir, paths: T) -> Vec<PathBuf>
     where
         P: AsRef<Path>,
         T: AsRef<[P]>,
     {
-        paths
+        let (files, paths): (Vec<fs::File>, Vec<PathBuf>) = paths
             .as_ref()
             .iter()
             .map(|path| {
@@ -95,7 +101,10 @@ mod tests {
                     .create_file(fs::OpenOptions::new().create(true).read(true).write(true), path)
                     .expect("create a temporary file")
             })
-            .unzip()
+            .unzip();
+
+        drop(files);
+        paths
     }
 
     #[tokio::test]
@@ -104,13 +113,13 @@ mod tests {
 
         wait(&[]).await.expect("wait for nothing");
 
-        let (_, mut oks) = create_files(&temp_dir, vec!["柏/の/葉/ok", "秋/葉/原/ok"]);
+        let mut oks = create_files(&temp_dir, vec!["柏/の/葉/ok", "秋/葉/原/ok"]);
         wait(&oks).await.expect("waiting for files created just before");
 
-        let (_, errs) = create_files(&temp_dir, vec!["0.err"]);
+        let errs = create_files(&temp_dir, vec!["0.err"]);
         wait(&oks).await.expect("affected by an error file not waiting for");
 
-        let (_, more_oks) = create_files(&temp_dir, vec!["0"]);
+        let more_oks = create_files(&temp_dir, vec!["0"]);
         oks.extend_from_slice(&more_oks);
 
         let err = wait(&oks)
