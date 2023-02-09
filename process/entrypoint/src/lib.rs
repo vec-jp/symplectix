@@ -64,9 +64,6 @@ pub enum Error {
     #[error("error file exists at {0}")]
     ErrFileExists(PathBuf),
 
-    #[error("error files exists at {err} but also found {ok}")]
-    Ambiguous { ok: PathBuf, err: PathBuf },
-
     #[error("failed to spawn the child process: {0}")]
     NotSpawned(io::Error),
 
