@@ -6,7 +6,10 @@ rust_library(
     name = "entrypoint",
     srcs = glob(
         ["src/**/*.rs"],
-        exclude = ["src/main.rs"],
+        exclude = [
+            "src/main.rs",
+            "src/bin/**/*",
+        ],
     ),
     # will not work as expected on windows
     target_compatible_with = select({
@@ -27,8 +30,21 @@ rust_library(
 )
 
 rust_binary(
-    name = "entrypoint_bin",
-    srcs = ["src/main.rs"],
+    name = "process_wrapper",
+    srcs = ["src/bin/process_wrapper.rs"],
+    deps = [
+        ":entrypoint",
+        "@crates//:anyhow",
+        "@crates//:clap",
+        "@crates//:tokio",
+        "@crates//:tracing",
+        "@crates//:tracing-subscriber",
+    ],
+)
+
+rust_binary(
+    name = "coordinator",
+    srcs = ["src/bin/coordinator.rs"],
     deps = [
         ":entrypoint",
         "@crates//:anyhow",
