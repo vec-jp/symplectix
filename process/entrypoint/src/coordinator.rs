@@ -24,7 +24,7 @@ pub struct Coordinator {
     post_file: Option<PathBuf>,
 
     #[command(flatten)]
-    entrypoint: ProcessWrapper,
+    process_wrapper: ProcessWrapper,
 }
 
 impl Coordinator {
@@ -37,7 +37,7 @@ impl Coordinator {
     )]
     pub async fn run(&self) -> Result {
         wait(&self.wait_files).await?;
-        let result = self.entrypoint.run().await;
+        let result = self.process_wrapper.run().await;
         post(&self.post_file, result).await
     }
 }
