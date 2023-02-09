@@ -21,14 +21,6 @@ use Error::*;
 
 #[derive(Debug, Clone, Parser)]
 pub struct Entrypoint {
-    /// List of paths to wait for before spawning the child process.
-    #[arg(long = "wait-file", value_name = "PATH")]
-    wait_files: Vec<PathBuf>,
-
-    /// Create a file after the child process exits successfully.
-    #[arg(long, value_name = "PATH")]
-    post_file: Option<PathBuf>,
-
     /// Redirect the child process stdout.
     #[arg(long, value_name = "PATH")]
     stdout: Option<PathBuf>,
@@ -51,6 +43,29 @@ pub struct Entrypoint {
     /// The entrypoint of the child process.
     #[arg(last = true)]
     command: Vec<String>,
+}
+
+#[derive(Debug, Clone, Parser)]
+pub struct Coordinator {
+    /// List of paths to wait for before spawning the child process.
+    #[arg(long = "wait-file", value_name = "PATH")]
+    wait_files: Vec<PathBuf>,
+
+    /// Create a file after the child process exits successfully.
+    #[arg(long, value_name = "PATH")]
+    post_file: Option<PathBuf>,
+
+    #[command(flatten)]
+    entrypoint: Entrypoint,
+}
+
+impl Coordinator {
+    #[tracing::instrument(skip(self))]
+    pub async fn run(&self) -> Result {
+        wait(&self.wait_files).await?;
+        let result = self.entrypoint.run().await;
+        post(&self.post_file, result).await
+    }
 }
 
 /// ProcessWrapper errors.
@@ -90,8 +105,6 @@ impl Entrypoint {
         //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
         // }
 
-        wait(&self.wait_files).await?;
-
         let mut interrupt = signal(SignalKind::interrupt()).map_err(Error::Io)?;
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
 
@@ -119,7 +132,7 @@ impl Entrypoint {
 
         // TODO: Wait all descendant processes, if any.
         // Currently, the direct child is the only process to be waited before exiting.
-        let result = match child.try_wait() {
+        match child.try_wait() {
             // It is possible for the child process to complete and exceed the timeout
             // without returning an error.
             Ok(Some(status)) => into_process_result(status),
@@ -133,9 +146,7 @@ impl Entrypoint {
 
             // Some error happens on collecting the child status.
             Err(err) => Err(WaitFailed(err)),
-        };
-
-        post(&self.post_file, result).await
+        }
     }
 }
 

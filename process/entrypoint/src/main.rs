@@ -1,11 +1,5 @@
 use clap::Parser;
-use entrypoint::Entrypoint;
-
-#[derive(Clone, Debug, clap::Parser)]
-struct Main {
-    #[command(flatten)]
-    entrypoint: Entrypoint,
-}
+use entrypoint::Coordinator;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -16,5 +10,5 @@ async fn main() -> anyhow::Result<()> {
         .compact()
         .init();
 
-    Main::parse().entrypoint.run().await.map_err(anyhow::Error::from)
+    Coordinator::parse().run().await.map_err(anyhow::Error::from)
 }
