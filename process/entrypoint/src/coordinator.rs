@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::time::Duration;
 
 use clap::Parser;
@@ -88,6 +88,7 @@ mod tests {
     use super::*;
 
     use std::fs;
+    use std::path::Path;
     use testing::TempDirExt;
     use tokio::task;
 
