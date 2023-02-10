@@ -7,10 +7,12 @@ use std::time::Duration;
 
 use clap::Parser;
 use futures::future;
+use futures::future::{Either, Pending};
 use futures::prelude::*;
 use tokio::process::{Child, Command};
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
+use tokio::time::Sleep;
 
 use crate::fsutil;
 use crate::Error::*;
@@ -59,14 +61,21 @@ impl ProcessWrapper {
 
         tokio::select! {
             biased;
+            _ = self.timer() => {}
             _ = interrupt.recv() => {}
             _ = terminate.recv() => {}
-            _ = timer(self) => {}
             _ = process.wait() => {}
         }
 
         process.killpg_gracefully().await;
         process.wait_sync()
+    }
+
+    fn timer(&self) -> Either<Pending<()>, Sleep> {
+        match self.timeout.as_ref() {
+            None => future::pending().left_future(),
+            Some(&dur) => time::sleep(dur.into()).right_future(),
+        }
     }
 
     async fn spawn(&self) -> Result<Process> {
@@ -99,13 +108,6 @@ impl ProcessWrapper {
         let child = Command::from(cmd).spawn().map_err(NotSpawned)?;
         let id = child.id().expect("fetching the OS-assigned process id");
         Ok(Process { child, id })
-    }
-}
-
-fn timer(opts: &ProcessWrapper) -> future::Either<future::Pending<()>, time::Sleep> {
-    match opts.timeout.as_ref() {
-        None => future::pending().left_future(),
-        Some(&dur) => time::sleep(dur.into()).right_future(),
     }
 }
 
