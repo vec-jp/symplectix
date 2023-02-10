@@ -55,25 +55,14 @@ impl ProcessWrapper {
     pub async fn run(&self) -> Result {
         let mut interrupt = signal(SignalKind::interrupt()).map_err(Error::Io)?;
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
-
         let mut process = self.spawn().await?;
-        let id = process.id as libc::c_int;
 
         tokio::select! {
             biased;
-            _ = future::select(
-                interrupt.recv().boxed_local(),
-                terminate.recv().boxed_local(),
-            ) => {
-                tracing::trace!(id, branch = "signaled");
-            }
-            _ = timer(self) => {
-                tracing::trace!(id, branch = "timedout");
-            }
-            wait_result = process.wait() => match wait_result {
-                Ok(_) => tracing::trace!(id, branch = "exited successfully"),
-                Err(err) => tracing::warn!(id, branch = "failed", %err),
-            }
+            _ = interrupt.recv() => {}
+            _ = terminate.recv() => {}
+            _ = timer(self) => {}
+            _ = process.wait() => {}
         }
 
         process.killpg_gracefully().await;
@@ -110,17 +99,6 @@ impl ProcessWrapper {
         let child = Command::from(cmd).spawn().map_err(NotSpawned)?;
         let id = child.id().expect("fetching the OS-assigned process id");
         Ok(Process { child, id })
-    }
-}
-
-fn into_process_result(status: ExitStatus) -> Result {
-    if status.success() {
-        Ok(())
-    } else if let Some(code) = status.code() {
-        Err(ExitedUnsuccessfully(code))
-    } else {
-        // because `status.code()` returns `None`
-        Err(KilledBySignal(status.signal().expect("WIFSIGNALED is true")))
     }
 }
 
@@ -191,6 +169,17 @@ impl Process {
                 );
             }
         }
+    }
+}
+
+fn into_process_result(status: ExitStatus) -> Result {
+    if status.success() {
+        Ok(())
+    } else if let Some(code) = status.code() {
+        Err(ExitedUnsuccessfully(code))
+    } else {
+        // because `status.code()` returns `None`
+        Err(KilledBySignal(status.signal().expect("WIFSIGNALED is true")))
     }
 }
 
