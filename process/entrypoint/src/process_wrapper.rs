@@ -67,13 +67,9 @@ impl ProcessWrapper {
             biased;
             _ = interrupt.recv() => {}
             _ = terminate.recv() => {}
-            output = process.wait_timeout() => match output {
-                Err(_timedout) => {}
-                Ok(result) => {
-                    process.killpg_gracefully().await;
-                    return result;
-                }
-            }
+            // wait_sync must be invoked even if the child process exits successfully,
+            // in order to 1) wait all descendant processes, 2) ensure there are no children left behind.
+            _ = process.wait_timeout() => {}
         }
 
         process.killpg_gracefully().await;
