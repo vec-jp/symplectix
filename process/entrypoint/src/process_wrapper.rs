@@ -39,6 +39,12 @@ pub struct ProcessWrapper {
     command: Vec<String>,
 }
 
+#[derive(Debug)]
+pub struct Process {
+    child: Child,
+    id: u32,
+}
+
 impl ProcessWrapper {
     #[tracing::instrument(
         skip(self),
@@ -47,16 +53,11 @@ impl ProcessWrapper {
         )
     )]
     pub async fn run(&self) -> Result {
-        // #[cfg(target_os = "linux")]
-        // unsafe {
-        //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
-        // }
-
         let mut interrupt = signal(SignalKind::interrupt()).map_err(Error::Io)?;
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
 
-        let mut child = spawn(self).await?;
-        let id = child.id().expect("fetching the OS-assigned process id") as libc::c_int;
+        let mut process = self.spawn().await?;
+        let id = process.id as libc::c_int;
 
         tokio::select! {
             biased;
@@ -69,31 +70,46 @@ impl ProcessWrapper {
             _ = timer(self) => {
                 tracing::trace!(id, branch = "timedout");
             }
-            wait_result = child.wait() => match wait_result {
-                Ok(exit_status) => tracing::trace!(id, branch = "wait_exited", ?exit_status),
-                Err(io_err) => tracing::warn!(id, branch = "wait_failed", %io_err),
+            wait_result = process.wait() => match wait_result {
+                Ok(_) => tracing::trace!(id, branch = "exited successfully"),
+                Err(err) => tracing::warn!(id, branch = "failed", %err),
             }
         }
 
-        killpg(id).await;
+        process.killpg_gracefully().await;
+        process.wait_sync()
+    }
 
-        // TODO: Wait all descendant processes, if any.
-        // Currently, the direct child is the only process to be waited before exiting.
-        match child.try_wait() {
-            // It is possible for the child process to complete and exceed the timeout
-            // without returning an error.
-            Ok(Some(status)) => into_process_result(status),
+    async fn spawn(&self) -> Result<Process> {
+        // #[cfg(target_os = "linux")]
+        // unsafe {
+        //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
+        // }
 
-            // The exit status is not available at this time.
-            // The child process(es) may still be running.
-            Ok(None) => match child.wait().await {
-                Ok(status) => into_process_result(status),
-                Err(err) => Err(WaitFailed(err)),
-            },
+        let mut cmd = StdCommand::new(self.command[0].as_str());
 
-            // Some error happens on collecting the child status.
-            Err(err) => Err(WaitFailed(err)),
-        }
+        cmd.args(&self.command[1..]);
+
+        cmd.stdout(if let Some(path) = self.stdout.as_ref() {
+            fsutil::stdio_from(path, false).map_err(Error::Io).await?
+        } else {
+            Stdio::inherit()
+        });
+
+        cmd.stderr(if let Some(path) = self.stderr.as_ref() {
+            fsutil::stdio_from(path, false).map_err(Error::Io).await?
+        } else {
+            Stdio::inherit()
+        });
+
+        cmd.env_clear().envs(env::vars().filter(|(key, _)| self.envs.contains(key)));
+
+        // Put the child into a new process group.
+        cmd.process_group(0);
+
+        let child = Command::from(cmd).spawn().map_err(NotSpawned)?;
+        let id = child.id().expect("fetching the OS-assigned process id");
+        Ok(Process { child, id })
     }
 }
 
@@ -115,54 +131,67 @@ fn timer(opts: &ProcessWrapper) -> future::Either<future::Pending<()>, time::Sle
     }
 }
 
-async fn spawn(opts: &ProcessWrapper) -> Result<Child> {
-    let mut cmd = StdCommand::new(opts.command[0].as_str());
-
-    cmd.args(&opts.command[1..]);
-
-    cmd.stdout(if let Some(path) = opts.stdout.as_ref() {
-        fsutil::stdio_from(path, false).map_err(Error::Io).await?
-    } else {
-        Stdio::inherit()
-    });
-
-    cmd.stderr(if let Some(path) = opts.stderr.as_ref() {
-        fsutil::stdio_from(path, false).map_err(Error::Io).await?
-    } else {
-        Stdio::inherit()
-    });
-
-    cmd.env_clear().envs(env::vars().filter(|(key, _)| opts.envs.contains(key)));
-
-    // Put the child into a new process group.
-    cmd.process_group(0);
-
-    Command::from(cmd).spawn().map_err(NotSpawned)
+impl Drop for Process {
+    #[tracing::instrument(skip(self))]
+    fn drop(&mut self) {
+        self.killpg(libc::SIGKILL);
+    }
 }
 
-/// Kill the whole process group, in a graceful manner, to ensure there are no children left behind.
-/// This mostly works, but not perfect because:
-/// * it is easy to "escape" from the group.
-/// * the PID is potentially reused at some point.
-#[tracing::instrument]
-async fn killpg(id: i32) {
-    let killpg = |signal| unsafe {
-        if libc::killpg(id, 0) == 0 {
-            let killed = libc::killpg(id, signal);
-            tracing::trace!(
-                signal,
-                killed,
-                errno = io::Error::last_os_error().raw_os_error().unwrap_or(0)
-            );
-        }
-    };
+impl Process {
+    fn wait_sync(&mut self) -> Result {
+        use tokio::runtime::Handle;
 
-    killpg(libc::SIGTERM);
-    // The time window between the `wait` returning and `SIGKILL` should be small.
-    // Don't sleep too much.
-    let delay = Duration::from_millis(100);
-    time::sleep(delay).await;
-    killpg(libc::SIGKILL);
+        // TODO: Wait all descendant processes, if any.
+        // Currently, the direct child is the only process to be waited before exiting.
+        match self.child.try_wait() {
+            // It is possible for the child process to complete and exceed the timeout
+            // without returning an error.
+            Ok(Some(status)) => into_process_result(status),
+
+            // The exit status is not available at this time.
+            // The child process(es) may still be running.
+            Ok(None) => Handle::current().block_on(self.wait()),
+
+            // Some error happens on collecting the child status.
+            Err(err) => Err(WaitFailed(err)),
+        }
+    }
+
+    async fn wait(&mut self) -> Result {
+        match self.child.wait().await {
+            Ok(status) => into_process_result(status),
+            Err(err) => Err(WaitFailed(err)),
+        }
+    }
+
+    /// Kill the whole process group, in a graceful manner, to ensure there are no children left behind.
+    /// This mostly works, but not perfect because:
+    /// * it is easy to "escape" from the group.
+    /// * the PID is potentially reused at some point.
+    #[tracing::instrument(skip(self))]
+    async fn killpg_gracefully(&self) {
+        self.killpg(libc::SIGTERM);
+        // The time window between the `wait` returning and `SIGKILL` should be small.
+        // Don't sleep too much.
+        let delay = Duration::from_millis(100);
+        time::sleep(delay).await;
+        self.killpg(libc::SIGKILL);
+    }
+
+    fn killpg(&self, signal: libc::c_int) {
+        let id = self.id as libc::c_int;
+        unsafe {
+            if libc::killpg(id, 0) == 0 {
+                let killed = libc::killpg(id, signal);
+                tracing::trace!(
+                    signal,
+                    killed,
+                    errno = io::Error::last_os_error().raw_os_error().unwrap_or(0)
+                );
+            }
+        }
+    }
 }
 
 #[cfg(test)]
