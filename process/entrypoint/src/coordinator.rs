@@ -35,7 +35,7 @@ impl Coordinator {
             post_file = ?self.post_file,
         )
     )]
-    pub async fn run(&self) -> Result {
+    pub async fn run(self) -> Result {
         wait(&self.wait_files).await?;
         let result = self.process_wrapper.run().await;
         post(&self.post_file, result).await

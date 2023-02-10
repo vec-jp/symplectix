@@ -12,6 +12,7 @@ use futures::prelude::*;
 use tokio::process::{Child, Command};
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
+use tokio::time::error::Elapsed;
 use tokio::time::Sleep;
 
 use crate::fsutil;
@@ -44,8 +45,11 @@ pub struct ProcessWrapper {
 #[derive(Debug)]
 pub struct Process {
     child: Child,
+    timeout: Option<Duration>,
     id: u32,
 }
+
+type StdResult<T, E> = std::result::Result<T, E>;
 
 impl ProcessWrapper {
     #[tracing::instrument(
@@ -54,28 +58,26 @@ impl ProcessWrapper {
             command = %self.command[0],
         )
     )]
-    pub async fn run(&self) -> Result {
+    pub async fn run(self) -> Result {
         let mut interrupt = signal(SignalKind::interrupt()).map_err(Error::Io)?;
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
         let mut process = self.spawn().await?;
 
         tokio::select! {
             biased;
-            _ = self.timer() => {}
             _ = interrupt.recv() => {}
             _ = terminate.recv() => {}
-            _ = process.wait() => {}
+            output = process.wait_timeout() => match output {
+                Err(_timedout) => {}
+                Ok(result) => {
+                    process.killpg_gracefully().await;
+                    return result;
+                }
+            }
         }
 
         process.killpg_gracefully().await;
         process.wait_sync()
-    }
-
-    fn timer(&self) -> Either<Pending<()>, Sleep> {
-        match self.timeout.as_ref() {
-            None => future::pending().left_future(),
-            Some(&dur) => time::sleep(dur.into()).right_future(),
-        }
     }
 
     async fn spawn(&self) -> Result<Process> {
@@ -107,7 +109,8 @@ impl ProcessWrapper {
 
         let child = Command::from(cmd).spawn().map_err(NotSpawned)?;
         let id = child.id().expect("fetching the OS-assigned process id");
-        Ok(Process { child, id })
+
+        Ok(Process { child, id, timeout: self.timeout.as_ref().map(|&dur| dur.into()) })
     }
 }
 
@@ -119,6 +122,20 @@ impl Drop for Process {
 }
 
 impl Process {
+    async fn wait(&mut self) -> Result {
+        match self.child.wait().await {
+            Ok(status) => into_process_result(status),
+            Err(err) => Err(WaitFailed(err)),
+        }
+    }
+
+    async fn wait_timeout(&mut self) -> StdResult<Result, Elapsed> {
+        match self.timeout.as_ref() {
+            None => self.wait().map(Ok).await,
+            Some(&dur) => time::timeout(dur.into(), self.wait()).await,
+        }
+    }
+
     fn wait_sync(&mut self) -> Result {
         use tokio::runtime::Handle;
 
@@ -134,13 +151,6 @@ impl Process {
             Ok(None) => Handle::current().block_on(self.wait()),
 
             // Some error happens on collecting the child status.
-            Err(err) => Err(WaitFailed(err)),
-        }
-    }
-
-    async fn wait(&mut self) -> Result {
-        match self.child.wait().await {
-            Ok(status) => into_process_result(status),
             Err(err) => Err(WaitFailed(err)),
         }
     }
