@@ -30,19 +30,6 @@ rust_library(
 )
 
 rust_binary(
-    name = "process_wrapper",
-    srcs = ["src/bin/process_wrapper.rs"],
-    deps = [
-        ":entrypoint",
-        "@crates//:anyhow",
-        "@crates//:clap",
-        "@crates//:tokio",
-        "@crates//:tracing",
-        "@crates//:tracing-subscriber",
-    ],
-)
-
-rust_binary(
     name = "coordinator",
     srcs = ["src/bin/coordinator.rs"],
     deps = [
