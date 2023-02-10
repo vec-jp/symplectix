@@ -6,14 +6,11 @@ use std::process::{Command as StdCommand, ExitStatus, Stdio};
 use std::time::Duration;
 
 use clap::Parser;
-use futures::future;
-use futures::future::{Either, Pending};
 use futures::prelude::*;
 use tokio::process::{Child, Command};
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
 use tokio::time::error::Elapsed;
-use tokio::time::Sleep;
 
 use crate::fsutil;
 use crate::Error::*;
@@ -72,7 +69,10 @@ impl ProcessWrapper {
             _ = process.wait_timeout() => {}
         }
 
-        process.killpg_gracefully().await;
+        // The procedures below should mostly work, but not perfect because:
+        // - it is easy to "escape" from the group
+        // - the PID is potentially reused at some point
+        process.terminate(true).await;
         process.wait_sync()
     }
 
@@ -128,7 +128,7 @@ impl Process {
     async fn wait_timeout(&mut self) -> StdResult<Result, Elapsed> {
         match self.timeout.as_ref() {
             None => self.wait().map(Ok).await,
-            Some(&dur) => time::timeout(dur.into(), self.wait()).await,
+            Some(&dur) => time::timeout(dur, self.wait()).await,
         }
     }
 
@@ -151,17 +151,15 @@ impl Process {
         }
     }
 
-    /// Kill the whole process group, in a graceful manner, to ensure there are no children left behind.
-    /// This mostly works, but not perfect because:
-    /// * it is easy to "escape" from the group.
-    /// * the PID is potentially reused at some point.
+    /// Kill the whole process group to ensure there are no children left behind.
+    /// If gracefully is true, this will be done in a graceful manner.
     #[tracing::instrument(skip(self))]
-    async fn killpg_gracefully(&self) {
-        self.killpg(libc::SIGTERM);
-        // The time window between the `wait` returning and `SIGKILL` should be small.
-        // Don't sleep too much.
-        let delay = Duration::from_millis(100);
-        time::sleep(delay).await;
+    async fn terminate(&self, gracefully: bool) {
+        if gracefully {
+            self.killpg(libc::SIGTERM);
+            time::sleep(Duration::from_millis(100)).await;
+        }
+
         self.killpg(libc::SIGKILL);
     }
 

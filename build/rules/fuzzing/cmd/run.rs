@@ -8,7 +8,7 @@ pub struct Run {
 }
 
 impl Run {
-    pub(crate) async fn run(&self) -> anyhow::Result<()> {
+    pub(crate) async fn run(self) -> anyhow::Result<()> {
         self.process_wrapper.run().await.map_err(anyhow::Error::from)
     }
 }
