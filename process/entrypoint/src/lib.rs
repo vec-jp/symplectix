@@ -5,7 +5,7 @@ mod coordinator;
 mod process_wrapper;
 
 pub use coordinator::Coordinator;
-pub use process_wrapper::ProcessWrapper;
+pub use process_wrapper::{Process, ProcessWrapper};
 
 mod fsutil {
     use std::io;

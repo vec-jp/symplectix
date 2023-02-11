@@ -105,69 +105,72 @@ impl ProcessWrapper {
     }
 }
 
-impl Drop for Process {
-    #[tracing::instrument(skip(self))]
-    fn drop(&mut self) {
-        let _ = self.kill();
-    }
-}
+mod process_impl {
+    use super::*;
 
-impl Process {
-    async fn wait(&mut self, timeout: Option<Duration>) -> Option<Result> {
-        match timeout {
-            None => Some(self.wait_child().await),
-            Some(dur) => time::timeout(dur, self.wait_child()).await.ok(),
+    impl Drop for Process {
+        #[tracing::instrument(skip(self))]
+        fn drop(&mut self) {
+            let _ = self.kill();
         }
     }
 
-    async fn wait_child(&mut self) -> Result {
-        match self.child.wait().await {
-            Ok(status) => into_process_result(status),
-            Err(err) => Err(WaitFailed(err)),
-        }
-    }
-
-    /// Kill the whole process group to ensure there are no children left behind.
-    /// If gracefully is true, this will be done in a graceful manner.
-    #[tracing::instrument(skip(self))]
-    async fn stop(&mut self, gracefully: bool) -> Result {
-        if gracefully {
-            self.killpg(libc::SIGTERM);
-            time::sleep(Duration::from_millis(50)).await;
-        }
-        self.kill()
-    }
-
-    fn kill(&mut self) -> Result {
-        self.killpg(libc::SIGKILL);
-        self.wait_sync()
-    }
-
-    fn wait_sync(&mut self) -> Result {
-        loop {
-            // TODO: Wait all descendant processes, if any.
-            // Currently, the direct child is the only process to be waited before exiting.
-            match self.child.try_wait() {
-                // The exit status is not available at this time.
-                // The child process(es) may still be running.
-                Ok(None) => {
-                    continue;
-                }
-
-                // It is possible for the child process to complete and exceed the timeout
-                // without returning an error.
-                Ok(Some(status)) => break into_process_result(status),
-
-                // Some error happens on collecting the child status.
-                Err(err) => break Err(WaitFailed(err)),
+    impl Process {
+        pub async fn wait(&mut self, timeout: Option<Duration>) -> Option<Result> {
+            match timeout {
+                None => Some(self.wait_child().await),
+                Some(dur) => time::timeout(dur, self.wait_child()).await.ok(),
             }
         }
-    }
 
-    fn killpg(&self, signal: libc::c_int) {
-        let id = self.id as libc::c_int;
-        unsafe {
-            if libc::killpg(id, 0) == 0 {
+        async fn wait_child(&mut self) -> Result {
+            match self.child.wait().await {
+                Ok(status) => into_process_result(status),
+                Err(err) => Err(WaitFailed(err)),
+            }
+        }
+
+        /// Same as [crate::Process::kill], but in a slightly more graceful way if gracefully is true.
+        #[tracing::instrument(skip(self))]
+        pub async fn stop(&mut self, gracefully: bool) -> Result {
+            if gracefully {
+                self.killpg(libc::SIGTERM);
+                time::sleep(Duration::from_millis(50)).await;
+            }
+            self.kill()
+        }
+
+        /// Kill the whole process group, and wait the child exits.
+        ///
+        /// TODO: Wait all descendant processes to ensure there are no children left behind.
+        /// Currently, the direct child is the only process to be waited before exiting.
+        pub fn kill(&mut self) -> Result {
+            self.killpg(libc::SIGKILL);
+            self.wait_sync()
+        }
+
+        fn wait_sync(&mut self) -> Result {
+            loop {
+                match self.child.try_wait() {
+                    // The exit status is not available at this time.
+                    // The child process(es) may still be running.
+                    Ok(None) => {
+                        continue;
+                    }
+
+                    // It is possible for the child process to complete and exceed the timeout
+                    // without returning an error.
+                    Ok(Some(status)) => break into_process_result(status),
+
+                    // Some error happens on collecting the child status.
+                    Err(err) => break Err(WaitFailed(err)),
+                }
+            }
+        }
+
+        fn killpg(&self, signal: libc::c_int) {
+            let id = self.id as libc::c_int;
+            unsafe {
                 let killed = libc::killpg(id, signal);
                 tracing::trace!(
                     signal,
@@ -177,16 +180,16 @@ impl Process {
             }
         }
     }
-}
 
-fn into_process_result(status: ExitStatus) -> Result {
-    if status.success() {
-        Ok(())
-    } else if let Some(code) = status.code() {
-        Err(ExitedUnsuccessfully(code))
-    } else {
-        // because `status.code()` returns `None`
-        Err(KilledBySignal(status.signal().expect("WIFSIGNALED is true")))
+    fn into_process_result(status: ExitStatus) -> Result {
+        if status.success() {
+            Ok(())
+        } else if let Some(code) = status.code() {
+            Err(ExitedUnsuccessfully(code))
+        } else {
+            // because `status.code()` returns `None`
+            Err(KilledBySignal(status.signal().expect("WIFSIGNALED is true")))
+        }
     }
 }
 
