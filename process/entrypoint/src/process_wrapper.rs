@@ -111,8 +111,7 @@ impl ProcessWrapper {
 impl Drop for Process {
     #[tracing::instrument(skip(self))]
     fn drop(&mut self) {
-        self.killpg(libc::SIGKILL);
-        let _ = self.wait_sync();
+        let _ = self.kill_and_wait();
     }
 }
 
@@ -152,6 +151,11 @@ impl Process {
                 Err(err) => break Err(WaitFailed(err)),
             }
         }
+    }
+
+    fn kill_and_wait(&mut self) -> Result {
+        self.killpg(libc::SIGKILL);
+        self.wait_sync()
     }
 
     /// Kill the whole process group to ensure there are no children left behind.
