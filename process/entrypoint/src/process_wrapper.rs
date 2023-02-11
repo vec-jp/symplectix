@@ -56,8 +56,6 @@ impl ProcessWrapper {
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
         let mut process = self.spawn().await?;
 
-        let timeout = self.timeout.map(Into::into);
-
         // The procedures below should mostly work, but not perfect because:
         // - it is easy to "escape" from the group
         // - the PID is potentially reused at some point
@@ -68,10 +66,9 @@ impl ProcessWrapper {
             biased;
             _ = interrupt.recv() => {},
             _ = terminate.recv() => {},
-            _ = process.wait(timeout) => {},
+            _ = process.wait(self.timeout.map(|d| d.into())) => {},
         };
-        process.terminate(true).await;
-        process.wait_sync()
+        process.stop(true).await
     }
 
     async fn spawn(&self) -> Result<Process> {
@@ -111,7 +108,7 @@ impl ProcessWrapper {
 impl Drop for Process {
     #[tracing::instrument(skip(self))]
     fn drop(&mut self) {
-        let _ = self.kill_and_wait();
+        let _ = self.kill();
     }
 }
 
@@ -130,10 +127,24 @@ impl Process {
         }
     }
 
+    /// Kill the whole process group to ensure there are no children left behind.
+    /// If gracefully is true, this will be done in a graceful manner.
+    #[tracing::instrument(skip(self))]
+    async fn stop(&mut self, gracefully: bool) -> Result {
+        if gracefully {
+            self.killpg(libc::SIGTERM);
+            time::sleep(Duration::from_millis(50)).await;
+        }
+        self.kill()
+    }
+
+    fn kill(&mut self) -> Result {
+        self.killpg(libc::SIGKILL);
+        self.wait_sync()
+    }
+
     fn wait_sync(&mut self) -> Result {
         loop {
-            tracing::trace!("wait loop");
-
             // TODO: Wait all descendant processes, if any.
             // Currently, the direct child is the only process to be waited before exiting.
             match self.child.try_wait() {
@@ -151,23 +162,6 @@ impl Process {
                 Err(err) => break Err(WaitFailed(err)),
             }
         }
-    }
-
-    fn kill_and_wait(&mut self) -> Result {
-        self.killpg(libc::SIGKILL);
-        self.wait_sync()
-    }
-
-    /// Kill the whole process group to ensure there are no children left behind.
-    /// If gracefully is true, this will be done in a graceful manner.
-    #[tracing::instrument(skip(self))]
-    async fn terminate(&self, gracefully: bool) {
-        if gracefully {
-            self.killpg(libc::SIGTERM);
-            time::sleep(Duration::from_millis(100)).await;
-        }
-
-        self.killpg(libc::SIGKILL);
     }
 
     fn killpg(&self, signal: libc::c_int) {
