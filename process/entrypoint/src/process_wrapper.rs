@@ -60,18 +60,18 @@ impl ProcessWrapper {
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
         let mut process = self.spawn().await?;
 
-        tokio::select! {
-            biased;
-            _ = interrupt.recv() => {}
-            _ = terminate.recv() => {}
-            // wait_sync must be invoked even if the child process exits successfully,
-            // in order to 1) wait all descendant processes, 2) ensure there are no children left behind.
-            _ = process.wait_timeout() => {}
-        }
-
         // The procedures below should mostly work, but not perfect because:
         // - it is easy to "escape" from the group
         // - the PID is potentially reused at some point
+        //
+        // Note that `wait_sync` must be invoked even if the child process exits successfully
+        // in order to 1) wait all descendant processes, 2) ensure there are no children left behind.
+        tokio::select! {
+            biased;
+            _ = interrupt.recv() => {},
+            _ = terminate.recv() => {},
+            _ = process.wait_timeout() => {},
+        };
         process.terminate(true).await;
         process.wait_sync()
     }
