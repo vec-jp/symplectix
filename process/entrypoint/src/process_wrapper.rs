@@ -114,6 +114,7 @@ impl Drop for Process {
     #[tracing::instrument(skip(self))]
     fn drop(&mut self) {
         self.killpg(libc::SIGKILL);
+        let _ = self.wait_sync();
     }
 }
 
@@ -133,21 +134,25 @@ impl Process {
     }
 
     fn wait_sync(&mut self) -> Result {
-        use tokio::runtime::Handle;
+        loop {
+            tracing::trace!("wait loop");
 
-        // TODO: Wait all descendant processes, if any.
-        // Currently, the direct child is the only process to be waited before exiting.
-        match self.child.try_wait() {
-            // It is possible for the child process to complete and exceed the timeout
-            // without returning an error.
-            Ok(Some(status)) => into_process_result(status),
+            // TODO: Wait all descendant processes, if any.
+            // Currently, the direct child is the only process to be waited before exiting.
+            match self.child.try_wait() {
+                // The exit status is not available at this time.
+                // The child process(es) may still be running.
+                Ok(None) => {
+                    continue;
+                }
 
-            // The exit status is not available at this time.
-            // The child process(es) may still be running.
-            Ok(None) => Handle::current().block_on(self.wait()),
+                // It is possible for the child process to complete and exceed the timeout
+                // without returning an error.
+                Ok(Some(status)) => break into_process_result(status),
 
-            // Some error happens on collecting the child status.
-            Err(err) => Err(WaitFailed(err)),
+                // Some error happens on collecting the child status.
+                Err(err) => break Err(WaitFailed(err)),
+            }
         }
     }
 
