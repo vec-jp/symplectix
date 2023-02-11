@@ -10,7 +10,6 @@ use futures::prelude::*;
 use tokio::process::{Child, Command};
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
-use tokio::time::error::Elapsed;
 
 use crate::fsutil;
 use crate::Error::*;
@@ -42,11 +41,8 @@ pub struct ProcessWrapper {
 #[derive(Debug)]
 pub struct Process {
     child: Child,
-    timeout: Option<Duration>,
     id: u32,
 }
-
-type StdResult<T, E> = std::result::Result<T, E>;
 
 impl ProcessWrapper {
     #[tracing::instrument(
@@ -60,6 +56,8 @@ impl ProcessWrapper {
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
         let mut process = self.spawn().await?;
 
+        let timeout = self.timeout.map(Into::into);
+
         // The procedures below should mostly work, but not perfect because:
         // - it is easy to "escape" from the group
         // - the PID is potentially reused at some point
@@ -70,7 +68,7 @@ impl ProcessWrapper {
             biased;
             _ = interrupt.recv() => {},
             _ = terminate.recv() => {},
-            _ = process.wait_timeout() => {},
+            _ = process.wait(timeout) => {},
         };
         process.terminate(true).await;
         process.wait_sync()
@@ -106,7 +104,7 @@ impl ProcessWrapper {
         let child = Command::from(cmd).spawn().map_err(NotSpawned)?;
         let id = child.id().expect("fetching the OS-assigned process id");
 
-        Ok(Process { child, id, timeout: self.timeout.as_ref().map(|&dur| dur.into()) })
+        Ok(Process { child, id })
     }
 }
 
@@ -119,17 +117,17 @@ impl Drop for Process {
 }
 
 impl Process {
-    async fn wait(&mut self) -> Result {
-        match self.child.wait().await {
-            Ok(status) => into_process_result(status),
-            Err(err) => Err(WaitFailed(err)),
+    async fn wait(&mut self, timeout: Option<Duration>) -> Option<Result> {
+        match timeout {
+            None => Some(self.wait_child().await),
+            Some(dur) => time::timeout(dur, self.wait_child()).await.ok(),
         }
     }
 
-    async fn wait_timeout(&mut self) -> StdResult<Result, Elapsed> {
-        match self.timeout.as_ref() {
-            None => self.wait().map(Ok).await,
-            Some(&dur) => time::timeout(dur, self.wait()).await,
+    async fn wait_child(&mut self) -> Result {
+        match self.child.wait().await {
+            Ok(status) => into_process_result(status),
+            Err(err) => Err(WaitFailed(err)),
         }
     }
 
