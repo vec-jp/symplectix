@@ -65,7 +65,7 @@ impl Command {
         process.stop(true).await
     }
 
-    async fn spawn(&self) -> Result<Process> {
+    pub async fn spawn(&self) -> Result<Process> {
         // #[cfg(target_os = "linux")]
         // unsafe {
         //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
