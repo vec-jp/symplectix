@@ -25,17 +25,17 @@ pub struct ProcessWrapper {
     #[arg(long, value_name = "PATH")]
     stderr: Option<PathBuf>,
 
-    /// Environment variables visible to the spawned process.
-    #[arg(long = "env", value_name = "KEY")]
-    envs: Vec<String>,
-
     /// Kill the spawned child process after the specified duration.
     #[arg(long, value_name = "DURATION")]
     timeout: Option<humantime::Duration>,
 
+    /// Environment variables visible to the spawned process.
+    #[arg(long = "env", value_name = "KEY")]
+    envs: Vec<String>,
+
     /// The entrypoint of the child process.
     #[arg(last = true)]
-    command: Vec<String>,
+    argv: Vec<String>,
 }
 
 #[derive(Debug)]
@@ -48,7 +48,7 @@ impl ProcessWrapper {
     #[tracing::instrument(
         skip(self),
         fields(
-            command = %self.command[0],
+            argv = ?self.argv,
         )
     )]
     pub async fn run(self) -> Result {
@@ -77,9 +77,9 @@ impl ProcessWrapper {
         //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
         // }
 
-        let mut cmd = StdCommand::new(self.command[0].as_str());
+        let mut cmd = StdCommand::new(self.argv[0].as_str());
 
-        cmd.args(&self.command[1..]);
+        cmd.args(&self.argv[1..]);
 
         cmd.stdout(if let Some(path) = self.stdout.as_ref() {
             fsutil::stdio_from(path, false).map_err(Error::Io).await?
@@ -203,7 +203,7 @@ mod tests {
             stderr: None,
             envs: vec![],
             timeout: None,
-            command: command.into_iter().map(|s| s.into()).collect(),
+            argv: command.into_iter().map(|s| s.into()).collect(),
         }
     }
 
