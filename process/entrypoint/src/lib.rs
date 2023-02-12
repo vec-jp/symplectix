@@ -129,7 +129,7 @@ mod process_impl {
     impl Drop for Process {
         #[tracing::instrument(skip(self))]
         fn drop(&mut self) {
-            let _ = self.kill();
+            self.kill();
         }
     }
 
@@ -156,7 +156,8 @@ mod process_impl {
                 self.killpg(libc::SIGTERM);
                 time::sleep(Duration::from_millis(50)).await;
             }
-            self.kill()
+            self.kill();
+            self.result.clone().unwrap()
         }
 
         /// Kill the whole process group, and wait the child exits.
@@ -166,29 +167,26 @@ mod process_impl {
         ///
         /// TODO: Wait all descendant processes to ensure there are no children left behind.
         /// Currently, the direct child is the only process to be waited before exiting.
-        pub fn kill(&mut self) -> Result {
-            if let Some(r) = self.result.as_ref() {
-                return r.clone();
+        pub fn kill(&mut self) {
+            if self.result.is_some() {
+                return;
             }
 
             self.killpg(libc::SIGKILL);
 
             // Note that this loop is necessary even if the child process exits successfully
             // in order to 1) wait all descendant processes, 2) ensure there are no children left behind.
-            let result = loop {
+            self.result = loop {
                 match self.child.try_wait() {
                     // The exit status is not available at this time. The child may still be running.
                     // SIGKILL is sent just before entering the loop, but this happens because
                     // kill(2) just sends the signal to the given process(es).
                     // Once kill(2) returns, there is no guarantee that the signal has been delivered and handled.
                     Ok(None) => continue,
-                    Ok(Some(status)) => break into_process_result(status),
-                    Err(err) => break Err(Error::Io(err)),
+                    Ok(Some(status)) => break Some(into_process_result(status)),
+                    Err(err) => break Some(Err(Error::Io(err))),
                 }
             };
-
-            self.result = Some(result.clone());
-            result
         }
 
         fn killpg(&self, signal: libc::c_int) {
