@@ -43,6 +43,7 @@ pub struct Process {
     child: process::Child,
     id: u32,
     timeout: Option<Duration>,
+    result: Option<Result>,
 }
 
 /// Process errors.
@@ -56,6 +57,16 @@ pub enum Error {
 
     #[error("the spawned child exited unsuccessfully with non-zero code: {0}")]
     ExitedUnsuccessfully(i32),
+}
+
+impl Clone for Error {
+    fn clone(&self) -> Self {
+        match self {
+            Error::KilledBySignal(signal) => KilledBySignal(*signal),
+            Error::ExitedUnsuccessfully(code) => ExitedUnsuccessfully(*code),
+            Error::Io(io_err) => Error::Io(io::Error::new(io_err.kind(), io_err.to_string())),
+        }
+    }
 }
 
 impl Command {
@@ -108,7 +119,7 @@ impl Command {
 
         let child = process::Command::from(cmd).spawn()?;
         let id = child.id().expect("fetching the OS-assigned process id");
-        Ok(Process { child, id, timeout: self.timeout })
+        Ok(Process { child, id, timeout: self.timeout, result: None })
     }
 }
 
@@ -156,20 +167,28 @@ mod process_impl {
         /// TODO: Wait all descendant processes to ensure there are no children left behind.
         /// Currently, the direct child is the only process to be waited before exiting.
         pub fn kill(&mut self) -> Result {
+            if let Some(r) = self.result.as_ref() {
+                return r.clone();
+            }
+
             self.killpg(libc::SIGKILL);
 
             // Note that this loop is necessary even if the child process exits successfully
             // in order to 1) wait all descendant processes, 2) ensure there are no children left behind.
-            loop {
-                match self.child.try_wait().map_err(Error::Io)? {
+            let result = loop {
+                match self.child.try_wait() {
                     // The exit status is not available at this time. The child may still be running.
                     // SIGKILL is sent just before entering the loop, but this happens because
                     // kill(2) just sends the signal to the given process(es).
                     // Once kill(2) returns, there is no guarantee that the signal has been delivered and handled.
-                    None => continue,
-                    Some(status) => return into_process_result(status),
+                    Ok(None) => continue,
+                    Ok(Some(status)) => break into_process_result(status),
+                    Err(err) => break Err(Error::Io(err)),
                 }
-            }
+            };
+
+            self.result = Some(result.clone());
+            result
         }
 
         fn killpg(&self, signal: libc::c_int) {
