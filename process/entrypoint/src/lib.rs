@@ -13,7 +13,7 @@ use tokio::time;
 
 pub type Result<T = ()> = std::result::Result<T, Error>;
 
-use Error::{KilledBySignal, ExitedUnsuccessfully};
+use Error::{ExitedUnsuccessfully, KilledBySignal};
 
 #[derive(Debug, Clone, Parser)]
 pub struct Command {
@@ -69,12 +69,6 @@ impl Command {
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
         let mut process = self.spawn().map_err(Error::Io).await?;
 
-        // The procedures below should mostly work, but not perfect because:
-        // - it is easy to "escape" from the group
-        // - the PID is potentially reused at some point
-        //
-        // Note that `wait_sync` must be invoked even if the child process exits successfully
-        // in order to 1) wait all descendant processes, 2) ensure there are no children left behind.
         tokio::select! {
             biased;
             _ = interrupt.recv() => {},
@@ -128,9 +122,13 @@ mod process_impl {
     }
 
     impl Process {
+        /// If the process exits before the timeout has elapsed, then the completed
+        /// result is returned. Otherwise, a `None` is returned.
         pub async fn wait(&mut self, timeout: Option<Duration>) -> Option<Result> {
             match timeout {
                 None => Some(self.wait_child().await),
+                // It is possible for the child process to complete and exceed the timeout
+                // without returning an error.
                 Some(dur) => time::timeout(dur, self.wait_child()).await.ok(),
             }
         }
@@ -153,24 +151,25 @@ mod process_impl {
         }
 
         /// Kill the whole process group, and wait the child exits.
+        /// This should mostly work, but not perfect because:
+        /// - it is easy to "escape" from the group
+        /// - the PID is potentially reused at some point
         ///
         /// TODO: Wait all descendant processes to ensure there are no children left behind.
         /// Currently, the direct child is the only process to be waited before exiting.
         pub fn kill(&mut self) -> Result {
             self.killpg(libc::SIGKILL);
 
+            // Note that this loop is necessary even if the child process exits successfully
+            // in order to 1) wait all descendant processes, 2) ensure there are no children left behind.
             loop {
-                match self.child.try_wait() {
-                    // The exit status is not available at this time.
-                    // The child process(es) may still be running.
-                    Ok(None) => continue,
-
-                    // It is possible for the child process to complete and exceed the timeout
-                    // without returning an error.
-                    Ok(Some(status)) => break into_process_result(status),
-
-                    // Some error happens on collecting the child status.
-                    Err(err) => break Err(Error::Io(err)),
+                match self.child.try_wait().map_err(Error::Io)? {
+                    // The exit status is not available at this time. The child may still be running.
+                    // SIGKILL is sent just before entering the loop, but this happens because
+                    // kill(2) just sends the signal to the given process(es).
+                    // Once kill(2) returns, there is no guarantee that the signal has been delivered and handled.
+                    None => continue,
+                    Some(status) => return into_process_result(status),
                 }
             }
         }
