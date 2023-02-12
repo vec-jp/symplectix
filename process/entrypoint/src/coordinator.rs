@@ -6,7 +6,6 @@ use futures::future;
 use futures::prelude::*;
 use tokio::time;
 
-use crate::fsutil;
 use crate::Command;
 use crate::{Error, Result};
 

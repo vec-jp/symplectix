@@ -11,7 +11,6 @@ use tokio::process;
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
 
-use crate::fsutil;
 use crate::Error::*;
 use crate::{Error, Result};
 
