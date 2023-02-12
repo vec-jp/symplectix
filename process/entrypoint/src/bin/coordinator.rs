@@ -18,15 +18,18 @@ async fn main() -> anyhow::Result<()> {
         .compact()
         .init();
 
-    Coordinator::parse().run().await
+    let coord = Coordinator::parse();
+    wait(&coord.wait_files).await?;
+    let result = coord.command.run().await;
+    post(&coord.post_file, result).await
 }
 
 #[derive(Debug, Clone, Parser)]
 pub struct Coordinator {
     /// List of paths to wait for before spawning the child process.
     ///
-    /// The timeout clock does not tick until the child spawns.
-    /// So the operations before spawning, i.e., while waiting for `wait-file`s, never times out.
+    /// The timeout duration does not elapse until the child is spawned.
+    /// So the operations before spawning, i.e., while waiting for `wait_files`, never times out.
     #[arg(long = "wait", value_name = "PATH")]
     wait_files: Vec<PathBuf>,
 
@@ -36,21 +39,6 @@ pub struct Coordinator {
 
     #[command(flatten)]
     command: Command,
-}
-
-impl Coordinator {
-    #[tracing::instrument(
-        skip(self),
-        fields(
-            wait_files = ?self.wait_files,
-            post_file = ?self.post_file,
-        )
-    )]
-    pub async fn run(self) -> anyhow::Result<()> {
-        wait(&self.wait_files).await?;
-        let result = self.command.run().await;
-        post(&self.post_file, result).await.map_err(anyhow::Error::from)
-    }
 }
 
 #[tracing::instrument]
@@ -76,21 +64,21 @@ async fn wait(wait_files: &[PathBuf]) -> anyhow::Result<()> {
 }
 
 #[tracing::instrument]
-async fn post(post_file: &Option<PathBuf>, result: Result) -> Result {
+async fn post(post_file: &Option<PathBuf>, result: Result) -> anyhow::Result<()> {
     let Some(path) = post_file.as_ref() else {
         return Ok(());
     };
 
-    fsutil::ensure_path_is_writable(path).await.map_err(Error::Io)?;
+    fsutil::ensure_path_is_writable(path).await?;
 
     if result.is_ok() {
-        fsutil::create_file(path, true).await.map_err(Error::Io)?;
+        fsutil::create_file(path, true).await?;
     } else {
         let path = path.with_extension("err");
-        fsutil::create_file(path, true).await.map_err(Error::Io)?;
+        fsutil::create_file(path, true).await?;
     }
 
-    result
+    result.map_err(anyhow::Error::from)
 }
 
 #[cfg(test)]
