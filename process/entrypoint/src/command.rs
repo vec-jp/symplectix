@@ -7,7 +7,7 @@ use std::time::Duration;
 
 use clap::Parser;
 use futures::prelude::*;
-use tokio::process::{Child, Command};
+use tokio::process::{self, Child};
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
 
@@ -16,7 +16,7 @@ use crate::Error::*;
 use crate::{Error, Result};
 
 #[derive(Debug, Clone, Parser)]
-pub struct ProcessWrapper {
+pub struct Command {
     /// Redirect the child process stdout.
     #[arg(long, value_name = "PATH")]
     stdout: Option<PathBuf>,
@@ -44,7 +44,7 @@ pub struct Process {
     id: u32,
 }
 
-impl ProcessWrapper {
+impl Command {
     #[tracing::instrument(
         skip(self),
         fields(
@@ -98,7 +98,7 @@ impl ProcessWrapper {
         // Put the child into a new process group.
         cmd.process_group(0);
 
-        let child = Command::from(cmd).spawn().map_err(NotSpawned)?;
+        let child = process::Command::from(cmd).spawn().map_err(NotSpawned)?;
         let id = child.id().expect("fetching the OS-assigned process id");
 
         Ok(Process { child, id })
@@ -197,24 +197,24 @@ mod process_impl {
 mod tests {
     use super::*;
 
-    fn process_wrapper<S: Into<String>>(command: Vec<S>) -> ProcessWrapper {
-        ProcessWrapper {
+    fn command<S: Into<String>>(program: Vec<S>) -> Command {
+        Command {
             stdout: None,
             stderr: None,
             envs: vec![],
             timeout: None,
-            argv: command.into_iter().map(|s| s.into()).collect(),
+            argv: program.into_iter().map(|s| s.into()).collect(),
         }
     }
 
-    fn sleep<S: Into<String>>(duration: S) -> ProcessWrapper {
-        process_wrapper(vec!["sleep".to_owned(), duration.into()])
+    fn sleep<S: Into<String>>(duration: S) -> Command {
+        command(vec!["sleep".to_owned(), duration.into()])
     }
 
     #[tokio::test]
     async fn run_process() {
-        assert!(process_wrapper(vec!["date"]).run().await.is_ok());
-        assert!(process_wrapper(vec!["unknown_command"]).run().await.is_err());
+        assert!(command(vec!["date"]).run().await.is_ok());
+        assert!(command(vec!["unknown_command"]).run().await.is_err());
         assert!(sleep("0.1").run().await.is_ok());
     }
 }

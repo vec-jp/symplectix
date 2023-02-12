@@ -1,11 +1,11 @@
 use std::io;
 use std::path::PathBuf;
 
+mod command;
 mod coordinator;
-mod process_wrapper;
 
+pub use command::{Command, Process};
 pub use coordinator::Coordinator;
-pub use process_wrapper::{Process, ProcessWrapper};
 
 mod fsutil {
     use std::io;
@@ -37,9 +37,9 @@ mod fsutil {
     }
 }
 
-/// ProcessWrapper errors.
 pub type Result<T = ()> = std::result::Result<T, Error>;
 
+/// Process errors.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("{0}")]

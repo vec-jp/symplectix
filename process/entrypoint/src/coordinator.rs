@@ -7,7 +7,7 @@ use futures::prelude::*;
 use tokio::time;
 
 use crate::fsutil;
-use crate::ProcessWrapper;
+use crate::Command;
 use crate::{Error, Result};
 
 #[derive(Debug, Clone, Parser)]
@@ -24,7 +24,7 @@ pub struct Coordinator {
     post_file: Option<PathBuf>,
 
     #[command(flatten)]
-    process_wrapper: ProcessWrapper,
+    command: Command,
 }
 
 impl Coordinator {
@@ -37,7 +37,7 @@ impl Coordinator {
     )]
     pub async fn run(self) -> Result {
         wait(&self.wait_files).await?;
-        let result = self.process_wrapper.run().await;
+        let result = self.command.run().await;
         post(&self.post_file, result).await
     }
 }
