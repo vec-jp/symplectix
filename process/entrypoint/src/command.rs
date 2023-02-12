@@ -7,7 +7,7 @@ use std::time::Duration;
 
 use clap::Parser;
 use futures::prelude::*;
-use tokio::process::{self, Child};
+use tokio::process;
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
 
@@ -36,12 +36,6 @@ pub struct Command {
     /// The entrypoint of the child process.
     #[arg(last = true)]
     argv: Vec<String>,
-}
-
-#[derive(Debug)]
-pub struct Process {
-    child: Child,
-    id: u32,
 }
 
 impl Command {
@@ -100,9 +94,14 @@ impl Command {
 
         let child = process::Command::from(cmd).spawn().map_err(NotSpawned)?;
         let id = child.id().expect("fetching the OS-assigned process id");
-
         Ok(Process { child, id })
     }
+}
+
+#[derive(Debug)]
+pub struct Process {
+    child: process::Child,
+    id: u32,
 }
 
 mod process_impl {
@@ -146,17 +145,12 @@ mod process_impl {
         /// Currently, the direct child is the only process to be waited before exiting.
         pub fn kill(&mut self) -> Result {
             self.killpg(libc::SIGKILL);
-            self.wait_sync()
-        }
 
-        fn wait_sync(&mut self) -> Result {
             loop {
                 match self.child.try_wait() {
                     // The exit status is not available at this time.
                     // The child process(es) may still be running.
-                    Ok(None) => {
-                        continue;
-                    }
+                    Ok(None) => continue,
 
                     // It is possible for the child process to complete and exceed the timeout
                     // without returning an error.
