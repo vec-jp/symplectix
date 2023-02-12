@@ -26,8 +26,8 @@ pub struct ProcessWrapper {
     stderr: Option<PathBuf>,
 
     /// Kill the spawned child process after the specified duration.
-    #[arg(long, value_name = "DURATION")]
-    timeout: Option<humantime::Duration>,
+    #[arg(long, value_name = "DURATION", value_parser = humantime::parse_duration)]
+    timeout: Option<Duration>,
 
     /// Environment variables visible to the spawned process.
     #[arg(long = "env", value_name = "KEY")]
@@ -66,7 +66,7 @@ impl ProcessWrapper {
             biased;
             _ = interrupt.recv() => {},
             _ = terminate.recv() => {},
-            _ = process.wait(self.timeout.map(|d| d.into())) => {},
+            _ = process.wait(self.timeout) => {},
         };
         process.stop(true).await
     }
