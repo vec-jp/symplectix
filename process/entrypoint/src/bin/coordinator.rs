@@ -18,10 +18,10 @@ async fn main() -> anyhow::Result<()> {
         .compact()
         .init();
 
-    let coord = Coordinator::parse();
-    wait(&coord.wait_files).await?;
-    let result = coord.command.run().await;
-    post(&coord.post_file, result).await
+    let this = Coordinator::parse();
+    wait(&this.wait_files).await?;
+    let result = this.command.run().await;
+    post(&this.post_file, result).await
 }
 
 #[derive(Debug, Clone, Parser)]

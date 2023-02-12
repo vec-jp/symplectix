@@ -42,6 +42,7 @@ pub struct Command {
 pub struct Process {
     child: process::Child,
     id: u32,
+    timeout: Option<Duration>,
 }
 
 /// Process errors.
@@ -73,7 +74,7 @@ impl Command {
             biased;
             _ = interrupt.recv() => {},
             _ = terminate.recv() => {},
-            _ = process.wait(self.timeout) => {},
+            _ = process.wait() => {},
         };
         process.stop(true).await
     }
@@ -107,7 +108,7 @@ impl Command {
 
         let child = process::Command::from(cmd).spawn()?;
         let id = child.id().expect("fetching the OS-assigned process id");
-        Ok(Process { child, id })
+        Ok(Process { child, id, timeout: self.timeout })
     }
 }
 
@@ -124,8 +125,8 @@ mod process_impl {
     impl Process {
         /// If the process exits before the timeout has elapsed, then the completed
         /// result is returned. Otherwise, a `None` is returned.
-        pub async fn wait(&mut self, timeout: Option<Duration>) -> Option<Result> {
-            match timeout {
+        pub async fn wait(&mut self) -> Option<Result> {
+            match self.timeout {
                 None => Some(self.wait_child().await),
                 // It is possible for the child process to complete and exceed the timeout
                 // without returning an error.
@@ -134,10 +135,7 @@ mod process_impl {
         }
 
         async fn wait_child(&mut self) -> Result {
-            match self.child.wait().await {
-                Ok(status) => into_process_result(status),
-                Err(err) => Err(Error::Io(err)),
-            }
+            into_process_result(self.child.wait().map_err(Error::Io).await?)
         }
 
         /// Same as [crate::Process::kill], but in a slightly more graceful way if gracefully is true.
