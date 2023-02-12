@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 use std::time::Duration;
 
-use anyhow::Context;
 use clap::Parser;
 use futures::future;
 use futures::prelude::*;
@@ -48,7 +47,7 @@ impl Coordinator {
         )
     )]
     pub async fn run(self) -> anyhow::Result<()> {
-        wait(&self.wait_files).await.context("wait files")?;
+        wait(&self.wait_files).await?;
         let result = self.command.run().await;
         post(&self.post_file, result).await.map_err(anyhow::Error::from)
     }
@@ -61,12 +60,11 @@ async fn wait(wait_files: &[PathBuf]) -> anyhow::Result<()> {
 
         loop {
             tracing::trace!(wait_for = %ok_file.display());
-
-            if err_file.try_exists().context("try_exists")? {
-                anyhow::bail!("error files exists at {}", err_file.display());
+            if err_file.try_exists().map_err(Error::Io)? {
+                anyhow::bail!("error file present at {}", err_file.display());
             }
 
-            if ok_file.try_exists().context("try_exists")? {
+            if ok_file.try_exists().map_err(Error::Io)? {
                 return Ok(());
             }
 

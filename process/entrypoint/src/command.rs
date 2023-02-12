@@ -124,7 +124,7 @@ mod process_impl {
         async fn wait_child(&mut self) -> Result {
             match self.child.wait().await {
                 Ok(status) => into_process_result(status),
-                Err(err) => Err(WaitFailed(err)),
+                Err(err) => Err(Error::Io(err)),
             }
         }
 
@@ -156,7 +156,7 @@ mod process_impl {
                     Ok(Some(status)) => break into_process_result(status),
 
                     // Some error happens on collecting the child status.
-                    Err(err) => break Err(WaitFailed(err)),
+                    Err(err) => break Err(Error::Io(err)),
                 }
             }
         }

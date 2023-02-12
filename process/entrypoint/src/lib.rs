@@ -9,11 +9,8 @@ pub type Result<T = ()> = std::result::Result<T, Error>;
 /// Process errors.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("{0}")]
+    #[error("io error: {0}")]
     Io(io::Error),
-
-    #[error("failed to wait the child process: {0}")]
-    WaitFailed(io::Error),
 
     #[error("the spawned child process was killed by a signal: {0}")]
     KilledBySignal(i32),
