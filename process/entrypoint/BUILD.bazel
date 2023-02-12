@@ -35,7 +35,9 @@ rust_binary(
     srcs = ["src/bin/coordinator.rs"],
     deps = [
         ":entrypoint",
+        "//process/entrypoint/fsutil",
         "@crates//:anyhow",
+        "@crates//:futures",
         "@crates//:clap",
         "@crates//:tokio",
         "@crates//:tracing",

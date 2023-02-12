@@ -2,10 +2,8 @@ use std::io;
 use std::path::PathBuf;
 
 mod command;
-mod coordinator;
 
 pub use command::{Command, Process};
-pub use coordinator::Coordinator;
 
 pub type Result<T = ()> = std::result::Result<T, Error>;
 
