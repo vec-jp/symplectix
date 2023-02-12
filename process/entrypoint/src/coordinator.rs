@@ -16,11 +16,11 @@ pub struct Coordinator {
     ///
     /// The timeout clock does not tick until the child spawns.
     /// So the operations before spawning, i.e., while waiting for `wait-file`s, never times out.
-    #[arg(long = "wait-file", value_name = "PATH")]
+    #[arg(long = "wait", value_name = "PATH")]
     wait_files: Vec<PathBuf>,
 
     /// Create a file after the child process exits successfully.
-    #[arg(long, value_name = "PATH")]
+    #[arg(long = "post", value_name = "PATH")]
     post_file: Option<PathBuf>,
 
     #[command(flatten)]
