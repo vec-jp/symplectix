@@ -47,7 +47,7 @@ impl Command {
     pub async fn run(self) -> Result {
         let mut interrupt = signal(SignalKind::interrupt()).map_err(Error::Io)?;
         let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
-        let mut process = self.spawn().await?;
+        let mut process = self.spawn().map_err(Error::Io).await?;
 
         // The procedures below should mostly work, but not perfect because:
         // - it is easy to "escape" from the group
@@ -64,7 +64,7 @@ impl Command {
         process.stop(true).await
     }
 
-    pub async fn spawn(&self) -> Result<Process> {
+    pub async fn spawn(&self) -> io::Result<Process> {
         // #[cfg(target_os = "linux")]
         // unsafe {
         //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
@@ -75,13 +75,13 @@ impl Command {
         cmd.args(&self.argv[1..]);
 
         cmd.stdout(if let Some(path) = self.stdout.as_ref() {
-            fsutil::stdio_from(path, false).map_err(Error::Io).await?
+            fsutil::stdio_from(path, false).await?
         } else {
             Stdio::inherit()
         });
 
         cmd.stderr(if let Some(path) = self.stderr.as_ref() {
-            fsutil::stdio_from(path, false).map_err(Error::Io).await?
+            fsutil::stdio_from(path, false).await?
         } else {
             Stdio::inherit()
         });
@@ -91,7 +91,7 @@ impl Command {
         // Put the child into a new process group.
         cmd.process_group(0);
 
-        let child = process::Command::from(cmd).spawn().map_err(NotSpawned)?;
+        let child = process::Command::from(cmd).spawn()?;
         let id = child.id().expect("fetching the OS-assigned process id");
         Ok(Process { child, id })
     }

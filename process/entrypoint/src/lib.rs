@@ -1,5 +1,4 @@
 use std::io;
-use std::path::PathBuf;
 
 mod command;
 
@@ -12,9 +11,6 @@ pub type Result<T = ()> = std::result::Result<T, Error>;
 pub enum Error {
     #[error("{0}")]
     Io(io::Error),
-
-    #[error("failed to spawn the child process: {0}")]
-    NotSpawned(io::Error),
 
     #[error("failed to wait the child process: {0}")]
     WaitFailed(io::Error),
