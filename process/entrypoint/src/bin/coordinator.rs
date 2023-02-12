@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use std::time::Duration;
 
+use anyhow::Context;
 use clap::Parser;
 use futures::future;
 use futures::prelude::*;
@@ -18,7 +19,7 @@ async fn main() -> anyhow::Result<()> {
         .compact()
         .init();
 
-    Coordinator::parse().run().await.map_err(anyhow::Error::from)
+    Coordinator::parse().run().await
 }
 
 #[derive(Debug, Clone, Parser)]
@@ -46,26 +47,26 @@ impl Coordinator {
             post_file = ?self.post_file,
         )
     )]
-    pub async fn run(self) -> Result {
-        wait(&self.wait_files).await?;
+    pub async fn run(self) -> anyhow::Result<()> {
+        wait(&self.wait_files).await.context("wait files")?;
         let result = self.command.run().await;
-        post(&self.post_file, result).await
+        post(&self.post_file, result).await.map_err(anyhow::Error::from)
     }
 }
 
 #[tracing::instrument]
-async fn wait(wait_files: &[PathBuf]) -> Result {
+async fn wait(wait_files: &[PathBuf]) -> anyhow::Result<()> {
     let wait_files = wait_files.iter().map(|ok_file| async move {
         let err_file = ok_file.with_extension("err");
 
         loop {
             tracing::trace!(wait_for = %ok_file.display());
 
-            if err_file.try_exists().map_err(Error::Io)? {
-                return Err(Error::ErrFileExists(err_file));
+            if err_file.try_exists().context("try_exists")? {
+                anyhow::bail!("error files exists at {}", err_file.display());
             }
 
-            if ok_file.try_exists().map_err(Error::Io)? {
+            if ok_file.try_exists().context("try_exists")? {
                 return Ok(());
             }
 

@@ -13,9 +13,6 @@ pub enum Error {
     #[error("{0}")]
     Io(io::Error),
 
-    #[error("error file exists at {0}")]
-    ErrFileExists(PathBuf),
-
     #[error("failed to spawn the child process: {0}")]
     NotSpawned(io::Error),
 
