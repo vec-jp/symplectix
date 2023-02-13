@@ -33,14 +33,5 @@ jobs:
 
       - run: $BAZEL test $BAZEL_ARGS //...
 
-      - uses: actions/cache@v3
-        if: github.event_name == 'schedule'
-        env:
-          cache-name: advisory-db-cache
-        with:
-          path: ~/.cargo/advisory-db
-          key: ${{ env.cache-name }}-${{ github.sha }}
-          restore-keys: ${{ env.cache-name }}-
-
       - run: $BAZEL run $BAZEL_ARGS //tool/audit
         if: github.event_name == 'schedule'
