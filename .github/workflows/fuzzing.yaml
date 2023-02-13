@@ -9,8 +9,7 @@ jobs:
       BAZEL: bazel --output_user_root=/tmp/trunk-fuzzing
       BAZEL_ARGS: --config=fuzz
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - uses: actions/cache@v3
         env:
@@ -23,9 +22,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
-      - name: Build //build/rules/fuzzing/examples:memory_leaks
-        run: $BAZEL build $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
+      - run: $BAZEL build $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
 
       # TODO: Test fuzzing targets
-      # - name: Test //build/rules/fuzzing/examples:memory_leaks
-      #   run: $BAZEL test $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
+      # - run: $BAZEL test $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
