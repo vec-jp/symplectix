@@ -6,26 +6,25 @@ jobs:
     name: Bazel
     runs-on: [ubuntu-22.04]
     env:
-      BAZEL: bazel --output_user_root=/tmp/trunk-nightly
-      BAZEL_ARGS: --config=ci --config=nightly
+      BAZEL: bazel --output_user_root=/tmp/trunk-fuzzing
+      BAZEL_ARGS: --config=fuzz
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - uses: actions/cache@v3
         env:
-          cache-name: bazel-cache-nightly
+          cache-name: bazel-cache-fuzzing
         with:
           path: |
-            /tmp/trunk-nightly
+            /tmp/trunk-fuzzing
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
-      - name: Build //build/rules/fuzzing/examples:use_after_scope
-        run: $BAZEL build $BAZEL_ARGS //build/rules/fuzzing/examples:use_after_scope
+      - name: Build //build/rules/fuzzing/examples:memory_leaks
+        run: $BAZEL build $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
 
-      # - name: Run //build/rules/fuzzing/examples:use_after_scope
-      #   run: $BAZEL run $BAZEL_ARGS //build/rules/fuzzing/examples:use_after_scope
-
+      # - name: Run //build/rules/fuzzing/examples:memory_leaks
+      #   run: $BAZEL run $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
