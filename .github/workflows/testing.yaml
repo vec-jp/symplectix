@@ -6,43 +6,35 @@ on:
       os:
         required: true
         type: string
-      channel:
-        required: true
-        type: string
 
 jobs:
   bazel:
     name: Bazel
     runs-on: ${{ inputs.os }}
     env:
-      bazel-cmd: bazel --output_user_root=/tmp/trunk/${{ inputs.channel }}
-      bazel-args: --config=ci --config=${{ inputs.channel }}
+      bazel-cmd: bazel --output_user_root=/tmp/trunk/
+      bazel-args: --config=stable --config=ci
       bazel-build: ${{ env.bazel-cmd }} build ${{ env.bazel-args }}
       bazel-test: ${{ env.bazel-cmd }} test ${{ env.bazel-args }}
       bazel-run: ${{ env.bazel-cmd }} run ${{ env.bazel-args }}
     steps:
-      - name: Check channel validity
-        run: bash -c '[[ "$CHANNEL" == "stable" || "$CHANNEL" == "nightly" ]]'
-        env:
-          CHANNEL: ${{ inputs.channel }}
-
       - name: Checkout
         uses: actions/checkout@v3
 
       - uses: actions/cache@v3
         env:
-          cache-name: bazel-cache-${{ inputs.channel }}
+          cache-name: bazel-cache
         with:
           # bazelisk stores a bazel binary in the [UserCacheDir](https://pkg.go.dev/os#UserCacheDir).
           path: |
-            /tmp/trunk/${{ inputs.channel }}
+            /tmp/trunk
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}-
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
       - uses: actions/cache@v3
-        if: github.event_name == 'schedule' && ${{ inputs.channel }} == 'stable'
+        if: github.event_name == 'schedule'
         env:
           cache-name: advisory-db-cache
         with:
@@ -54,7 +46,7 @@ jobs:
         run: ${{ env.bazel-run }} //tool/buildifier
 
       - name: Run //tool/audit
-        if: github.event_name == 'schedule' && ${{ inputs.channel }} == 'stable'
+        if: github.event_name == 'schedule'
         run: ${{ env.bazel-run }} //tool/audit
 
       - name: Build

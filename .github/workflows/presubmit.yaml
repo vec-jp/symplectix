@@ -12,8 +12,6 @@ jobs:
       matrix:
         # TODO: add macos-12
         os: [ubuntu-22.04]
-        channel: [stable, nightly]
     uses: ./.github/workflows/testing.yaml
     with:
       os: ${{ matrix.os }}
-      channel: ${{ matrix.os }}
