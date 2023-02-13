@@ -23,6 +23,7 @@ jobs:
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
       - run: $BAZEL build $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
+        name: Build
 
       # TODO: Test fuzzing targets
       # - run: $BAZEL test $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks

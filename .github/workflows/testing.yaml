@@ -28,10 +28,14 @@ jobs:
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
       - run: $BAZEL run $BAZEL_ARGS //tool/buildifier
+        name: Buildifier
 
       - run: $BAZEL build $BAZEL_ARGS //...
+        name: Build
 
       - run: $BAZEL test $BAZEL_ARGS //...
+        name: Test
 
       - run: $BAZEL run $BAZEL_ARGS //tool/audit
+        name: Audit
         if: github.event_name == 'schedule'
