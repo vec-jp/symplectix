@@ -8,6 +8,7 @@ jobs:
     env:
       BAZEL: bazel --output_user_root=/tmp/fuzz/
       BAZEL_ARGS: --config=fuzz
+      BUILD_TAG_FILTERS: --build_tag_filters=+fuzzing
     steps:
       - uses: actions/checkout@v3
 
@@ -22,8 +23,6 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
-      - run: $BAZEL build $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
-        name: Build
-
       # TODO: Test fuzzing targets
-      # - run: $BAZEL test $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
+      - run: $BAZEL build $BAZEL_ARGS $BUILD_TAG_FILTERS //...
+        name: Build
