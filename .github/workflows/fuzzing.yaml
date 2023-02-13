@@ -26,5 +26,5 @@ jobs:
       - name: Build //build/rules/fuzzing/examples:memory_leaks
         run: $BAZEL build $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
 
-      # - name: Run //build/rules/fuzzing/examples:memory_leaks
-      #   run: $BAZEL run $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
+      - name: Run //build/rules/fuzzing/examples:memory_leaks
+        run: $BAZEL run $BAZEL_ARGS //build/rules/fuzzing/examples:memory_leaks
