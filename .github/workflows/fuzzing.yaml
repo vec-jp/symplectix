@@ -6,17 +6,17 @@ jobs:
     name: Bazel
     runs-on: [ubuntu-22.04]
     env:
-      BAZEL: bazel --output_user_root=/tmp/trunk-fuzzing
+      BAZEL: bazel --output_user_root=/tmp/fuzz/
       BAZEL_ARGS: --config=fuzz
     steps:
       - uses: actions/checkout@v3
 
       - uses: actions/cache@v3
         env:
-          cache-name: bazel-cache-fuzzing
+          cache-name: bazel-cache-fuzz
         with:
           path: |
-            /tmp/trunk-fuzzing
+            /tmp/fuzz
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}

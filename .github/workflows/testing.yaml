@@ -10,7 +10,7 @@ jobs:
     name: Bazel
     runs-on: ${{ inputs.os }}
     env:
-      BAZEL: bazel --output_user_root=/tmp/trunk/
+      BAZEL: bazel --output_user_root=/tmp/ci/
       BAZEL_ARGS: --config=ci
     steps:
       - uses: actions/checkout@v3
@@ -21,7 +21,7 @@ jobs:
         with:
           # bazelisk stores a bazel binary in the [UserCacheDir](https://pkg.go.dev/os#UserCacheDir).
           path: |
-            /tmp/trunk
+            /tmp/ci
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
