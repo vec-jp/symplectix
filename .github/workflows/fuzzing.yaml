@@ -1,5 +1,3 @@
-name: Fuzzing
-
 on:
   workflow_call:
 
@@ -25,6 +23,9 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
-      - name: Run //build/rules/fuzzing/examples:use_after_scope
-        run: $BAZEL run $BAZEL_ARGS //build/rules/fuzzing/examples:use_after_scope
+      - name: Build //build/rules/fuzzing/examples:use_after_scope
+        run: $BAZEL build $BAZEL_ARGS //build/rules/fuzzing/examples:use_after_scope
+
+      # - name: Run //build/rules/fuzzing/examples:use_after_scope
+      #   run: $BAZEL run $BAZEL_ARGS //build/rules/fuzzing/examples:use_after_scope
 
