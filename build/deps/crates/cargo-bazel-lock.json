@@ -1,5 +1,5 @@
 {
-  "checksum": "5c44c18486b3221066a2a531d3af8ff12feb24eec7194a981d7f1c951bb289ab",
+  "checksum": "6f846cbf9c7a20895e1e13d83a33916db7254dbae819ea17cf03591ed6c413c5",
   "crates": {
     "abscissa_core 0.6.0": {
       "name": "abscissa_core",
@@ -2533,7 +2533,7 @@
               "target": "thiserror"
             },
             {
-              "id": "tokio 1.24.2",
+              "id": "tokio 1.27.0",
               "target": "tokio"
             },
             {
@@ -8371,13 +8371,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "socket2 0.4.7": {
+    "socket2 0.4.9": {
       "name": "socket2",
-      "version": "0.4.7",
+      "version": "0.4.9",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/socket2/0.4.7/download",
-          "sha256": "02e2d2db9033d13a1567121ddd7a095ee144db4e1ca1b1bda3419bc0da294ebd"
+          "url": "https://crates.io/api/v1/crates/socket2/0.4.9/download",
+          "sha256": "64a4a911eed85daf18834cfaa86a79b7d266ff93ff5ba14005426219480ed662"
         }
       },
       "targets": [
@@ -8420,7 +8420,7 @@
           }
         },
         "edition": "2018",
-        "version": "0.4.7"
+        "version": "0.4.9"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -9062,13 +9062,13 @@
       },
       "license": "MIT OR Apache-2.0 OR Zlib"
     },
-    "tokio 1.24.2": {
+    "tokio 1.27.0": {
       "name": "tokio",
-      "version": "1.24.2",
+      "version": "1.27.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/tokio/1.24.2/download",
-          "sha256": "597a12a59981d9e3c38d216785b0c37399f6e415e8d0712047620f189371b0bb"
+          "url": "https://crates.io/api/v1/crates/tokio/1.27.0/download",
+          "sha256": "d0de47a4eecbe11f498978a9b29d792f0d2692d1dd003650c24c76510e3bc001"
         }
       },
       "targets": [
@@ -9106,7 +9106,6 @@
             "io-util",
             "libc",
             "macros",
-            "memchr",
             "mio",
             "net",
             "num_cpus",
@@ -9140,10 +9139,6 @@
               "target": "bytes"
             },
             {
-              "id": "memchr 2.5.0",
-              "target": "memchr"
-            },
-            {
               "id": "mio 0.8.5",
               "target": "mio"
             },
@@ -9160,20 +9155,20 @@
               "target": "pin_project_lite"
             },
             {
-              "id": "tokio 1.24.2",
+              "id": "tokio 1.27.0",
               "target": "build_script_build"
             }
           ],
           "selects": {
             "cfg(docsrs)": [
               {
-                "id": "windows-sys 0.42.0",
+                "id": "windows-sys 0.45.0",
                 "target": "windows_sys"
               }
             ],
             "cfg(not(any(target_arch = \"wasm32\", target_arch = \"wasm64\")))": [
               {
-                "id": "socket2 0.4.7",
+                "id": "socket2 0.4.9",
                 "target": "socket2"
               }
             ],
@@ -9189,23 +9184,23 @@
             ],
             "cfg(windows)": [
               {
-                "id": "windows-sys 0.42.0",
+                "id": "windows-sys 0.45.0",
                 "target": "windows_sys"
               }
             ]
           }
         },
-        "edition": "2018",
+        "edition": "2021",
         "proc_macro_deps": {
           "common": [
             {
-              "id": "tokio-macros 1.8.2",
+              "id": "tokio-macros 2.0.0",
               "target": "tokio_macros"
             }
           ],
           "selects": {}
         },
-        "version": "1.24.2"
+        "version": "1.27.0"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9223,13 +9218,13 @@
       },
       "license": "MIT"
     },
-    "tokio-macros 1.8.2": {
+    "tokio-macros 2.0.0": {
       "name": "tokio-macros",
-      "version": "1.8.2",
+      "version": "2.0.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/tokio-macros/1.8.2/download",
-          "sha256": "d266c00fde287f55d3f1c3e96c500c362a2b8c695076ec180f27918820bc6df8"
+          "url": "https://crates.io/api/v1/crates/tokio-macros/2.0.0/download",
+          "sha256": "61a573bdc87985e9d6ddeed1b3d864e8a302c847e40d647746df2f1de209d1ce"
         }
       },
       "targets": [
@@ -9259,14 +9254,14 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.107",
+              "id": "syn 2.0.13",
               "target": "syn"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.8.2"
+        "version": "2.0.0"
       },
       "license": "MIT"
     },
@@ -10533,12 +10528,10 @@
             "Win32_Storage",
             "Win32_Storage_FileSystem",
             "Win32_System",
-            "Win32_System_Console",
             "Win32_System_IO",
             "Win32_System_LibraryLoader",
             "Win32_System_Pipes",
             "Win32_System_SystemServices",
-            "Win32_System_Threading",
             "Win32_System_WindowsProgramming",
             "default"
           ],
@@ -10655,10 +10648,15 @@
           "common": [
             "Win32",
             "Win32_Foundation",
+            "Win32_Security",
             "Win32_Storage",
             "Win32_Storage_FileSystem",
             "Win32_System",
             "Win32_System_Console",
+            "Win32_System_Pipes",
+            "Win32_System_SystemServices",
+            "Win32_System_Threading",
+            "Win32_System_WindowsProgramming",
             "default"
           ],
           "selects": {}

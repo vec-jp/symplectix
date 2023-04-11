@@ -83,7 +83,7 @@ _packages = {
     ),
     # Async runtime
     "tokio": crate.spec(
-        version = "1.24",
+        version = "1.27",
         features = ["full"],
     ),
     # Async fn in traits
