@@ -102,7 +102,7 @@ _packages = {
 
     # Arguments parsing
     "clap": crate.spec(
-        version = "4.1",
+        version = "4.2.1",
         features = ["derive"],
     ),
 
