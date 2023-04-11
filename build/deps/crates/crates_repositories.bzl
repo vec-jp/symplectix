@@ -113,7 +113,7 @@ _packages = {
 
     # Provides a macro to generate structures which behave like a set of bitflags
     "bitflags": crate.spec(
-        version = "2.0.0-rc.1",
+        version = "2.1.0",
     ),
 
     # TODO: Use std::cell::OnceCell
