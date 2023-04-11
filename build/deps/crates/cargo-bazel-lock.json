@@ -1,5 +1,5 @@
 {
-  "checksum": "6d54cd81b30a8b5f96096c7629eaf902534947305ef644e5dfea850117597287",
+  "checksum": "f0f6a625065b603024855aef2ff69e0cbe058cab2f3ef3ded47dfb9ac4ac9f01",
   "crates": {
     "abscissa_core 0.6.0": {
       "name": "abscissa_core",
@@ -2202,11 +2202,11 @@
               "target": "once_cell"
             },
             {
-              "id": "openssl 0.10.48",
+              "id": "openssl 0.10.50",
               "target": "openssl"
             },
             {
-              "id": "openssl-sys 0.9.83",
+              "id": "openssl-sys 0.9.85",
               "target": "openssl_sys"
             },
             {
@@ -3454,7 +3454,7 @@
                 "target": "openssl_probe"
               },
               {
-                "id": "openssl-sys 0.9.83",
+                "id": "openssl-sys 0.9.85",
                 "target": "openssl_sys"
               }
             ]
@@ -3531,7 +3531,7 @@
                 "target": "openssl_probe"
               },
               {
-                "id": "openssl-sys 0.9.83",
+                "id": "openssl-sys 0.9.85",
                 "target": "openssl_sys"
               }
             ]
@@ -4564,7 +4564,7 @@
           "selects": {
             "cfg(unix)": [
               {
-                "id": "openssl-sys 0.9.83",
+                "id": "openssl-sys 0.9.85",
                 "target": "openssl_sys"
               }
             ]
@@ -4618,7 +4618,7 @@
           "selects": {
             "cfg(unix)": [
               {
-                "id": "openssl-sys 0.9.83",
+                "id": "openssl-sys 0.9.85",
                 "target": "openssl_sys"
               }
             ]
@@ -5335,13 +5335,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "openssl 0.10.48": {
+    "openssl 0.10.50": {
       "name": "openssl",
-      "version": "0.10.48",
+      "version": "0.10.50",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/openssl/0.10.48/download",
-          "sha256": "518915b97df115dd36109bfa429a48b8f737bd05508cf9588977b599648926d2"
+          "url": "https://crates.io/api/v1/crates/openssl/0.10.50/download",
+          "sha256": "7e30d8bc91859781f0a943411186324d580f2bbeb71b452fe91ae344806af3f1"
         }
       },
       "targets": [
@@ -5398,11 +5398,11 @@
               "target": "once_cell"
             },
             {
-              "id": "openssl 0.10.48",
+              "id": "openssl 0.10.50",
               "target": "build_script_build"
             },
             {
-              "id": "openssl-sys 0.9.83",
+              "id": "openssl-sys 0.9.85",
               "target": "openssl_sys",
               "alias": "ffi"
             }
@@ -5419,7 +5419,7 @@
           ],
           "selects": {}
         },
-        "version": "0.10.48"
+        "version": "0.10.50"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -5428,7 +5428,7 @@
         "deps": {
           "common": [
             {
-              "id": "openssl-sys 0.9.83",
+              "id": "openssl-sys 0.9.85",
               "target": "openssl_sys",
               "alias": "ffi"
             }
@@ -5515,13 +5515,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "openssl-sys 0.9.83": {
+    "openssl-sys 0.9.85": {
       "name": "openssl-sys",
-      "version": "0.9.83",
+      "version": "0.9.85",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/openssl-sys/0.9.83/download",
-          "sha256": "666416d899cf077260dac8698d60a60b435a46d57e82acb1be3d0dad87284e5b"
+          "url": "https://crates.io/api/v1/crates/openssl-sys/0.9.85/download",
+          "sha256": "0d3d193fb1488ad46ffe3aaabc912cc931d02ee8518fe2959aea8ef52718b0c0"
         }
       },
       "targets": [
@@ -5562,7 +5562,7 @@
               "target": "libc"
             },
             {
-              "id": "openssl-sys 0.9.83",
+              "id": "openssl-sys 0.9.85",
               "target": "build_script_main"
             }
           ],
@@ -5572,7 +5572,7 @@
           "@openssl"
         ],
         "edition": "2018",
-        "version": "0.9.83"
+        "version": "0.9.85"
       },
       "build_script_attrs": {
         "data": {
@@ -5588,10 +5588,6 @@
         ],
         "deps": {
           "common": [
-            {
-              "id": "autocfg 1.1.0",
-              "target": "autocfg"
-            },
             {
               "id": "cc 1.0.79",
               "target": "cc"

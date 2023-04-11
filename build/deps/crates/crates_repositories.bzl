@@ -42,10 +42,10 @@ _packages = {
         version = "0.2",
     ),
     "openssl": crate.spec(
-        version = "0.10.48",
+        version = "0.10.50",
     ),
     "openssl-sys": crate.spec(
-        version = "0.9.83",
+        version = "0.9.85",
     ),
     "ssh2": crate.spec(
         version = "0.9",
