@@ -11,9 +11,7 @@ use tokio::process;
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
 
-pub type Result<T = ()> = std::result::Result<T, Error>;
-
-use Error::{ExitedUnsuccessfully, KilledBySignal};
+// pub type Result<T = ()> = std::result::Result<T, Error>;
 
 #[derive(Debug, Clone, Parser)]
 pub struct Command {
@@ -43,31 +41,32 @@ pub struct Process {
     child: process::Child,
     id: u32,
     timeout: Option<Duration>,
-    result: Option<Result>,
 }
+
+// use Error::{ExitedUnsuccessfully, KilledBySignal};
 
 /// Process errors.
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error("io error: {0}")]
-    Io(io::Error),
+// #[derive(Debug, thiserror::Error)]
+// pub enum Error {
+//     #[error("io error: {0}")]
+//     Io(io::Error),
 
-    #[error("the spawned child process was killed by a signal: {0}")]
-    KilledBySignal(i32),
+//     #[error("the spawned child process was killed by a signal: {0}")]
+//     KilledBySignal(i32),
 
-    #[error("the spawned child exited unsuccessfully with non-zero code: {0}")]
-    ExitedUnsuccessfully(i32),
-}
+//     #[error("the spawned child exited unsuccessfully with non-zero code: {0}")]
+//     ExitedUnsuccessfully(i32),
+// }
 
-impl Clone for Error {
-    fn clone(&self) -> Self {
-        match self {
-            Error::KilledBySignal(signal) => KilledBySignal(*signal),
-            Error::ExitedUnsuccessfully(code) => ExitedUnsuccessfully(*code),
-            Error::Io(io_err) => Error::Io(io::Error::new(io_err.kind(), io_err.to_string())),
-        }
-    }
-}
+// impl Clone for Error {
+//     fn clone(&self) -> Self {
+//         match self {
+//             Error::KilledBySignal(signal) => KilledBySignal(*signal),
+//             Error::ExitedUnsuccessfully(code) => ExitedUnsuccessfully(*code),
+//             Error::Io(io_err) => Error::Io(io::Error::new(io_err.kind(), io_err.to_string())),
+//         }
+//     }
+// }
 
 impl Command {
     #[tracing::instrument(
@@ -76,10 +75,10 @@ impl Command {
             argv = ?self.argv,
         )
     )]
-    pub async fn run(self) -> Result {
-        let mut interrupt = signal(SignalKind::interrupt()).map_err(Error::Io)?;
-        let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
-        let mut process = self.spawn().map_err(Error::Io).await?;
+    pub async fn run(self) -> io::Result<ExitStatus> {
+        let mut interrupt = signal(SignalKind::interrupt())?;
+        let mut terminate = signal(SignalKind::terminate())?;
+        let mut process = self.spawn().await?;
 
         tokio::select! {
             biased;
@@ -90,7 +89,28 @@ impl Command {
         process.stop(true).await
     }
 
-    pub async fn spawn(&self) -> io::Result<Process> {
+    #[tracing::instrument(
+        skip(self),
+        fields(
+            argv = ?self.argv,
+        )
+    )]
+    pub async fn test(self) -> io::Result<ExitStatus> {
+        let mut interrupt = signal(SignalKind::interrupt())?;
+        let mut terminate = signal(SignalKind::terminate())?;
+        let mut process = self.spawn().await?;
+
+        tokio::select! {
+            biased;
+            _ = interrupt.recv() => {},
+            _ = terminate.recv() => {},
+            _ = process.wait() => {},
+        };
+
+        process.stop(true).await
+    }
+
+    async fn spawn(&self) -> io::Result<Process> {
         // #[cfg(target_os = "linux")]
         // unsafe {
         //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
@@ -119,74 +139,53 @@ impl Command {
 
         let child = process::Command::from(cmd).spawn()?;
         let id = child.id().expect("fetching the OS-assigned process id");
-        Ok(Process { child, id, timeout: self.timeout, result: None })
+        Ok(Process { child, id, timeout: self.timeout })
     }
 }
 
 mod process_impl {
     use super::*;
 
-    impl Drop for Process {
-        #[tracing::instrument(skip(self))]
-        fn drop(&mut self) {
-            self.kill();
-        }
-    }
-
     impl Process {
         /// If the process exits before the timeout has elapsed, then the completed
         /// result is returned. Otherwise, a `None` is returned.
-        pub async fn wait(&mut self) -> Option<Result> {
-            match self.timeout {
-                None => Some(self.wait_child().await),
-                // It is possible for the child process to complete and exceed the timeout
+        pub async fn wait(&mut self) -> io::Result<Option<ExitStatus>> {
+            let exit_status = match self.timeout {
+                // Always some because no timeout given.
+                None => Some(self.child.wait().await?),
+                // It is possible that the child process complete and exceed the timeout
                 // without returning an error.
-                Some(dur) => time::timeout(dur, self.wait_child()).await.ok(),
-            }
+                Some(dur) => time::timeout(dur, self.child.wait()).await?.ok(),
+            };
+
+            Ok(exit_status)
         }
 
-        async fn wait_child(&mut self) -> Result {
-            into_process_result(self.child.wait().map_err(Error::Io).await?)
-        }
-
-        /// Same as [crate::Process::kill], but in a slightly more graceful way if gracefully is true.
+        /// Stop the whole process group, and wait the child exits.
         #[tracing::instrument(skip(self))]
-        pub async fn stop(&mut self, gracefully: bool) -> Result {
+        pub async fn stop(&mut self, gracefully: bool) -> io::Result<ExitStatus> {
             if gracefully {
                 self.killpg(libc::SIGTERM);
                 time::sleep(Duration::from_millis(50)).await;
             }
-            self.kill();
-            self.result.clone().unwrap()
-        }
 
-        /// Kill the whole process group, and wait the child exits.
-        /// This should mostly work, but not perfect because:
-        /// - it is easy to "escape" from the group
-        /// - the PID is potentially reused at some point
-        ///
-        /// TODO: Wait all descendant processes to ensure there are no children left behind.
-        /// Currently, the direct child is the only process to be waited before exiting.
-        pub fn kill(&mut self) {
-            if self.result.is_some() {
-                return;
-            }
+            // TODO: Wait all descendant processes to ensure there are no children left behind.
+            // Currently, the direct child is the only process to be waited before exiting.
 
             self.killpg(libc::SIGKILL);
 
             // Note that this loop is necessary even if the child process exits successfully
             // in order to 1) wait all descendant processes, 2) ensure there are no children left behind.
-            self.result = loop {
-                match self.child.try_wait() {
+            loop {
+                match self.child.try_wait()? {
                     // The exit status is not available at this time. The child may still be running.
                     // SIGKILL is sent just before entering the loop, but this happens because
                     // kill(2) just sends the signal to the given process(es).
                     // Once kill(2) returns, there is no guarantee that the signal has been delivered and handled.
-                    Ok(None) => continue,
-                    Ok(Some(status)) => break Some(into_process_result(status)),
-                    Err(err) => break Some(Err(Error::Io(err))),
+                    None => continue,
+                    Some(status) => break Ok(status),
                 }
-            };
+            }
         }
 
         fn killpg(&self, signal: libc::c_int) {
@@ -202,16 +201,16 @@ mod process_impl {
         }
     }
 
-    fn into_process_result(status: ExitStatus) -> Result {
-        if status.success() {
-            Ok(())
-        } else if let Some(code) = status.code() {
-            Err(ExitedUnsuccessfully(code))
-        } else {
-            // because `status.code()` returns `None`
-            Err(KilledBySignal(status.signal().expect("WIFSIGNALED is true")))
-        }
-    }
+    // fn into_exit_status(status: StdExitStatus) -> ExitStatus {
+    //     if status.success() {
+    //         Ok(())
+    //     } else if let Some(code) = status.code() {
+    //         Err(ExitedUnsuccessfully(code))
+    //     } else {
+    //         // because `status.code()` returns `None`
+    //         Err(KilledBySignal(status.signal().expect("WIFSIGNALED is true")))
+    //     }
+    // }
 }
 
 #[cfg(test)]

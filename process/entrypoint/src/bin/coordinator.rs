@@ -1,13 +1,13 @@
+use std::os::unix::process::ExitStatusExt;
 use std::path::PathBuf;
+use std::process::ExitStatus;
 use std::time::Duration;
 
 use clap::Parser;
+use entrypoint::Command;
 use futures::future;
 use futures::prelude::*;
 use tokio::time;
-
-use entrypoint::Command;
-use entrypoint::{Error, Result};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -20,8 +20,8 @@ async fn main() -> anyhow::Result<()> {
 
     let this = Coordinator::parse();
     wait(&this.wait_files).await?;
-    let result = this.command.run().await;
-    post(&this.post_file, result).await
+    let exit_status = this.command.run().await?;
+    post(&this.post_file, exit_status).await
 }
 
 #[derive(Debug, Clone, Parser)]
@@ -48,11 +48,11 @@ async fn wait(wait_files: &[PathBuf]) -> anyhow::Result<()> {
 
         loop {
             tracing::trace!(wait_for = %ok_file.display());
-            if err_file.try_exists().map_err(Error::Io)? {
+            if err_file.try_exists().map_err(anyhow::Error::from)? {
                 anyhow::bail!("error file present at {}", err_file.display());
             }
 
-            if ok_file.try_exists().map_err(Error::Io)? {
+            if ok_file.try_exists().map_err(anyhow::Error::from)? {
                 return Ok(());
             }
 
@@ -64,21 +64,20 @@ async fn wait(wait_files: &[PathBuf]) -> anyhow::Result<()> {
 }
 
 #[tracing::instrument]
-async fn post(post_file: &Option<PathBuf>, result: Result) -> anyhow::Result<()> {
+async fn post(post_file: &Option<PathBuf>, result: ExitStatus) -> anyhow::Result<()> {
     let Some(path) = post_file.as_ref() else {
         return Ok(());
     };
 
     fsutil::ensure_path_is_writable(path).await?;
 
-    if result.is_ok() {
+    if result.success() {
         fsutil::create_file(path, true).await?;
     } else {
         let path = path.with_extension("err");
         fsutil::create_file(path, true).await?;
     }
-
-    result.map_err(anyhow::Error::from)
+    Ok(())
 }
 
 #[cfg(test)]
