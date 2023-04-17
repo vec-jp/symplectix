@@ -1,12 +1,11 @@
 use std::env;
 use std::io;
-use std::os::unix::process::{CommandExt, ExitStatusExt};
+use std::os::unix::process::CommandExt;
 use std::path::PathBuf;
 use std::process::{Command as StdCommand, ExitStatus, Stdio};
 use std::time::Duration;
 
 use clap::Parser;
-use futures::prelude::*;
 use tokio::process;
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
@@ -68,49 +67,28 @@ pub struct Process {
 //     }
 // }
 
+#[tracing::instrument(skip(process))]
+pub async fn wait(mut process: Process) -> io::Result<(ExitStatus, bool)> {
+    let mut interrupt = signal(SignalKind::interrupt())?;
+    let mut terminate = signal(SignalKind::terminate())?;
+
+    let timedout = tokio::select! {
+        biased;
+        _ = interrupt.recv() => { false },
+        _ = terminate.recv() => { false },
+        r = process.wait() => match r {
+            Ok(None) => true,
+            _ => false,
+        },
+    };
+
+    let status = process.stop(true).await?;
+
+    Ok((status, timedout))
+}
+
 impl Command {
-    #[tracing::instrument(
-        skip(self),
-        fields(
-            argv = ?self.argv,
-        )
-    )]
-    pub async fn run(self) -> io::Result<ExitStatus> {
-        let mut interrupt = signal(SignalKind::interrupt())?;
-        let mut terminate = signal(SignalKind::terminate())?;
-        let mut process = self.spawn().await?;
-
-        tokio::select! {
-            biased;
-            _ = interrupt.recv() => {},
-            _ = terminate.recv() => {},
-            _ = process.wait() => {},
-        };
-        process.stop(true).await
-    }
-
-    #[tracing::instrument(
-        skip(self),
-        fields(
-            argv = ?self.argv,
-        )
-    )]
-    pub async fn test(self) -> io::Result<ExitStatus> {
-        let mut interrupt = signal(SignalKind::interrupt())?;
-        let mut terminate = signal(SignalKind::terminate())?;
-        let mut process = self.spawn().await?;
-
-        tokio::select! {
-            biased;
-            _ = interrupt.recv() => {},
-            _ = terminate.recv() => {},
-            _ = process.wait() => {},
-        };
-
-        process.stop(true).await
-    }
-
-    async fn spawn(&self) -> io::Result<Process> {
+    pub async fn spawn(&self) -> io::Result<Process> {
         // #[cfg(target_os = "linux")]
         // unsafe {
         //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);

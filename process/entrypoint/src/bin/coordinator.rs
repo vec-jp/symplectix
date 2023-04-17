@@ -1,4 +1,3 @@
-use std::os::unix::process::ExitStatusExt;
 use std::path::PathBuf;
 use std::process::ExitStatus;
 use std::time::Duration;
@@ -20,7 +19,10 @@ async fn main() -> anyhow::Result<()> {
 
     let this = Coordinator::parse();
     wait(&this.wait_files).await?;
-    let exit_status = this.command.run().await?;
+
+    let process = this.command.spawn().await?;
+    let (exit_status, _timedout) = entrypoint::wait(process).await?;
+
     post(&this.post_file, exit_status).await
 }
 

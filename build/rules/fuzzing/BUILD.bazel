@@ -12,6 +12,7 @@ rust_binary(
         "//process/entrypoint",
         "@crates//:anyhow",
         "@crates//:clap",
+        "@crates//:thiserror",
         "@crates//:tokio",
         "@crates//:tracing",
         "@crates//:tracing-subscriber",
