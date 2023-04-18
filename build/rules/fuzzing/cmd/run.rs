@@ -1,5 +1,5 @@
 use entrypoint::Command;
-use std::os::unix::process::ExitStatusExt;
+use std::process::ExitStatus;
 
 /// An entrypoint for fuzzing.
 #[derive(Clone, Debug, clap::Parser)]
@@ -10,29 +10,26 @@ pub struct Run {
 
 #[derive(Debug, thiserror::Error)]
 pub enum RunError {
-    // #[error("io error: {0}")]
-    // Io(io::Error),
-    #[error("the spawned child process was killed by a signal: {0}")]
-    KilledBySignal(i32),
+    #[error("the spawned child exited unsuccessfully: {0}")]
+    ExitedUnsuccessfully(ExitStatus),
 
-    #[error("the spawned child exited unsuccessfully with non-zero code: {0}")]
-    ExitedUnsuccessfully(i32),
+    #[error("the spawned child timedout: {0}")]
+    Timedout(ExitStatus),
 }
 
 impl Run {
     pub(crate) async fn run(self) -> anyhow::Result<()> {
-        use RunError::{ExitedUnsuccessfully, KilledBySignal};
+        use RunError::*;
 
         let process = self.command.spawn().await?;
-        let (exit_status, _timedout) = entrypoint::wait(process).await?;
+        let (exit_status, timedout) = entrypoint::wait_and_stop(process).await?;
 
-        (if exit_status.success() {
-            Ok(())
-        } else if let Some(code) = exit_status.code() {
-            Err(ExitedUnsuccessfully(code))
+        (if timedout {
+            Err(Timedout(exit_status))
+        } else if !exit_status.success() {
+            Err(ExitedUnsuccessfully(exit_status))
         } else {
-            // because `status.code()` returns `None`
-            Err(KilledBySignal(exit_status.signal().expect("WIFSIGNALED is true")))
+            Ok(())
         })
         .map_err(anyhow::Error::from)
     }

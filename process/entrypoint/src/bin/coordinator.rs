@@ -21,7 +21,7 @@ async fn main() -> anyhow::Result<()> {
     wait(&this.wait_files).await?;
 
     let process = this.command.spawn().await?;
-    let (exit_status, _timedout) = entrypoint::wait(process).await?;
+    let (exit_status, _timedout) = entrypoint::wait_and_stop(process).await?;
 
     post(&this.post_file, exit_status).await
 }

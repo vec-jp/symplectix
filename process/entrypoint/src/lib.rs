@@ -42,33 +42,8 @@ pub struct Process {
     timeout: Option<Duration>,
 }
 
-// use Error::{ExitedUnsuccessfully, KilledBySignal};
-
-/// Process errors.
-// #[derive(Debug, thiserror::Error)]
-// pub enum Error {
-//     #[error("io error: {0}")]
-//     Io(io::Error),
-
-//     #[error("the spawned child process was killed by a signal: {0}")]
-//     KilledBySignal(i32),
-
-//     #[error("the spawned child exited unsuccessfully with non-zero code: {0}")]
-//     ExitedUnsuccessfully(i32),
-// }
-
-// impl Clone for Error {
-//     fn clone(&self) -> Self {
-//         match self {
-//             Error::KilledBySignal(signal) => KilledBySignal(*signal),
-//             Error::ExitedUnsuccessfully(code) => ExitedUnsuccessfully(*code),
-//             Error::Io(io_err) => Error::Io(io::Error::new(io_err.kind(), io_err.to_string())),
-//         }
-//     }
-// }
-
 #[tracing::instrument(skip(process))]
-pub async fn wait(mut process: Process) -> io::Result<(ExitStatus, bool)> {
+pub async fn wait_and_stop(mut process: Process) -> io::Result<(ExitStatus, bool)> {
     let mut interrupt = signal(SignalKind::interrupt())?;
     let mut terminate = signal(SignalKind::terminate())?;
 
@@ -128,15 +103,14 @@ mod process_impl {
         /// If the process exits before the timeout has elapsed, then the completed
         /// result is returned. Otherwise, a `None` is returned.
         pub async fn wait(&mut self) -> io::Result<Option<ExitStatus>> {
-            let exit_status = match self.timeout {
+            match self.timeout {
                 // Always some because no timeout given.
-                None => Some(self.child.wait().await?),
-                // It is possible that the child process complete and exceed the timeout
-                // without returning an error.
-                Some(dur) => time::timeout(dur, self.child.wait()).await?.ok(),
-            };
-
-            Ok(exit_status)
+                None => self.child.wait().await.map(Some),
+                Some(dur) => match time::timeout(dur, self.child.wait()).await {
+                    Err(_) => Ok(None),
+                    Ok(status) => status.map(Some),
+                },
+            }
         }
 
         /// Stop the whole process group, and wait the child exits.

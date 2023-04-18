@@ -23,6 +23,7 @@ rust_library(
         "@crates//:clap",
         "@crates//:humantime",
         "@crates//:libc",
+        "@crates//:thiserror",
         "@crates//:tokio",
         "@crates//:tracing",
     ],
