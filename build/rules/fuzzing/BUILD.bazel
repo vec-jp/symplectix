@@ -9,6 +9,7 @@ rust_binary(
         "cmd/*.rs",
     ]),
     deps = [
+        "//process",
         "//process/entrypoint",
         "@crates//:anyhow",
         "@crates//:clap",

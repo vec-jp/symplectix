@@ -1,11 +1,10 @@
 use std::path::PathBuf;
-use std::process::ExitStatus;
 use std::time::Duration;
 
 use clap::Parser;
-use entrypoint::Command;
 use futures::future;
 use futures::prelude::*;
+use process::{Command, ExitStatus};
 use tokio::time;
 
 #[tokio::main]
@@ -20,8 +19,7 @@ async fn main() -> anyhow::Result<()> {
     let this = Coordinator::parse();
     wait(&this.wait_files).await?;
 
-    let process = this.command.spawn().await?;
-    let (exit_status, _timedout) = entrypoint::wait_and_stop(process).await?;
+    let (exit_status, _timedout) = entrypoint::run(&this.command).await?;
 
     post(&this.post_file, exit_status).await
 }

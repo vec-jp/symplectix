@@ -1,5 +1,4 @@
-use entrypoint::Command;
-use std::process::ExitStatus;
+use process::{Command, ExitStatus};
 
 /// An entrypoint for fuzzing.
 #[derive(Clone, Debug, clap::Parser)]
