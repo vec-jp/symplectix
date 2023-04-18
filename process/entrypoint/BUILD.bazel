@@ -13,6 +13,7 @@ rust_library(
     ),
     deps = [
         "//process",
+        "@crates//:thiserror",
         "@crates//:tokio",
         "@crates//:tracing",
     ],

@@ -1,4 +1,4 @@
-use process::{Command, ExitStatus};
+use process::Command;
 
 #[derive(Clone, Debug, clap::Parser)]
 pub struct Test {
@@ -6,28 +6,15 @@ pub struct Test {
     command: Command,
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum TestError {
-    #[error("the spawned child timedout: {0}")]
-    Timedout(ExitStatus),
-
-    #[error("the spawned child exited unsuccessfully: {0}")]
-    ExitedWithError(ExitStatus),
-}
-
 impl Test {
     pub(crate) async fn run(self) -> anyhow::Result<()> {
-        use TestError::{ExitedWithError, Timedout};
+        use entrypoint::Error::*;
 
-        let (exit_status, timedout) = entrypoint::run(&self.command).await?;
-
-        (if dbg!(timedout) {
-            Err(Timedout(exit_status))
-        } else if exit_status.success() {
-            Ok(())
-        } else {
-            Err(ExitedWithError(exit_status))
-        })
-        .map_err(anyhow::Error::from)
+        let process = self.command.spawn().await?;
+        match entrypoint::wait(process).await {
+            Ok(_) => Ok(()),
+            Err(Timedout(_)) => Ok(()),
+            Err(e) => Err(anyhow::Error::from(e)),
+        }
     }
 }

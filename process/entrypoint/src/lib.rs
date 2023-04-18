@@ -3,16 +3,28 @@ use std::io;
 use process::{Command, ExitStatus, Process};
 use tokio::signal::unix::{signal, SignalKind};
 
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("{0}")]
+    Io(io::Error),
+
+    #[error("the spawned child exited unsuccessfully: {0}")]
+    ExitedUnsuccessfully(ExitStatus),
+
+    #[error("the spawned child timedout: {0}")]
+    Timedout(ExitStatus),
+}
+
 #[tracing::instrument(skip(command))]
-pub async fn run(command: &Command) -> io::Result<(ExitStatus, bool)> {
-    let process = command.spawn().await?;
-    wait_and_stop(process).await
+pub async fn run(command: &Command) -> Result<(), Error> {
+    let process = command.spawn().await.map_err(Error::Io)?;
+    wait(process).await
 }
 
 #[tracing::instrument(skip(process))]
-pub async fn wait_and_stop(mut process: Process) -> io::Result<(ExitStatus, bool)> {
-    let mut interrupt = signal(SignalKind::interrupt())?;
-    let mut terminate = signal(SignalKind::terminate())?;
+pub async fn wait(mut process: Process) -> Result<(), Error> {
+    let mut interrupt = signal(SignalKind::interrupt()).map_err(Error::Io)?;
+    let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
 
     let timedout = tokio::select! {
         biased;
@@ -24,7 +36,13 @@ pub async fn wait_and_stop(mut process: Process) -> io::Result<(ExitStatus, bool
         },
     };
 
-    let status = process.stop(true).await?;
+    let exit_status = process.stop(true).await.map_err(Error::Io)?;
 
-    Ok((status, timedout))
+    if timedout {
+        Err(Error::Timedout(exit_status))
+    } else if !exit_status.success() {
+        Err(Error::ExitedUnsuccessfully(exit_status))
+    } else {
+        Ok(())
+    }
 }
