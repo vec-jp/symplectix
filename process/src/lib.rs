@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::{OsStr, OsString};
 use std::io;
 use std::os::unix::process::CommandExt;
 use std::path::PathBuf;
@@ -10,8 +11,6 @@ use tokio::process;
 use tokio::time;
 
 pub use std::process::ExitStatus;
-
-// pub type Result<T = ()> = std::result::Result<T, Error>;
 
 #[derive(Debug, Clone, Parser)]
 pub struct Command {
@@ -33,7 +32,7 @@ pub struct Command {
 
     /// The entrypoint of the child process.
     #[arg(last = true)]
-    argv: Vec<String>,
+    argv: Vec<OsString>,
 }
 
 #[derive(Debug)]
@@ -44,13 +43,47 @@ pub struct Process {
 }
 
 impl Command {
+    pub fn new<S: AsRef<OsStr>>(program: S) -> Command {
+        Command {
+            stdout: None,
+            stderr: None,
+            envs: vec![],
+            timeout: None,
+            argv: vec![program.as_ref().to_owned()],
+        }
+    }
+
+    pub fn arg<S>(&mut self, arg: S) -> &mut Command
+    where
+        S: AsRef<OsStr>,
+    {
+        self.argv.push(arg.as_ref().to_owned());
+        self
+    }
+
+    pub fn args<I, S>(&mut self, args: I) -> &mut Command
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<OsStr>,
+    {
+        for arg in args {
+            self.arg(arg);
+        }
+        self
+    }
+
+    pub fn timeout(&mut self, duration: Duration) -> &mut Command {
+        self.timeout = Some(duration);
+        self
+    }
+
     pub async fn spawn(&self) -> io::Result<Process> {
         // #[cfg(target_os = "linux")]
         // unsafe {
         //     libc::prctl(libc::PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0);
         // }
 
-        let mut cmd = StdCommand::new(self.argv[0].as_str());
+        let mut cmd = StdCommand::new(&self.argv[0]);
 
         cmd.args(&self.argv[1..]);
 
@@ -131,39 +164,13 @@ impl Process {
     }
 }
 
-// fn into_exit_status(status: StdExitStatus) -> ExitStatus {
-//     if status.success() {
-//         Ok(())
-//     } else if let Some(code) = status.code() {
-//         Err(ExitedUnsuccessfully(code))
-//     } else {
-//         // because `status.code()` returns `None`
-//         Err(KilledBySignal(status.signal().expect("WIFSIGNALED is true")))
-//     }
-// }
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn command<S: Into<String>>(program: Vec<S>) -> Command {
-        Command {
-            stdout: None,
-            stderr: None,
-            envs: vec![],
-            timeout: None,
-            argv: program.into_iter().map(|s| s.into()).collect(),
-        }
-    }
-
-    fn sleep<S: Into<String>>(duration: S) -> Command {
-        command(vec!["sleep".to_owned(), duration.into()])
-    }
-
     #[tokio::test]
-    async fn run_process() {
-        assert!(command(vec!["date"]).run().await.is_ok());
-        assert!(command(vec!["unknown_command"]).run().await.is_err());
-        assert!(sleep("0.1").run().await.is_ok());
+    async fn spawn_commands() {
+        assert!(Command::new("date").spawn().await.is_ok());
+        assert!(Command::new("unknown_command").spawn().await.is_err());
     }
 }

@@ -3,6 +3,8 @@ use std::io;
 use process::{Command, ExitStatus, Process};
 use tokio::signal::unix::{signal, SignalKind};
 
+pub type Result<T = ()> = std::result::Result<T, Error>;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("{0}")]
@@ -16,13 +18,13 @@ pub enum Error {
 }
 
 #[tracing::instrument(skip(command))]
-pub async fn run(command: &Command) -> Result<(), Error> {
+pub async fn run(command: &Command) -> Result {
     let process = command.spawn().await.map_err(Error::Io)?;
     wait(process).await
 }
 
 #[tracing::instrument(skip(process))]
-pub async fn wait(mut process: Process) -> Result<(), Error> {
+pub async fn wait(mut process: Process) -> Result {
     let mut interrupt = signal(SignalKind::interrupt()).map_err(Error::Io)?;
     let mut terminate = signal(SignalKind::terminate()).map_err(Error::Io)?;
 
@@ -44,5 +46,39 @@ pub async fn wait(mut process: Process) -> Result<(), Error> {
         Err(Error::ExitedUnsuccessfully(exit_status))
     } else {
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[tokio::test]
+    async fn run_process() {
+        use Error::*;
+
+        let Ok(_) = wait(
+            Command::new("sleep")
+                .arg("0.1")
+                .spawn()
+                .await
+                .unwrap(),
+        )
+        .await else {
+            panic!("expected that the command 'sleep' exit successfully");
+        };
+
+        let Err(Timedout(_exit_status)) = wait(
+            Command::new("sleep")
+                .arg("10")
+                .timeout(Duration::from_millis(10))
+                .spawn()
+                .await
+                .unwrap(),
+        )
+        .await else {
+            panic!("expected that the command 'sleep' times out");
+        };
     }
 }
