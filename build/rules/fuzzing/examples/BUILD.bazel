@@ -17,7 +17,6 @@ rust_fuzz_test(
         ["corpus/**/*"],
         allow_empty = False,
     ),
-    sanitizer = "address",
     tags = ["manual"],
     deps = [
         "@crates//:arbitrary",
@@ -32,7 +31,6 @@ rust_fuzz_test(
         ["corpus/**/*"],
         allow_empty = False,
     ),
-    sanitizer = "address",
     tags = ["manual"],
     deps = [
         "@crates//:arbitrary",
@@ -53,7 +51,6 @@ rust_fuzz_test(
             "detect_stack_use_after_return=1",
         ]),
     },
-    sanitizer = "address",
     tags = ["manual"],
     deps = [
         "@crates//:arbitrary",
