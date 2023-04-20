@@ -11,14 +11,14 @@ pub struct Fuzz {
 #[derive(Clone, Debug, clap::Subcommand)]
 enum Command {
     Test(cmd::Test),
-    Prep(cmd::Prep),
+    Corpus(cmd::Corpus),
 }
 
 impl Fuzz {
     async fn run(self) -> anyhow::Result<()> {
         match self.command {
-            Command::Test(f) => f.run().await,
-            Command::Prep(p) => p.run().await,
+            Command::Test(c) => c.run().await,
+            Command::Corpus(c) => c.run().await,
         }
     }
 }

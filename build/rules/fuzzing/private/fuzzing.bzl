@@ -107,7 +107,7 @@ def _fuzz_corpus_impl(ctx):
 
     ctx.actions.run(
         executable = ctx.executable._fuzz,
-        arguments = ["prep", "corpus", output_args, corpus_list_args],
+        arguments = ["corpus", output_args, corpus_list_args],
         inputs = ctx.files.srcs,
         outputs = [output],
     )

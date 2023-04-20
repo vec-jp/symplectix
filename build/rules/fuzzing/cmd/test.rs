@@ -1,5 +1,6 @@
 use process::Command;
 
+/// Runs a instrumented binary.
 #[derive(Clone, Debug, clap::Parser)]
 pub struct Test {
     #[command(flatten)]

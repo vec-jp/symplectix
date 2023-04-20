@@ -11,13 +11,33 @@ filegroup(
 )
 
 rust_fuzz_test(
+    name = "should_not_fail",
+    srcs = ["should_not_fail.rs"],
+    corpus = glob(
+        ["corpus/**/*"],
+        allow_empty = False,
+    ),
+    tags = [
+        "external",
+        "manual",
+    ],
+    deps = [
+        "@crates//:arbitrary",
+        "@crates//:libfuzzer-sys",
+    ],
+)
+
+rust_fuzz_test(
     name = "buffer_overflow",
     srcs = ["buffer_overflow.rs"],
     corpus = glob(
         ["corpus/**/*"],
         allow_empty = False,
     ),
-    tags = ["manual"],
+    tags = [
+        "external",
+        "manual",
+    ],
     deps = [
         "@crates//:arbitrary",
         "@crates//:libfuzzer-sys",
@@ -31,7 +51,10 @@ rust_fuzz_test(
         ["corpus/**/*"],
         allow_empty = False,
     ),
-    tags = ["manual"],
+    tags = [
+        "external",
+        "manual",
+    ],
     deps = [
         "@crates//:arbitrary",
         "@crates//:libfuzzer-sys",
@@ -51,7 +74,10 @@ rust_fuzz_test(
             "detect_stack_use_after_return=1",
         ]),
     },
-    tags = ["manual"],
+    tags = [
+        "external",
+        "manual",
+    ],
     deps = [
         "@crates//:arbitrary",
         "@crates//:libfuzzer-sys",
