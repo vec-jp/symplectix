@@ -60,21 +60,3 @@ rust_fuzz_test(
         "@crates//:libfuzzer-sys",
     ],
 )
-
-rust_fuzz_test(
-    name = "data_race",
-    srcs = ["data_race.rs"],
-    corpus = glob(
-        ["corpus/**/*"],
-        allow_empty = False,
-    ),
-    sanitizer = "thread",
-    tags = [
-        "external",
-        "manual",
-    ],
-    deps = [
-        "@crates//:arbitrary",
-        "@crates//:libfuzzer-sys",
-    ],
-)
