@@ -4,7 +4,7 @@ use std::time::Duration;
 use clap::Parser;
 use futures::future;
 use futures::prelude::*;
-use process::{Command, ExitStatus};
+use process::Command;
 use tokio::time;
 
 #[tokio::main]
@@ -18,10 +18,8 @@ async fn main() -> anyhow::Result<()> {
 
     let this = Coordinator::parse();
     wait(&this.wait_files).await?;
-
-    let (exit_status, _timedout) = entrypoint::run(&this.command).await?;
-
-    post(&this.post_file, exit_status).await
+    let result = entrypoint::run(&this.command).await;
+    post(&this.post_file, result).await
 }
 
 #[derive(Debug, Clone, Parser)]
@@ -64,14 +62,14 @@ async fn wait(wait_files: &[PathBuf]) -> anyhow::Result<()> {
 }
 
 #[tracing::instrument]
-async fn post(post_file: &Option<PathBuf>, result: ExitStatus) -> anyhow::Result<()> {
+async fn post(post_file: &Option<PathBuf>, result: entrypoint::Result) -> anyhow::Result<()> {
     let Some(path) = post_file.as_ref() else {
         return Ok(());
     };
 
     fsutil::ensure_path_is_writable(path).await?;
 
-    if result.success() {
+    if result.is_ok() {
         fsutil::create_file(path, true).await?;
     } else {
         let path = path.with_extension("err");
