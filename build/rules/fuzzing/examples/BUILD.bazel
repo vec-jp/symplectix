@@ -1,4 +1,4 @@
-load("//build/rules/fuzzing:defs.bzl", "rust_fuzz_binary")
+load("//build/rules/fuzzing:defs.bzl", "rust_fuzz_test")
 
 package(default_visibility = ["//:__subpackages__"])
 
@@ -10,7 +10,7 @@ filegroup(
     ]),
 )
 
-rust_fuzz_binary(
+rust_fuzz_test(
     name = "buffer_overflow",
     srcs = ["buffer_overflow.rs"],
     corpus = glob(
@@ -18,23 +18,29 @@ rust_fuzz_binary(
         allow_empty = False,
     ),
     sanitizer = "address",
+    tags = ["manual"],
     deps = [
         "@crates//:arbitrary",
         "@crates//:libfuzzer-sys",
     ],
 )
 
-rust_fuzz_binary(
+rust_fuzz_test(
     name = "use_after_scope",
     srcs = ["use_after_scope.rs"],
+    corpus = glob(
+        ["corpus/**/*"],
+        allow_empty = False,
+    ),
     sanitizer = "address",
+    tags = ["manual"],
     deps = [
         "@crates//:arbitrary",
         "@crates//:libfuzzer-sys",
     ],
 )
 
-rust_fuzz_binary(
+rust_fuzz_test(
     name = "memory_leaks",
     srcs = ["memory_leaks.rs"],
     corpus = glob(
@@ -48,13 +54,14 @@ rust_fuzz_binary(
         ]),
     },
     sanitizer = "address",
+    tags = ["manual"],
     deps = [
         "@crates//:arbitrary",
         "@crates//:libfuzzer-sys",
     ],
 )
 
-rust_fuzz_binary(
+rust_fuzz_test(
     name = "data_race",
     srcs = ["data_race.rs"],
     corpus = glob(
@@ -62,6 +69,10 @@ rust_fuzz_binary(
         allow_empty = False,
     ),
     sanitizer = "thread",
+    tags = [
+        "external",
+        "manual",
+    ],
     deps = [
         "@crates//:arbitrary",
         "@crates//:libfuzzer-sys",

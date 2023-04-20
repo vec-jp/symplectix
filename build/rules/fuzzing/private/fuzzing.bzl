@@ -5,12 +5,18 @@ def _fuzz_impl(ctx):
 {exports}
 RUNFILES_DIR="$0.runfiles" \
 exec "{fuzz}" "{command}" \
+{time_to_run} \
 {envs} \
 -- \
 "{target}" \
 "{corpus}" \
 "$@"
 """
+
+    if hasattr(ctx.attr, "time_to_run") and ctx.attr.time_to_run != "":
+        time_to_run = "--timeout {}".format(ctx.attr.time_to_run)
+    else:
+        time_to_run = ""
 
     entrypoint_content = entrypoint_template.format(
         exports = "\n".join([
@@ -20,6 +26,7 @@ exec "{fuzz}" "{command}" \
         fuzz = ctx.executable._fuzz.short_path,
         command = ctx.attr.command,
         corpus = ctx.file.corpus.short_path,
+        time_to_run = time_to_run,
         envs = " ".join([
             "\"--env\" '%s'" % key
             for key in ctx.attr.envs.keys()
@@ -76,9 +83,50 @@ _fuzz = rule(
     },
 )
 
+_fuzz_test = rule(
+    implementation = _fuzz_impl,
+    test = True,
+    attrs = {
+        "_fuzz": attr.label(
+            default = Label("@//build/rules/fuzzing:fuzz"),
+            executable = True,
+            cfg = "exec",
+        ),
+        "time_to_run": attr.string(
+            default = "",
+            mandatory = True,
+        ),
+        "command": attr.string(
+            mandatory = True,
+        ),
+        "corpus": attr.label(
+            mandatory = True,
+            allow_single_file = True,
+        ),
+        "envs": attr.string_dict(
+            default = {},
+            mandatory = False,
+        ),
+        "target": attr.label(
+            doc = "The executable of the fuzz test to run.",
+            executable = True,
+            allow_single_file = True,
+            cfg = "target",
+            mandatory = True,
+        ),
+    },
+)
+
 def fuzz_binary(**kwargs):
     _fuzz(
         command = "run",
+        **kwargs
+    )
+
+def fuzz_test(**kwargs):
+    _fuzz_test(
+        command = "test",
+        time_to_run = "30s",
         **kwargs
     )
 
