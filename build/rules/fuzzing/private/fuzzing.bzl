@@ -1,4 +1,4 @@
-def _fuzz_impl(ctx):
+def _fuzz_test_impl(ctx):
     entrypoint = ctx.actions.declare_file(ctx.label.name)
 
     entrypoint_template = """\
@@ -53,38 +53,8 @@ exec "{fuzz}" "{command}" \
         ),
     ]
 
-_fuzz = rule(
-    implementation = _fuzz_impl,
-    executable = True,
-    attrs = {
-        "_fuzz": attr.label(
-            default = Label("@//build/rules/fuzzing:fuzz"),
-            executable = True,
-            cfg = "exec",
-        ),
-        "command": attr.string(
-            mandatory = True,
-        ),
-        "corpus": attr.label(
-            mandatory = True,
-            allow_single_file = True,
-        ),
-        "envs": attr.string_dict(
-            default = {},
-            mandatory = False,
-        ),
-        "target": attr.label(
-            doc = "The executable of the fuzz test to run.",
-            executable = True,
-            allow_single_file = True,
-            cfg = "target",
-            mandatory = True,
-        ),
-    },
-)
-
 _fuzz_test = rule(
-    implementation = _fuzz_impl,
+    implementation = _fuzz_test_impl,
     test = True,
     attrs = {
         "_fuzz": attr.label(
@@ -116,12 +86,6 @@ _fuzz_test = rule(
         ),
     },
 )
-
-def fuzz_binary(**kwargs):
-    _fuzz(
-        command = "run",
-        **kwargs
-    )
 
 def fuzz_test(**kwargs):
     _fuzz_test(
