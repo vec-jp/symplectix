@@ -32,10 +32,7 @@ pub async fn wait(mut process: Process) -> Result {
         biased;
         _ = interrupt.recv() => { false },
         _ = terminate.recv() => { false },
-        r = process.wait() => match r {
-            Ok(None) => true,
-            _ => false,
-        },
+        r = process.wait() => matches!(r, Ok(None)),
     };
 
     let exit_status = process.stop(true).await.map_err(Error::Io)?;
