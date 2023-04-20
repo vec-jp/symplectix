@@ -10,7 +10,6 @@ pub struct Fuzz {
 
 #[derive(Clone, Debug, clap::Subcommand)]
 enum Command {
-    Run(cmd::Run),
     Test(cmd::Test),
     Prep(cmd::Prep),
 }
@@ -18,7 +17,6 @@ enum Command {
 impl Fuzz {
     async fn run(self) -> anyhow::Result<()> {
         match self.command {
-            Command::Run(f) => f.run().await,
             Command::Test(f) => f.run().await,
             Command::Prep(p) => p.run().await,
         }
