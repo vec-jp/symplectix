@@ -55,13 +55,13 @@ _packages = {
         version = "0.9",
     ),
     "libssh2-sys": crate.spec(
-        version = "0.2",
+        version = "0.3",
     ),
     "git2": crate.spec(
-        version = "0.16.1",
+        version = "0.17.2",
     ),
     "libgit2-sys": crate.spec(
-        version = "0.14.2+1.5.1",
+        version = "0.15.2+1.6.4",
     ),
     "serde": crate.spec(
         version = "1.0.188",
