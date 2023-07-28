@@ -3,7 +3,7 @@ load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
-    "cargo.lock",
+    "Cargo.lock",
 ])
 
 cargo_build_script(
