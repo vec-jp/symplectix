@@ -2,10 +2,10 @@ sh_binary(
     name = "audit",
     srcs = ["audit.sh"],
     args = [
-        "$(rootpath //build/deps/crates:Cargo.lock)",
+        "$(rootpath //build/deps/crates:cargo.lock)",
     ],
     data = [
-        "@//build/deps/crates:Cargo.lock",
+        "@//build/deps/crates:cargo.lock",
         "@crates//:cargo-audit__cargo-audit",
     ],
     env = {
