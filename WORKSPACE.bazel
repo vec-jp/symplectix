@@ -1,6 +1,6 @@
 workspace(name = "trunk")
 
-load("@//:toolchain.bzl", "GO_VERSION", "RUST_EDITION", "RUST_VERSIONS")
+load("@//:toolchain.bzl", "GO_VERSION", "RUST_EDITION", "RUST_STABLE_VERSION", "RUST_VERSIONS")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Platforms
@@ -57,6 +57,11 @@ perl_rules_dependencies()
 
 perl_register_toolchains()
 
+# External build dependencies
+load("@//build/deps:repositories.bzl", build_deps_repositories = "repositories")
+
+build_deps_repositories()
+
 # Rust
 http_archive(
     name = "rules_rust",
@@ -82,14 +87,33 @@ rust_register_toolchains(
 
 rust_analyzer_dependencies()
 
-# External build dependencies
-load("@//build/deps:repositories.bzl", build_deps_repositories = "repositories")
+load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 
-build_deps_repositories()
+crate_universe_dependencies(
+    rust_version = RUST_STABLE_VERSION,
+)
 
-load("@//build/deps:setup.bzl", build_deps_setup = "setup")
+load("@//build/deps/crates:crates.bzl", "crates")
+load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "splicing_config")
 
-build_deps_setup()
+# Repinning
+# https://bazelbuild.github.io/rules_rust/crate_universe.html#repinning--updating-dependencies
+crates_repository(
+    name = "crates",
+    annotations = crates.annotations,
+    cargo_lockfile = "//build/deps/crates:cargo.lock",
+    lockfile = "//build/deps/crates:cargo-bazel-lock.json",
+    packages = crates.packages,
+    # The version of Rust the currently registered toolchain is using.
+    rust_version = RUST_STABLE_VERSION,
+    splicing_config = splicing_config(
+        resolver_version = "2",
+    ),
+)
+
+load("@crates//:defs.bzl", "crate_repositories")
+
+crate_repositories()
 
 # Protocol Buffers
 # For tonic/prost: https://github.com/rules-proto-grpc/rules_proto_grpc/pull/202
