@@ -182,6 +182,6 @@ _rust_image_repos()
 # Bazel Buildtools
 http_archive(
     name = "com_github_bazelbuild_buildtools",
-    strip_prefix = "buildtools-6.0.0",
-    urls = ["https://github.com/bazelbuild/buildtools/archive/refs/tags/6.0.0.tar.gz"],
+    strip_prefix = "buildtools-6.1.2",
+    urls = ["https://github.com/bazelbuild/buildtools/archive/refs/tags/6.1.2.tar.gz"],
 )
