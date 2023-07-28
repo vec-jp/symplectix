@@ -119,7 +119,7 @@ crates_repository(
     name = "crates",
     annotations = crates.annotations,
     cargo_lockfile = "//build/deps/crates:cargo.lock",
-    lockfile = "//build/deps/crates:cargo-bazel-lock.json",
+    lockfile = "//build/deps/crates:cargo.bazel.lock",
     packages = crates.packages,
     # The version of Rust the currently registered toolchain is using.
     rust_version = RUST_STABLE_VERSION,
