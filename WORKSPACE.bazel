@@ -87,9 +87,9 @@ load("@//build/deps:repositories.bzl", build_deps_repositories = "repositories")
 
 build_deps_repositories()
 
-load("@//build/deps:init.bzl", build_deps_init = "init")
+load("@//build/deps:setup.bzl", build_deps_setup = "setup")
 
-build_deps_init()
+build_deps_setup()
 
 # Protocol Buffers
 # For tonic/prost: https://github.com/rules-proto-grpc/rules_proto_grpc/pull/202

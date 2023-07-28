@@ -1,4 +1,4 @@
 load("@crates//:defs.bzl", "crate_repositories")
 
-def init():
+def setup():
     crate_repositories()
