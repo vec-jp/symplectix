@@ -62,6 +62,23 @@ load("@//build/deps:repositories.bzl", build_deps_repositories = "repositories")
 
 build_deps_repositories()
 
+# Protocol Buffers
+# For tonic/prost: https://github.com/rules-proto-grpc/rules_proto_grpc/pull/202
+http_archive(
+    name = "rules_proto",
+    sha256 = "dc3fb206a2cb3441b485eb1e423165b231235a1ea9b031b4433cf7bc1fa460dd",
+    strip_prefix = "rules_proto-5.3.0-21.7",
+    urls = [
+        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.7.tar.gz",
+    ],
+)
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+
+rules_proto_dependencies()
+
+rules_proto_toolchains()
+
 # Rust
 http_archive(
     name = "rules_rust",
@@ -115,39 +132,22 @@ load("@crates//:defs.bzl", "crate_repositories")
 
 crate_repositories()
 
-# Protocol Buffers
-# For tonic/prost: https://github.com/rules-proto-grpc/rules_proto_grpc/pull/202
-http_archive(
-    name = "rules_proto",
-    sha256 = "dc3fb206a2cb3441b485eb1e423165b231235a1ea9b031b4433cf7bc1fa460dd",
-    strip_prefix = "rules_proto-5.3.0-21.7",
-    urls = [
-        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.7.tar.gz",
-    ],
-)
-
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
-
-rules_proto_dependencies()
-
-rules_proto_toolchains()
-
 # Go
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "dd926a88a564a9246713a9c00b35315f54cbd46b31a26d5d8fb264c07045f05d",
+    sha256 = "51dc53293afe317d2696d4d6433a4c33feedb7748a9e352072e2ec3c0dafd2c6",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.38.1/rules_go-v0.38.1.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.38.1/rules_go-v0.38.1.zip",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.40.1/rules_go-v0.40.1.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.40.1/rules_go-v0.40.1.zip",
     ],
 )
 
 http_archive(
     name = "bazel_gazelle",
-    sha256 = "ecba0f04f96b4960a5b250c8e8eeec42281035970aa8852dda73098274d14a1d",
+    sha256 = "727f3e4edd96ea20c29e8c2ca9e8d2af724d8c7778e7923a854b2c80952bc405",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.29.0/bazel-gazelle-v0.29.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.29.0/bazel-gazelle-v0.29.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.30.0/bazel-gazelle-v0.30.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.30.0/bazel-gazelle-v0.30.0.tar.gz",
     ],
 )
 
