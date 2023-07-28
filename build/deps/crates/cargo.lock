@@ -159,9 +159,9 @@ dependencies = [
 
 [[package]]
 name = "auditable-info"
-version = "0.6.2"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "158d56117c834b6e90edbe4c5b5caaefff0996eebe8b952108a0a491330344ee"
+checksum = "e563c9e31a71d1a6f2ab7a5a168cdb0d387f59bde891aac5957b9ebaaf03f602"
 dependencies = [
  "auditable-extract",
  "auditable-serde",
@@ -171,9 +171,9 @@ dependencies = [
 
 [[package]]
 name = "auditable-serde"
-version = "0.5.2"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57ba7d807ad2850c436750154dbc442eb8611527deb6dfcc4e5e0bd10d5fbf28"
+checksum = "b23f8f6711ddeb1c2a163edc94dff5d7c805ca484d33e3464e779741805790c0"
 dependencies = [
  "cargo-lock",
  "semver",
@@ -235,16 +235,18 @@ checksum = "e6e9e01327e6c86e92ec72b1c798d4a94810f147209bbe3ffab6a86954937a6f"
 
 [[package]]
 name = "cargo-audit"
-version = "0.17.5"
+version = "0.17.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9687fb6e8e2217aac2e72955ffb03d2d93b987f5f36a806787a5c64b38db0d13"
+checksum = "d7c04d2178b9ff56e0d4500d10d72d3a5d8156c2d6b6fc193e28a524dadde5c5"
 dependencies = [
  "abscissa_core",
  "auditable-info",
  "auditable-serde",
+ "binfarce",
  "cargo-lock",
  "clap 3.2.23",
  "home",
+ "once_cell",
  "quitters",
  "rustsec",
  "serde",
@@ -254,14 +256,14 @@ dependencies = [
 
 [[package]]
 name = "cargo-lock"
-version = "8.0.3"
+version = "9.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "031718ddb8f78aa5def78a09e90defe30151d1f6c672f937af4dd916429ed996"
+checksum = "e11c675378efb449ed3ce8de78d75d0d80542fc98487c26aba28eb3b82feac72"
 dependencies = [
  "petgraph",
  "semver",
  "serde",
- "toml 0.5.11",
+ "toml 0.7.3",
  "url",
 ]
 
@@ -1372,9 +1374,9 @@ dependencies = [
 
 [[package]]
 name = "rustsec"
-version = "0.26.5"
+version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "252facd5756861013b3dbad84b0568036a4310014311f064e56b214ccc4364db"
+checksum = "cabcfea780f9b2f75bc2eaae946621fa42cb18189f41cda4dee608ea73a9c397"
 dependencies = [
  "cargo-lock",
  "crates-index",

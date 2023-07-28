@@ -135,7 +135,7 @@ _packages = {
 
     # Audit
     "cargo-audit": crate.spec(
-        version = "0.17.5",
+        version = "0.17.6",
     ),
 }
 

@@ -1,5 +1,5 @@
 {
-  "checksum": "3d03c2183ad0e310f2922e7a31dc494e880535906bd4f90109634c4d01cdd8d1",
+  "checksum": "1daa967de0cd373309b023ebac74e29cfd5d0d5b5a98607964f0d5f468b688e2",
   "crates": {
     "abscissa_core 0.6.0": {
       "name": "abscissa_core",
@@ -805,13 +805,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "auditable-info 0.6.2": {
+    "auditable-info 0.7.0": {
       "name": "auditable-info",
-      "version": "0.6.2",
+      "version": "0.7.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/auditable-info/0.6.2/download",
-          "sha256": "158d56117c834b6e90edbe4c5b5caaefff0996eebe8b952108a0a491330344ee"
+          "url": "https://crates.io/api/v1/crates/auditable-info/0.7.0/download",
+          "sha256": "e563c9e31a71d1a6f2ab7a5a168cdb0d387f59bde891aac5957b9ebaaf03f602"
         }
       },
       "targets": [
@@ -846,7 +846,7 @@
               "target": "auditable_extract"
             },
             {
-              "id": "auditable-serde 0.5.2",
+              "id": "auditable-serde 0.6.0",
               "target": "auditable_serde"
             },
             {
@@ -861,17 +861,17 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.6.2"
+        "version": "0.7.0"
       },
       "license": "MIT OR Apache-2.0"
     },
-    "auditable-serde 0.5.2": {
+    "auditable-serde 0.6.0": {
       "name": "auditable-serde",
-      "version": "0.5.2",
+      "version": "0.6.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/auditable-serde/0.5.2/download",
-          "sha256": "57ba7d807ad2850c436750154dbc442eb8611527deb6dfcc4e5e0bd10d5fbf28"
+          "url": "https://crates.io/api/v1/crates/auditable-serde/0.6.0/download",
+          "sha256": "b23f8f6711ddeb1c2a163edc94dff5d7c805ca484d33e3464e779741805790c0"
         }
       },
       "targets": [
@@ -901,7 +901,7 @@
         "deps": {
           "common": [
             {
-              "id": "cargo-lock 8.0.3",
+              "id": "cargo-lock 9.0.0",
               "target": "cargo_lock"
             },
             {
@@ -924,7 +924,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.5.2"
+        "version": "0.6.0"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -1215,13 +1215,13 @@
       },
       "license": "Apache-2.0"
     },
-    "cargo-audit 0.17.5": {
+    "cargo-audit 0.17.6": {
       "name": "cargo-audit",
-      "version": "0.17.5",
+      "version": "0.17.6",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/cargo-audit/0.17.5/download",
-          "sha256": "9687fb6e8e2217aac2e72955ffb03d2d93b987f5f36a806787a5c64b38db0d13"
+          "url": "https://crates.io/api/v1/crates/cargo-audit/0.17.6/download",
+          "sha256": "d7c04d2178b9ff56e0d4500d10d72d3a5d8156c2d6b6fc193e28a524dadde5c5"
         }
       },
       "targets": [
@@ -1263,15 +1263,19 @@
               "target": "abscissa_core"
             },
             {
-              "id": "auditable-info 0.6.2",
+              "id": "auditable-info 0.7.0",
               "target": "auditable_info"
             },
             {
-              "id": "auditable-serde 0.5.2",
+              "id": "auditable-serde 0.6.0",
               "target": "auditable_serde"
             },
             {
-              "id": "cargo-lock 8.0.3",
+              "id": "binfarce 0.2.1",
+              "target": "binfarce"
+            },
+            {
+              "id": "cargo-lock 9.0.0",
               "target": "cargo_lock"
             },
             {
@@ -1283,11 +1287,15 @@
               "target": "home"
             },
             {
+              "id": "once_cell 1.17.0",
+              "target": "once_cell"
+            },
+            {
               "id": "quitters 0.1.0",
               "target": "quitters"
             },
             {
-              "id": "rustsec 0.26.5",
+              "id": "rustsec 0.27.0",
               "target": "rustsec"
             },
             {
@@ -1306,17 +1314,17 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.17.5"
+        "version": "0.17.6"
       },
       "license": "Apache-2.0 OR MIT"
     },
-    "cargo-lock 8.0.3": {
+    "cargo-lock 9.0.0": {
       "name": "cargo-lock",
-      "version": "8.0.3",
+      "version": "9.0.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/cargo-lock/8.0.3/download",
-          "sha256": "031718ddb8f78aa5def78a09e90defe30151d1f6c672f937af4dd916429ed996"
+          "url": "https://crates.io/api/v1/crates/cargo-lock/9.0.0/download",
+          "sha256": "e11c675378efb449ed3ce8de78d75d0d80542fc98487c26aba28eb3b82feac72"
         }
       },
       "targets": [
@@ -1357,7 +1365,7 @@
               "target": "serde"
             },
             {
-              "id": "toml 0.5.11",
+              "id": "toml 0.7.3",
               "target": "toml"
             },
             {
@@ -1368,7 +1376,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "8.0.3"
+        "version": "9.0.0"
       },
       "license": "Apache-2.0 OR MIT"
     },
@@ -2469,7 +2477,7 @@
               "target": "bitflags"
             },
             {
-              "id": "cargo-audit 0.17.5",
+              "id": "cargo-audit 0.17.6",
               "target": "cargo_audit"
             },
             {
@@ -7615,13 +7623,13 @@
       },
       "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
     },
-    "rustsec 0.26.5": {
+    "rustsec 0.27.0": {
       "name": "rustsec",
-      "version": "0.26.5",
+      "version": "0.27.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/rustsec/0.26.5/download",
-          "sha256": "252facd5756861013b3dbad84b0568036a4310014311f064e56b214ccc4364db"
+          "url": "https://crates.io/api/v1/crates/rustsec/0.27.0/download",
+          "sha256": "cabcfea780f9b2f75bc2eaae946621fa42cb18189f41cda4dee608ea73a9c397"
         }
       },
       "targets": [
@@ -7651,7 +7659,7 @@
         "deps": {
           "common": [
             {
-              "id": "cargo-lock 8.0.3",
+              "id": "cargo-lock 9.0.0",
               "target": "cargo_lock"
             },
             {
@@ -7710,7 +7718,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.26.5"
+        "version": "0.27.0"
       },
       "license": "Apache-2.0 OR MIT"
     },
@@ -11729,7 +11737,7 @@
     }
   },
   "binary_crates": [
-    "cargo-audit 0.17.5"
+    "cargo-audit 0.17.6"
   ],
   "workspace_members": {
     "direct-cargo-bazel-deps 0.0.1": ""
