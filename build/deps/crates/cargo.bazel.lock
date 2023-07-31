@@ -1,5 +1,5 @@
 {
-  "checksum": "52a7ef114a86cbdb9bf8168d7cca9c35ccc753082abd6ce428365baf96da1703",
+  "checksum": "12a1ab06d9c753a40d11e9e715114b26c8653fdf633165f18e5c256d2874f0bf",
   "crates": {
     "abscissa_core 0.6.0": {
       "name": "abscissa_core",
@@ -1875,7 +1875,7 @@
               "target": "toml"
             },
             {
-              "id": "url 2.3.1",
+              "id": "url 2.4.0",
               "target": "url"
             }
           ],
@@ -3040,10 +3040,6 @@
             {
               "id": "tracing-subscriber 0.3.17",
               "target": "tracing_subscriber"
-            },
-            {
-              "id": "url 2.3.1",
-              "target": "url"
             }
           ],
           "selects": {}
@@ -4339,7 +4335,7 @@
               "target": "log"
             },
             {
-              "id": "url 2.3.1",
+              "id": "url 2.4.0",
               "target": "url"
             }
           ],
@@ -5159,13 +5155,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "idna 0.3.0": {
+    "idna 0.4.0": {
       "name": "idna",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/idna/0.3.0/download",
-          "sha256": "e14ddfc70884202db2244c223200c204c2bda1bc6e0998d11b5e024d657209e6"
+          "url": "https://crates.io/api/v1/crates/idna/0.4.0/download",
+          "sha256": "7d20d6b07bfbc108882d88ed8e37d39636dcc260e15e30c45e6ba089610b917c"
         }
       },
       "targets": [
@@ -5184,6 +5180,14 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "alloc",
+            "default",
+            "std"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -5198,7 +5202,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.3.0"
+        "version": "0.4.0"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -9639,7 +9643,7 @@
               "target": "toml"
             },
             {
-              "id": "url 2.3.1",
+              "id": "url 2.4.0",
               "target": "url"
             }
           ],
@@ -12583,7 +12587,6 @@
         ],
         "crate_features": {
           "common": [
-            "default",
             "hardcoded-data",
             "std"
           ],
@@ -12651,7 +12654,6 @@
         ],
         "crate_features": {
           "common": [
-            "default",
             "std"
           ],
           "selects": {}
@@ -12706,13 +12708,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "url 2.3.1": {
+    "url 2.4.0": {
       "name": "url",
-      "version": "2.3.1",
+      "version": "2.4.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/url/2.3.1/download",
-          "sha256": "0d68c799ae75762b8c3fe375feb6600ef5602c883c5d21eb51c09f22b83c4643"
+          "url": "https://crates.io/api/v1/crates/url/2.4.0/download",
+          "sha256": "50bff7831e19200a85b17131d085c25d7811bc4e186efdaf54bbd132994a88cb"
         }
       },
       "targets": [
@@ -12745,7 +12747,7 @@
               "target": "form_urlencoded"
             },
             {
-              "id": "idna 0.3.0",
+              "id": "idna 0.4.0",
               "target": "idna"
             },
             {
@@ -12760,7 +12762,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "2.3.1"
+        "version": "2.4.0"
       },
       "license": "MIT OR Apache-2.0"
     },

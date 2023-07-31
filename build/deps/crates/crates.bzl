@@ -166,13 +166,6 @@ _packages = {
         version = "1",
     ),
 
-    # TODO: Remove from crates.bzl
-    # error[E0599]: the method `serialize` exists for tuple but its trait bounds were not satisfied
-    # --> external/crates__url-2.4.0/src/lib.rs:2508:14
-    "url": crate.spec(
-        version = "~2.3",
-    ),
-
     # Audit
     "cargo-audit": crate.spec(
         version = "0.17.6",
