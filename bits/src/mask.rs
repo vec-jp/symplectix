@@ -77,9 +77,7 @@ mod impl_mask {
         type Bits = Cow<'a, T>;
         type Iter = Blocks<'a, T>;
         fn into_mask(self) -> Self::Iter {
-            Blocks {
-                blocks: self.iter().enumerate(),
-            }
+            Blocks { blocks: self.iter().enumerate() }
         }
     }
 
@@ -91,8 +89,7 @@ mod impl_mask {
         type Item = (usize, Cow<'a, T>);
         #[inline]
         fn next(&mut self) -> Option<Self::Item> {
-            self.blocks
-                .find_map(|(i, b)| b.any().then(|| (i, Cow::Borrowed(b))))
+            self.blocks.find_map(|(i, b)| b.any().then(|| (i, Cow::Borrowed(b))))
         }
     }
 }

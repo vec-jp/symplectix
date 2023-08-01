@@ -55,7 +55,14 @@ mod tests {
     async fn run_process() {
         use Error::*;
 
-        let Ok(_) = wait(Command::new("sleep").arg("0.1").spawn().await.unwrap()).await else {
+        let Ok(_) = wait(
+            Command::new("sleep")
+                .arg("0.1")
+                .spawn()
+                .await
+                .unwrap(),
+        )
+        .await else {
             panic!("expected that the command 'sleep' exit successfully");
         };
 
@@ -67,8 +74,7 @@ mod tests {
                 .await
                 .unwrap(),
         )
-        .await
-        else {
+        .await else {
             panic!("expected that the command 'sleep' times out");
         };
     }
