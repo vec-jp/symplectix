@@ -99,14 +99,19 @@ impl Command {
             Stdio::inherit()
         });
 
-        cmd.env_clear().envs(env::vars().filter(|(key, _)| self.envs.contains(key)));
+        cmd.env_clear()
+            .envs(env::vars().filter(|(key, _)| self.envs.contains(key)));
 
         // Put the child into a new process group.
         cmd.process_group(0);
 
         let child = process::Command::from(cmd).spawn()?;
         let id = child.id().expect("fetching the OS-assigned process id");
-        Ok(Process { child, id, timeout: self.timeout })
+        Ok(Process {
+            child,
+            id,
+            timeout: self.timeout,
+        })
     }
 }
 

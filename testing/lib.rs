@@ -19,8 +19,13 @@ static RUNFILES: Lazy<Runfiles> =
 
 // Signifies test executable is being driven by bazel test.
 // https://bazel.build/reference/test-encyclopedia
-static BAZEL_TEST: Lazy<bool> =
-    Lazy::new(|| if let Ok(val) = env::var("BAZEL_TEST") { val == "1" } else { false });
+static BAZEL_TEST: Lazy<bool> = Lazy::new(|| {
+    if let Ok(val) = env::var("BAZEL_TEST") {
+        val == "1"
+    } else {
+        false
+    }
+});
 
 /// Absolute path to the base of the runfiles tree.
 pub static SRCDIR: Lazy<String> =
@@ -93,10 +98,15 @@ impl TempDirExt for TempDir {
 
         let filepath = self.path().join(path);
         let Some(dir) = filepath.parent() else {
-            return Err(io::Error::new(io::ErrorKind::Other, format!("no parent '{}'", filepath.display())));
+            return Err(io::Error::new(
+                io::ErrorKind::Other,
+                format!("no parent '{}'", filepath.display()),
+            ));
         };
 
-        fs::create_dir_all(dir).and_then(|_| options.open(&filepath)).map(|file| (file, filepath))
+        fs::create_dir_all(dir)
+            .and_then(|_| options.open(&filepath))
+            .map(|file| (file, filepath))
     }
 }
 

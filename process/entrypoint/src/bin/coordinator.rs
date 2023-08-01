@@ -97,7 +97,10 @@ mod tests {
             .iter()
             .map(|path| {
                 temp_dir
-                    .create_file(fs::OpenOptions::new().create(true).read(true).write(true), path)
+                    .create_file(
+                        fs::OpenOptions::new().create(true).read(true).write(true),
+                        path,
+                    )
                     .expect("create a temporary file")
             })
             .unzip();
@@ -113,10 +116,14 @@ mod tests {
         wait(&[]).await.expect("wait for nothing");
 
         let mut oks = create_files(&temp_dir, vec!["柏/の/葉/ok", "秋/葉/原/ok"]);
-        wait(&oks).await.expect("waiting for files created just before");
+        wait(&oks)
+            .await
+            .expect("waiting for files created just before");
 
         let errs = create_files(&temp_dir, vec!["0.err"]);
-        wait(&oks).await.expect("affected by an error file not waiting for");
+        wait(&oks)
+            .await
+            .expect("affected by an error file not waiting for");
 
         let more_oks = create_files(&temp_dir, vec!["0"]);
         oks.extend_from_slice(&more_oks);

@@ -117,7 +117,10 @@ impl<T: Block> BitAux<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> BitAux<Vec<T>> {
         let dat = bits::new(n);
-        BitAux { poppy: Poppy::new(dat.bits()), inner: dat }
+        BitAux {
+            poppy: Poppy::new(dat.bits()),
+            inner: dat,
+        }
     }
 }
 

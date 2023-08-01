@@ -81,7 +81,10 @@ where
     type Iter = Union<A::Iter, B::Iter>;
     #[inline]
     fn into_mask(self) -> Self::Iter {
-        Union { a: self.a.into_mask().fuse().peekable(), b: self.b.into_mask().fuse().peekable() }
+        Union {
+            a: self.a.into_mask().fuse().peekable(),
+            b: self.b.into_mask().fuse().peekable(),
+        }
     }
 }
 
