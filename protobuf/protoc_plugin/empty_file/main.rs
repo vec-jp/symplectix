@@ -13,10 +13,11 @@ impl protoc_plugin::CodeGenerator for EmptyFileGenerator {
 
         resp.file.extend(req.file_to_generate.iter().map(|f| {
             let stem = f.strip_suffix(".proto").expect("no .proto suffix");
-            let mut file = code_generator_response::File::default();
-            file.name = Some(format!("{}.empty", stem));
-            file.content = None;
-            file
+            code_generator_response::File {
+                name: Some(format!("{}.empty", stem)),
+                content: None,
+                ..Default::default()
+            }
         }));
 
         resp
