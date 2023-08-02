@@ -1,4 +1,3 @@
-load("@rules_proto//proto:defs.bzl", "ProtoInfo")
 load(
     "@rules_proto_grpc//:defs.bzl",
     "ProtoPluginInfo",

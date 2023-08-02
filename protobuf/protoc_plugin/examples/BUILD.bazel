@@ -1,5 +1,5 @@
-load("//protobuf/protoc_plugin:defs.bzl", "empty_file_compile")
 load("@rules_proto//proto:defs.bzl", "proto_library")
+load("//protobuf/protoc_plugin:defs.bzl", "empty_file_compile")
 
 proto_library(
     name = "customer_proto",

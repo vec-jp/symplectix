@@ -1,10 +1,15 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary")
 load("@rules_proto_grpc//:defs.bzl", "proto_plugin")
+load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 rust_binary(
     name = "empty_file_generator",
     srcs = ["main.rs"],
+    rustc_flags = [
+        "-Copt-level=3",
+        "-Cdebuginfo=2",
+    ],
     deps = [
+        "//protobuf/protoc_plugin",
         "@crates//:anyhow",
         "@crates//:prost",
         "@crates//:prost-types",
@@ -13,7 +18,8 @@ rust_binary(
 
 proto_plugin(
     name = "empty_file",
-    outputs = ["{protopath}.empty"],  # {protopath} gets replaced with relative path to each .proto file
-    tool = ":empty_file_generator",  # Point this at your plugin binary target, use select if desired
+    # {protopath} gets replaced with relative path to each .proto file
+    outputs = ["{protopath}.empty"],
+    tool = ":empty_file_generator",
     visibility = ["//visibility:public"],
 )
