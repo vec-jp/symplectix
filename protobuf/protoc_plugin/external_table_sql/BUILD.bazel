@@ -12,13 +12,13 @@ rust_binary(
         "//protobuf/protoc_plugin",
         "@crates//:anyhow",
         "@crates//:prost",
+        "@crates//:prost-reflect",
         "@crates//:prost-types",
     ],
 )
 
 proto_plugin(
     name = "external_table_sql",
-    # {protopath} gets replaced with relative path to each .proto file
     outputs = ["{protopath}.external_table.sql"],
     tool = ":external_table_sql_generator",
     visibility = ["//visibility:public"],

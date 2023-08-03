@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
+use prost_reflect::DescriptorPool;
 use prost_types::{
     compiler::{code_generator_response, CodeGeneratorRequest, CodeGeneratorResponse},
     field_descriptor_proto::{Label, Type},
-    FileDescriptorProto,
+    FileDescriptorProto, FileDescriptorSet,
 };
 
 fn main() -> anyhow::Result<()> {
@@ -13,61 +14,44 @@ fn main() -> anyhow::Result<()> {
 #[derive(Debug, Default, Clone)]
 struct ExternalTableSqlGenerator {}
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
-struct Table {
-    name: String,
-    columns: Vec<Column>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct Column {
-    name: String,
-    label: Label,
-    r#type: Type,
-    type_name: Option<String>,
-}
-
 impl protoc_plugin::CodeGenerator for ExternalTableSqlGenerator {
     fn gen_code(&self, req: CodeGeneratorRequest) -> CodeGeneratorResponse {
-        eprintln!("{:?}", req.parameter());
+        let pool = {
+            let fd_set = FileDescriptorSet { file: req.proto_file.clone() };
+            DescriptorPool::from_file_descriptor_set(fd_set)
+                .expect("failed to create descriptor pool")
+        };
 
-        let mut resp = CodeGeneratorResponse::default();
+        let file = req
+            .file_to_generate
+            .iter()
+            .map(|file| {
+                let file_desc = pool
+                    .get_file_by_name(file.as_str())
+                    .expect("failed to fetch a file descriptor from a pool");
 
-        let file_desc_protos =
-            req.proto_file.iter().map(|fd| (fd.name(), fd)).collect::<HashMap<_, _>>();
+                let mut buf = String::with_capacity(1 << 10);
+                for msg_desc in file_desc.messages() {
+                    // buf.push_str(&format!("{:#?}\n", msg_desc));
 
-        // let type_desc_protos: HashMap<&str, &DescriptorProto> = unimplemented!();
-        // let enum_desc_protos: HashMap<&str, &DescriptorProto> = unimplemented!();
+                    for field_desc in msg_desc.fields() {
+                        buf.push_str(&format!(
+                            "{name}: {kind:?}\n",
+                            name = field_desc.name(),
+                            kind = field_desc.kind()
+                        ));
+                    }
+                }
 
-        for f in &req.file_to_generate {
-            let file_desc = file_desc_protos[f.as_str()];
-            for type_desc in &file_desc.message_type {
-                let name = type_desc.name().to_owned();
-                let columns = type_desc
-                    .field
-                    .iter()
-                    .map(|field| Column {
-                        name: field.name().to_owned(),
-                        label: field.label(),
-                        r#type: field.r#type(),
-                        type_name: field.type_name.clone(),
-                    })
-                    .collect();
+                let stem = file.strip_suffix(".proto").expect("no .proto suffix");
+                code_generator_response::File {
+                    name: Some(format!("{}.external_table.sql", stem)),
+                    content: Some(buf),
+                    ..Default::default()
+                }
+            })
+            .collect();
 
-                let table = Table { name, columns };
-                eprintln!("{:#?}", table);
-            }
-        }
-
-        resp.file.extend(req.file_to_generate.iter().map(|f| {
-            let stem = f.strip_suffix(".proto").expect("no .proto suffix");
-            code_generator_response::File {
-                name: Some(format!("{}.external_table.sql", stem)),
-                content: None,
-                ..Default::default()
-            }
-        }));
-
-        resp
+        CodeGeneratorResponse { file, ..Default::default() }
     }
 }
