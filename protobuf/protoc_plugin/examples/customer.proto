@@ -1,9 +1,8 @@
 syntax = "proto3";
 
-package trunk.protobuf.compiler.plugin.examples;
+package trunk.protobuf.protoc_plugin.examples;
 
 import "google/protobuf/any.proto";
-
 
 message Customer {
     message Id {
@@ -32,7 +31,17 @@ message Customer {
 
     repeated Id ids = 1;
 
-    google.protobuf.Any payload = 2;
+    enum Type {
+        UNKNOWN = 0;
+        A = 1;
+        B = 2;
+    }
+    Type type = 2;
+
+    google.protobuf.Any payload = 3;
+
+    int32 i32 = 4;
+    int64 i64 = 5;
 
     reserved 100 to max;
 }
