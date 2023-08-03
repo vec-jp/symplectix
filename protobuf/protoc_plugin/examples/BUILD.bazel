@@ -1,5 +1,5 @@
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("//protobuf/protoc_plugin:defs.bzl", "empty_file_compile")
+load("//protobuf/protoc_plugin:defs.bzl", "empty_file_compile", "external_table_sql_compile")
 
 proto_library(
     name = "customer_proto",
@@ -9,5 +9,10 @@ proto_library(
 
 empty_file_compile(
     name = "customer_proto_empty_file",
+    protos = [":customer_proto"],
+)
+
+external_table_sql_compile(
+    name = "customer_external_table_sql",
     protos = [":customer_proto"],
 )
