@@ -17,13 +17,13 @@ empty_file_compile = rule(
     toolchains = [str(Label("@rules_proto_grpc//protobuf:toolchain_type"))],
 )
 
-external_table_sql_compile = rule(
+message_descriptor_dump_compile = rule(
     implementation = proto_compile_impl,
     attrs = dict(
         proto_compile_attrs,
         _plugins = attr.label_list(
             providers = [ProtoPluginInfo],
-            default = [Label("//protobuf/protoc_plugin/external_table_sql")],
+            default = [Label("//protobuf/protoc_plugin/message_descriptor_dump")],
         ),
     ),
     toolchains = [str(Label("@rules_proto_grpc//protobuf:toolchain_type"))],

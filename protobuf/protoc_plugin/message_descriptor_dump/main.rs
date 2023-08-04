@@ -1,13 +1,13 @@
 use prost_types::compiler::{code_generator_response, CodeGeneratorRequest, CodeGeneratorResponse};
 
 fn main() -> anyhow::Result<()> {
-    protoc_plugin::run(ExternalTableSqlGenerator::default())
+    protoc_plugin::run(MessageDescriptorDumpGenerator::default())
 }
 
 #[derive(Debug, Default, Clone)]
-struct ExternalTableSqlGenerator {}
+struct MessageDescriptorDumpGenerator {}
 
-impl protoc_plugin::CodeGenerator for ExternalTableSqlGenerator {
+impl protoc_plugin::CodeGenerator for MessageDescriptorDumpGenerator {
     fn gen_code(&self, req: CodeGeneratorRequest) -> CodeGeneratorResponse {
         let pool = protoc_plugin::create_descriptor_pool(&req);
 
@@ -17,7 +17,7 @@ impl protoc_plugin::CodeGenerator for ExternalTableSqlGenerator {
             .map(|file| {
                 let file_name = {
                     let stem = file.strip_suffix(".proto").expect("no .proto suffix");
-                    format!("{}.external_table.sql", stem)
+                    format!("{}.message_descriptor_dump", stem)
                 };
 
                 let file_desc = pool

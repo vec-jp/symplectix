@@ -1,5 +1,5 @@
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("//protobuf/protoc_plugin:defs.bzl", "empty_file_compile", "external_table_sql_compile")
+load("//protobuf/protoc_plugin:defs.bzl", "empty_file_compile", "message_descriptor_dump_compile")
 
 proto_library(
     name = "customer_proto",
@@ -12,7 +12,7 @@ empty_file_compile(
     protos = [":customer_proto"],
 )
 
-external_table_sql_compile(
-    name = "customer_external_table_sql",
+message_descriptor_dump_compile(
+    name = "examples_message_descriptor_dump",
     protos = [":customer_proto"],
 )

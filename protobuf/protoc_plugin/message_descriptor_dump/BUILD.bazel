@@ -2,7 +2,7 @@ load("@rules_proto_grpc//:defs.bzl", "proto_plugin")
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 rust_binary(
-    name = "external_table_sql_generator",
+    name = "message_descriptor_dump_generator",
     srcs = ["main.rs"],
     rustc_flags = [
         "-Copt-level=3",
@@ -18,8 +18,8 @@ rust_binary(
 )
 
 proto_plugin(
-    name = "external_table_sql",
-    outputs = ["{protopath}.external_table.sql"],
-    tool = ":external_table_sql_generator",
+    name = "message_descriptor_dump",
+    outputs = ["{protopath}.message_descriptor_dump"],
+    tool = ":message_descriptor_dump_generator",
     visibility = ["//visibility:public"],
 )
