@@ -1,5 +1,5 @@
 {
-  "checksum": "168d0817e41824664ff7ffc5cda594926ed8875370a6c5252ee55c03a5bc8765",
+  "checksum": "0ba9c01b87d1e242b6cb373c56d8797aecae1ef987d661aa405550fe0aa61a8b",
   "crates": {
     "abscissa_core 0.6.0": {
       "name": "abscissa_core",
