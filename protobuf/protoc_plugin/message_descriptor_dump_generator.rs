@@ -11,7 +11,7 @@ struct MessageDescriptorDumpGenerator {}
 impl protoc_plugin::FileGenerator for MessageDescriptorDumpGenerator {
     fn gen_file(
         &self,
-        target_proto: &String,
+        target_proto: &str,
         file_desc: &FileDescriptor,
     ) -> Result<codegen_response::File, String> {
         let file_name = {

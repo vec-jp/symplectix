@@ -17,7 +17,7 @@ pub trait CodeGenerator {
 pub trait FileGenerator {
     fn gen_file(
         &self,
-        target_proto: &String,
+        target_proto: &str,
         file_desc: &FileDescriptor,
     ) -> Result<codegen_response::File, String>;
 }
@@ -46,7 +46,7 @@ impl<T: FileGenerator> CodeGenerator for T {
             }
         }
 
-        return response;
+        response
     }
 }
 
