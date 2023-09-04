@@ -1,1 +1,1 @@
-which -a env
+#!/usr/bin/env bash
