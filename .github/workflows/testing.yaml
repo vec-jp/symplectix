@@ -28,6 +28,11 @@ jobs:
       # This number begins at 1 for the workflow run's first attempt, and increments with each re-run.
       GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
     steps:
+      # TODO: Remove
+      - run: echo $GITHUB_RUN_ID
+      - run: echo $GITHUB_RUN_NUMBER
+      - run: echo $GITHUB_RUN_ATTEMPT
+
       - uses: actions/checkout@v3
 
       - uses: actions/cache@v3
