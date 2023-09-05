@@ -28,9 +28,6 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
-      # TODO: Remove
-      - run: ./build/stamp/workspace_status.sh
-
       - run: $BAZEL run $BAZEL_ARGS //tool/buildifier
         name: Buildifier
 
