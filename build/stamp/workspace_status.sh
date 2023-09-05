@@ -16,4 +16,4 @@ echo "STABLE_GITHUB_RUN_NUMBER ${GITHUB_RUN_NUMBER:=0}"
 
 # A unique number for each attempt of a particular workflow run in a repository.
 # This number begins at 1 for the workflow run's first attempt, and increments with each re-run.
-echo "GITHUB_RUN_ATTEMPT ${GITHUB_RUN_ATTEMPT:=0}"
+# echo "GITHUB_RUN_ATTEMPT ${GITHUB_RUN_ATTEMPT:=0}"
