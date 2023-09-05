@@ -14,9 +14,6 @@ jobs:
       BAZEL_ARGS: --config=ci
 
     steps:
-      # TODO: Remove
-      - run: ./build/stamp/workspace_status.sh
-
       - uses: actions/checkout@v3
 
       - uses: actions/cache@v3
@@ -30,6 +27,9 @@ jobs:
             ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
+
+      # TODO: Remove
+      - run: ./build/stamp/workspace_status.sh
 
       - run: $BAZEL run $BAZEL_ARGS //tool/buildifier
         name: Buildifier
