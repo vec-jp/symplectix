@@ -7,6 +7,7 @@ on:
 
 jobs:
   bazel:
+    name: Bazel
     runs-on: ${{ inputs.os }}
     env:
       BAZEL: bazel --output_user_root=/tmp/ci/
@@ -28,14 +29,14 @@ jobs:
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
       - run: $BAZEL run $BAZEL_ARGS //tool/buildifier
-        name: buildifier
+        name: Buildifier
 
       - run: $BAZEL build $BAZEL_ARGS //...
-        name: build
+        name: Build
 
       - run: $BAZEL test $BAZEL_ARGS //...
-        name: test
+        name: Test
 
       - run: $BAZEL run $BAZEL_ARGS //tool/audit
-        name: audit
+        name: Audit
         if: github.event_name == 'schedule'

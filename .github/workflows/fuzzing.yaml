@@ -3,6 +3,7 @@ on:
 
 jobs:
   bazel:
+    name: Bazel
     runs-on: [ubuntu-22.04]
     env:
       BAZEL: bazel --output_user_root=/tmp/fuzz/
