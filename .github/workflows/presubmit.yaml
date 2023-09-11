@@ -35,6 +35,7 @@ jobs:
             The subject "{subject}" found in the pull request title didn't match the configured pattern.
             Please ensure that the subject doesn't start with an uppercase character.
   testing:
+    name: Testing
     needs: semantic-pr
     strategy:
       matrix:
