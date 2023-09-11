@@ -6,8 +6,18 @@ on:
       - main
 
 jobs:
+  semantic-pr:
+    name: Validate PR title
+    permissions:
+      pull-requests: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   testing:
     name: Testing
+    needs: semantic-pr
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-12]
