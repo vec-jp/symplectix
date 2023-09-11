@@ -1,5 +1,3 @@
-name: Postsubmit
-
 on:
   schedule:
     - cron: '0 0 * * *'

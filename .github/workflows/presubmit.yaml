@@ -1,5 +1,3 @@
-name: Presubmit
-
 on:
   pull_request:
     branches:
