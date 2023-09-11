@@ -10,7 +10,6 @@ on:
 
 jobs:
   testing:
-    name: Testing
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-12]
@@ -18,5 +17,4 @@ jobs:
     with:
       os: ${{ matrix.os }}
   fuzzing:
-    name: Fuzzing
     uses: ./.github/workflows/fuzzing.yaml
