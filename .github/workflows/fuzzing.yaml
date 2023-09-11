@@ -1,3 +1,5 @@
+name: Fuzzing
+
 on:
   workflow_call:
 
