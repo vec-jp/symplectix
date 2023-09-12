@@ -2,12 +2,6 @@ on:
   workflow_call:
 
 jobs:
-  # For the PR title:
-  # - the name of the primary package affected by the change goes before the colon
-  # - the part after the colon uses the verb tense
-  # - the verb after the colon is lowercase
-  # - there is no trailing period
-  # - should keep the text short as much as possible
   title:
     runs-on: [ubuntu-latest]
     steps:
