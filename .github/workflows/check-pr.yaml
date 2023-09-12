@@ -12,4 +12,4 @@ jobs:
     runs-on: [ubuntu-latest]
     steps:
       - run: |
-          [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/]*:\ [a-z]{1}.*[^.]$ ]]
+          [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/_-]*:\ [a-z]{1}.*[^.]$ ]]
