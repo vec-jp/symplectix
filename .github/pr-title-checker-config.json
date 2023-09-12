@@ -4,10 +4,7 @@
     "color": "EEEEEE"
   },
   "CHECKS": {
-    "prefixes": ["chore: "],
     "regexp": "^[a-z]{1}\\w*: [a-z0-9]{1}.*",
-    "regexpFlags": "i",
-    "ignoreLabels" : []
   },
   "MESSAGES": {
     "success": "All OK",
