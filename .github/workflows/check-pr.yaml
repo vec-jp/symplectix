@@ -7,9 +7,18 @@ jobs:
   # - the part after the colon uses the verb tense
   # - the verb after the colon is lowercase
   # - there is no trailing period
-  title-regexp-match:
-    name: Title regexp match
+  # - should keep the text short as much as possible
+  title-regexp-tests:
+    name: Title regexp tests
     runs-on: [ubuntu-latest]
     steps:
       - run: |
           [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/_-]*:\ [a-z]{1}.*[^.]$ ]]
+
+  body-regexp-tests:
+    name: Body regexp tests
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Dump PR sentences
+        run: |
+          echo "${{ github.event.pull_request.body }}" | sed 's/\([.!?]\) \([[:upper:]]\)/\1\n\2/g'
