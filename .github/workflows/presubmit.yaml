@@ -6,6 +6,13 @@ on:
       - main
 
 jobs:
+  check-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: thehanimo/pr-title-checker@v1.4.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          pass_on_octokit_error: false
   semantic-pr:
     name: Semantic PR
     permissions:
@@ -36,7 +43,7 @@ jobs:
             Please ensure that the subject doesn't start with an uppercase character.
   testing:
     name: Testing
-    needs: semantic-pr
+    needs: check-pr
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-12]

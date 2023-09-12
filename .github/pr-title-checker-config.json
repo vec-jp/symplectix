@@ -1,0 +1,17 @@
+{
+  "LABEL": {
+    "name": "A PR title need formatting",
+    "color": "EEEEEE"
+  },
+  "CHECKS": {
+    "prefixes": ["chore: "],
+    "regexp": "(?![A-Z]).+: ",
+    "regexpFlags": "i",
+    "ignoreLabels" : []
+  },
+  "MESSAGES": {
+    "success": "All OK",
+    "failure": "Failing CI test",
+    "notice": ""
+  }
+}
