@@ -1,11 +1,11 @@
 {
   "LABEL": {
-    "name": "A PR title need formatting",
+    "name": "A PR title needs formatting",
     "color": "EEEEEE"
   },
   "CHECKS": {
     "prefixes": ["chore: "],
-    "regexp": "^[a-z0-9]+: ",
+    "regexp": "^[a-z]{1}\\w*: [a-z0-9]{1}.*",
     "regexpFlags": "i",
     "ignoreLabels" : []
   },
