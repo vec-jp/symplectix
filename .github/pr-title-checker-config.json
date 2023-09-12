@@ -5,7 +5,7 @@
   },
   "CHECKS": {
     "prefixes": ["chore: "],
-    "regexp": "(?![A-Z]).+: ",
+    "regexp": "^[a-z0-9]+: ",
     "regexpFlags": "i",
     "ignoreLabels" : []
   },
