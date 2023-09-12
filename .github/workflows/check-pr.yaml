@@ -1,0 +1,17 @@
+on:
+  workflow_call:
+
+jobs:
+  # For the PR title:
+  # - the name of the primary package affected by the change goes before the colon
+  # - the part after the colon uses the verb tense
+  # - the verb after the colon is lowercase
+  # - there is no trailing period
+  check-pr-title:
+    name: Check PR title
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: thehanimo/pr-title-checker@v1.4.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          pass_on_octokit_error: false
