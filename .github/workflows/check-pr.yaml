@@ -15,3 +15,10 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           pass_on_octokit_error: false
+  check-pr-title-next:
+    name: Check PR title
+    runs-on: [ubuntu-latest]
+    steps:
+      - id: check-pr-title
+        run: |
+          [[ ${{ github.event.pull_request.title }} =~ ^[a-z]{1}[\\w/]*: [a-z0-9]{1}.*[^\\.]$ ]]
