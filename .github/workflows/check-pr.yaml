@@ -21,4 +21,4 @@ jobs:
     steps:
       - name: Regexp match
         run: |
-          [[ "${{ github.event.pull_request.title }}" =~ "^[a-z]{1}[\w/]*: [a-z0-9]{1}.*[^\.]$" ]]
+          [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/]*:\ [a-z]{1}.*[^.]$ ]]
