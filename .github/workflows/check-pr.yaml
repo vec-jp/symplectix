@@ -7,18 +7,9 @@ jobs:
   # - the part after the colon uses the verb tense
   # - the verb after the colon is lowercase
   # - there is no trailing period
-  check-pr-title:
-    name: Check PR title
+  title-regexp-match:
+    name: Title regexp match
     runs-on: [ubuntu-latest]
     steps:
-      - uses: thehanimo/pr-title-checker@v1.4.0
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          pass_on_octokit_error: false
-  check-pr-title-next:
-    name: Check PR title
-    runs-on: [ubuntu-latest]
-    steps:
-      - name: Regexp match
-        run: |
+      - run: |
           [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/]*:\ [a-z]{1}.*[^.]$ ]]
