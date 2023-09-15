@@ -1,20 +1,7 @@
 workspace(name = "trunk")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-RUST_STABLE_VERSION = "1.72.0"
-
-# https://github.com/oxalica/rust-overlay/tree/master/manifests/nightly
-RUST_NIGHTLY_VERSION = "nightly/2023-09-14"
-
-RUST_VERSIONS = [
-    RUST_STABLE_VERSION,
-    RUST_NIGHTLY_VERSION,
-]
-
-RUST_EDITION = "2021"
-
-GO_VERSION = "1.20.5"
+load("//build/deps:versions.bzl", "GO_VERSION", "RUST_EDITION", "RUST_VERSIONS")
 
 # Platforms
 http_archive(
@@ -85,11 +72,6 @@ perl_rules_dependencies()
 
 perl_register_toolchains()
 
-# External build dependencies
-load("@//build/deps:repositories.bzl", build_deps_repositories = "repositories")
-
-build_deps_repositories()
-
 # Protocol Buffers
 http_archive(
     name = "rules_proto",
@@ -127,7 +109,6 @@ http_archive(
 )
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
-load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 
 rules_rust_dependencies()
 
@@ -136,37 +117,9 @@ rust_register_toolchains(
     versions = RUST_VERSIONS,
 )
 
+load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
+
 rust_analyzer_dependencies()
-
-load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
-
-crate_universe_dependencies(
-    rust_version = RUST_STABLE_VERSION,
-)
-
-load("@//build/deps/crates/lib_crates:crates.bzl", "crates")
-load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "splicing_config")
-
-# Repinning
-# CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=lib_crates bazel sync --only=lib_crates
-#
-# https://bazelbuild.github.io/rules_rust/crate_universe.html#repinning--updating-dependencies
-crates_repository(
-    name = "lib_crates",
-    annotations = crates.annotations,
-    cargo_lockfile = "//build/deps/crates/lib_crates:Cargo.lock",
-    lockfile = "//build/deps/crates/lib_crates:Cargo.Bazel.lock",
-    packages = crates.packages,
-    # The version of Rust the currently registered toolchain is using.
-    rust_version = RUST_STABLE_VERSION,
-    splicing_config = splicing_config(
-        resolver_version = "2",
-    ),
-)
-
-load("@lib_crates//:defs.bzl", lib_crates_repositories = "crate_repositories")
-
-lib_crates_repositories()
 
 load("@rules_rust//proto/prost:repositories.bzl", "rust_prost_dependencies")
 
@@ -178,30 +131,14 @@ rust_prost_transitive_repositories()
 
 register_toolchains("//build/toolchains:prost_toolchain")
 
-# In order to depend on a Cargo package that contains binaries but no library:
-# * use http_archive to import its source code,
-# * use crates_repository to make build targets for its dependencies
-# * create build targets for the binary
-#
-# https://bazelbuild.github.io/rules_rust/crate_universe.html#binary-dependencies
-http_archive(
-    name = "geckodriver",
-    build_file = "//build/deps/crates/bin_crates:BUILD.geckodriver.bazel",
-    sha256 = "6847d9046206c0f0189857d356991b9b225554045241cb0d33b43c1c83d732b7",
-    strip_prefix = "geckodriver-0.33.0",
-    type = "tar.gz",
-    urls = ["https://crates.io/api/v1/crates/geckodriver/0.33.0/download"],
-)
+# External build dependencies
+load("//build/deps:repositories.bzl", "build_dependencies")
 
-# CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=bin_crates bazel sync --only=bin_crates
-crates_repository(
-    name = "bin_crates",
-    cargo_lockfile = "//build/deps/crates/bin_crates:Cargo.lock",
-    lockfile = "//build/deps/crates/bin_crates:Cargo.Bazel.lock",
-    manifests = [
-        "@geckodriver//:Cargo.toml",
-    ],
-)
+build_dependencies()
+
+load("@lib_crates//:defs.bzl", lib_crates_repositories = "crate_repositories")
+
+lib_crates_repositories()
 
 load("@bin_crates//:defs.bzl", bin_crates_repositories = "crate_repositories")
 
@@ -217,6 +154,12 @@ http_archive(
     ],
 )
 
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+
+go_rules_dependencies()
+
+go_register_toolchains(version = GO_VERSION)
+
 http_archive(
     name = "bazel_gazelle",
     sha256 = "29218f8e0cebe583643cbf93cae6f971be8a2484cdcfa1e45057658df8d54002",
@@ -227,11 +170,6 @@ http_archive(
 )
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-
-go_rules_dependencies()
-
-go_register_toolchains(version = GO_VERSION)
 
 gazelle_dependencies(go_repository_default_config = "//:WORKSPACE.bazel")
 

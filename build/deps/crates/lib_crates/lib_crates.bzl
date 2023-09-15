@@ -162,7 +162,7 @@ _packages = {
     ),
 }
 
-crates = struct(
+lib_crates = struct(
     annotations = _annotations,
     packages = _packages,
 )
