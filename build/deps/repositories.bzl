@@ -3,7 +3,7 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "splicing_config")
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 load("//build/deps:versions.bzl", "RUST_STABLE_VERSION")
-load("//build/deps/crates/lib_crates:lib_crates.bzl", "lib_crates")
+load("//build/deps/crates:defs.bzl", "lib_crates")
 
 def build_dependencies():
     # openssl
