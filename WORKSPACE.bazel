@@ -144,18 +144,18 @@ crate_universe_dependencies(
     rust_version = RUST_STABLE_VERSION,
 )
 
-load("@//build/deps/crates:crates.bzl", "crates")
+load("@//build/deps/crates/lib_crates:crates.bzl", "crates")
 load("@rules_rust//crate_universe:defs.bzl", "crates_repository", "splicing_config")
 
 # Repinning
-# CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=crates bazel sync --only=crates
+# CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=lib_crates bazel sync --only=lib_crates
 #
 # https://bazelbuild.github.io/rules_rust/crate_universe.html#repinning--updating-dependencies
 crates_repository(
-    name = "crates",
+    name = "lib_crates",
     annotations = crates.annotations,
-    cargo_lockfile = "//build/deps/crates:Cargo.lock",
-    lockfile = "//build/deps/crates:Cargo.Bazel.lock",
+    cargo_lockfile = "//build/deps/crates/lib_crates:Cargo.lock",
+    lockfile = "//build/deps/crates/lib_crates:Cargo.Bazel.lock",
     packages = crates.packages,
     # The version of Rust the currently registered toolchain is using.
     rust_version = RUST_STABLE_VERSION,
@@ -164,9 +164,9 @@ crates_repository(
     ),
 )
 
-load("@crates//:defs.bzl", crates_repositories = "crate_repositories")
+load("@lib_crates//:defs.bzl", lib_crates_repositories = "crate_repositories")
 
-crates_repositories()
+lib_crates_repositories()
 
 load("@rules_rust//proto/prost:repositories.bzl", "rust_prost_dependencies")
 
@@ -193,7 +193,7 @@ http_archive(
     urls = ["https://crates.io/api/v1/crates/geckodriver/0.33.0/download"],
 )
 
-# CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=crate_tools bazel sync --only=crate_tools
+# CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=bin_crates bazel sync --only=bin_crates
 crates_repository(
     name = "bin_crates",
     cargo_lockfile = "//build/deps/crates/bin_crates:Cargo.lock",
