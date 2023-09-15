@@ -119,17 +119,12 @@ rust_register_toolchains(
 
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 
+# Load the dependencies for the rust-project.json generator tool.
+# n.b., rust_register_toolchains in WORKSPACE ensure a rust_analyzer_toolchain is registered.
+#
+# To regenerate the rust-project.json file:
+#   bazel run @rules_rust//tools/rust_analyzer:gen_rust_project
 rust_analyzer_dependencies()
-
-load("@rules_rust//proto/prost:repositories.bzl", "rust_prost_dependencies")
-
-rust_prost_dependencies()
-
-load("@rules_rust//proto/prost:transitive_repositories.bzl", "rust_prost_transitive_repositories")
-
-rust_prost_transitive_repositories()
-
-register_toolchains("//build/toolchains:prost_toolchain")
 
 # External build dependencies
 load("//build/deps:repositories.bzl", "build_deps_repositories")
@@ -139,6 +134,8 @@ build_deps_repositories()
 load("//build/deps:setup.bzl", "build_deps_setup")
 
 build_deps_setup()
+
+register_toolchains("//build/toolchains:prost_toolchain")
 
 # Go
 http_archive(

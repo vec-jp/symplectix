@@ -2,6 +2,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@rules_rust//crate_universe:defs.bzl", "splicing_config")
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
+load("@rules_rust//proto/prost:repositories.bzl", "rust_prost_dependencies")
+load("@rules_rust//proto/prost:transitive_repositories.bzl", "rust_prost_transitive_repositories")
 load("//build/deps:versions.bzl", "RUST_STABLE_VERSION")
 load("//build/deps/crates:defs.bzl", "bin_crates", "lib_crates")
 
@@ -44,7 +46,11 @@ def build_deps_repositories():
         ],
     )
 
-    # n.b., If the current version of rules_rust is not a release artifact,
+    # For prost and tonic.
+    rust_prost_dependencies()
+    rust_prost_transitive_repositories()
+
+    # If the current version of rules_rust is not a release artifact,
     # you may need to set additional flags such as bootstrap = True.
     crate_universe_dependencies()
 
