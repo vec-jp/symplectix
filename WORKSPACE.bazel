@@ -132,17 +132,13 @@ rust_prost_transitive_repositories()
 register_toolchains("//build/toolchains:prost_toolchain")
 
 # External build dependencies
-load("//build/deps:repositories.bzl", "build_dependencies")
+load("//build/deps:repositories.bzl", "build_deps_repositories")
 
-build_dependencies()
+build_deps_repositories()
 
-load("@lib_crates//:defs.bzl", lib_crates_repositories = "crate_repositories")
+load("//build/deps:setup.bzl", "build_deps_setup")
 
-lib_crates_repositories()
-
-load("@bin_crates//:defs.bzl", bin_crates_repositories = "crate_repositories")
-
-bin_crates_repositories()
+build_deps_setup()
 
 # Go
 http_archive(

@@ -5,7 +5,7 @@ load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencie
 load("//build/deps:versions.bzl", "RUST_STABLE_VERSION")
 load("//build/deps/crates:defs.bzl", "bin_crates", "lib_crates")
 
-def build_dependencies():
+def build_deps_repositories():
     # openssl
     maybe(
         http_archive,
@@ -49,8 +49,10 @@ def build_dependencies():
     crate_universe_dependencies()
 
     bin_crates.dependencies()
+
     # CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=bin_crates bazel sync --only=bin_crates
     bin_crates.repository()
+
     # CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=lib_crates bazel sync --only=lib_crates
     lib_crates.repository(
         # The version of Rust the currently registered toolchain is using.
