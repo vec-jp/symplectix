@@ -1,4 +1,6 @@
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "register_jq_toolchains", "register_yq_toolchains")
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 load("@rules_perl//perl:deps.bzl", "perl_register_toolchains", "perl_rules_dependencies")
@@ -12,6 +14,11 @@ load("//build/deps:versions.bzl", "GO_VERSION", "RUST_EDITION", "RUST_STABLE_VER
 load("//build/deps/crates:defs.bzl", "bin_crates", "lib_crates")
 
 def build_dependencies():
+    bazel_skylib_workspace()
+    aspect_bazel_lib_dependencies()
+    register_jq_toolchains()
+    register_yq_toolchains()
+
     # This sets up some common toolchains for building targets. For more details, please see
     # https://bazelbuild.github.io/rules_foreign_cc/0.9.0/flatten.html#rules_foreign_cc_dependencies
     rules_foreign_cc_dependencies()
