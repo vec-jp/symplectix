@@ -45,6 +45,8 @@ _lib_crates_packages = {
         version = "1.1.0",
         features = ["libc"],
     ),
+
+    # A framework for serializing and deserializing Rust data structures.
     "serde": crate.spec(
         version = "1.0.188",
         features = ["derive"],
