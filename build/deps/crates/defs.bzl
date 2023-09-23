@@ -52,6 +52,18 @@ _lib_crates_packages = {
         features = ["derive"],
     ),
 
+    # A Rust tree-sitter binding.
+    # Tree-sitter is a parser generator tool and an incremental parsing library.
+    #
+    # https://tree-sitter.github.io/tree-sitter/
+    "tree-sitter": crate.spec(
+        version = "0.20",
+    ),
+    # Rust grammer for tree-sitter.
+    "tree-sitter-rust": crate.spec(
+        version = "0.20",
+    ),
+
     # Proroc plugins for prost/tonic
     "protoc-gen-prost": crate.spec(
         version = "0",
