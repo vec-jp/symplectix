@@ -10,14 +10,8 @@ load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_regi
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 load("//build/deps:versions.bzl", "GO_VERSION", "RUST_EDITION", "RUST_STABLE_VERSION", "RUST_VERSIONS")
 load("//build/deps/crates:defs.bzl", "bin_crates", "lib_crates")
-load("@rules_cc//cc:repositories.bzl", "rules_cc_dependencies", "rules_cc_toolchains")
 
 def build_dependencies():
-    # Auto-detect toolchain that expects to find tools installed on the host machine.
-    # This is non-hermetic, and may have varying behaviors depending on the versions of tools found.
-    rules_cc_dependencies()
-    rules_cc_toolchains()
-
     # This sets up some common toolchains for building targets. For more details, please see
     # https://bazelbuild.github.io/rules_foreign_cc/0.9.0/flatten.html#rules_foreign_cc_dependencies
     rules_foreign_cc_dependencies()
