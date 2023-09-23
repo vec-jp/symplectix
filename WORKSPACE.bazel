@@ -148,13 +148,13 @@ rules_proto_grpc_toolchains()
 
 rules_proto_grpc_repos()
 
-load("//build/deps:repositories.bzl", "build_deps_repositories")
+load("//build/deps:repositories.bzl", "build_dependencies")
 
-build_deps_repositories()
+build_dependencies()
 
-load("//build/deps:setup.bzl", "build_deps_setup")
+load("//build/deps:setup.bzl", "build_dependencies_setup")
 
-build_deps_setup()
+build_dependencies_setup()
 
 # OCI
 http_archive(

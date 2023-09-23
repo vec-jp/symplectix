@@ -11,7 +11,7 @@ load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 load("//build/deps:versions.bzl", "GO_VERSION", "RUST_EDITION", "RUST_STABLE_VERSION", "RUST_VERSIONS")
 load("//build/deps/crates:defs.bzl", "bin_crates", "lib_crates")
 
-def build_deps_repositories():
+def build_dependencies():
     # This sets up some common toolchains for building targets. For more details, please see
     # https://bazelbuild.github.io/rules_foreign_cc/0.9.0/flatten.html#rules_foreign_cc_dependencies
     rules_foreign_cc_dependencies()
