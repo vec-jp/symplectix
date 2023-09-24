@@ -58,6 +58,9 @@ def build_dependencies():
         # The version of Rust the currently registered toolchain is using.
         rust_version = RUST_STABLE_VERSION,
         splicing_config = splicing_config(
+            # The resolver version to use in generated Cargo manifests.
+            # This flag is only used when splicing a manifest from direct package definitions.
+            # https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
             resolver_version = "2",
         ),
     )
