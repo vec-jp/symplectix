@@ -59,7 +59,6 @@ _lib_crates_packages = {
     "tree-sitter": crate.spec(
         version = "0.20",
     ),
-    # Rust grammer for tree-sitter.
     "tree-sitter-rust": crate.spec(
         version = "0.20",
     ),
