@@ -10,7 +10,6 @@ _exclude_patterns = [
 ]
 
 _lint_warnings = [
-    "+out-of-order-load",
     "-function-docstring",
     "-function-docstring-args",
     "-module-docstring",
