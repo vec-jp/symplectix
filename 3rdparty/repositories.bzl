@@ -10,8 +10,8 @@ load("@rules_rust//proto/prost:repositories.bzl", "rust_prost_dependencies")
 load("@rules_rust//proto/prost:transitive_repositories.bzl", "rust_prost_transitive_repositories")
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
-load("//build/deps:versions.bzl", "GO_VERSION", "RUST_EDITION", "RUST_VERSIONS")
-load("//build/deps/crates:defs.bzl", "bin_crates", "crates")
+load("//3rdparty:versions.bzl", "GO_VERSION", "RUST_EDITION", "RUST_VERSIONS")
+load("//3rdparty/crates:defs.bzl", "bin_crates", "crates")
 
 def build_dependencies():
     bazel_skylib_workspace()
