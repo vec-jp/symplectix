@@ -13,7 +13,6 @@ _lint_warnings = [
     "-function-docstring",
     "-function-docstring-args",
     "-module-docstring",
-    "-unnamed-macro",
 ]
 
 buildifier(
