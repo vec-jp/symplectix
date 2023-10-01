@@ -12,8 +12,8 @@ _GO_VERSION = "1.20.5"
 
 versions = struct(
     rust = struct(
-        rust_edition = _RUST_EDITION,
-        rust_versions = [
+        edition = _RUST_EDITION,
+        versions = [
             _RUST_STABLE_VERSION,
             _RUST_NIGHTLY_VERSION,
         ],

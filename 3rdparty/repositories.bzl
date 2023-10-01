@@ -4,28 +4,12 @@ load("@rules_rust//crate_universe:defs.bzl", "splicing_config")
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 load("@rules_rust//proto/prost:repositories.bzl", "rust_prost_dependencies")
 load("@rules_rust//proto/prost:transitive_repositories.bzl", "rust_prost_transitive_repositories")
-load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 load("//3rdparty/crates:defs.bzl", "bin_crates", "crates")
-
-_RUST_EDITION = "2021"
-
-_RUST_VERSIONS = [
-    "1.72.1",
-    # https://github.com/oxalica/rust-overlay/tree/master/manifests/nightly
-    "nightly/2023-09-28",
-]
 
 _GO_VERSION = "1.20.5"
 
 def build_dependencies():
-    rules_rust_dependencies()
-
-    rust_register_toolchains(
-        edition = _RUST_EDITION,
-        versions = _RUST_VERSIONS,
-    )
-
     # Load the dependencies for the rust-project.json generator tool.
     # n.b., rust_register_toolchains in WORKSPACE ensure a rust_analyzer_toolchain is registered.
     #

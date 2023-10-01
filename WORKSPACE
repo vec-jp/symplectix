@@ -1,6 +1,6 @@
 workspace(name = "trunk")
 
-load("//:workspace.bzl", "workspace_dependencies")
+load("//:workspace.bzl", "versions", "workspace_dependencies")
 
 workspace_dependencies()
 
@@ -21,6 +21,15 @@ register_yq_toolchains()
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 
 rules_foreign_cc_dependencies()
+
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
+
+rules_rust_dependencies()
+
+rust_register_toolchains(
+    edition = versions.rust.edition,
+    versions = versions.rust.versions,
+)
 
 load("@rules_perl//perl:deps.bzl", "perl_register_toolchains", "perl_rules_dependencies")
 
