@@ -1,13 +1,10 @@
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@rules_rust//crate_universe:defs.bzl", "splicing_config")
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 load("@rules_rust//proto/prost:repositories.bzl", "rust_prost_dependencies")
 load("@rules_rust//proto/prost:transitive_repositories.bzl", "rust_prost_transitive_repositories")
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 load("//3rdparty/crates:defs.bzl", "bin_crates", "crates")
-
-_GO_VERSION = "1.20.5"
 
 def build_dependencies():
     # Load the dependencies for the rust-project.json generator tool.
@@ -44,6 +41,4 @@ def build_dependencies():
     # CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=bin_crates bazel sync --only=bin_crates
     bin_crates.repository()
 
-    go_rules_dependencies()
-    go_register_toolchains(version = _GO_VERSION)
     gazelle_dependencies()
