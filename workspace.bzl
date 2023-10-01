@@ -1,6 +1,28 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
+_RUST_EDITION = "2021"
+
+_RUST_STABLE_VERSION = "1.72.1"
+
+# https://github.com/oxalica/rust-overlay/tree/master/manifests/nightly
+_RUST_NIGHTLY_VERSION = "nightly/2023-09-28"
+
+_GO_VERSION = "1.20.5"
+
+versions = struct(
+    rust = struct(
+        rust_edition = _RUST_EDITION,
+        rust_versions = [
+            _RUST_STABLE_VERSION,
+            _RUST_NIGHTLY_VERSION,
+        ],
+    ),
+    go = struct(
+        version = _GO_VERSION,
+    ),
+)
+
 _http_archives = {
     "platforms": {
         "sha256": "3a561c99e7bdbe9173aa653fd579fe849f1d8d67395780ab4770b1f381431d51",
