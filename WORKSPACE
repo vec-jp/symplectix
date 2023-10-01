@@ -1,10 +1,8 @@
 workspace(name = "trunk")
 
-load("//:workspace.bzl", "repo")
+load("//:workspace.bzl", "workspace_dependencies")
 
-repo.http_archives()
-
-repo.http_files()
+workspace_dependencies()
 
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
