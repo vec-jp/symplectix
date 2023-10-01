@@ -1,6 +1,5 @@
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 load("@rules_perl//perl:deps.bzl", "perl_register_toolchains", "perl_rules_dependencies")
 load("@rules_rust//crate_universe:defs.bzl", "splicing_config")
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
@@ -21,10 +20,6 @@ _RUST_VERSIONS = [
 _GO_VERSION = "1.20.5"
 
 def build_dependencies():
-    # This sets up some common toolchains for building targets. For more details, please see
-    # https://bazelbuild.github.io/rules_foreign_cc/0.9.0/flatten.html#rules_foreign_cc_dependencies
-    rules_foreign_cc_dependencies()
-
     perl_rules_dependencies()
     perl_register_toolchains()
 
