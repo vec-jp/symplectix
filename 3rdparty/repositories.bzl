@@ -1,8 +1,6 @@
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 load("@rules_rust//crate_universe:defs.bzl", "splicing_config")
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
-load("@rules_rust//proto/prost:repositories.bzl", "rust_prost_dependencies")
-load("@rules_rust//proto/prost:transitive_repositories.bzl", "rust_prost_transitive_repositories")
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 load("//3rdparty/crates:defs.bzl", "bin_crates", "crates")
 
@@ -13,10 +11,6 @@ def build_dependencies():
     # To regenerate the rust-project.json file:
     #   bazel run @rules_rust//tools/rust_analyzer:gen_rust_project
     rust_analyzer_dependencies()
-
-    # For prost and tonic.
-    rust_prost_dependencies()
-    rust_prost_transitive_repositories()
 
     # If the current version of rules_rust is not a release artifact,
     # you may need to set additional flags such as bootstrap = True.

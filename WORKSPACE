@@ -57,6 +57,14 @@ rules_proto_grpc_toolchains()
 
 rules_proto_grpc_repos()
 
+# For prost and tonic.
+load("@rules_rust//proto/prost:repositories.bzl", "rust_prost_dependencies")
+load("@rules_rust//proto/prost:transitive_repositories.bzl", "rust_prost_transitive_repositories")
+
+rust_prost_dependencies()
+
+rust_prost_transitive_repositories()
+
 load("//3rdparty:repositories.bzl", "build_dependencies")
 
 build_dependencies()
