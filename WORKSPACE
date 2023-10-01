@@ -6,6 +6,18 @@ repo.http_archives()
 
 repo.http_files()
 
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies", "register_jq_toolchains", "register_yq_toolchains")
+
+aspect_bazel_lib_dependencies()
+
+register_jq_toolchains()
+
+register_yq_toolchains()
+
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
 
 rules_proto_dependencies()
