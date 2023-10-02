@@ -107,6 +107,10 @@ bin_crates_repositories()
 
 crates_repositories()
 
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+
+gazelle_dependencies()
+
 load("//3rdparty:repositories.bzl", "build_dependencies")
 
 build_dependencies()
