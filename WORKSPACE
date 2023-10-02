@@ -65,11 +65,40 @@ rust_prost_dependencies()
 
 rust_prost_transitive_repositories()
 
+load("@rules_rust//crate_universe:defs.bzl", "splicing_config")
+
 # If the current version of rules_rust is not a release artifact,
 # you may need to set additional flags such as bootstrap = True.
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
+load("//3rdparty/crates:defs.bzl", "bin_crates", "crates")
 
 crate_universe_dependencies()
+
+# Cargo packages that contain a library. To generate Bazel targets for binaries,
+# you must annotate on the package. See defs.bzl for working examples.
+#
+# CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=crates bazel sync --only=crates
+crates.repository(
+    splicing_config = splicing_config(
+        # The resolver version to use in generated Cargo manifests.
+        # This flag is only used when splicing a manifest from direct package definitions.
+        # https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
+        resolver_version = "2",
+    ),
+)
+
+# The bin_crates repository is for cargo packages that contain binaries but no library.
+# https://bazelbuild.github.io/rules_rust/crate_universe.html#binary-dependencies
+#
+# CARGO_BAZEL_REPIN=1 CARGO_BAZEL_REPIN_ONLY=bin_crates bazel sync --only=bin_crates
+bin_crates.repository()
+
+load("@bin_crates//:defs.bzl", bin_crates_repositories = "crate_repositories")
+load("@crates//:defs.bzl", crates_repositories = "crate_repositories")
+
+bin_crates_repositories()
+
+crates_repositories()
 
 load("//3rdparty:repositories.bzl", "build_dependencies")
 
