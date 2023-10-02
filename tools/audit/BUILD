@@ -3,11 +3,11 @@ sh_binary(
     srcs = ["audit.sh"],
     args = [
         "$(rootpath //3rdparty/crates:Cargo.lock)",
-        "$(rootpath //3rdparty/crates/bin_crates:Cargo.lock)",
+        "$(rootpath //3rdparty/bin_crates:Cargo.lock)",
     ],
     data = [
+        "@//3rdparty/bin_crates:Cargo.lock",
         "@//3rdparty/crates:Cargo.lock",
-        "@//3rdparty/crates/bin_crates:Cargo.lock",
         "@crates//:cargo-audit__cargo-audit",
     ],
     env = {

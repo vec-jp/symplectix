@@ -79,9 +79,11 @@ load("@rules_rust//crate_universe:defs.bzl", "splicing_config")
 # If the current version of rules_rust is not a release artifact,
 # you may need to set additional flags such as bootstrap = True.
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
-load("//3rdparty/crates:defs.bzl", "bin_crates", "crates")
 
 crate_universe_dependencies()
+
+load("//3rdparty/bin_crates:defs.bzl", "bin_crates")
+load("//3rdparty/crates:defs.bzl", "crates")
 
 # Cargo packages that contain a library. To generate Bazel targets for binaries,
 # you must annotate on the package. See defs.bzl for working examples.
