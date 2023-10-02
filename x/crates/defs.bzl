@@ -264,8 +264,8 @@ def _crates_repository(**kwargs):
     crates_repository(
         name = "crates",
         annotations = _crates_annotations,
-        cargo_lockfile = "//3rdparty/crates:Cargo.lock",
-        lockfile = "//3rdparty/crates:Cargo.Bazel.lock",
+        cargo_lockfile = "//x/crates:Cargo.lock",
+        lockfile = "//x/crates:Cargo.Bazel.lock",
         packages = _crates_packages,
         **kwargs
     )

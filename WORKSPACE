@@ -82,8 +82,8 @@ load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencie
 
 crate_universe_dependencies()
 
-load("//3rdparty/bin_crates:defs.bzl", "bin_crates")
-load("//3rdparty/crates:defs.bzl", "crates")
+load("//x/bin_crates:defs.bzl", "bin_crates")
+load("//x/crates:defs.bzl", "crates")
 
 # Cargo packages that contain a library. To generate Bazel targets for binaries,
 # you must annotate on the package. See defs.bzl for working examples.

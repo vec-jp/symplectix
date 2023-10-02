@@ -54,7 +54,7 @@ _http_archives = {
         "url": "https://github.com/bazelbuild/rules_foreign_cc/archive/refs/tags/0.9.0.tar.gz",
     },
     "zlib": {
-        "build_file": "//3rdparty/zlib:BUILD.zlib.bazel",
+        "build_file": "//x/zlib:BUILD.zlib.bazel",
         "sha256": "b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30",
         "strip_prefix": "zlib-1.2.13",
         "urls": [
@@ -63,7 +63,7 @@ _http_archives = {
         ],
     },
     "openssl": {
-        "build_file": "//3rdparty/openssl:BUILD.openssl.bazel",
+        "build_file": "//x/openssl:BUILD.openssl.bazel",
         "sha256": "cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8",
         "strip_prefix": "openssl-1.1.1w",
         "urls": [
@@ -73,7 +73,7 @@ _http_archives = {
         ],
     },
     "nasm": {
-        "build_file": "//3rdparty/openssl:BUILD.nasm.bazel",
+        "build_file": "//x/openssl:BUILD.nasm.bazel",
         "sha256": "f5c93c146f52b4f1664fa3ce6579f961a910e869ab0dae431bd871bdd2584ef2",
         "strip_prefix": "nasm-2.15.05",
         "urls": [
