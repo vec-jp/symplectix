@@ -1,6 +1,5 @@
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 load("@rules_rust//crate_universe:defs.bzl", "splicing_config")
-load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 load("//3rdparty/crates:defs.bzl", "bin_crates", "crates")
 
@@ -11,10 +10,6 @@ def build_dependencies():
     # To regenerate the rust-project.json file:
     #   bazel run @rules_rust//tools/rust_analyzer:gen_rust_project
     rust_analyzer_dependencies()
-
-    # If the current version of rules_rust is not a release artifact,
-    # you may need to set additional flags such as bootstrap = True.
-    crate_universe_dependencies()
 
     # Cargo packages that contain a library. To generate Bazel targets for binaries,
     # you must annotate on the package. See defs.bzl for working examples.

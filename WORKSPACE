@@ -65,6 +65,12 @@ rust_prost_dependencies()
 
 rust_prost_transitive_repositories()
 
+# If the current version of rules_rust is not a release artifact,
+# you may need to set additional flags such as bootstrap = True.
+load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
+
+crate_universe_dependencies()
+
 load("//3rdparty:repositories.bzl", "build_dependencies")
 
 build_dependencies()
