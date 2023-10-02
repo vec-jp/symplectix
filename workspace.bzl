@@ -165,9 +165,17 @@ _http_files = {
     },
 }
 
+_toolchains = [
+    "//toolchains:prost_toolchain",
+]
+
 def workspace_dependencies():
     for name in _http_archives:
         maybe(http_archive, name, **_http_archives[name])
 
     for name in _http_files:
         maybe(http_file, name, **_http_files[name])
+
+def workspace_toolchains():
+    for tc in _toolchains:
+        native.register_toolchains(tc)

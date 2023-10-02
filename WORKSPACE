@@ -1,8 +1,10 @@
 workspace(name = "trunk")
 
-load("//:workspace.bzl", "versions", "workspace_dependencies")
+load("//:workspace.bzl", "versions", "workspace_dependencies", "workspace_toolchains")
 
 workspace_dependencies()
+
+workspace_toolchains()
 
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
@@ -110,10 +112,6 @@ crates_repositories()
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 
 gazelle_dependencies()
-
-load("//3rdparty:setup.bzl", "build_dependencies_setup")
-
-build_dependencies_setup()
 
 load("@rules_oci//oci:dependencies.bzl", "rules_oci_dependencies")
 
