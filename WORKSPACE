@@ -111,10 +111,6 @@ load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 
 gazelle_dependencies()
 
-load("//3rdparty:repositories.bzl", "build_dependencies")
-
-build_dependencies()
-
 load("//3rdparty:setup.bzl", "build_dependencies_setup")
 
 build_dependencies_setup()
