@@ -176,6 +176,7 @@ def workspace_dependencies():
     for name in _http_files:
         maybe(http_file, name, **_http_files[name])
 
+# buildifier: disable=unnamed-macro
 def workspace_toolchains():
     for tc in _toolchains:
         native.register_toolchains(tc)
