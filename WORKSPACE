@@ -31,6 +31,13 @@ rust_register_toolchains(
     versions = versions.rust.versions,
 )
 
+load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
+
+# Load the dependencies for the rust-project.json generator tool.
+# To regenerate the rust-project.json file:
+#   bazel run @rules_rust//tools/rust_analyzer:gen_rust_project
+rust_analyzer_dependencies()
+
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()
