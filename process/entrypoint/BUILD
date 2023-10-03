@@ -9,9 +9,20 @@ rust_library(
             "src/bin/**/*",
         ],
     ),
+    # will not work as expected on windows
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//process",
+        "//process/fsutil",
+        "@crates//:anyhow",
+        "@crates//:clap",
+        "@crates//:humantime",
+        "@crates//:libc",
         "@crates//:thiserror",
         "@crates//:tokio",
         "@crates//:tracing",
@@ -38,7 +49,6 @@ rust_binary(
     srcs = ["src/bin/coordinator.rs"],
     deps = [
         ":entrypoint",
-        "//process",
         "//process/fsutil",
         "@crates//:anyhow",
         "@crates//:clap",
