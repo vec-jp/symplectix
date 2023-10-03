@@ -32,7 +32,7 @@ pub struct Command {
     envs: Vec<String>,
 
     /// The entrypoint of the child process.
-    #[arg(last = true)]
+    #[arg(trailing_var_arg = true)]
     argv: Vec<OsString>,
 }
 
