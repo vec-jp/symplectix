@@ -11,8 +11,6 @@ use tokio::process;
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::time;
 
-pub type Result<T = ()> = std::result::Result<T, Error>;
-
 #[derive(Debug, Clone, Parser)]
 pub struct Entrypoint {
     /// Redirect the child process stdout.
@@ -42,6 +40,8 @@ pub struct Process {
     id: u32,
     timeout: Option<Duration>,
 }
+
+pub type Result<T = ()> = std::result::Result<T, Error>;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
