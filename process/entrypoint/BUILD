@@ -42,6 +42,11 @@ cc_binary(
     srcs = ["orphan.c"],
 )
 
+cc_binary(
+    name = "zombie",
+    srcs = ["zombie.c"],
+)
+
 rust_binary(
     name = "coordinator",
     srcs = ["bin/coordinator.rs"],
