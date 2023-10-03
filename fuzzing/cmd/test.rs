@@ -1,4 +1,4 @@
-use process::Command;
+use entrypoint::Command;
 
 /// Runs a instrumented binary.
 #[derive(Clone, Debug, clap::Parser)]

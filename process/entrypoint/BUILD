@@ -17,7 +17,6 @@ rust_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//process",
         "//process/fsutil",
         "@crates//:anyhow",
         "@crates//:clap",

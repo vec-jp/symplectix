@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use process::Command;
+use entrypoint::Command;
 use runfiles::Runfiles;
 
 static GECKODRIVER_BIN: &str = "geckodriver/geckodriver";
