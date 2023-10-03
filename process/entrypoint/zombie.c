@@ -11,10 +11,11 @@ int main() {
     }
 
     if (pid == 0) {
+        printf("%6d: pid=%d ppid=%d pgid=%d\n", pid, getpid(), getppid(), getpgid(0));
         exit(1);
     }
 
-    printf("%6d: pid=%d ppid=%d\n", pid, getpid(), getppid());
+    printf("%6d: pid=%d ppid=%d pgid=%d\n", pid, getpid(), getppid(), getpgid(0));
 
     // sleep to observe the zombie child.
     sleep(30);
