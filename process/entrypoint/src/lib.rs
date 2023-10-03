@@ -1,3 +1,10 @@
+// TODO: Wait all descendant processes to ensure there are no children left behind.
+// Currently, the spawned child is the only process to be waited before exiting.
+//
+// It is viable to wait all descendant processes by calling
+// waitpid(-1, NULL, WNOHANG) every time SIGCHLD arrives.
+// The concern is that tokio::process::Child relies on SIGCHLD to get woken up.
+
 use std::env;
 use std::ffi::{OsStr, OsString};
 use std::io;
@@ -173,13 +180,8 @@ impl Process {
             time::sleep(Duration::from_millis(50)).await;
         }
 
-        // TODO: Wait all descendant processes to ensure there are no children left behind.
-        // Currently, the direct child is the only process to be waited before exiting.
-
         self.killpg(libc::SIGKILL);
 
-        // Note that this loop is necessary even if the child process exits successfully
-        // in order to 1) wait all descendant processes, 2) ensure there are no children left behind.
         loop {
             match self.child.try_wait()? {
                 // The exit status is not available at this time. The child may still be running.
