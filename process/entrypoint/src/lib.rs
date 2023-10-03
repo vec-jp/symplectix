@@ -14,7 +14,7 @@ use tokio::time;
 pub type Result<T = ()> = std::result::Result<T, Error>;
 
 #[derive(Debug, Clone, Parser)]
-pub struct Command {
+pub struct Entrypoint {
     /// Redirect the child process stdout.
     #[arg(long, value_name = "PATH")]
     stdout: Option<PathBuf>,
@@ -55,9 +55,9 @@ pub enum Error {
     Timedout(ExitStatus),
 }
 
-#[tracing::instrument(skip(command))]
-pub async fn run(command: &Command) -> Result {
-    let process = command.spawn().await.map_err(Error::Io)?;
+#[tracing::instrument(skip(entrypoint))]
+pub async fn run(entrypoint: &Entrypoint) -> Result {
+    let process = entrypoint.spawn().await.map_err(Error::Io)?;
     wait(process).await
 }
 
@@ -84,9 +84,9 @@ pub async fn wait(mut process: Process) -> Result {
     }
 }
 
-impl Command {
-    pub fn new<S: AsRef<OsStr>>(program: S) -> Command {
-        Command {
+impl Entrypoint {
+    pub fn new<S: AsRef<OsStr>>(program: S) -> Entrypoint {
+        Entrypoint {
             stdout: None,
             stderr: None,
             envs: vec![],
@@ -95,7 +95,7 @@ impl Command {
         }
     }
 
-    pub fn arg<S>(&mut self, arg: S) -> &mut Command
+    pub fn arg<S>(&mut self, arg: S) -> &mut Entrypoint
     where
         S: AsRef<OsStr>,
     {
@@ -103,7 +103,7 @@ impl Command {
         self
     }
 
-    pub fn args<I, S>(&mut self, args: I) -> &mut Command
+    pub fn args<I, S>(&mut self, args: I) -> &mut Entrypoint
     where
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,
@@ -114,7 +114,7 @@ impl Command {
         self
     }
 
-    pub fn timeout(&mut self, duration: Duration) -> &mut Command {
+    pub fn timeout(&mut self, duration: Duration) -> &mut Entrypoint {
         self.timeout = Some(duration);
         self
     }
@@ -213,21 +213,21 @@ mod tests {
 
     #[tokio::test]
     async fn spawn_commands() {
-        assert!(Command::new("date").spawn().await.is_ok());
-        assert!(Command::new("unknown_command").spawn().await.is_err());
+        assert!(Entrypoint::new("date").spawn().await.is_ok());
+        assert!(Entrypoint::new("unknown_command").spawn().await.is_err());
     }
 
     #[tokio::test]
     async fn run_process() {
         use Error::*;
 
-        let sleep = wait(Command::new("sleep").arg("0.1").spawn().await.unwrap());
+        let sleep = wait(Entrypoint::new("sleep").arg("0.1").spawn().await.unwrap());
         let Ok(_) = sleep.await else {
             panic!("expected that the command 'sleep' exit successfully");
         };
 
         let sleep = wait(
-            Command::new("sleep")
+            Entrypoint::new("sleep")
                 .arg("10")
                 .timeout(Duration::from_millis(10))
                 .spawn()
