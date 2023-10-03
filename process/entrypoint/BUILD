@@ -2,13 +2,7 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc_test", "rust_library
 
 rust_library(
     name = "entrypoint",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = [
-            "src/main.rs",
-            "src/bin/**/*",
-        ],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     # will not work as expected on windows
     target_compatible_with = select({
         "@platforms//os:linux": [],
@@ -45,7 +39,7 @@ rust_doc_test(
 
 rust_binary(
     name = "coordinator",
-    srcs = ["src/bin/coordinator.rs"],
+    srcs = ["bin/coordinator.rs"],
     deps = [
         ":entrypoint",
         "//process/fsutil",
