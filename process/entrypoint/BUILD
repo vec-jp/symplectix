@@ -37,6 +37,11 @@ rust_doc_test(
     crate = ":entrypoint",
 )
 
+cc_binary(
+    name = "orphan",
+    srcs = ["orphan.c"],
+)
+
 rust_binary(
     name = "coordinator",
     srcs = ["bin/coordinator.rs"],
