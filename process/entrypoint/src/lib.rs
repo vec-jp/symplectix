@@ -37,7 +37,6 @@ pub struct Entrypoint {
 #[derive(Debug)]
 pub struct Process {
     child: process::Child,
-    id: u32,
     timeout: Option<Duration>,
 }
 
@@ -147,8 +146,8 @@ impl Entrypoint {
         cmd.process_group(0);
 
         let child = process::Command::from(cmd).spawn()?;
-        let id = child.id().expect("fetching the OS-assigned process id");
-        Ok(Process { child, id, timeout: self.timeout })
+        let timeout = self.timeout;
+        Ok(Process { child, timeout })
     }
 }
 
@@ -194,15 +193,15 @@ impl Process {
     }
 
     fn killpg(&self, signal: libc::c_int) {
-        let id = self.id as libc::c_int;
-        unsafe {
-            let killed = libc::killpg(id, signal);
-            tracing::trace!(
-                signal,
-                killed,
-                errno = io::Error::last_os_error().raw_os_error().unwrap_or(0)
-            );
-        }
+        // The child already has been polled to completion.
+        let Some(id) = self.child.id() else { return };
+        let id = id as libc::c_int;
+        let killed = unsafe { libc::killpg(id, signal) };
+        tracing::trace!(
+            signal,
+            killed,
+            errno = io::Error::last_os_error().raw_os_error().unwrap_or(0)
+        );
     }
 }
 
