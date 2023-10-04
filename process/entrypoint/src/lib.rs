@@ -172,7 +172,7 @@ impl Process {
         }
     }
 
-    /// Stop the whole process group, and wait the child exits.
+    /// Stops the whole process group, and waits the child exits.
     #[tracing::instrument(skip(self))]
     pub async fn stop(&mut self, gracefully: bool) -> io::Result<ExitStatus> {
         if gracefully {
@@ -194,16 +194,17 @@ impl Process {
         }
     }
 
+    /// Sends signal to a process group.
     fn killpg(&self, signal: libc::c_int) {
         // The child already has been polled to completion.
         let Some(id) = self.child.id() else { return };
         let id = id as libc::c_int;
+
+        // The killpg() function returns 0 if successful;
+        // otherwise -1 is returned and the global variable errno is set to indicate the error.
         let killed = unsafe { libc::killpg(id, signal) };
-        tracing::trace!(
-            signal,
-            killed,
-            errno = io::Error::last_os_error().raw_os_error().unwrap_or(0)
-        );
+        let last_os_error = (killed == -1).then_some(format!("{}", io::Error::last_os_error()));
+        tracing::trace!(pgid = id, signal, killed, last_os_error);
     }
 }
 
