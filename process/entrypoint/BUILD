@@ -101,4 +101,7 @@ container_structure_test(
     name = "coordinator_test",
     configs = ["testdata/coordinator_test.yaml"],
     image = ":coordinator_test_image",
+    target_compatible_with = [
+        "@platforms//os:linux",
+    ],
 )
