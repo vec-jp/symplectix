@@ -1,4 +1,9 @@
-# https://nixos.wiki/wiki/Flakes
+# Setup a reproducible build/test environment using a [flake].
+#
+# - https://devenv.sh/
+# - https://github.com/tweag/rules_nixpkgs
+#
+# [flake]: https://nixos.wiki/wiki/Flakes
 {
   description = "trunk";
 
@@ -20,12 +25,12 @@
           };
         in
         {
-          # Used by `nix develop`
           devShells.default = pkgs.mkShellNoCC {
             buildInputs = with pkgs;[
               (writeShellScriptBin "bazel" ''
                 exec ${bazelisk}/bin/bazelisk "$@"
               '')
+              bazel-buildtools
             ];
           };
         }
