@@ -41,7 +41,7 @@ build --noincompatible_legacy_local_fallback
 # Bazel enables local sandboxing by default, on systems that support sandboxed execution.
 #
 # https://bazel.build/docs/user-manual#spawn-strategy
-build --spawn_strategy=sandboxed,local
+# build --spawn_strategy=sandboxed,local
 
 # Restricts network access by default for actions.
 # https://bazel.build/reference/command-line-reference#flag--sandbox_default_allow_network
