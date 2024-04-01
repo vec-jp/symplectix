@@ -70,15 +70,6 @@ _http_archives = {
             "https://www.openssl.org/source/openssl-3.2.1.tar.gz",
         ],
     },
-    "nasm": {
-        "build_file": "//x/openssl:BUILD.nasm.bazel",
-        "sha256": "f5c93c146f52b4f1664fa3ce6579f961a910e869ab0dae431bd871bdd2584ef2",
-        "strip_prefix": "nasm-2.16.01",
-        "urls": [
-            "https://mirror.bazel.build/www.nasm.us/pub/nasm/releasebuilds/2.16.01/win64/nasm-2.16.01-win64.zip",
-            "https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/win64/nasm-2.16.01-win64.zip",
-        ],
-    },
     "rules_perl": {
         "sha256": "391edb08802860ba733d402c6376cfe1002b598b90d2240d9d302ecce2289a64",
         "strip_prefix": "rules_perl-7f10dada09fcba1dc79a6a91da2facc25e72bd7d",
