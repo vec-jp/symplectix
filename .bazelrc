@@ -34,7 +34,7 @@ build --action_env=CXX=clang++
 # if an action can't be run in a sandbox. This will be the default flag in a future release (probably 7.0).
 #
 # https://github.com/bazelbuild/bazel/issues/16522
-build --noincompatible_legacy_local_fallback
+build --incompatible_legacy_local_fallback
 
 # The option sandboxed causes commands to be executed inside a sandbox on the local machine.
 # This requires that all input files, data dependencies and tools are listed as direct dependencies in the srcs, data and tools attributes.
