@@ -32,7 +32,7 @@ configure_make(
     out_binaries = ["openssl"],
     out_lib_dir = select({
         "@platforms//os:macos": "lib",
-        "//conditions:default": "lib64"
+        "//conditions:default": "lib64",
     }),
     out_static_libs = [
         "libssl.a",
