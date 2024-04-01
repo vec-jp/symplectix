@@ -31,8 +31,9 @@ configure_make(
     lib_source = ":src",
     out_binaries = ["openssl"],
     out_lib_dir = select({
+        "@platforms//os:linux": "lib64",
         "@platforms//os:macos": "lib",
-        "//conditions:default": "lib64",
+        "//conditions:default": "@platforms//:incompatible",
     }),
     out_static_libs = [
         "libssl.a",
