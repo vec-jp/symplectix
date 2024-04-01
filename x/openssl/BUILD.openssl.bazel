@@ -15,6 +15,7 @@ configure_make(
     configure_options = [
         "no-comp",
         "no-idea",
+        "no-shared",
         "no-weak-ssl-ciphers",
     ],
     env = select({
@@ -29,22 +30,14 @@ configure_make(
     lib_name = "openssl",
     lib_source = ":src",
     out_binaries = ["openssl"],
+    out_lib_dir = select({
+        "@platforms//os:macos": "lib",
+        "//conditions:default": "lib64"
+    }),
     out_static_libs = [
         "libssl.a",
         "libcrypto.a",
     ],
-    # Note that for Linux builds, libssl must come before libcrypto on the linker command-line.
-    # As such, libssl must be listed before libcrypto
-    out_shared_libs = select({
-        "@platforms//os:macos": [
-            "libssl.3.dylib",
-            "libcrypto.3.dylib",
-        ],
-        "//conditions:default": [
-            "libssl.so.3",
-            "libcrypto.so.3",
-        ],
-    }),
     target_compatible_with = select({
         "@platforms//os:linux": [],
         "@platforms//os:macos": [],
