@@ -39,8 +39,10 @@ configure_make(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     targets = [
-        "build_libs",
-        "install_dev",
+        # "build_programs",
+        # "install_sw",
+        # "build_libs",
+        # "install_dev",
     ],
     toolchains = ["@rules_perl//:current_toolchain"],
     visibility = ["//visibility:public"],
