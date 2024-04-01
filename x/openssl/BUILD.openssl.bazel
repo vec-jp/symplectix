@@ -10,7 +10,7 @@ filegroup(
 
 configure_make(
     name = "openssl",
-    configure_command = "config",
+    configure_command = "Configure",
     configure_in_place = True,
     configure_options = [
         "no-comp",
