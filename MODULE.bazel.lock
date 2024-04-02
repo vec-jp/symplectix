@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "5c1e1de055aa0848d8c0b0daf1cd67eaae3728688d3bf0a3f3b109f9dd0984bc",
+  "moduleFileHash": "96a343d9d7d5086502a2bfab2e563f8d6e1aab609d52b3c4fa0276a5f4c200f4",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -25,12 +25,51 @@
       "toolchainsToRegister": [],
       "extensionUsages": [
         {
+          "extensionBzlFile": "@aspect_bazel_lib//lib:extensions.bzl",
+          "extensionName": "toolchains",
+          "usingModule": "<root>",
+          "location": {
+            "file": "@@//:MODULE.bazel",
+            "line": 17,
+            "column": 37
+          },
+          "imports": {
+            "jq_toolchains": "jq_toolchains",
+            "yq_toolchains": "yq_toolchains"
+          },
+          "devImports": [],
+          "tags": [
+            {
+              "tagName": "jq",
+              "attributeValues": {},
+              "devDependency": false,
+              "location": {
+                "file": "@@//:MODULE.bazel",
+                "line": 18,
+                "column": 24
+              }
+            },
+            {
+              "tagName": "yq",
+              "attributeValues": {},
+              "devDependency": false,
+              "location": {
+                "file": "@@//:MODULE.bazel",
+                "line": 19,
+                "column": 24
+              }
+            }
+          ],
+          "hasDevUseExtension": false,
+          "hasNonDevUseExtension": true
+        },
+        {
           "extensionBzlFile": "@rules_oci//oci:extensions.bzl",
           "extensionName": "oci",
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 38,
+            "line": 45,
             "column": 20
           },
           "imports": {
@@ -53,7 +92,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 48,
+                "line": 55,
                 "column": 9
               }
             },
@@ -71,7 +110,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 60,
+                "line": 67,
                 "column": 9
               }
             }
@@ -88,6 +127,7 @@
         "rules_perl": "rules_perl@0.2.0",
         "rules_pkg": "rules_pkg@0.10.1",
         "rules_oci": "rules_oci@1.7.5",
+        "container_structure_test": "container_structure_test@1.16.0",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       }
@@ -515,6 +555,57 @@
             "https://bcr.bazel.build/modules/rules_oci/1.7.5/patches/module_dot_bazel_version.patch": "sha256-lig21/o7qRchCezlG3z6xbGmkFFEsfxbrJwrdPJAc/E="
           },
           "remote_patch_strip": 1
+        }
+      }
+    },
+    "container_structure_test@1.16.0": {
+      "name": "container_structure_test",
+      "version": "1.16.0",
+      "key": "container_structure_test@1.16.0",
+      "repoName": "container_structure_test",
+      "executionPlatformsToRegister": [],
+      "toolchainsToRegister": [
+        "@structure_test_toolchains//:all"
+      ],
+      "extensionUsages": [
+        {
+          "extensionBzlFile": "@container_structure_test//:repositories.bzl",
+          "extensionName": "extension",
+          "usingModule": "container_structure_test@1.16.0",
+          "location": {
+            "file": "https://bcr.bazel.build/modules/container_structure_test/1.16.0/MODULE.bazel",
+            "line": 14,
+            "column": 20
+          },
+          "imports": {
+            "structure_test_toolchains": "structure_test_toolchains"
+          },
+          "devImports": [],
+          "tags": [],
+          "hasDevUseExtension": false,
+          "hasNonDevUseExtension": true
+        }
+      ],
+      "deps": {
+        "aspect_bazel_lib": "aspect_bazel_lib@2.6.1",
+        "bazel_skylib": "bazel_skylib@1.5.0",
+        "platforms": "platforms@0.0.9",
+        "bazel_tools": "bazel_tools@_",
+        "local_config_platform": "local_config_platform@_"
+      },
+      "repoSpec": {
+        "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+        "ruleClassName": "http_archive",
+        "attributes": {
+          "urls": [
+            "https://github.com/GoogleContainerTools/container-structure-test/archive/18d9b2bcd2cbee1ab8df7c232ef6b7cddff9708a.zip"
+          ],
+          "integrity": "sha256-bl48uxXyeFxlKCKlbgyGsUtjCmo6QQyInnGNWA8sGac=",
+          "strip_prefix": "container-structure-test-18d9b2bcd2cbee1ab8df7c232ef6b7cddff9708a",
+          "remote_patches": {
+            "https://bcr.bazel.build/modules/container_structure_test/1.16.0/patches/module_dot_bazel.patch": "sha256-XvjiOZuN3y2tj5SJY6ws5H6VrIsuLC1Bdh3xw6qKeMs="
+          },
+          "remote_patch_strip": 0
         }
       }
     },
@@ -2169,6 +2260,74 @@
                 "windows-amd64": "e7f05bf847f7c3689dd28926460ce6e1097ae97380ac8e6ae7147b7b706ba19b"
               },
               "version": "6.4.0"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": []
+      }
+    },
+    "@@container_structure_test~//:repositories.bzl%extension": {
+      "general": {
+        "bzlTransitiveDigest": "/vl5vOyGN/nxHtUF3SxoDZnTDgDklt4HUpLQD5LE8+k=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "structure_test_st_linux_i386": {
+            "bzlFile": "@@container_structure_test~//:repositories.bzl",
+            "ruleClassName": "structure_test_repositories",
+            "attributes": {
+              "platform": "linux_i386"
+            }
+          },
+          "structure_test_st_linux_s390x": {
+            "bzlFile": "@@container_structure_test~//:repositories.bzl",
+            "ruleClassName": "structure_test_repositories",
+            "attributes": {
+              "platform": "linux_s390x"
+            }
+          },
+          "structure_test_st_linux_amd64": {
+            "bzlFile": "@@container_structure_test~//:repositories.bzl",
+            "ruleClassName": "structure_test_repositories",
+            "attributes": {
+              "platform": "linux_amd64"
+            }
+          },
+          "structure_test_st_darwin_arm64": {
+            "bzlFile": "@@container_structure_test~//:repositories.bzl",
+            "ruleClassName": "structure_test_repositories",
+            "attributes": {
+              "platform": "darwin_arm64"
+            }
+          },
+          "structure_test_st_windows_amd64": {
+            "bzlFile": "@@container_structure_test~//:repositories.bzl",
+            "ruleClassName": "structure_test_repositories",
+            "attributes": {
+              "platform": "windows_amd64"
+            }
+          },
+          "structure_test_st_darwin_amd64": {
+            "bzlFile": "@@container_structure_test~//:repositories.bzl",
+            "ruleClassName": "structure_test_repositories",
+            "attributes": {
+              "platform": "darwin_amd64"
+            }
+          },
+          "structure_test_toolchains": {
+            "bzlFile": "@@container_structure_test~//bazel:toolchains_repo.bzl",
+            "ruleClassName": "toolchains_repo",
+            "attributes": {
+              "toolchain_type": "@container_structure_test//bazel:structure_test_toolchain_type",
+              "toolchain": "@structure_test_st_{platform}//:structure_test_toolchain"
+            }
+          },
+          "structure_test_st_linux_arm64": {
+            "bzlFile": "@@container_structure_test~//:repositories.bzl",
+            "ruleClassName": "structure_test_repositories",
+            "attributes": {
+              "platform": "linux_arm64"
             }
           }
         },

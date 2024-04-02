@@ -14,6 +14,7 @@ bazel_dep(name = "bazel_skylib", version = "1.5.0")
 # Starlark libraries and rules which are useful for
 # constructing rulesets and BUILD files.
 bazel_dep(name = "aspect_bazel_lib", version = "2.6.1")
+
 bazel_lib_toolchains = use_extension("@aspect_bazel_lib//lib:extensions.bzl", "toolchains")
 bazel_lib_toolchains.jq()
 bazel_lib_toolchains.yq()
@@ -39,6 +40,7 @@ bazel_dep(name = "rules_pkg", version = "0.10.1")
 
 # Rules for building OCI containers.
 bazel_dep(name = "rules_oci", version = "1.7.5")
+
 # Validate the structure of container images.
 bazel_dep(name = "container_structure_test", version = "1.16.0")
 
