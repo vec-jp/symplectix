@@ -27,8 +27,8 @@ common --enable_platform_specific_config
 # common --experimental_allow_tags_propagation
 
 # Force the use of Clang for C++ builds.
-build --action_env=CC=clang
-build --action_env=CXX=clang++
+# build --action_env=CC=clang
+# build --action_env=CXX=clang++
 
 # Disables a legacy feature where local sandboxed execution can silently fall back to non-sandboxed
 # if an action can't be run in a sandbox. This will be the default flag in a future release (probably 7.0).
