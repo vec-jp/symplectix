@@ -24,6 +24,11 @@ versions = struct(
 )
 
 _http_archives = {
+    "rules_cc": {
+        "sha256": "2037875b9a4456dce4a79d112a8ae885bbc4aad968e6587dca6e64f3a0900cdf",
+        "strip_prefix": "rules_cc-0.0.9",
+        "urls": ["https://github.com/bazelbuild/rules_cc/releases/download/0.0.9/rules_cc-0.0.9.tar.gz"],
+    },
     "rules_foreign_cc": {
         "sha256": "2a4d07cd64b0719b39a7c12218a3e507672b82a97b98c6a89d38565894cf7c51",
         "strip_prefix": "rules_foreign_cc-0.9.0",
