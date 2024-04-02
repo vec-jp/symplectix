@@ -6,17 +6,11 @@
 module(name = "trunk")
 
 # Constraint values for specifying platforms and toolchains.
-#
-# https://registry.bazel.build/modules/platforms
 bazel_dep(name = "platforms", version = "0.0.9")
 
 # Common useful functions and rules for Bazel.
-#
-# https://registry.bazel.build/modules/bazel_skylib
 bazel_dep(name = "bazel_skylib", version = "1.5.0")
 
 # Starlark libraries and rules which are useful for
 # constructing rulesets and BUILD files.
-#
-# https://registry.bazel.build/modules/aspect_bazel_lib
 bazel_dep(name = "aspect_bazel_lib", version = "2.6.1")
