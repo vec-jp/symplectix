@@ -81,11 +81,6 @@ _http_archives = {
         "strip_prefix": "buildtools-7.1.0",
         "urls": ["https://github.com/bazelbuild/buildtools/archive/refs/tags/v7.1.0.tar.gz"],
     },
-    "rules_oci": {
-        "sha256": "56d5499025d67a6b86b2e6ebae5232c72104ae682b5a21287770bd3bf0661abf",
-        "strip_prefix": "rules_oci-1.7.5",
-        "url": "https://github.com/bazel-contrib/rules_oci/releases/download/v1.7.5/rules_oci-v1.7.5.tar.gz",
-    },
     "container_structure_test": {
         "sha256": "978db1ed0f802120fb0308b08b5c1e38ea81377944cc7a2fb727529815e4ed09",
         "strip_prefix": "container-structure-test-1.17.0",

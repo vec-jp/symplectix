@@ -28,3 +28,6 @@ bazel_dep(name = "rules_perl", version = "0.2.0")
 
 # Rules for creating packages of many types (zip, tar, deb, rpm, ...).
 bazel_dep(name = "rules_pkg", version = "0.10.1")
+
+# Rules for building OCI containers.
+bazel_dep(name = "rules_oci", version = "1.7.5")
