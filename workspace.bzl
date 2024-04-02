@@ -24,13 +24,6 @@ versions = struct(
 )
 
 _http_archives = {
-    "platforms": {
-        "sha256": "5eda539c841265031c2f82d8ae7a3a6490bd62176e0c038fc469eabf91f6149b",
-        "urls": [
-            "https://mirror.bazel.build/github.com/bazelbuild/platforms/releases/download/0.0.9/platforms-0.0.9.tar.gz",
-            "https://github.com/bazelbuild/platforms/releases/download/0.0.9/platforms-0.0.9.tar.gz",
-        ],
-    },
     "bazel_skylib": {
         "sha256": "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
         "urls": [

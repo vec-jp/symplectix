@@ -1,6 +1,9 @@
-###############################################################################
+# TODO: Migrate external dependencies from WORKSPACE to MODULE.bazel.
 # Bazel now uses Bzlmod by default to manage external dependencies.
-# Please consider migrating your external dependencies from WORKSPACE to MODULE.bazel.
 #
-# For more details, please check https://github.com/bazelbuild/bazel/issues/18958
-###############################################################################
+# https://bazel.build/external/module
+# https://registry.bazel.build/
+
+# Constraint values for specifying platforms and toolchains.
+# https://registry.bazel.build/modules/platforms
+bazel_dep(name = "platforms", version = "0.0.9")
