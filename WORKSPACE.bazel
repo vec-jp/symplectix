@@ -28,14 +28,6 @@ load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 #   bazel run @rules_rust//tools/rust_analyzer:gen_rust_project
 rust_analyzer_dependencies()
 
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
-
-go_rules_dependencies()
-
-go_register_toolchains(
-    version = versions.go.version,
-)
-
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
 
 rules_proto_dependencies()
@@ -92,10 +84,6 @@ load("@crates//:defs.bzl", crates_repositories = "crate_repositories")
 bin_crates_repositories()
 
 crates_repositories()
-
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
-
-gazelle_dependencies()
 
 load("@container_structure_test//:repositories.bzl", "container_structure_test_register_toolchain")
 

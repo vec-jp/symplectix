@@ -50,13 +50,6 @@ _http_archives = {
         "integrity": "sha256-Y4v6kjQQfXxh5tU6FQB6YXux/ODFGUq3IlpgBV4Bwj8=",
         "urls": ["https://github.com/bazelbuild/rules_rust/releases/download/0.41.0/rules_rust-v0.41.0.tar.gz"],
     },
-    "io_bazel_rules_go": {
-        "sha256": "80a98277ad1311dacd837f9b16db62887702e9f1d1c4c9f796d0121a46c8e184",
-        "urls": [
-            "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.46.0/rules_go-v0.46.0.zip",
-            "https://github.com/bazelbuild/rules_go/releases/download/v0.46.0/rules_go-v0.46.0.zip",
-        ],
-    },
     "rules_proto": {
         "sha256": "dc3fb206a2cb3441b485eb1e423165b231235a1ea9b031b4433cf7bc1fa460dd",
         "strip_prefix": "rules_proto-5.3.0-21.7",
@@ -68,18 +61,6 @@ _http_archives = {
         "sha256": "928e4205f701b7798ce32f3d2171c1918b363e9a600390a25c876f075f1efc0a",
         "strip_prefix": "rules_proto_grpc-4.4.0",
         "urls": ["https://github.com/rules-proto-grpc/rules_proto_grpc/releases/download/4.4.0/rules_proto_grpc-4.4.0.tar.gz"],
-    },
-    "bazel_gazelle": {
-        "sha256": "32938bda16e6700063035479063d9d24c60eda8d79fd4739563f50d331cb3209",
-        "urls": [
-            "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.35.0/bazel-gazelle-v0.35.0.tar.gz",
-            "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.35.0/bazel-gazelle-v0.35.0.tar.gz",
-        ],
-    },
-    "com_github_bazelbuild_buildtools": {
-        "sha256": "061472b3e8b589fb42233f0b48798d00cf9dee203bd39502bd294e6b050bc6c2",
-        "strip_prefix": "buildtools-7.1.0",
-        "urls": ["https://github.com/bazelbuild/buildtools/archive/refs/tags/v7.1.0.tar.gz"],
     },
     "container_structure_test": {
         "sha256": "978db1ed0f802120fb0308b08b5c1e38ea81377944cc7a2fb727529815e4ed09",
