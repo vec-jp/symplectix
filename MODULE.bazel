@@ -15,6 +15,9 @@ bazel_dep(name = "bazel_skylib", version = "1.5.0")
 # constructing rulesets and BUILD files.
 bazel_dep(name = "aspect_bazel_lib", version = "2.6.1")
 
+# Prebuilt binaries for buildifier and buildozer.
+bazel_dep(name = "buildifier_prebuilt", version = "6.4.0", dev_dependency = True)
+
 # Non-hermetic C++ rules, contains an auto-detecting toolchain that
 # expects to find tools installed on the host machine.
 # bazel_dep(name = "rules_cc", version = "0.0.9")
