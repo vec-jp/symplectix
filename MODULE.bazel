@@ -7,3 +7,7 @@
 # Constraint values for specifying platforms and toolchains.
 # https://registry.bazel.build/modules/platforms
 bazel_dep(name = "platforms", version = "0.0.9")
+
+# Common useful functions and rules for Bazel.
+# https://registry.bazel.build/modules/bazel_skylib
+bazel_dep(name = "bazel_skylib", version = "1.5.0")

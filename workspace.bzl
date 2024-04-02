@@ -24,13 +24,6 @@ versions = struct(
 )
 
 _http_archives = {
-    "bazel_skylib": {
-        "sha256": "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
-        "urls": [
-            "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz",
-            "https://github.com/bazelbuild/bazel-skylib/releases/download/1.5.0/bazel-skylib-1.5.0.tar.gz",
-        ],
-    },
     "aspect_bazel_lib": {
         "sha256": "ac6392cbe5e1cc7701bbd81caf94016bae6f248780e12af4485d4a7127b4cb2b",
         "strip_prefix": "bazel-lib-2.6.1",
