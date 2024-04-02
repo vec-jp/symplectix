@@ -119,9 +119,11 @@ build:fuzz --config=lint
 build:fuzz --config=nightly
 build:fuzz --config=dbg
 
-# Since Bazel 7, the details are unknown, but builds with sandbox enabled has
+# Disable sandoxing in CI for a while.
+#
+# TODO: Enable sandboxing.
+# Since Bazel 7, the details are unknown, but builds in sandbox has
 # started to fail with an error that process_wrapper.sh does not exist.
-# To accommodate this, disable sandoxing in CI for a while.
 build:ci --spawn_strategy=local
 build:fuzz --spawn_strategy=local
 
