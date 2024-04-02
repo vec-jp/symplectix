@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "aa29d6cba5705fe9870a6e6a787ddf60ee4c300f5399ef1bafd40acfb4dcdde8",
+  "moduleFileHash": "a545da92565a2e786909f64ff514cc64fc5938d0fb171d8236b86a55c75bf4e0",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -23,7 +23,63 @@
       "repoName": "trunk",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [],
-      "extensionUsages": [],
+      "extensionUsages": [
+        {
+          "extensionBzlFile": "@rules_oci//oci:extensions.bzl",
+          "extensionName": "oci",
+          "usingModule": "<root>",
+          "location": {
+            "file": "@@//:MODULE.bazel",
+            "line": 34,
+            "column": 20
+          },
+          "imports": {
+            "distroless_base_nonroot": "distroless_base_nonroot",
+            "distroless_cc_nonroot": "distroless_cc_nonroot"
+          },
+          "devImports": [],
+          "tags": [
+            {
+              "tagName": "pull",
+              "attributeValues": {
+                "name": "distroless_base_nonroot",
+                "digest": "sha256:c62385962234a3dae5c9e9777dedc863d99f676b7202cd073e90b06e46021994",
+                "image": "gcr.io/distroless/base",
+                "platforms": [
+                  "linux/amd64",
+                  "linux/arm64"
+                ]
+              },
+              "devDependency": false,
+              "location": {
+                "file": "@@//:MODULE.bazel",
+                "line": 44,
+                "column": 9
+              }
+            },
+            {
+              "tagName": "pull",
+              "attributeValues": {
+                "name": "distroless_cc_nonroot",
+                "digest": "sha256:880bcf2ca034ab5e8ae76df0bd50d700e54eb44e948877244b130e3fcd5a1d66",
+                "image": "gcr.io/distroless/cc",
+                "platforms": [
+                  "linux/amd64",
+                  "linux/arm64"
+                ]
+              },
+              "devDependency": false,
+              "location": {
+                "file": "@@//:MODULE.bazel",
+                "line": 56,
+                "column": 9
+              }
+            }
+          ],
+          "hasDevUseExtension": false,
+          "hasNonDevUseExtension": true
+        }
+      ],
       "deps": {
         "platforms": "platforms@0.0.9",
         "bazel_skylib": "bazel_skylib@1.5.0",
@@ -3481,6 +3537,18 @@
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
+          "distroless_cc_nonroot_linux_arm64": {
+            "bzlFile": "@@rules_oci~//oci/private:pull.bzl",
+            "ruleClassName": "oci_pull",
+            "attributes": {
+              "scheme": "https",
+              "registry": "gcr.io",
+              "repository": "distroless/cc",
+              "identifier": "sha256:880bcf2ca034ab5e8ae76df0bd50d700e54eb44e948877244b130e3fcd5a1d66",
+              "platform": "linux/arm64",
+              "target_name": "distroless_cc_nonroot_linux_arm64"
+            }
+          },
           "oci_crane_registry_toolchains": {
             "bzlFile": "@@rules_oci~//oci/private:toolchains_repo.bzl",
             "ruleClassName": "toolchains_repo",
@@ -3586,6 +3654,18 @@
               "crane_version": "v0.18.0"
             }
           },
+          "distroless_base_nonroot_linux_amd64": {
+            "bzlFile": "@@rules_oci~//oci/private:pull.bzl",
+            "ruleClassName": "oci_pull",
+            "attributes": {
+              "scheme": "https",
+              "registry": "gcr.io",
+              "repository": "distroless/base",
+              "identifier": "sha256:c62385962234a3dae5c9e9777dedc863d99f676b7202cd073e90b06e46021994",
+              "platform": "linux/amd64",
+              "target_name": "distroless_base_nonroot_linux_amd64"
+            }
+          },
           "copy_to_directory_darwin_arm64": {
             "bzlFile": "@@aspect_bazel_lib~//lib/private:copy_to_directory_toolchain.bzl",
             "ruleClassName": "copy_to_directory_platform_repo",
@@ -3645,12 +3725,41 @@
               "crane_version": "v0.18.0"
             }
           },
+          "distroless_base_nonroot": {
+            "bzlFile": "@@rules_oci~//oci/private:pull.bzl",
+            "ruleClassName": "oci_alias",
+            "attributes": {
+              "target_name": "distroless_base_nonroot",
+              "scheme": "https",
+              "registry": "gcr.io",
+              "repository": "distroless/base",
+              "identifier": "sha256:c62385962234a3dae5c9e9777dedc863d99f676b7202cd073e90b06e46021994",
+              "platforms": {
+                "@@platforms//cpu:x86_64": "@distroless_base_nonroot_linux_amd64",
+                "@@platforms//cpu:arm64": "@distroless_base_nonroot_linux_arm64"
+              },
+              "bzlmod_repository": "distroless_base_nonroot",
+              "reproducible": true
+            }
+          },
           "jq_darwin_arm64": {
             "bzlFile": "@@aspect_bazel_lib~//lib/private:jq_toolchain.bzl",
             "ruleClassName": "jq_platform_repo",
             "attributes": {
               "platform": "darwin_arm64",
               "version": "1.7"
+            }
+          },
+          "distroless_cc_nonroot_linux_amd64": {
+            "bzlFile": "@@rules_oci~//oci/private:pull.bzl",
+            "ruleClassName": "oci_pull",
+            "attributes": {
+              "scheme": "https",
+              "registry": "gcr.io",
+              "repository": "distroless/cc",
+              "identifier": "sha256:880bcf2ca034ab5e8ae76df0bd50d700e54eb44e948877244b130e3fcd5a1d66",
+              "platform": "linux/amd64",
+              "target_name": "distroless_cc_nonroot_linux_amd64"
             }
           },
           "yq_darwin_amd64": {
@@ -3699,6 +3808,18 @@
             "attributes": {
               "toolchain_type": "@rules_oci//oci:crane_toolchain_type",
               "toolchain": "@oci_crane_{platform}//:crane_toolchain"
+            }
+          },
+          "distroless_base_nonroot_linux_arm64": {
+            "bzlFile": "@@rules_oci~//oci/private:pull.bzl",
+            "ruleClassName": "oci_pull",
+            "attributes": {
+              "scheme": "https",
+              "registry": "gcr.io",
+              "repository": "distroless/base",
+              "identifier": "sha256:c62385962234a3dae5c9e9777dedc863d99f676b7202cd073e90b06e46021994",
+              "platform": "linux/arm64",
+              "target_name": "distroless_base_nonroot_linux_arm64"
             }
           },
           "jq_windows_amd64": {
@@ -3767,6 +3888,23 @@
             "attributes": {
               "platform": "linux_s390x",
               "crane_version": "v0.18.0"
+            }
+          },
+          "distroless_cc_nonroot": {
+            "bzlFile": "@@rules_oci~//oci/private:pull.bzl",
+            "ruleClassName": "oci_alias",
+            "attributes": {
+              "target_name": "distroless_cc_nonroot",
+              "scheme": "https",
+              "registry": "gcr.io",
+              "repository": "distroless/cc",
+              "identifier": "sha256:880bcf2ca034ab5e8ae76df0bd50d700e54eb44e948877244b130e3fcd5a1d66",
+              "platforms": {
+                "@@platforms//cpu:x86_64": "@distroless_cc_nonroot_linux_amd64",
+                "@@platforms//cpu:arm64": "@distroless_cc_nonroot_linux_arm64"
+              },
+              "bzlmod_repository": "distroless_cc_nonroot",
+              "reproducible": true
             }
           },
           "coreutils_windows_amd64": {
