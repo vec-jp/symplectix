@@ -8,8 +8,6 @@ _RUST_STABLE_VERSION = "1.77.0"
 # https://github.com/oxalica/rust-overlay/tree/master/manifests/nightly
 _RUST_NIGHTLY_VERSION = "nightly/2024-03-27"
 
-_GO_VERSION = "1.22.1"
-
 versions = struct(
     rust = struct(
         edition = _RUST_EDITION,
@@ -17,9 +15,6 @@ versions = struct(
             _RUST_STABLE_VERSION,
             _RUST_NIGHTLY_VERSION,
         ],
-    ),
-    go = struct(
-        version = _GO_VERSION,
     ),
 )
 
@@ -61,11 +56,6 @@ _http_archives = {
         "sha256": "928e4205f701b7798ce32f3d2171c1918b363e9a600390a25c876f075f1efc0a",
         "strip_prefix": "rules_proto_grpc-4.4.0",
         "urls": ["https://github.com/rules-proto-grpc/rules_proto_grpc/releases/download/4.4.0/rules_proto_grpc-4.4.0.tar.gz"],
-    },
-    "container_structure_test": {
-        "sha256": "978db1ed0f802120fb0308b08b5c1e38ea81377944cc7a2fb727529815e4ed09",
-        "strip_prefix": "container-structure-test-1.17.0",
-        "urls": ["https://github.com/GoogleContainerTools/container-structure-test/archive/v1.17.0.zip"],
     },
 }
 
