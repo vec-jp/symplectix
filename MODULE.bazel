@@ -34,6 +34,8 @@ bazel_dep(name = "rules_pkg", version = "0.10.1")
 
 # Rules for building OCI containers.
 bazel_dep(name = "rules_oci", version = "1.7.5")
+# Validate the structure of container images.
+bazel_dep(name = "container_structure_test", version = "1.16.0")
 
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 

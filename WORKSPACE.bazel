@@ -84,7 +84,3 @@ load("@crates//:defs.bzl", crates_repositories = "crate_repositories")
 bin_crates_repositories()
 
 crates_repositories()
-
-load("@container_structure_test//:repositories.bzl", "container_structure_test_register_toolchain")
-
-container_structure_test_register_toolchain(name = "cst")
