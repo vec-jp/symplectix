@@ -25,3 +25,6 @@ bazel_dep(name = "aspect_bazel_lib", version = "2.6.1")
 
 # Perl rules, to build openssl.
 bazel_dep(name = "rules_perl", version = "0.2.0")
+
+# Rules for creating packages of many types (zip, tar, deb, rpm, ...).
+bazel_dep(name = "rules_pkg", version = "0.10.1")
