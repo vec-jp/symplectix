@@ -6,7 +6,7 @@ jq(
     filter = "|".join([
         "$ARGS.named.STAMP as $stamp",
         "$stamp // []",
-        ".[]"
+        ".[]",
     ]),
 )
 
