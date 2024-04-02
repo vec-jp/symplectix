@@ -3,6 +3,7 @@
 #
 # https://bazel.build/external/module
 # https://registry.bazel.build/
+module(name = "trunk")
 
 # Constraint values for specifying platforms and toolchains.
 #
