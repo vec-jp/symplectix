@@ -14,3 +14,14 @@ bazel_dep(name = "bazel_skylib", version = "1.5.0")
 # Starlark libraries and rules which are useful for
 # constructing rulesets and BUILD files.
 bazel_dep(name = "aspect_bazel_lib", version = "2.6.1")
+
+# Non-hermetic C++ rules, contains an auto-detecting toolchain that
+# expects to find tools installed on the host machine.
+# bazel_dep(name = "rules_cc", version = "0.0.9")
+
+# Build rules for interfacing with "foreign" (non-Bazel) build systems
+# (CMake, configure-make, GNU Make, boost, ninja, Meson).
+# bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
+
+# Perl rules, to build openssl.
+bazel_dep(name = "rules_perl", version = "0.2.0")

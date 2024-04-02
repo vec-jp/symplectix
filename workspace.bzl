@@ -24,11 +24,6 @@ versions = struct(
 )
 
 _http_archives = {
-    "rules_cc": {
-        "sha256": "2037875b9a4456dce4a79d112a8ae885bbc4aad968e6587dca6e64f3a0900cdf",
-        "strip_prefix": "rules_cc-0.0.9",
-        "urls": ["https://github.com/bazelbuild/rules_cc/releases/download/0.0.9/rules_cc-0.0.9.tar.gz"],
-    },
     "rules_foreign_cc": {
         "sha256": "2a4d07cd64b0719b39a7c12218a3e507672b82a97b98c6a89d38565894cf7c51",
         "strip_prefix": "rules_foreign_cc-0.9.0",
@@ -49,13 +44,6 @@ _http_archives = {
         "strip_prefix": "openssl-3.2.1",
         "urls": [
             "https://www.openssl.org/source/openssl-3.2.1.tar.gz",
-        ],
-    },
-    "rules_perl": {
-        "sha256": "391edb08802860ba733d402c6376cfe1002b598b90d2240d9d302ecce2289a64",
-        "strip_prefix": "rules_perl-7f10dada09fcba1dc79a6a91da2facc25e72bd7d",
-        "urls": [
-            "https://github.com/bazelbuild/rules_perl/archive/7f10dada09fcba1dc79a6a91da2facc25e72bd7d.tar.gz",
         ],
     },
     "rules_rust": {
