@@ -1,10 +1,10 @@
 workspace(name = "trunk")
 
-load("//:workspace.bzl", "versions", "workspace_dependencies", "workspace_toolchains")
+load("//:workspace.bzl", "versions", "workspace_dependencies")
 
 workspace_dependencies()
 
-workspace_toolchains()
+register_toolchains("//toolchains:prost_toolchain")
 
 # Build rules for interfacing with "foreign" (non-Bazel) build systems
 # (CMake, configure-make, GNU Make, boost, ninja, Meson).
