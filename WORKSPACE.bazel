@@ -110,7 +110,6 @@ load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencie
 
 crate_universe_dependencies()
 
-load("//x/bin_crates:defs.bzl", "bin_crates")
 load("//x/crates:defs.bzl", "crates")
 
 # Cargo packages that contain a library. To generate Bazel targets for binaries,
@@ -129,6 +128,12 @@ crates.repository(
     ),
 )
 
+load("@crates//:defs.bzl", crates_repositories = "crate_repositories")
+
+crates_repositories()
+
+load("//x/bin_crates:defs.bzl", "bin_crates")
+
 # The bin_crates repository is for cargo packages that contain binaries but no library.
 # https://bazelbuild.github.io/rules_rust/crate_universe.html#binary-dependencies
 #
@@ -136,8 +141,5 @@ crates.repository(
 bin_crates.repository()
 
 load("@bin_crates//:defs.bzl", bin_crates_repositories = "crate_repositories")
-load("@crates//:defs.bzl", crates_repositories = "crate_repositories")
 
 bin_crates_repositories()
-
-crates_repositories()
