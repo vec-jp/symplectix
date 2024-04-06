@@ -5,15 +5,16 @@ on:
         required: true
         type: string
 
+env:
+  BAZEL_OUTPUT_USER_ROOT: /tmp/ci/
+  BAZEL_STARTUP_ARGS: --output_user_root=$BAZEL_OUTPUT_USER_ROOT
+  BAZEL_COMMAND_ARGS: --config=ci
+  BAZEL: bazel ${BAZEL_STARTUP_ARGS}
+
 jobs:
   bazel:
     name: Bazel
     runs-on: ${{ inputs.os }}
-    env:
-      BAZEL_OUTPUT_USER_ROOT: /tmp/ci/
-      BAZEL_STARTUP_ARGS: --output_user_root=$BAZEL_OUTPUT_USER_ROOT
-      BAZEL_COMMAND_ARGS: --config=ci
-      BAZEL: bazel $BAZEL_STARTUP_ARGS
     steps:
       - uses: actions/checkout@v4
 
@@ -29,7 +30,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
-      - run: echo $XDG_CACHE_HOME
+      - run: echo "$XDG_CACHE_HOME"
 
       - name: Build
         run: $BAZEL build $BAZEL_COMMAND_ARGS //...

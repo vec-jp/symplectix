@@ -1,15 +1,16 @@
 on:
   workflow_call:
 
+env:
+  BAZEL_OUTPUT_USER_ROOT: /tmp/fuzz/
+  BAZEL_STARTUP_ARGS: --output_user_root=$BAZEL_OUTPUT_USER_ROOT
+  BAZEL_COMMAND_ARGS: --config=fuzz --build_tag_filters=+fuzzing
+  BAZEL: bazel $BAZEL_STARTUP_ARGS
+
 jobs:
   bazel:
     name: Bazel
     runs-on: [ubuntu-22.04]
-    env:
-      BAZEL_OUTPUT_USER_ROOT: /tmp/fuzz/
-      BAZEL_STARTUP_ARGS: --output_user_root=$BAZEL_OUTPUT_USER_ROOT
-      BAZEL_COMMAND_ARGS: --config=fuzz --build_tag_filters=+fuzzing
-      BAZEL: bazel $BAZEL_STARTUP_ARGS
     steps:
       - uses: actions/checkout@v4
 
