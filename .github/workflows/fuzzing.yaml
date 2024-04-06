@@ -6,7 +6,7 @@ jobs:
     name: Bazel
     runs-on: [ubuntu-22.04]
     env:
-      BAZEL: bazel --output_user_root=/tmp/fuzz/
+      BAZEL: bazel --output_user_root=/tmp/fuzzing/
       BAZEL_ARGS: --config=fuzz
       BUILD_TAG_FILTERS: --build_tag_filters=+fuzzing
     steps:
@@ -17,7 +17,7 @@ jobs:
           cache-name: bazel-cache-fuzz
         with:
           path: |
-            /tmp/fuzz
+            /tmp/fuzzing
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}

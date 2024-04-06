@@ -6,34 +6,61 @@ on:
         type: string
 
 jobs:
-  bazel:
-    name: Bazel
+  testing:
     runs-on: ${{ inputs.os }}
     env:
-      BAZEL: bazel --output_user_root=/tmp/ci/
-      BAZEL_ARGS: --config=ci
+      BAZEL: bazel --output_user_root=/tmp/testing/
+      BAZEL_COMMAND_ARGS: --config=testing
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/cache@v3
         env:
-          cache-name: bazel-cache
+          cache-name: bazel-cache-testing
         with:
-          # bazelisk stores a bazel binary in the [UserCacheDir](https://pkg.go.dev/os#UserCacheDir).
           path: |
-            /tmp/ci
+            /tmp/testing
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
+      - name: Create .bazelrc for actions
+        run: cp .github/bazelrc .bazelrc.local
+
       - name: Build
-        run: $BAZEL build $BAZEL_ARGS //...
+        run: $BAZEL build $BAZEL_COMMAND_ARGS //...
 
       - name: Test
-        run: $BAZEL test $BAZEL_ARGS //...
+        run: $BAZEL test $BAZEL_COMMAND_ARGS //...
 
       - name: Audit
         if: github.event_name == 'schedule'
-        run: $BAZEL run $BAZEL_ARGS //tools/audit
+        run: $BAZEL run $BAZEL_COMMAND_ARGS //tools/audit
+
+  fuzzing:
+    runs-on: [ubuntu-22.04]
+    env:
+      BAZEL: bazel --output_user_root=/tmp/fuzzing/
+      BAZEL_COMMAND_ARGS: --config=fuzzing
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create .bazelrc for actions
+        run: cp .github/bazelrc .bazelrc.local
+
+      - uses: actions/cache@v3
+        env:
+          cache-name: bazel-cache-fuzzing
+        with:
+          path: |
+            /tmp/fuzzing
+            ~/.cache/bazelisk
+            ~/Library/Caches/bazelisk
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
+          restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
+
+      # TODO: Test fuzzing targets
+      - name: Build
+        run: $BAZEL build $BAZEL_COMMAND_ARGS //...
