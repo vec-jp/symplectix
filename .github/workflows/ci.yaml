@@ -14,12 +14,17 @@ on:
 
 jobs:
   CheckPullRequest:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Validate PR title formatting
+        id: validate-pr-title-formatting
         run: |
-          [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/_-]*:\ [a-z]{1}.*[^.]$ ]]
+          [[ "${{ github.event.pull_request.title }}" =~ ^.*:\\ .*[^.]$ ]] && \
+          sed "s;^\(.*\):.*$;package=\1;" <<< "${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
+
+      - name: Check the package
+        run: echo "${{steps.validate-pr-title-formatting.outputs.package}}"
 
   Testing:
     strategy:
