@@ -13,7 +13,7 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  Check PR:
+  CheckPullRequest:
     runs-on: [ubuntu-latest]
     if: ${{ github.event_name == 'pull_request' }}
     steps:
