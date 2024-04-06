@@ -20,11 +20,12 @@ jobs:
       - name: Validate PR title formatting
         id: validate-pr-title-formatting
         run: |
-          [[ "${{ github.event.pull_request.title }}" =~ ^.*:\ .*[^.]$ ]] && \
-          sed "s;^\(.*\):.*$;package=\1;" <<< "${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
+          [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/_-]*:\ [a-z]{1}.*[^.]$ ]] && \
+          sed "s;^\(.*\):[[:space:]].*$;package=\1;" <<< "${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
 
       - name: Check the package
-        run: echo "${{steps.validate-pr-title-formatting.outputs.package}}"
+        run: |
+          bazel query 'attr(visibility, "//visibility:public", //${{steps.validate-pr-title-formatting.outputs.package}}:*)'
 
   Testing:
     strategy:
