@@ -10,9 +10,10 @@ jobs:
     name: Bazel
     runs-on: ${{ inputs.os }}
     env:
-      BAZEL: bazel --output_user_root=/tmp/ci/
-      BAZEL_ARGS: --config=ci
-
+      BAZEL_OUTPUT_USER_ROOT: /tmp/ci/
+      BAZEL_STARTUP_ARGS: --output_user_root=$BAZEL_OUTPUT_USER_ROOT
+      BAZEL_COMMAND_ARGS: --config=ci
+      BAZEL: bazel $BAZEL_STARTUP_ARGS
     steps:
       - uses: actions/checkout@v4
 
@@ -22,18 +23,20 @@ jobs:
         with:
           # bazelisk stores a bazel binary in the [UserCacheDir](https://pkg.go.dev/os#UserCacheDir).
           path: |
-            /tmp/ci
+            $BAZEL_OUTPUT_USER_ROOT
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
+      - run: echo $XDG_CACHE_HOME
+
       - name: Build
-        run: $BAZEL build $BAZEL_ARGS //...
+        run: $BAZEL build $BAZEL_COMMAND_ARGS //...
 
       - name: Test
-        run: $BAZEL test $BAZEL_ARGS //...
+        run: $BAZEL test $BAZEL_COMMAND_ARGS //...
 
       - name: Audit
         if: github.event_name == 'schedule'
-        run: $BAZEL run $BAZEL_ARGS //tools/audit
+        run: $BAZEL run $BAZEL_COMMAND_ARGS //tools/audit

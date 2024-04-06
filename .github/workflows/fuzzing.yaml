@@ -6,9 +6,10 @@ jobs:
     name: Bazel
     runs-on: [ubuntu-22.04]
     env:
-      BAZEL: bazel --output_user_root=/tmp/fuzz/
-      BAZEL_ARGS: --config=fuzz
-      BUILD_TAG_FILTERS: --build_tag_filters=+fuzzing
+      BAZEL_OUTPUT_USER_ROOT: /tmp/fuzz/
+      BAZEL_STARTUP_ARGS: --output_user_root=$BAZEL_OUTPUT_USER_ROOT
+      BAZEL_COMMAND_ARGS: --config=fuzz --build_tag_filters=+fuzzing
+      BAZEL: bazel $BAZEL_STARTUP_ARGS
     steps:
       - uses: actions/checkout@v4
 
@@ -17,12 +18,12 @@ jobs:
           cache-name: bazel-cache-fuzz
         with:
           path: |
-            /tmp/fuzz
+            $BAZEL_OUTPUT_USER_ROOT
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
       # TODO: Test fuzzing targets
-      - run: $BAZEL build $BAZEL_ARGS $BUILD_TAG_FILTERS //...
+      - run: $BAZEL build $BAZEL_COMMAND_ARGS //...
         name: Build
