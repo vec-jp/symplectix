@@ -1,13 +1,30 @@
 on:
-  workflow_call:
-    inputs:
-      os:
-        required: true
-        type: string
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
+  check-pr:
+    name: Check PR
+    runs-on: [ubuntu-latest]
+    if: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - name: Validate PR title formatting
+        run: |
+          [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/_-]*:\ [a-z]{1}.*[^.]$ ]]
+
   testing:
-    runs-on: ${{ inputs.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-14]
+    runs-on: ${{ matrix.os }}
     env:
       BAZEL: bazel --output_user_root=/tmp/testing/
       BAZEL_COMMAND_ARGS: --config=testing
@@ -40,7 +57,10 @@ jobs:
         run: $BAZEL run $BAZEL_COMMAND_ARGS //tools/audit
 
   fuzzing:
-    runs-on: [ubuntu-22.04]
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
     env:
       BAZEL: bazel --output_user_root=/tmp/fuzzing/
       BAZEL_COMMAND_ARGS: --config=fuzzing
