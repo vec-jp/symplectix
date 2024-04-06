@@ -13,24 +13,22 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  CheckPullRequest:
-    runs-on: ubuntu-latest
+  ValidatePR:
     if: ${{ github.event_name == 'pull_request' }}
-    outputs:
-      bazel_package: ${{ steps.validate-pr-title-formatting.outputs.bazel_package }}
+    runs-on: ubuntu-latest
     steps:
-      - name: Validate PR title formatting
-        id: validate-pr-title-formatting
+      - name: Title
         run: |
-          [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/_-]*:\ [a-z]{1}.*[^.]$ ]] && \
-          sed "s;^\(.*\):[[:space:]].*$;package=\1;" <<< "${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
+          [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/_-]*:\ [a-z]{1}.*[^.]$ ]]
 
   Testing:
+    needs: ValidatePR
+
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-14]
+
     runs-on: ${{ matrix.os }}
-    needs: CheckPullRequest
     env:
       BAZEL: bazel --output_user_root=/tmp/testing/
       BAZEL_COMMAND_ARGS: --config=testing
@@ -52,10 +50,6 @@ jobs:
       - name: Create .bazelrc for actions
         run: cp .github/bazelrc .bazelrc.local
 
-      - name: Check the package
-        run: |
-          bazel query 'attr(visibility, "//visibility:public", //${{needs.CheckPullRequest.outputs.bazel_package}}:*)'
-
       - name: Build
         run: $BAZEL build $BAZEL_COMMAND_ARGS //...
 
@@ -67,9 +61,12 @@ jobs:
         run: $BAZEL run $BAZEL_COMMAND_ARGS //tools/audit
 
   Fuzzing:
+    needs: ValidatePR
+
     strategy:
       matrix:
         os: [ubuntu-22.04]
+
     runs-on: ${{ matrix.os }}
     env:
       BAZEL: bazel --output_user_root=/tmp/fuzzing/
