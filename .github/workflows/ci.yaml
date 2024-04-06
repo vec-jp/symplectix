@@ -22,8 +22,6 @@ jobs:
           [[ "${{ github.event.pull_request.title }}" =~ ^[a-z]{1}[a-z/_-]*:\ [a-z]{1}.*[^.]$ ]]
 
   Testing:
-    needs: ValidatePR
-
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-14]
@@ -61,8 +59,6 @@ jobs:
         run: $BAZEL run $BAZEL_COMMAND_ARGS //tools/audit
 
   Fuzzing:
-    needs: ValidatePR
-
     strategy:
       matrix:
         os: [ubuntu-22.04]
