@@ -17,7 +17,7 @@ jobs:
           cache-name: bazel-cache-fuzz
         with:
           path: |
-            $BAZEL_OUTPUT_USER_ROOT
+            /tmp/fuzz
             ~/.cache/bazelisk
             ~/Library/Caches/bazelisk
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
