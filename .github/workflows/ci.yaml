@@ -20,7 +20,7 @@ jobs:
       - name: Validate PR title formatting
         id: validate-pr-title-formatting
         run: |
-          [[ "${{ github.event.pull_request.title }}" =~ ^.*:\\ .*[^.]$ ]] && \
+          [[ "${{ github.event.pull_request.title }}" =~ ^.*:\ .*[^.]$ ]] && \
           sed "s;^\(.*\):.*$;package=\1;" <<< "${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
 
       - name: Check the package
