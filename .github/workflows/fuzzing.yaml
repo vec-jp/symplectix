@@ -2,10 +2,8 @@ on:
   workflow_call:
 
 env:
-  BAZEL_OUTPUT_USER_ROOT: /tmp/fuzz/
-  BAZEL_STARTUP_ARGS: --output_user_root=$BAZEL_OUTPUT_USER_ROOT
-  BAZEL_COMMAND_ARGS: --config=fuzz --build_tag_filters=+fuzzing
-  BAZEL: bazel $BAZEL_STARTUP_ARGS
+  BAZEL_COMMAND_ARGS: --config=fuzz
+  BAZEL: bazel --output_user_root=/tmp/fuzz/
 
 jobs:
   bazel:

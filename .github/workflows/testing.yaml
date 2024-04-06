@@ -6,10 +6,8 @@ on:
         type: string
 
 env:
-  BAZEL_OUTPUT_USER_ROOT: /tmp/ci/
-  BAZEL_STARTUP_ARGS: --output_user_root=$BAZEL_OUTPUT_USER_ROOT
   BAZEL_COMMAND_ARGS: --config=ci
-  BAZEL: bazel ${BAZEL_STARTUP_ARGS}
+  BAZEL: bazel --output_user_root=/tmp/ci/
 
 jobs:
   bazel:
