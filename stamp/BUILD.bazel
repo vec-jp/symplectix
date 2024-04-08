@@ -15,8 +15,8 @@ jq(
 
 genrule(
     name = "git_commit",
-    srcs = [":status.json"],
+    srcs = [":buildinfo.json"],
     outs = ["git_commit.txt"],
-    cmd = "$(JQ_BIN) -r '.STABLE_GIT_COMMIT' $(location :status.json) > $@",
+    cmd = "$(JQ_BIN) -r '.STABLE_GIT_COMMIT' $(location :buildinfo.json) > $@",
     toolchains = ["@jq_toolchains//:resolved_toolchain"],
 )
