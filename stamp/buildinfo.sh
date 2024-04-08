@@ -1,10 +1,26 @@
 #!/usr/bin/env bash
 
-echo "STABLE_GIT_COMMIT $(git rev-parse HEAD 2>/dev/null)"
+git_revision() {
+    git rev-parse HEAD 2>/dev/null
+}
 
-# Environment variables for stamping.
+git_status() {
+    if [ -z "$(git status --porcelain)" ]; then
+        echo clean
+    else
+        echo dirty
+    fi
+}
+
+# A "revision" refers to the id you can use as a parameter
+# to reference an object in git (usually a commit).
+echo "STABLE_GIT_REVISION $(git_revision)"
+
+echo "STABLE_GIT_STATUS $(git_status)"
+
+# Github Actions environment variables for stamping.
 # https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
-#
+
 # A unique number for each workflow run within a repository.
 # This number does not change if you re-run the workflow run.
 echo "STABLE_GITHUB_RUN_ID ${GITHUB_RUN_ID:=0}"
