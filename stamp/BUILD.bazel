@@ -4,7 +4,7 @@ jq(
     name = "buildinfo",
     srcs = [],
     args = [
-      "--sort-keys",
+        "--sort-keys",
     ],
     filter = "|".join([
         "$ARGS.named.STAMP as $stamp",
