@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
+# A "revision" refers to the id you can use as a parameter
+# to reference an object in git (usually a commit).
 git_revision() {
     git rev-parse HEAD 2>/dev/null
 }
+echo "STABLE_GIT_REVISION $(git_revision)"
 
+# The working tree status.
 git_status() {
     if [ -z "$(git status --porcelain)" ]; then
         echo clean
@@ -11,11 +15,6 @@ git_status() {
         echo dirty
     fi
 }
-
-# A "revision" refers to the id you can use as a parameter
-# to reference an object in git (usually a commit).
-echo "STABLE_GIT_REVISION $(git_revision)"
-
 echo "STABLE_GIT_STATUS $(git_status)"
 
 # Github Actions environment variables for stamping.
