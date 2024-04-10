@@ -192,10 +192,10 @@ impl Process {
         // Notify the spawned process to be terminated.
         unsafe {
             if gracefully {
-                kill(self.child_id as libc::c_int, libc::SIGTERM)?;
+                _ = kill(self.child_id as libc::c_int, libc::SIGTERM);
                 time::sleep(Duration::from_millis(50)).await;
             }
-            kill(self.child_id as libc::c_int, libc::SIGKILL)?;
+            _ = kill(self.child_id as libc::c_int, libc::SIGKILL);
         }
 
         let status = loop {
@@ -219,7 +219,7 @@ impl Process {
 
     /// Waits all descendant processes to ensure there are no children left behind.
     unsafe fn reap(&self) {
-        let _ = killpg(self.child_id as libc::c_int, libc::SIGKILL);
+        _ = killpg(self.child_id as libc::c_int, libc::SIGKILL);
 
         loop {
             // The WNOHANG option is used to indicate that the call should not block
@@ -270,7 +270,7 @@ mod tests {
         use Error::*;
 
         let sleep = wait(Entrypoint::new("sleep").arg("0.1").spawn().await.unwrap());
-        let Ok(_) = sleep.await else {
+        let Ok(_) = dbg!(sleep.await) else {
             panic!("expected that the command 'sleep' exit successfully");
         };
 
