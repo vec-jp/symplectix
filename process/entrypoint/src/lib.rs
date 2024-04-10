@@ -270,7 +270,7 @@ mod tests {
         use Error::*;
 
         let sleep = wait(Entrypoint::new("sleep").arg("0.1").spawn().await.unwrap());
-        let Ok(_) = dbg!(sleep.await) else {
+        let Ok(_) = sleep.await else {
             panic!("expected that the command 'sleep' exit successfully");
         };
 
