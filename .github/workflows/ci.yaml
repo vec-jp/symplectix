@@ -49,16 +49,9 @@ jobs:
           echo "BAZEL=bazel --output_user_root=/tmp/testing/" >> $GITHUB_ENV
 
           if [[ ${{ matrix.os }} == "ubuntu-22.04" ]]; then
-            cat <<EOF
-          BAZEL_COMMAND_ARGS=\
-          --config=testing \
-          --@openssl//:out_lib_dir=lib64
-          EOF >> $GITHUB_ENV
+            echo "BAZEL_COMMAND_ARGS=--config=testing --@openssl//:out_lib_dir=lib64" >> $GITHUB_ENV
           else
-            cat <<EOF
-          BAZEL_COMMAND_ARGS=\
-          --config=testing
-          EOF >> $GITHUB_ENV
+            echo "BAZEL_COMMAND_ARGS=--config=testing --@openssl//:out_lib_dir=lib" >> $GITHUB_ENV
           fi
 
       - name: Create .bazelrc for actions
@@ -99,19 +92,12 @@ jobs:
       # The default value is 'lib'.
       - name: Set environment variables
         run: |
-          echo "BAZEL=bazel --output_user_root=/tmp/testing/" >> $GITHUB_ENV
+          echo "BAZEL=bazel --output_user_root=/tmp/fuzzing/" >> $GITHUB_ENV
 
           if [[ ${{ matrix.os }} == "ubuntu-22.04" ]]; then
-            cat <<EOF
-          BAZEL_COMMAND_ARGS=\
-          --config=testing \
-          --@openssl//:out_lib_dir=lib64
-          EOF >> $GITHUB_ENV
+            echo "BAZEL_COMMAND_ARGS=--config=testing --@openssl//:out_lib_dir=lib64" >> $GITHUB_ENV
           else
-            cat <<EOF
-          BAZEL_COMMAND_ARGS=\
-          --config=testing
-          EOF >> $GITHUB_ENV
+            echo "BAZEL_COMMAND_ARGS=--config=testing --@openssl//:out_lib_dir=lib" >> $GITHUB_ENV
           fi
 
       - name: Create .bazelrc for actions
