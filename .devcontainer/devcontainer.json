@@ -1,0 +1,38 @@
+{
+  "name": "trunk",
+  "service": "workspace",
+  "dockerComposeFile": [
+    "docker-compose.yaml"
+  ],
+  "workspaceFolder": "/home/nonroot/trunk",
+  "remoteUser": "nonroot",
+  "remoteEnv": {
+    "USER": "nonroot",
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+  },
+  "features": {
+    "docker-from-docker": {
+      "version": "latest",
+      "moby": true,
+      "dockerDashComposeVersion": "v1",
+    }
+  },
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "bazel-*": true,
+    },
+    "search.exclude": {
+      "**/.git": true,
+      "bazel-*": true,
+    },
+  },
+  // Add the IDs of extensions you want installed when the container is created.
+  "extensions": [
+    "EditorConfig.EditorConfig",
+  ],
+  "postCreateCommand": ".devcontainer/post-create.sh",
+  "postAttachCommand": ".devcontainer/post-attach.sh",
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": []
+}
