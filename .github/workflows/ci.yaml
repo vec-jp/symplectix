@@ -46,17 +46,19 @@ jobs:
       # The default value is 'lib'.
       - name: Set environment variables
         run: |
-          echo "BAZEL=bazel --output_user_root" >> $GITHUB_ENV
+          echo "BAZEL=bazel --output_user_root=/tmp/testing/" >> $GITHUB_ENV
 
           if [[ ${{ matrix.os }} == "ubuntu-22.04" ]]; then
-            echo "BAZEL_COMMAND_ARGS=\
-            --config=testing \
-            --@openssl//:out_lib_dir=lib64 \
-            " >> $GITHUB_ENV
+            cat <<EOF
+          BAZEL_COMMAND_ARGS=\
+          --config=testing \
+          --@openssl//:out_lib_dir=lib64
+          EOF >> $GITHUB_ENV
           else
-            echo "BAZEL_COMMAND_ARGS=\
-            --config=testing \
-            " >> $GITHUB_ENV
+            cat <<EOF
+          BAZEL_COMMAND_ARGS=\
+          --config=testing
+          EOF >> $GITHUB_ENV
           fi
 
       - name: Create .bazelrc for actions
@@ -93,19 +95,23 @@ jobs:
           key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ runner.os }}-${{ env.cache-name }}-
 
+      # The openssl out_lib_dir should be lib64 on a ubuntu-22.04 instance.
+      # The default value is 'lib'.
       - name: Set environment variables
         run: |
-          echo "BAZEL=bazel --output_user_root" >> $GITHUB_ENV
+          echo "BAZEL=bazel --output_user_root=/tmp/testing/" >> $GITHUB_ENV
 
           if [[ ${{ matrix.os }} == "ubuntu-22.04" ]]; then
-            echo "BAZEL_COMMAND_ARGS=\
-            --config=testing \
-            --@openssl//:out_lib_dir=lib64 \
-            " >> $GITHUB_ENV
+            cat <<EOF
+          BAZEL_COMMAND_ARGS=\
+          --config=testing \
+          --@openssl//:out_lib_dir=lib64
+          EOF >> $GITHUB_ENV
           else
-            echo "BAZEL_COMMAND_ARGS=\
-            --config=testing \
-            " >> $GITHUB_ENV
+            cat <<EOF
+          BAZEL_COMMAND_ARGS=\
+          --config=testing
+          EOF >> $GITHUB_ENV
           fi
 
       - name: Create .bazelrc for actions
