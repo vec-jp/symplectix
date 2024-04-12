@@ -10,10 +10,6 @@ build:ci --config=rustfmt
 build:ci --spawn_strategy=local
 build:ci --spawn_strategy=local
 
-# The openssl out_lib_dir should be lib64 on a ubuntu-22.04 instance.
-# The default value is 'lib'.
-build:ci --@openssl//:out_lib_dir=lib64
-
 build:testing --config=ci
 build:testing --config=stable
 build:testing --config=opt
