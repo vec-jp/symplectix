@@ -16,10 +16,3 @@ services:
     init: true
     volumes:
       - ..:/home/nonroot/trunk
-      - xdg-cache:/home/nonroot/.cache
-      - xdg-config:/home/nonroot/.config
-      - xdg-data:/home/nonroot/.local/share
-    cap_add:
-      - SYS_PTRACE
-    security_opt:
-      - seccomp:unconfined

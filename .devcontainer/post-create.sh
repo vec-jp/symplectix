@@ -8,7 +8,7 @@ main() {
 }
 
 chown_volumes() {
-    sudo chown nonroot:nonroot ~/.cache ~/.config ~/.local/share
+    sudo chown nonroot:nonroot ~/.cache ~/.config ~/.local
 }
 
 locale_gen() {
