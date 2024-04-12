@@ -3,7 +3,9 @@
   "name": "trunk",
   "workspaceFolder": "/home/nonroot/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/nonroot/workspace,type=bind,consistency=cached",
-  "dockerFile": "Dockerfile",
+  "build": {
+    "dockerfile": "Dockerfile",
+  },
   "remoteUser": "nonroot",
   "remoteEnv": {
     "USER": "nonroot",
@@ -37,18 +39,22 @@
   // or for forwarding a service not in the primary container in docker-compose scenarios (e.g. "mysql:3306").
   "forwardPorts": [
   ],
-  "settings": {
-    "files.exclude": {
-      "**/.git": true,
-      "bazel-*": true,
-    },
-    "search.exclude": {
-      "**/.git": true,
-      "bazel-*": true,
-    },
-  },
-  // Add the IDs of extensions you want installed when the container is created.
-  "extensions": [
-    "EditorConfig.EditorConfig",
-  ]
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "files.exclude": {
+          "**/.git": true,
+          "bazel-*": true,
+        },
+        "search.exclude": {
+          "**/.git": true,
+          "bazel-*": true,
+        },
+      },
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "EditorConfig.EditorConfig",
+      ]
+    }
+  }
 }
