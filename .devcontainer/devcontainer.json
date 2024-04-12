@@ -28,6 +28,9 @@
   //
   // https://containers.dev/features
   "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest"
+    }
   },
   "postCreateCommand": ".devcontainer/post-create.sh",
   "postAttachCommand": ".devcontainer/post-attach.sh",
