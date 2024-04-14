@@ -22,7 +22,6 @@ build:ci --config=rustfmt
 # Since Bazel 7, the details are unknown, but builds in sandbox has
 # started to fail with an error that process_wrapper.sh does not exist.
 build:ci --spawn_strategy=local
-build:ci --spawn_strategy=local
 
 build:testing --config=ci
 build:testing --config=stable
