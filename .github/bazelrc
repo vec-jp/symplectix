@@ -1,3 +1,17 @@
+startup --output_user_root=/tmp/ci/
+
+# Use a directory on the file system as a remote cache.
+# By default, Bazel has a build cache per workspace which keeps only the latest version
+# of any target. Dish cache is useful for sharing build artifacts when switching branches
+# and/or working on multiple workspaces of the same project, such as multiple checkouts.
+#
+# Since Bazel does not garbage-collect the directory,
+# you might want to automate a periodic cleanup of this directory.
+#
+# https://bazel.build/remote/caching#disk-cache
+build:ci --disk_cache=/tmp/ci/
+fetch:ci --disk_cache=/tmp/ci/
+
 build:ci --config=verbose
 build:ci --config=clippy
 build:ci --config=rustfmt
