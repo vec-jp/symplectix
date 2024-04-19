@@ -65,6 +65,38 @@ pub trait Bits {
     /// ```
     fn bits(&self) -> usize;
 
+    /// Returns the number of binary digits. Equivalent to [`Bits::bits`].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u8] = &[0, 0, 0];
+    /// let w: &[u8] = &[];
+    /// assert_eq!(Bits::len(v), 24);
+    /// assert_eq!(Bits::len(w), 0);
+    /// ```
+    #[inline]
+    fn len(this: &Self) -> usize {
+        this.bits()
+    }
+
+    /// Returns true if contains no bits.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u8] = &[0, 0, 0];
+    /// let w: &[u8] = &[];
+    /// assert!(!Bits::is_empty(v));
+    /// assert!(Bits::is_empty(w));
+    /// ```
+    #[inline]
+    fn is_empty(this: &Self) -> bool {
+        Bits::len(this) == 0
+    }
+
     /// Returns a bit at the given index `i`.
     /// When i is out of bounds, returns **None**.
     ///
