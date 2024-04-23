@@ -2,6 +2,8 @@
 
 use std::iter::Sum;
 use std::ops::{AddAssign, Sub, SubAssign};
+
+use bits::Bits;
 use word::Word;
 
 pub use index::{children, prefix, search, update};
@@ -179,7 +181,7 @@ where
     fn lower_bound(&self, mut w: U) -> usize {
         assert!(!self.is_empty());
 
-        if !w.any() {
+        if !Bits::any(&w) {
             return 0;
         }
 

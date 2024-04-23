@@ -33,7 +33,7 @@ fn prop_lsb(u: u32) -> bool {
 fn next_set_bit(n: u32) -> bool {
     let mut set_bit = successors(Some(n), |&n| {
         let m = n & !n.lsb();
-        m.any().then_some(m)
+        Bits::any(&m).then_some(m)
     })
     .map(|x| u32::trailing_zeros(x) as usize);
 

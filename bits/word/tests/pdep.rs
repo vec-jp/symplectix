@@ -1,4 +1,6 @@
 use core::fmt::Debug;
+
+use bits::Bits;
 use word::Word;
 
 trait Pdep {
@@ -53,7 +55,7 @@ unsafe fn pdep_u64_bmi2(n: u64, mask: u64) -> u64 {
 fn _pdep<T: Word>(data: T, mut mask: T) -> T {
     let mut dest = T::ZERO;
     for i in 0..<T as bits::Block>::BITS {
-        if !mask.any() {
+        if !Bits::any(&mask) {
             break;
         }
         if data.bit(i).unwrap() {

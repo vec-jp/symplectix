@@ -157,13 +157,13 @@ pub trait Bits {
     /// let a: &[u64] = &[0, 0, 0];
     /// let b: &[u64] = &[];
     /// let c: &[u64] = &[!0, !0, !0];
-    /// assert!(!a.all());
-    /// assert!( b.all());
-    /// assert!( c.all());
+    /// assert!(!Bits::all(a));
+    /// assert!( Bits::all(b));
+    /// assert!( Bits::all(c));
     /// ```
     #[inline]
-    fn all(&self) -> bool {
-        self.bits() == 0 || self.count0() == 0
+    fn all(this: &Self) -> bool {
+        Bits::is_empty(this) || this.count0() == 0
     }
 
     /// Returns true if any bits are enabled. An empty bits should return false.
@@ -176,14 +176,14 @@ pub trait Bits {
     /// let b2: &[u64] = &[0, 0, 0];
     /// let b3: &[u64] = &[!0, !0, !0];
     /// let b4: &[u64] = &[0, 0, 1];
-    /// assert!(!b1.any());
-    /// assert!(!b2.any());
-    /// assert!( b3.any());
-    /// assert!( b4.any());
+    /// assert!(!Bits::any(b1));
+    /// assert!(!Bits::any(b2));
+    /// assert!( Bits::any(b3));
+    /// assert!( Bits::any(b4));
     /// ```
     #[inline]
-    fn any(&self) -> bool {
-        self.bits() != 0 && self.count1() > 0
+    fn any(this: &Self) -> bool {
+        (!Bits::is_empty(this)) && this.count1() > 0
     }
 
     /// Counts occurrences of `1` in the given range.
@@ -489,13 +489,13 @@ macro_rules! ints_impl {
             }
 
             #[inline]
-            fn all(&self) -> bool {
-                *self == !0
+            fn all(this: &Self) -> bool {
+                *this == !0
             }
 
             #[inline]
-            fn any(&self) -> bool {
-                *self != 0
+            fn any(this: &Self) -> bool {
+                *this != 0
             }
 
             #[inline]
@@ -567,13 +567,13 @@ impl<B: Block> Bits for [B] {
     }
 
     #[inline]
-    fn all(&self) -> bool {
-        self.iter().all(Bits::all)
+    fn all(this: &Self) -> bool {
+        this.iter().all(Bits::all)
     }
 
     #[inline]
-    fn any(&self) -> bool {
-        self.iter().any(Bits::any)
+    fn any(this: &Self) -> bool {
+        this.iter().any(Bits::any)
     }
 
     fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
@@ -662,13 +662,13 @@ macro_rules! impl_bits {
         }
 
         #[inline]
-        fn all(&self) -> bool {
-            <$X as Bits>::all(self$(.$method())?)
+        fn all(this: &Self) -> bool {
+            <$X as Bits>::all(this$(.$method())?)
         }
 
         #[inline]
-        fn any(&self) -> bool {
-            <$X as Bits>::any(self$(.$method())?)
+        fn any(this: &Self) -> bool {
+            <$X as Bits>::any(this$(.$method())?)
         }
 
         #[inline]
