@@ -56,42 +56,6 @@ pub trait Word:
     fn msb(self) -> Self;
 }
 
-pub trait TryFromWord: TryFromSint + TryFromUint {}
-
-impl<T> TryFromWord for T where T: TryFromSint + TryFromUint {}
-
-pub trait TryFromSint:
-    Word + TryFrom<i8> + TryFrom<i16> + TryFrom<i32> + TryFrom<i64> + TryFrom<i128> + TryFrom<isize>
-{
-}
-
-pub trait TryFromUint:
-    Word + TryFrom<u8> + TryFrom<u16> + TryFrom<u32> + TryFrom<u64> + TryFrom<u128> + TryFrom<usize>
-{
-}
-
-impl<T> TryFromSint for T where
-    T: Word
-        + TryFrom<i8>
-        + TryFrom<i16>
-        + TryFrom<i32>
-        + TryFrom<i64>
-        + TryFrom<i128>
-        + TryFrom<isize>
-{
-}
-
-impl<T> TryFromUint for T where
-    T: Word
-        + TryFrom<u8>
-        + TryFrom<u16>
-        + TryFrom<u32>
-        + TryFrom<u64>
-        + TryFrom<u128>
-        + TryFrom<usize>
-{
-}
-
 macro_rules! impl_int {
     ($( $N:ty )*) => ($(
         impl Word for $N {
