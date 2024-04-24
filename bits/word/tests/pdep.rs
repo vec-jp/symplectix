@@ -1,4 +1,5 @@
 use core::fmt::Debug;
+use core::ops::{BitAndAssign, BitOrAssign};
 
 use bits::Bits;
 use word::Word;
@@ -52,7 +53,7 @@ unsafe fn pdep_u64_bmi2(n: u64, mask: u64) -> u64 {
     unsafe { _pdep_u64(n, mask) }
 }
 
-fn _pdep<T: Word>(data: T, mut mask: T) -> T {
+fn _pdep<T: Word + BitAndAssign + BitOrAssign>(data: T, mut mask: T) -> T {
     let mut dest = T::ZERO;
     for i in 0..<T as bits::Block>::BITS {
         if !Bits::any(&mask) {
