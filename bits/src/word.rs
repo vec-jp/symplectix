@@ -36,3 +36,16 @@ macro_rules! impl_int {
     )*)
 }
 impl_int!(u8 u16 u32 u64 u128 usize);
+
+#[cfg(test)]
+mod tests {
+    use crate::Bits;
+
+    fn lsb<T: Bits>(bs: &T) -> Option<usize> {
+        bs.select1(0)
+    }
+
+    fn msb<T: Bits>(bs: &T) -> Option<usize> {
+        Bits::any(bs).then(|| bs.select1(bs.count1() - 1).unwrap())
+    }
+}
