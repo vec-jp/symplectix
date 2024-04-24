@@ -30,6 +30,7 @@ rust_test_suite(
     ],
     deps = [
         ":fenwicktree",
+        "//bits",
         "@crates//:quickcheck",
     ],
 )

@@ -3,9 +3,8 @@ use std::iter::Sum;
 use std::ops::RangeBounds;
 
 use bitpacking::Unpack;
-use bits::{Bits, BitsMut, Block};
+use bits::{Bits, BitsMut, Block, Word};
 use fenwicktree::{LowerBound, Nodes, Prefix};
-use word::Word;
 
 mod l1l2;
 /// `BitAux<T>` stores auxiliary data to compute `Rank` and `Select` more efficiently.

@@ -3,8 +3,8 @@ extern crate quickcheck_macros;
 
 use std::{iter, ops};
 
+use bits::Word;
 use fenwicktree::{Incr, LowerBound, Nodes, Prefix};
-use word::Word;
 
 fn build<T: Word + ops::AddAssign>(mut vec: Vec<T>) -> Vec<T> {
     vec.insert(0, T::ZERO); // ensure vec.len() > 0

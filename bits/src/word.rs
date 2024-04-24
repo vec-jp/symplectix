@@ -35,5 +35,4 @@ macro_rules! impl_int {
         }
     )*)
 }
-impl_int!(i8 i16 i32 i64 i128 isize);
 impl_int!(u8 u16 u32 u64 u128 usize);

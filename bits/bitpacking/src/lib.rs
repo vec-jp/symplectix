@@ -60,7 +60,6 @@ macro_rules! ints_impl_packing {
     )*)
 }
 ints_impl_packing!(u8 u16 u32 u64 u128 usize);
-ints_impl_packing!(i8 i16 i32 i64 i128 isize);
 
 impl<B: bits::Block + Unpack> Unpack for [B] {
     // #[doc(hidden)]
