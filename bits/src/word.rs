@@ -1,5 +1,5 @@
 /// Integer with a fixed-sized bits.
-pub trait Word: num::PrimInt + bits::Block {
+pub trait Word: num::PrimInt + crate::Block {
     const ZERO: Self;
 
     const ONE: Self;

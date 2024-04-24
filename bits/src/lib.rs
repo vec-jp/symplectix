@@ -15,6 +15,9 @@ pub mod not;
 pub mod or;
 pub mod xor;
 
+mod word;
+pub use word::Word;
+
 mod mask;
 pub use self::mask::Mask;
 
