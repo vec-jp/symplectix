@@ -9,7 +9,7 @@ module(name = "trunk")
 bazel_dep(name = "platforms", version = "0.0.9")
 
 # Common useful functions and rules for Bazel.
-bazel_dep(name = "bazel_skylib", version = "1.5.0")
+bazel_dep(name = "bazel_skylib", version = "1.6.1")
 
 # Starlark libraries and rules which are useful for
 # constructing rulesets and BUILD files.
