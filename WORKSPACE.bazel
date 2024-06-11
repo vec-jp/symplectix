@@ -30,8 +30,8 @@ http_archive(
 
 http_archive(
     name = "rules_rust",
-    integrity = "sha256-JLN47ZcAbx9wEr5Jiib4HduZATGLiDgK7oUi/fvotzU=",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.42.1/rules_rust-v0.42.1.tar.gz"],
+    integrity = "sha256-F8U7+AC5MvMtPKGdLLnorVM84cDXKfDRgwd7/dq3rUY=",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.46.0/rules_rust-v0.46.0.tar.gz"],
 )
 
 http_archive(
@@ -52,10 +52,10 @@ register_toolchains("//protobuf/prost:prost_toolchain")
 
 _RUST_EDITION = "2021"
 
-_RUST_STABLE_VERSION = "1.77.2"
+_RUST_STABLE_VERSION = "1.78.0"
 
 # https://github.com/oxalica/rust-overlay/tree/master/manifests/nightly
-_RUST_NIGHTLY_VERSION = "nightly/2024-04-14"
+_RUST_NIGHTLY_VERSION = "nightly/2024-06-10"
 
 # Build rules for interfacing with "foreign" (non-Bazel) build systems
 # (CMake, configure-make, GNU Make, boost, ninja, Meson).
