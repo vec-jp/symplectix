@@ -16,9 +16,9 @@ http_archive(
 http_archive(
     name = "openssl",
     build_file = "//crypto/openssl:BUILD.openssl.bazel",
-    sha256 = "777cd596284c883375a2a7a11bf5d2786fc5413255efab20c50d6ffe6d020b7e",
-    strip_prefix = "openssl-3.3.1",
-    urls = ["https://www.openssl.org/source/openssl-3.3.1.tar.gz"],
+    integrity = "sha256-LopAsBl5r+i+C7+z3l3BxnCf7bRtbInBDaEUq1/D0oE=",
+    strip_prefix = "openssl-3.3.2",
+    urls = ["https://www.openssl.org/source/openssl-3.3.2.tar.gz"],
 )
 
 http_archive(
