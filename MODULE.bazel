@@ -5,6 +5,27 @@
 # https://registry.bazel.build/
 module(name = "symplectix")
 
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "zlib",
+    build_file = "//compress/zlib:BUILD.zlib.bazel",
+    sha256 = "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23",
+    strip_prefix = "zlib-1.3.1",
+    urls = [
+        "https://zlib.net/zlib-1.3.1.tar.gz",
+        "https://storage.googleapis.com/mirror.tensorflow.org/zlib.net/zlib-1.3.1.tar.gz",
+    ],
+)
+
+http_archive(
+    name = "openssl",
+    build_file = "//crypto/openssl:BUILD.openssl.bazel",
+    integrity = "sha256-LopAsBl5r+i+C7+z3l3BxnCf7bRtbInBDaEUq1/D0oE=",
+    strip_prefix = "openssl-3.3.2",
+    urls = ["https://www.openssl.org/source/openssl-3.3.2.tar.gz"],
+)
+
 # Constraint values for specifying platforms and toolchains.
 bazel_dep(name = "platforms", version = "0.0.10")
 
@@ -46,6 +67,8 @@ bazel_dep(name = "rules_rust", version = "0.52.0")
 
 # Rules for protobuf and gRPC.
 bazel_dep(name = "rules_proto", version = "6.0.2")
+
+# bazel_dep(name = "protobuf", version = "28.2")
 
 # Bazel rules for building Protobuf and gRPC code and libraries from proto_library targets.
 bazel_dep(name = "rules_proto_grpc", version = "5.0.0")
