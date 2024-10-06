@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package protobuf.protoc_plugin.examples;
 
+import "google/protobuf/empty.proto";
+
 message Product {
     int32 id = 1;
 }
@@ -9,7 +11,7 @@ message Product {
 message Review {
     int32 id = 1;
     Product product = 2;
-    optional int32 empty = 3;
+    optional google.protobuf.Empty empty = 3;
 }
 
 service ProductService {
