@@ -35,8 +35,277 @@ bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True
 # Perl rules, to build openssl.
 bazel_dep(name = "rules_perl", version = "0.2.3.bcr.1")
 
-# Rules for creating packages of many types (zip, tar, deb, rpm, ...).
+# Rules for creating packages (zip, tar, deb, rpm, ...).
 bazel_dep(name = "rules_pkg", version = "1.0.1")
+
+# Rust rules for Bazel.
+bazel_dep(name = "rules_rust", version = "0.52.0")
+
+# Rules for protobuf and gRPC.
+bazel_dep(name = "rules_proto", version = "6.0.2")
+
+# https://github.com/aspect-build/toolchains_protoc/releases
+bazel_dep(name = "toolchains_protoc", version = "0.3.1")
+
+RUST_EDITION = "2021"
+
+RUST_STABLE_VERSION = "1.81.0"
+
+# https://github.com/oxalica/rust-overlay/tree/master/manifests/nightly
+RUST_NIGHTLY_VERSION = "nightly/2024-10-01"
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = RUST_EDITION,
+    versions = [
+        RUST_STABLE_VERSION,
+        RUST_NIGHTLY_VERSION,
+    ],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains("@rust_toolchains//:all")
+
+register_toolchains("@//protobuf/prost:prost_toolchain")
+
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+crate.spec(
+    package = "libc",
+    version = "0.2",
+)
+crate.spec(
+    features = ["libc"],
+    package = "libz-sys",
+    version = "1.1",
+)
+crate.annotation(
+    crate = "libz-sys",
+    gen_build_script = "off",
+    deps = ["@zlib"],
+)
+crate.spec(
+    package = "openssl",
+    version = "0.10.64",
+)
+crate.spec(
+    package = "openssl-sys",
+    version = "0.9.101",
+)
+crate.annotation(
+    build_script_data = [
+        "@openssl//:openssl_dir",
+        "@openssl//:openssl",
+    ],
+    # https://github.com/sfackler/rust-openssl/tree/master/openssl-sys/build
+    build_script_data_glob = ["build/**/*.c"],
+    build_script_env = {
+        "OPENSSL_DIR": "$(execpath @openssl//:openssl_dir)",
+        "OPENSSL_STATIC": "1",
+    },
+    crate = "openssl-sys",
+    data = ["@openssl"],
+    deps = ["@openssl"],
+)
+
+# A framework for serializing and deserializing Rust data structures.
+crate.spec(
+    features = ["derive"],
+    package = "serde",
+    version = "1",
+)
+
+# Futures extensions
+crate.spec(
+    package = "futures",
+    version = "0.3",
+)
+
+# Async runtime
+crate.spec(
+    features = ["full"],
+    package = "tokio",
+    version = "1.36",
+)
+
+# Async fn in traits
+# https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html
+crate.spec(
+    package = "async-trait",
+    version = "0.1",
+)
+
+# Tracing
+crate.spec(
+    package = "tracing",
+    version = "0.1",
+)
+crate.spec(
+    package = "tracing-subscriber",
+    version = "0.3",
+)
+
+# Protobuf support for Rust.
+crate.spec(
+    package = "prost",
+    version = "0.12",
+)
+crate.spec(
+    package = "prost-types",
+    version = "0.12",
+)
+crate.spec(
+    package = "prost-reflect",
+    version = "0.12",
+)
+crate.spec(
+    package = "tonic",
+    version = "0.11",
+)
+crate.spec(
+    package = "tonic-types",
+    version = "0.11",
+)
+crate.spec(
+    package = "tonic-health",
+    version = "0.11",
+)
+crate.spec(
+    package = "tonic-reflection",
+    version = "0.11",
+)
+
+# Proroc plugins for prost/tonic.
+crate.spec(
+    package = "protoc-gen-prost",
+    version = "0",
+)
+crate.annotation(
+    crate = "protoc-gen-prost",
+    gen_binaries = ["protoc-gen-prost"],
+)
+crate.spec(
+    package = "protoc-gen-tonic",
+    version = "0",
+)
+crate.annotation(
+    crate = "protoc-gen-tonic",
+    gen_binaries = ["protoc-gen-tonic"],
+)
+
+# A tree-sitter binding.
+# Tree-sitter is a parser generator tool and an incremental parsing library.
+#
+# https://tree-sitter.github.io/tree-sitter/
+crate.spec(
+    package = "tree-sitter",
+    version = "0.20",
+)
+crate.spec(
+    package = "tree-sitter-cli",
+    version = "0.20",
+)
+crate.annotation(
+    crate = "tree-sitter-cli",
+    gen_binaries = ["tree-sitter"],
+)
+
+# Rust grammar for tree-sitter.
+crate.spec(
+    package = "tree-sitter-rust",
+    version = "0.20",
+)
+
+# Arguments parsing.
+crate.spec(
+    features = ["derive"],
+    package = "clap",
+    version = "4.3",
+)
+
+# A collection of numeric types and traits.
+crate.spec(
+    package = "num",
+    version = "0.4",
+)
+
+# Includes formatters and parsers for std::time::SystemTime and std::time::Duration.
+crate.spec(
+    package = "humantime",
+    version = "2",
+)
+crate.spec(
+    package = "time",
+    version = ">=0.3.35",
+)
+
+# Result/Error helpers.
+crate.spec(
+    package = "anyhow",
+    version = "1",
+)
+crate.spec(
+    package = "thiserror",
+    version = "1",
+)
+
+# Provides a macro to generate structures which behave like a set of bitflags
+crate.spec(
+    package = "bitflags",
+    version = "2",
+)
+
+# Temporary files and directories.
+crate.spec(
+    package = "tempfile",
+    version = "3",
+)
+
+# Single assignment cells and lazy statics without macros.
+#
+# TODO: Use std::cell::OnceCell
+# Parts of once_cell API are included into std as of Rust 1.70.0.
+# https://doc.rust-lang.org/std/cell/struct.OnceCell.html
+crate.spec(
+    package = "once_cell",
+    version = "1.18",
+)
+
+# For testing.
+crate.spec(
+    package = "quickcheck",
+    version = "1",
+)
+crate.spec(
+    package = "quickcheck_macros",
+    version = "1",
+)
+crate.spec(
+    features = ["derive"],
+    package = "arbitrary",
+    version = "1",
+)
+crate.spec(
+    package = "libfuzzer-sys",
+    version = "0.4",
+)
+
+# For auditing Rust packages.
+crate.spec(
+    package = "cargo-audit",
+    version = "0.20.0",
+)
+crate.annotation(
+    crate = "cargo-audit",
+    gen_binaries = ["cargo-audit"],
+)
+
+# https://rustsec.org/advisories/RUSTSEC-2024-0332
+crate.spec(
+    package = "h2",
+    version = "0.3.26",
+)
+crate.from_specs()
+use_repo(crate, "crates")
 
 # Rules for building OCI containers.
 bazel_dep(name = "rules_oci", version = "2.0.0")
