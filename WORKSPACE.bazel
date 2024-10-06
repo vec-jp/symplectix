@@ -22,24 +22,11 @@ http_archive(
 )
 
 http_archive(
-    name = "rules_foreign_cc",
-    sha256 = "476303bd0f1b04cc311fc258f1708a5f6ef82d3091e53fd1977fa20383425a6a",
-    strip_prefix = "rules_foreign_cc-0.10.1",
-    url = "https://github.com/bazelbuild/rules_foreign_cc/releases/download/0.10.1/rules_foreign_cc-0.10.1.tar.gz",
-)
-
-http_archive(
     name = "rules_proto_grpc",
     sha256 = "928e4205f701b7798ce32f3d2171c1918b363e9a600390a25c876f075f1efc0a",
     strip_prefix = "rules_proto_grpc-4.4.0",
     urls = ["https://github.com/rules-proto-grpc/rules_proto_grpc/releases/download/4.4.0/rules_proto_grpc-4.4.0.tar.gz"],
 )
-
-# Build rules for interfacing with "foreign" (non-Bazel) build systems
-# (CMake, configure-make, GNU Make, boost, ninja, Meson).
-load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
-
-rules_foreign_cc_dependencies()
 
 load("@rules_proto_grpc//:repositories.bzl", "rules_proto_grpc_repos", "rules_proto_grpc_toolchains")
 

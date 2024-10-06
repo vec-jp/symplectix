@@ -15,11 +15,14 @@ bazel_dep(name = "bazel_skylib", version = "1.7.1")
 # constructing rulesets and BUILD files.
 bazel_dep(name = "aspect_bazel_lib", version = "2.9.1")
 
-bazel_lib_toolchains = use_extension("@aspect_bazel_lib//lib:extensions.bzl", "toolchains")
-bazel_lib_toolchains.jq()
-bazel_lib_toolchains.yq()
-use_repo(bazel_lib_toolchains, "jq_toolchains")
-use_repo(bazel_lib_toolchains, "yq_toolchains")
+bazel_lib = use_extension("@aspect_bazel_lib//lib:extensions.bzl", "toolchains")
+bazel_lib.jq()
+bazel_lib.yq()
+use_repo(
+    bazel_lib,
+    "jq_toolchains",
+    "yq_toolchains",
+)
 
 # Prebuilt binaries for buildifier and buildozer.
 bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
@@ -30,7 +33,7 @@ bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True
 
 # Build rules for interfacing with "foreign" (non-Bazel) build systems
 # (CMake, configure-make, GNU Make, boost, ninja, Meson).
-# bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
+bazel_dep(name = "rules_foreign_cc", version = "0.12.0")
 
 # Perl rules, to build openssl.
 bazel_dep(name = "rules_perl", version = "0.2.3.bcr.1")
@@ -44,8 +47,8 @@ bazel_dep(name = "rules_rust", version = "0.52.0")
 # Rules for protobuf and gRPC.
 bazel_dep(name = "rules_proto", version = "6.0.2")
 
-# https://github.com/aspect-build/toolchains_protoc/releases
-bazel_dep(name = "toolchains_protoc", version = "0.3.1")
+# Pre-built protoc binary toolchain for Bazel, fetched from official protobuf releases.
+# bazel_dep(name = "toolchains_protoc", version = "0.3.1")
 
 RUST_EDITION = "2021"
 
@@ -304,6 +307,7 @@ crate.spec(
     package = "h2",
     version = "0.3.26",
 )
+
 crate.from_specs()
 use_repo(crate, "crates")
 
