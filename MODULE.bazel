@@ -83,7 +83,7 @@ RUST_EDITION = "2021"
 RUST_STABLE_VERSION = "1.81.0"
 
 # https://github.com/oxalica/rust-overlay/tree/master/manifests/nightly
-RUST_NIGHTLY_VERSION = "nightly/2024-10-01"
+RUST_NIGHTLY_VERSION = "nightly/2024-09-01"
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(

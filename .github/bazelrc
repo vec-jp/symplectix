@@ -18,10 +18,8 @@ common --curses=no
 common --show_timestamps
 
 build --config=verbose
+build --config=clippy
 build --config=rustfmt
-# TODO: Remove testing for --config=clippy
-# https://github.com/rust-lang/rust-clippy/issues/13486
-build:testing --config=clippy
 
 # Disable sandoxing in CI for a while.
 #
