@@ -3,6 +3,7 @@ use entrypoint::Entrypoint;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    #[allow(clippy::needless_return)] // https://github.com/rust-lang/rust-clippy/issues/13486
     fuzzing::run(Test::parse()).await
 }
 
