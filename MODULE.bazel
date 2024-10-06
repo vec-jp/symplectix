@@ -47,8 +47,13 @@ bazel_dep(name = "rules_rust", version = "0.52.0")
 # Rules for protobuf and gRPC.
 bazel_dep(name = "rules_proto", version = "6.0.2")
 
-# Pre-built protoc binary toolchain for Bazel, fetched from official protobuf releases.
-# bazel_dep(name = "toolchains_protoc", version = "0.3.1")
+# Bazel rules for building Protobuf and gRPC code and libraries from proto_library targets.
+bazel_dep(name = "rules_proto_grpc", version = "5.0.0")
+# bazel_dep(name = "rules_proto_grpc_doc", version = "<version number here>")
+# bazel_dep(name = "rules_proto_grpc_grpcgateway", version = "<version number here>")
+# bazel_dep(name = "rules_proto_grpc_buf", version = "<version number here>")
+# bazel_dep(name = "rules_proto_grpc_cc", version = "<version number here>")
+# bazel_dep(name = "rules_proto_grpc_go", version = "<version number here>")
 
 RUST_EDITION = "2021"
 
