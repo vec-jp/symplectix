@@ -37,8 +37,10 @@ bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "aspect_bazel_lib", version = "2.9.1")
 
 bazel_lib = use_extension("@aspect_bazel_lib//lib:extensions.bzl", "toolchains")
+
 bazel_lib.jq()
 bazel_lib.yq()
+
 use_repo(
     bazel_lib,
     "jq_toolchains",
@@ -120,6 +122,7 @@ RUST_STABLE_VERSION = "1.81.0"
 RUST_NIGHTLY_VERSION = "nightly/2024-09-01"
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+
 rust.toolchain(
     edition = RUST_EDITION,
     versions = [
@@ -127,6 +130,7 @@ rust.toolchain(
         RUST_NIGHTLY_VERSION,
     ],
 )
+
 use_repo(rust, "rust_toolchains")
 
 register_toolchains("@rust_toolchains//:all")
@@ -357,22 +361,8 @@ crate.spec(
     version = "0.4.0",
 )
 
-# For auditing Rust packages.
-crate.spec(
-    package = "cargo-audit",
-    version = "0.20.0",
-)
-crate.annotation(
-    crate = "cargo-audit",
-    gen_binaries = ["cargo-audit"],
-)
-
-# https://rustsec.org/advisories/RUSTSEC-2024-0332
-crate.spec(
-    package = "h2",
-    version = "0.3.26",
-)
 crate.from_specs()
+
 use_repo(crate, "crates")
 
 # Rules for building OCI containers.
