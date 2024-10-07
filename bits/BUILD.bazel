@@ -1,9 +1,12 @@
-load("@rules_go//go:def.bzl", "go_test", "go_library")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 load("@rules_rust//rust:defs.bzl", "rust_doc_test", "rust_library", "rust_test", "rust_test_suite")
 
 go_library(
     name = "go_bits",
-    srcs = glob(["*.go"], exclude = ["*_test.go"]),
+    srcs = glob(
+        ["*.go"],
+        exclude = ["*_test.go"],
+    ),
     importpath = "github.com/vec-jp/symplectix/bits",
 )
 
