@@ -37,10 +37,8 @@ bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "aspect_bazel_lib", version = "2.9.1")
 
 bazel_lib = use_extension("@aspect_bazel_lib//lib:extensions.bzl", "toolchains")
-
 bazel_lib.jq()
 bazel_lib.yq()
-
 use_repo(
     bazel_lib,
     "jq_toolchains",
@@ -122,7 +120,6 @@ RUST_STABLE_VERSION = "1.81.0"
 RUST_NIGHTLY_VERSION = "nightly/2024-09-01"
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-
 rust.toolchain(
     edition = RUST_EDITION,
     versions = [
@@ -130,7 +127,6 @@ rust.toolchain(
         RUST_NIGHTLY_VERSION,
     ],
 )
-
 use_repo(rust, "rust_toolchains")
 
 register_toolchains("@rust_toolchains//:all")
@@ -138,12 +134,10 @@ register_toolchains("@rust_toolchains//:all")
 register_toolchains("@//protobuf/prost:prost_toolchain")
 
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate", isolate = True)
-
 crate.spec(
     package = "libc",
     version = "0.2",
 )
-
 crate.spec(
     features = ["libc"],
     package = "libz-sys",
@@ -154,7 +148,6 @@ crate.annotation(
     gen_build_script = "off",
     deps = ["@zlib"],
 )
-
 crate.spec(
     package = "openssl",
     version = "0.10.64",
@@ -360,9 +353,7 @@ crate.spec(
     package = "libfuzzer-sys",
     version = "0.4.0",
 )
-
 crate.from_specs()
-
 use_repo(crate, "crates")
 
 # Rules for building OCI containers.
@@ -372,7 +363,6 @@ bazel_dep(name = "rules_oci", version = "2.0.0")
 bazel_dep(name = "container_structure_test", version = "1.19.1")
 
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
-
 oci.pull(
     name = "distroless_cc_nonroot",
     digest = "sha256:880bcf2ca034ab5e8ae76df0bd50d700e54eb44e948877244b130e3fcd5a1d66",
