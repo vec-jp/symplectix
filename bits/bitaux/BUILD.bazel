@@ -13,7 +13,7 @@ rust_library(
         "//bits:bits_rs",
         "//bits/bit:bit_rs",
         "//bits/bitpacking:bitpacking_rs",
-        "//index/fenwicktree",
+        "//index/fenwicktree:fenwicktree_rs",
         "@crates//:num",
     ],
 )
