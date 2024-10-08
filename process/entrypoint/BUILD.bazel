@@ -35,7 +35,7 @@ rust_test(
     size = "small",
     crate = ":entrypoint_rs",
     deps = [
-        "//testing",
+        "//testing:testing_rs",
     ],
 )
 
