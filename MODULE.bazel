@@ -45,9 +45,6 @@ use_repo(
     "yq_toolchains",
 )
 
-# Prebuilt binaries for buildifier and buildozer.
-bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
-
 # Non-hermetic C++ rules, contains an auto-detecting toolchain that
 # expects to find tools installed on the host machine.
 # bazel_dep(name = "rules_cc", version = "0.0.9")
@@ -75,10 +72,9 @@ bazel_dep(name = "gazelle", version = "0.39.1")
 # Protocol Buffers - Google's data interchange format.
 bazel_dep(name = "protobuf", version = "28.2")
 
-# Rules for protobuf and gRPC.
-bazel_dep(name = "rules_proto", version = "6.0.2")
-
-# bazel_dep(name = "protobuf", version = "28.2")
+# Prebuilt binaries for buildifier and buildozer.
+# Pre-built protoc binary toolchain for Bazel, fetched from official protobuf releases
+bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
 
 # Bazel rules for building Protobuf and gRPC code and libraries from proto_library targets.
 bazel_dep(name = "rules_proto_grpc", version = "5.0.0")
