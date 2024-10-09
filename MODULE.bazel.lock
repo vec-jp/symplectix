@@ -155,7 +155,8 @@
     "https://bcr.bazel.build/modules/stardoc/0.6.2/MODULE.bazel": "7060193196395f5dd668eda046ccbeacebfd98efc77fed418dbe2b82ffaa39fd",
     "https://bcr.bazel.build/modules/stardoc/0.6.2/source.json": "d2ff8063b63b4a85e65fe595c4290f99717434fa9f95b4748a79a7d04dfed349",
     "https://bcr.bazel.build/modules/toolchains_protoc/0.3.1/MODULE.bazel": "b6574a2a314cbd40cafb5ed87b03d1996e015315f80a7e33116c8b2e209cb5cf",
-    "https://bcr.bazel.build/modules/toolchains_protoc/0.3.1/source.json": "b589ee1faec4c789c680afa9d500b5ccbea25422560b8b9dc4e0e6b26471f13b",
+    "https://bcr.bazel.build/modules/toolchains_protoc/0.3.3/MODULE.bazel": "88dcce64b6d21454710d3f69006e57d29317e1637ccd04b75c7618c37cf1fc08",
+    "https://bcr.bazel.build/modules/toolchains_protoc/0.3.3/source.json": "162b584e472041273e3d83c5bedfe68e97f9a4cc6e52859e1bf87c4899f019e6",
     "https://bcr.bazel.build/modules/upb/0.0.0-20220923-a547704/MODULE.bazel": "7298990c00040a0e2f121f6c32544bab27d4452f80d9ce51349b1a28f3005c43",
     "https://bcr.bazel.build/modules/zlib/1.2.11/MODULE.bazel": "07b389abc85fdbca459b69e2ec656ae5622873af3f845e1c9d80fe179f3effa0",
     "https://bcr.bazel.build/modules/zlib/1.2.12/MODULE.bazel": "3b1a8834ada2a883674be8cbd36ede1b6ec481477ada359cd2d3ddc562340b27",
@@ -2050,7 +2051,7 @@
     "@@rules_python~//python/extensions:python.bzl%python": {
       "general": {
         "bzlTransitiveDigest": "uHZmn4VCpelMhuk7Rz8Q5oK94ttURW5KkyvXa6hRTfk=",
-        "usagesDigest": "TkX6wBSgt6Z90q4SsG8JIFDZe7N4F7K+lawxxu/ALco=",
+        "usagesDigest": "G4fgrUl4gvTNI/Vo1r8q1xUSF8PZCIjQMhUC5PZvQMs=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {
@@ -2189,15 +2190,15 @@
             "attributes": {
               "default_python_version": "3.11",
               "toolchain_prefixes": [
-                "_0000_python_3_9_",
-                "_0001_python_3_8_",
+                "_0000_python_3_8_",
+                "_0001_python_3_9_",
                 "_0002_python_3_10_",
                 "_0003_python_3_12_",
                 "_0004_python_3_11_"
               ],
               "toolchain_python_versions": [
-                "3.9",
                 "3.8",
+                "3.9",
                 "3.10",
                 "3.12",
                 "3.11"
@@ -2210,8 +2211,8 @@
                 "False"
               ],
               "toolchain_user_repository_names": [
-                "python_3_9",
                 "python_3_8",
+                "python_3_9",
                 "python_3_10",
                 "python_3_12",
                 "python_3_11"
@@ -2768,8 +2769,8 @@
             "ruleClassName": "multi_toolchain_aliases",
             "attributes": {
               "python_versions": {
-                "3.9": "python_3_9",
                 "3.8": "python_3_8",
+                "3.9": "python_3_9",
                 "3.10": "python_3_10",
                 "3.11": "python_3_11",
                 "3.12": "python_3_12"
@@ -8199,7 +8200,7 @@
     "@@rules_rust~//rust:extensions.bzl%rust": {
       "general": {
         "bzlTransitiveDigest": "3V5A2cUHVgVIHrdx/mTazfXyu9wKvRQAuex7DWgR6c4=",
-        "usagesDigest": "7dymW54SmBZAULPFlA+Kj5XnDfesAGYnz+kJlI7bIdI=",
+        "usagesDigest": "UpJC9OmZBHmi8SgqGASSTmQIqjEmakMFVH9L0Hs7NtI=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},

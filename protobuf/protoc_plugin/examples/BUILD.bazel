@@ -15,10 +15,10 @@ proto_library(
 )
 
 go_proto_library(
-    name = "examples_proto_go",
+    name = "examples_go_proto",
     compilers = ["@rules_go//proto:go_grpc"],
     importpath = "github.com/vec-jp/symplectix/protobuf/protoc_plugin/examples",
-    proto = ":examples_proto",
+    protos = [":examples_proto"],
 )
 
 message_descriptor_dump_compile(
