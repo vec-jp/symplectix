@@ -1,13 +1,13 @@
 syntax = "proto3";
 
-package protobuf.protoc_plugin.examplepb;
+package examplepb;
 
 import "protobuf/protoc_plugin/examplepb/example.proto";
 
 service CustomerService {
-    rpc GetCustomer(protobuf.protoc_plugin.examplepb.Customer.Id) returns (protobuf.protoc_plugin.examplepb.Customer);
+    rpc GetCustomer(examplepb.Customer.Id) returns (examplepb.Customer);
 }
 
 service ProductService {
-    rpc GetReviews(protobuf.protoc_plugin.examplepb.Product) returns (stream protobuf.protoc_plugin.examplepb.Review);
+    rpc GetReviews(examplepb.Product) returns (stream examplepb.Review);
 }

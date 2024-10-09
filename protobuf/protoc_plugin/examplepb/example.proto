@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package protobuf.protoc_plugin.examplepb;
+package examplepb;
 
 import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
