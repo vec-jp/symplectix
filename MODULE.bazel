@@ -98,17 +98,16 @@ bazel_dep(name = "container_structure_test", version = "1.19.1")
 
 RUST_EDITION = "2021"
 
-RUST_STABLE_VERSION = "1.81.0"
-
-# https://github.com/oxalica/rust-overlay/tree/master/manifests/nightly
-RUST_NIGHTLY_VERSION = "nightly/2024-09-01"
+RUST_VERSION = "1.81.0"
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = RUST_EDITION,
     versions = [
-        RUST_STABLE_VERSION,
-        RUST_NIGHTLY_VERSION,
+        # No idea why but mixing versions confuses rust-analyzer.
+        RUST_VERSION,
+        # https://github.com/oxalica/rust-overlay/tree/master/manifests/nightly
+        # "nightly/2024-09-01"
     ],
 )
 use_repo(rust, "rust_toolchains")
@@ -372,9 +371,18 @@ go_deps.from_file(go_mod = "//:go.mod")
 
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
-    name = "distroless_cc_nonroot",
+    name = "distroless_base_debian12_nonroot",
+    digest = "sha256:e5260be292def77bc70d03003f788f3d32c0796972ea1412d72cc0c843ab139a",
+    image = "gcr.io/distroless/base-debian12",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64",
+    ],
+)
+oci.pull(
+    name = "distroless_cc_debian12_nonroot",
     digest = "sha256:880bcf2ca034ab5e8ae76df0bd50d700e54eb44e948877244b130e3fcd5a1d66",
-    image = "gcr.io/distroless/cc",
+    image = "gcr.io/distroless/cc-debian12",
     platforms = [
         "linux/amd64",
         "linux/arm64",
@@ -384,7 +392,10 @@ oci.pull(
 # For each oci.pull call, repeat the "name" here to expose them as dependencies.
 use_repo(
     oci,
-    "distroless_cc_nonroot",
-    "distroless_cc_nonroot_linux_amd64",
-    "distroless_cc_nonroot_linux_arm64",
+    "distroless_base_debian12_nonroot",
+    "distroless_base_debian12_nonroot_linux_amd64",
+    "distroless_base_debian12_nonroot_linux_arm64",
+    "distroless_cc_debian12_nonroot",
+    "distroless_cc_debian12_nonroot_linux_amd64",
+    "distroless_cc_debian12_nonroot_linux_arm64",
 )
