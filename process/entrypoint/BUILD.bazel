@@ -54,6 +54,7 @@ rust_binary(
         "@crates//:anyhow",
         "@crates//:clap",
         "@crates//:futures",
+        "@crates//:thiserror",
         "@crates//:tokio",
         "@crates//:tracing",
         "@crates//:tracing-subscriber",

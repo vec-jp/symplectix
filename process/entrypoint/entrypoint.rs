@@ -47,7 +47,7 @@ pub type Result<T = ()> = std::result::Result<T, Error>;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("{0}")]
+    #[error("io error: {0}")]
     Io(io::Error),
 
     #[error("the spawned child exited unsuccessfully: {0}")]

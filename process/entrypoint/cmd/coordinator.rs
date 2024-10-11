@@ -1,3 +1,4 @@
+use std::io;
 use std::path::PathBuf;
 use std::time::Duration;
 
@@ -8,7 +9,7 @@ use futures::prelude::*;
 use tokio::time;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> anyhow::Result<(), Error> {
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::TRACE)
         .with_timer(tracing_subscriber::fmt::time::uptime())
@@ -19,7 +20,12 @@ async fn main() -> anyhow::Result<()> {
     let this = Coordinator::parse();
     wait(&this.wait_files).await?;
     let result = entrypoint::run(&this.entrypoint).await;
-    post(&this.post_file, result).await
+    let result = post(&this.post_file, result).await;
+    if let Err(err) = result {
+        eprintln!("{}", err);
+    }
+
+    Ok(())
 }
 
 #[derive(Debug, Clone, Parser)]
@@ -27,7 +33,7 @@ pub struct Coordinator {
     /// List of paths to wait for before spawning the child process.
     ///
     /// The timeout duration does not elapse until the child is spawned.
-    /// So the operations before spawning, i.e., while waiting for `wait_files`, never times out.
+    /// So the operations before spawning, i.e., waiting for `wait_files`, never times out.
     #[arg(long = "wait", value_name = "PATH")]
     wait_files: Vec<PathBuf>,
 
@@ -39,18 +45,31 @@ pub struct Coordinator {
     entrypoint: Entrypoint,
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error(transparent)]
+    Io(io::Error),
+
+    #[error("err file present at: {0}")]
+    WaitErrFile(PathBuf),
+
+    #[error(transparent)]
+    Entrypoint(#[from] entrypoint::Error),
+}
+
 #[tracing::instrument]
-async fn wait(wait_files: &[PathBuf]) -> anyhow::Result<()> {
+async fn wait(wait_files: &[PathBuf]) -> anyhow::Result<(), Error> {
     let wait_files = wait_files.iter().map(|ok_file| async move {
         let err_file = ok_file.with_extension("err");
 
         loop {
             tracing::trace!(wait_for = %ok_file.display());
-            if err_file.try_exists().map_err(anyhow::Error::from)? {
-                anyhow::bail!("error file present at {}", err_file.display());
+
+            if err_file.try_exists().map_err(Error::Io)? {
+                return Err(Error::WaitErrFile(err_file));
             }
 
-            if ok_file.try_exists().map_err(anyhow::Error::from)? {
+            if ok_file.try_exists().map_err(Error::Io)? {
                 return Ok(());
             }
 
@@ -62,20 +81,30 @@ async fn wait(wait_files: &[PathBuf]) -> anyhow::Result<()> {
 }
 
 #[tracing::instrument]
-async fn post(post_file: &Option<PathBuf>, result: entrypoint::Result) -> anyhow::Result<()> {
-    let Some(path) = post_file.as_ref() else {
-        return Ok(());
-    };
+async fn post(
+    post_file: &Option<PathBuf>,
+    result: entrypoint::Result,
+) -> anyhow::Result<(), Error> {
+    match result {
+        Ok(_) => {
+            let Some(path) = post_file.as_ref() else {
+                return Ok(());
+            };
 
-    fsutil::ensure_path_is_writable(path).await?;
+            fsutil::ensure_path_is_writable(path).map_err(Error::Io).await?;
+            fsutil::create_file(path, true).map_err(Error::Io).await?;
+            Ok(())
+        }
+        Err(err) => {
+            let Some(path) = post_file.as_ref() else {
+                return Err(Error::Entrypoint(err));
+            };
 
-    if result.is_ok() {
-        fsutil::create_file(path, true).await?;
-    } else {
-        let path = path.with_extension("err");
-        fsutil::create_file(path, true).await?;
+            fsutil::ensure_path_is_writable(path).map_err(Error::Io).await?;
+            fsutil::create_file(path.with_extension("err"), true).map_err(Error::Io).await?;
+            Err(Error::Entrypoint(err))
+        }
     }
-    Ok(())
 }
 
 #[cfg(test)]
