@@ -19,7 +19,7 @@ async fn create_dirs_if_missing<P: AsRef<Path>>(path: P) -> io::Result<()> {
 pub async fn create_file<P: AsRef<Path>>(path: P, truncate: bool) -> io::Result<std::fs::File> {
     let file = {
         let path = path.as_ref();
-        _ = create_dirs_if_missing(path).await?;
+        create_dirs_if_missing(path).await?;
         fs::OpenOptions::new().create(true).write(true).truncate(truncate).open(path).await?
     };
 

@@ -4,7 +4,7 @@ def _fuzz_test_impl(ctx):
     entrypoint_template = """\
 {exports}
 RUNFILES_DIR="$0.runfiles" \
-exec "{runproc}" \
+exec "{run}" \
 {envs} \
 --timeout.duration {time_to_run} \
 --timeout.is-not-failure \
@@ -24,7 +24,7 @@ exec "{runproc}" \
             "export %s='%s'" % (key, val)
             for key, val in ctx.attr.envs.items()
         ]),
-        runproc = ctx.executable._runproc.short_path,
+        run = ctx.executable._run.short_path,
         envs = " ".join([
             "\"--env\" '%s'" % key
             for key in ctx.attr.envs.keys()
@@ -41,8 +41,8 @@ exec "{runproc}" \
     )
 
     runfiles = ctx.runfiles(files = [ctx.file.corpus]) \
-        .merge(ctx.attr._runproc[DefaultInfo].default_runfiles) \
-        .merge(ctx.attr._runproc[DefaultInfo].data_runfiles) \
+        .merge(ctx.attr._run[DefaultInfo].default_runfiles) \
+        .merge(ctx.attr._run[DefaultInfo].data_runfiles) \
         .merge(ctx.attr.executable[DefaultInfo].default_runfiles) \
         .merge(ctx.attr.executable[DefaultInfo].data_runfiles)
 
@@ -57,8 +57,8 @@ _fuzz_test = rule(
     implementation = _fuzz_test_impl,
     test = True,
     attrs = {
-        "_runproc": attr.label(
-            default = Label("@//process/runproc:runproc"),
+        "_run": attr.label(
+            default = Label("@//process/run:run"),
             executable = True,
             cfg = "exec",
         ),

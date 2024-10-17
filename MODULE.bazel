@@ -193,6 +193,7 @@ crate.spec(
     version = "0.1",
 )
 crate.spec(
+    features = ["env-filter"],
     package = "tracing-subscriber",
     version = "0.3",
 )
@@ -368,6 +369,12 @@ go_sdk.download(version = GO_VERSION)
 
 go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
 go_deps.from_file(go_mod = "//:go.mod")
+
+# All *direct* Go dependencies of the module have to be listed explicitly.
+use_repo(
+    go_deps,
+    "org_golang_x_exp",
+)
 
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(

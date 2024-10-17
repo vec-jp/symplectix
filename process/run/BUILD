@@ -1,13 +1,14 @@
 load("@container_structure_test//:defs.bzl", "container_structure_test")
+load("@rules_go//go:def.bzl", "go_test")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc_test", "rust_library", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_doc_test", "rust_library", "rust_test")
 
 rust_library(
-    name = "runproc_rs",
+    name = "run",
     srcs = glob(["*.rs"]),
-    crate_name = "runproc",
-    crate_root = "runproc.rs",
+    crate_name = "run",
+    crate_root = "run.rs",
     # will not work as expected on windows
     target_compatible_with = select({
         "@platforms//os:linux": [],
@@ -17,6 +18,7 @@ rust_library(
     visibility = ["//visibility:public"],
     deps = [
         "//process/fsutil:fsutil_rs",
+        "//process/reaper",
         "@crates//:clap",
         "@crates//:futures",
         "@crates//:humantime",
@@ -27,68 +29,58 @@ rust_library(
     ],
 )
 
-rust_binary(
-    name = "runproc",
-    srcs = ["cmd/runproc.rs"],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":runproc_rs",
-        "@crates//:anyhow",
-        "@crates//:tokio",
-        "@crates//:tracing",
-        "@crates//:tracing-subscriber",
-    ],
-)
-
 rust_test(
-    name = "runproc_rs_lib_test",
+    name = "run_lib_test",
     size = "small",
-    crate = ":runproc_rs",
+    crate = ":run",
     deps = [
         "//testing:testing_rs",
     ],
 )
 
 rust_doc_test(
-    name = "runproc_rs_doc_test",
+    name = "run_doc_test",
     size = "small",
-    crate = ":runproc_rs",
+    crate = ":run",
 )
 
-cc_binary(
-    name = "orphan",
-    srcs = ["cmd/orphan.c"],
-)
-
-cc_binary(
-    name = "zombie",
-    srcs = ["cmd/zombie.c"],
+go_test(
+    name = "run_test",
+    srcs = ["run_test.go"],
+    data = [
+        "//process/run/cmd:orphan",
+        "//process/run/cmd:run",
+    ],
+    deps = [
+        "@org_golang_x_exp//constraints",
+        "@rules_go//go/runfiles:go_default_library",
+    ],
 )
 
 pkg_tar(
-    name = "tar",
+    name = "usr_bin",
     srcs = [
-        ":orphan",
-        ":runproc",
-        ":zombie",
+        "//process/run/cmd:orphan",
+        "//process/run/cmd:run",
     ],
+    package_dir = "/usr/bin",
 )
 
 oci_image(
     name = "image",
     base = "@distroless_cc_debian12_nonroot",
-    entrypoint = ["/runproc"],
+    entrypoint = ["/usr/bin/run"],
     target_compatible_with = [
         "@platforms//os:linux",
     ],
     tars = [
-        ":tar",
+        ":usr_bin",
     ],
 )
 
 # To load on macOS:
 #
-#     devcontainer exec --workspace-folder $(bazel info workspace) bazel run //process/runproc:load
+#     devcontainer exec --workspace-folder $(bazel info workspace) bazel run :load
 oci_load(
     name = "load",
     image = ":image",
@@ -97,7 +89,7 @@ oci_load(
 
 container_structure_test(
     name = "container_structure_test",
-    configs = ["testdata/runproc.yaml"],
+    configs = ["testdata/container_structure_test.yaml"],
     image = ":image",
     target_compatible_with = [
         "@platforms//os:linux",
