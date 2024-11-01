@@ -29,7 +29,7 @@ impl Child {
     /// Waits until the process exits or times out.
     /// For the case of timeout, Ok(None) will be returned.
     pub(crate) async fn wait(&mut self) -> io::Result<Option<ExitStatus>> {
-        match self.cmd.timeout.duration {
+        match self.cmd.timeout.kill_after {
             // Always some because no timeout given.
             None => self.inner.wait().await.map(Some),
             Some(dur) => match time::timeout(dur, self.inner.wait()).await {

@@ -7,7 +7,7 @@ use std::time::Duration;
 use testing::TempDirExt;
 use tokio::task;
 
-use super::{wait_on, SpawnError};
+use super::{wait_for, SpawnError};
 use crate::Command;
 
 fn command<I, T>(argv: I) -> Arc<Command>
@@ -18,8 +18,9 @@ where
     let mut argv = argv.into_iter();
 
     Arc::new(Command {
-        timeout: crate::Timeout { duration: None, is_not_failure: false },
-        hook: crate::Hook { wait_on: vec![], on_exit: None },
+        dry_run: false,
+        timeout: crate::Timeout { kill_after: None, is_ok: false },
+        hook: crate::Hook { wait_for: vec![], on_exit: None },
         program: argv.next().unwrap().into(),
         envs: vec![],
         args: argv.map(|s| s.into()).collect::<Vec<_>>(),
@@ -29,7 +30,7 @@ where
 impl Command {
     fn timeout(mut self: Arc<Self>, duration: Duration) -> Arc<Self> {
         Arc::make_mut(&mut self).timeout =
-            crate::Timeout { duration: Some(duration), is_not_failure: false };
+            crate::Timeout { kill_after: Some(duration), is_ok: false };
         self
     }
 }
@@ -73,7 +74,7 @@ async fn sleep() {
 async fn sleep_kill() {
     for sig in [libc::SIGINT, libc::SIGTERM, libc::SIGKILL] {
         let mut sleep = command(["sleep", "10"]).spawn().await.unwrap();
-        sleep.child.kill(Some(sig)).await;
+        sleep.inner.kill(Some(sig)).await;
         // super::kill(sleep.child_id as i32, sig).expect("failed to kill");
         let status = sleep.wait().await.expect("failed to wait");
         assert!(
@@ -116,18 +117,18 @@ where
 async fn wait_for_files() {
     let temp_dir = testing::tempdir();
 
-    wait_on(&[]).await.expect("wait for nothing");
+    wait_for(&[]).await.expect("wait for nothing");
 
     let mut oks = create_files(&temp_dir, vec!["東/新宿/ok", "柏/の/葉/ok", "秋/葉/原/ok"]);
-    wait_on(&oks).await.expect("waiting for files created just before");
+    wait_for(&oks).await.expect("waiting for files created just before");
 
     let err = create_files(&temp_dir, vec!["0.err"]);
-    wait_on(&oks).await.expect("affected by an error file not waiting for");
+    wait_for(&oks).await.expect("affected by an error file not waiting for");
 
     let more_oks = create_files(&temp_dir, vec!["0"]);
     oks.extend_from_slice(&more_oks);
 
-    match wait_on(&oks)
+    match wait_for(&oks)
         .await
         .expect_err("should be an error if '0' and '0.err' exist at the same time")
     {
@@ -140,7 +141,7 @@ async fn wait_for_files() {
     }
 
     fs::remove_file(&more_oks[0]).unwrap();
-    match wait_on(&oks)
+    match wait_for(&oks)
         .await
         .expect_err("should be an error because the error file '0.err' present")
     {
@@ -154,7 +155,7 @@ async fn wait_for_files() {
 
     fs::remove_file(&err[0]).unwrap();
     // `wait` does not finish until the file "0" is created.
-    let h = task::spawn(async move { wait_on(&oks).await });
+    let h = task::spawn(async move { wait_for(&oks).await });
     create_files(&temp_dir, vec!["0"]);
     h.await.unwrap().expect("should be ok");
 

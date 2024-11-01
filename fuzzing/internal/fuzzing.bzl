@@ -6,8 +6,8 @@ def _fuzz_test_impl(ctx):
 RUNFILES_DIR="$0.runfiles" \
 exec "{run}" \
 {envs} \
---timeout.duration {time_to_run} \
---timeout.is-not-failure \
+--kill-after {time_to_run} \
+--timeout-is-ok \
 -- \
 "{executable}" \
 "{corpus}" \
@@ -58,7 +58,7 @@ _fuzz_test = rule(
     test = True,
     attrs = {
         "_run": attr.label(
-            default = Label("@//process/run:run"),
+            default = Label("@//process/run/cmd:run"),
             executable = True,
             cfg = "exec",
         ),
