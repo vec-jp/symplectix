@@ -253,29 +253,28 @@ impl ProcessInner {
                                 trace!("closed({}), lagged({})", err.closed(), err.lagged().unwrap_or(0));
                             }
                             Ok((pid, exit_status)) => if pid == child.pid as libc::pid_t {
-                                break Ok(dbg!(to_wait_status(exit_status, cause, &child.cmd)));
+                                break Ok(to_wait_status(exit_status, cause, &child.cmd));
                             }
                         },
                         _ = sigterm.recv() => {
                             _interrupted += 1;
-                            cause.self_signaled = dbg!(cause.self_signaled.or(Some(libc::SIGTERM)));
+                            cause.self_signaled = cause.self_signaled.or(Some(libc::SIGTERM));
                             child.kill(Some(libc::SIGTERM)).await;
                         },
                         _ = sigint.recv() => {
                             _interrupted += 1;
-                            cause.self_signaled = dbg!(cause.self_signaled.or(Some(libc::SIGINT)));
+                            cause.self_signaled = cause.self_signaled.or(Some(libc::SIGINT));
                             child.kill(Some(libc::SIGINT)).await;
                         },
                         child_stat = child.wait() => match child_stat {
                             Err(err) => {
                                 error!("got an error while waiting the child: {}", err.to_string());
-                                cause.io_error = dbg!(cause.io_error.or(Some(err.kind())));
+                                cause.io_error = cause.io_error.or(Some(err.kind()));
                                 child.kill(None).await;
                             }
                             Ok(None) => {
                                 _interrupted += 1;
                                 cause.timedout = true;
-                                dbg!(cause);
                                 child.kill(None).await;
                             }
                             Ok(Some(exit_status)) => {
@@ -285,7 +284,7 @@ impl ProcessInner {
                         line = stderr.next_line() => match line {
                             Err(err) => {
                                 error!("got an error while reading lines: {}", err.to_string());
-                                cause.io_error = dbg!(cause.io_error.or(Some(err.kind())));
+                                cause.io_error = cause.io_error.or(Some(err.kind()));
                                 child.kill(None).await;
                             }
                             Ok(None) => {
@@ -339,7 +338,7 @@ impl WaitStatusError {
             return ExitCode::from(125);
         }
 
-        ws.exit_status.code().map(|c| ExitCode::from(dbg!(c) as u8)).unwrap_or(ExitCode::FAILURE)
+        ws.exit_status.code().map(|c| ExitCode::from(c as u8)).unwrap_or(ExitCode::FAILURE)
     }
 }
 
