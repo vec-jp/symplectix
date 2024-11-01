@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use tokio::process::{Child as TokioChild, ChildStderr, Command as TokioCommand};
 use tokio::time;
-use tracing::error;
+use tracing::trace;
 
 #[derive(Debug)]
 pub(crate) struct Child {
@@ -48,13 +48,13 @@ impl Child {
         if gracefully {
             let signal = signal.unwrap_or(libc::SIGTERM);
             if let Err(err) = kill(pid, signal) {
-                error!("kill {}: {}", signal, err);
+                trace!("kill {}: {}", signal, err);
             }
             time::sleep(Duration::from_millis(1000)).await;
         }
 
         if let Err(err) = kill(pid, libc::SIGKILL) {
-            error!("kill {}: {}", libc::SIGKILL, err);
+            trace!("kill {}: {}", libc::SIGKILL, err);
         }
     }
 
@@ -62,7 +62,7 @@ impl Child {
         // Reap all descendant processes here,
         // to ensure there are no children left behind.
         if let Err(err) = killpg(self.pid as libc::c_int, libc::SIGKILL) {
-            error!("killpg: {}", err);
+            trace!("killpg: {}", err);
         }
     }
 }

@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	runRloc = must(runfiles.Rlocation("symplectix/process/run/cmd/run"))
-	orphanRloc  = must(runfiles.Rlocation("symplectix/process/run/cmd/orphan"))
+	runRloc    = must(runfiles.Rlocation("symplectix/process/run/cmd/run"))
+	orphanRloc = must(runfiles.Rlocation("symplectix/process/run/cmd/orphan"))
 )
 
 var run = &runCmd{
@@ -34,7 +34,7 @@ func (c *runCmd) Args(arg ...string) *exec.Cmd {
 	cmd := exec.Command(c.loc, arg...)
 
 	cmd.Env = []string{
-		"RUNPROC_LOG=run=trace,reaper=trace",
+		"RUN_LOG=run=trace,reaper=trace",
 	}
 
 	return cmd

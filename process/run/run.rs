@@ -207,7 +207,7 @@ impl Process {
     }
 
     fn pid(&self) -> Option<u32> {
-        match self {
+        match &self.inner {
             ProcessInner::DryRun { .. } => None,
             ProcessInner::Spawned { child, .. } => Some(child.pid),
         }

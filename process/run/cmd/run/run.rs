@@ -27,11 +27,11 @@ async fn run_proc() -> anyhow::Result<()> {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::fmt::layer()
-                .with_level(false)
                 .with_writer(std::io::stderr)
+                .with_target(false)
                 .without_time(),
         )
-        .with(EnvFilter::from_env("RUNPROC_LOG"))
+        .with(EnvFilter::from_env("RUN_LOG"))
         .init();
 
     let entrypoint = run::Command::from_args_os(std::env::args_os());
