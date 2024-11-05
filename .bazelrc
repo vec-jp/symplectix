@@ -1,6 +1,3 @@
-# Do not create convenience symlinks.
-common --experimental_convenience_symlinks=ignore
-
 # This parameter is experimental and may change at any time. Please do not depend on it.
 #
 # If true, this usage of the module extension will be isolated from all other usages, both in this and other modules.
