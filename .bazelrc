@@ -9,6 +9,19 @@
 # https://bazel.build/reference/command-line-reference#flag--host_jvm_args
 startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
 
+# Bazel picks up host-OS-specific config lines from bazelrc files.
+# https://bazel.build/reference/command-line-reference#flag--enable_platform_specific_config
+common --enable_platform_specific_config
+
+# Set default value of `allow_empty` to `False` in `glob()`. This prevents a common mistake when
+# attempting to use `glob()` to match files in a subdirectory that is opaque to the current package
+# because it contains a BUILD file. See https://github.com/bazelbuild/bazel/issues/8195.
+# https://bazel.build/reference/command-line-reference#flag--incompatible_disallow_empty_glob
+common --incompatible_disallow_empty_glob
+
+# Enable the protoc toolchain support, introduced in Bazel 7.
+common --incompatible_enable_proto_toolchain_resolution
+
 # This parameter is experimental and may change at any time. Please do not depend on it.
 #
 # If true, this usage of the module extension will be isolated from all other usages, both in this and other modules.
@@ -17,20 +30,6 @@ startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
 #
 # https://bazel.build/rules/lib/globals/module
 common --experimental_isolated_extension_usages
-
-# Directories used by sandboxed non-worker execution may be reused to avoid unnecessary setup costs.
-# Save time on Sandbox creation and deletion when many of the same kind of action run during the
-# build.
-#
-# https://bazel.build/reference/command-line-reference#flag--reuse_sandbox_directories
-build --reuse_sandbox_directories
-
-# Enable the protoc toolchain support, introduced in Bazel 7.
-common --incompatible_enable_proto_toolchain_resolution
-
-# Bazel picks up host-OS-specific config lines from bazelrc files.
-# https://bazel.build/reference/command-line-reference#flag--enable_platform_specific_config
-common --enable_platform_specific_config
 
 # Output a heap dump if an OOM is thrown during a Bazel invocation.
 # The dump will be written to `<output_base>/<invocation_id>.heapdump.hprof`.
@@ -101,6 +100,13 @@ build --sandbox_fake_hostname
 # Change the current username to 'nobody' for sandboxed actions.
 # https://bazel.build/reference/command-line-reference#flag--sandbox_fake_username
 build --sandbox_fake_username
+
+# Directories used by sandboxed non-worker execution may be reused to avoid unnecessary setup costs.
+# Save time on Sandbox creation and deletion when many of the same kind of action run during the
+# build.
+#
+# https://bazel.build/reference/command-line-reference#flag--reuse_sandbox_directories
+build --reuse_sandbox_directories
 
 # If set to true, each Linux sandbox will have its own dedicated empty directory mounted as /tmp rather than
 # sharing /tmp with the host filesystem. Use --sandbox_add_mount_pair=/tmp to keep seeing the host's /tmp in all sandboxes.
