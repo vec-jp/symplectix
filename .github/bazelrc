@@ -21,7 +21,10 @@ fetch --disk_cache=/tmp/ci/
 # https://bazel.build/reference/command-line-reference#flag--show_progress_rate_limit
 build --show_progress_rate_limit=60
 
-common --color=no
+# Use colors to highlight output on the screen. Set to `no` if your CI does not display colors.
+# https://bazel.build/docs/user-manual#color
+build --color=yes
+
 common --curses=no
 common --show_timestamps
 
