@@ -34,7 +34,6 @@ jobs:
         with:
           path: |
             ~/.cache/bazel
-            ~/.cache/bazel-disk-cache
             ~/.cache/bazelisk
           key: ${{ matrix.os }}-${{ env.cache-name }}-${{ github.sha }}
           restore-keys: ${{ matrix.os}}-${{ env.cache-name }}-
