@@ -25,7 +25,10 @@ build --show_progress_rate_limit=60
 # https://bazel.build/docs/user-manual#color
 build --color=yes
 
-common --curses=no
+# Use cursor controls in screen output.
+# Docs: https://bazel.build/docs/user-manual#curses
+build --curses=yes
+
 common --show_timestamps
 
 build --config=verbose
