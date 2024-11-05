@@ -40,6 +40,16 @@ build --noremote_upload_local_results
 # https://bazel.build/reference/command-line-reference#flag--test_output
 test --test_output=errors
 
+# Warn if a test's timeout is significantly longer than the test's actual execution time.
+# Bazel's default for test_timeout is medium (5 min), but most tests should instead be short (1 min).
+# While a test's timeout should be set such that it is not flaky, a test that has a highly
+# over-generous timeout can hide real problems that crop up unexpectedly.
+# For instance, a test that normally executes in a minute or two should not have a timeout of
+# ETERNAL or LONG as these are much, much too generous.
+#
+# https://bazel.build/docs/user-manual#test-verbose-timeout-warnings
+test --test_verbose_timeout_warnings
+
 # Disables a legacy feature where local sandboxed execution can silently fall back to non-sandboxed
 # if an action can't be run in a sandbox. This will be the default flag in a future release (probably 7.0).
 #
