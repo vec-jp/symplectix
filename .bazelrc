@@ -57,9 +57,10 @@ common:stamp --stamp --workspace_status_command=stamp/buildinfo.sh
 # https://github.com/bazelbuild/bazel/issues/16522
 build --noincompatible_legacy_local_fallback
 
-# Restricts network access by default for actions.
+# Don't allow network access for build actions in the sandbox.
+# Need to tag targets with `tags=["requires-network"]` to opt-out of the enforcement.
 # https://bazel.build/reference/command-line-reference#flag--sandbox_default_allow_network
-build --nosandbox_default_allow_network
+build --sandbox_default_allow_network=false
 
 # Change the current hostname to 'localhost' for sandboxed actions.
 # https://bazel.build/reference/command-line-reference#flag--sandbox_fake_hostname
