@@ -21,13 +21,6 @@ build --config=verbose
 build --config=clippy
 build --config=rustfmt
 
-# Disable sandoxing in CI for a while.
-#
-# TODO: Enable sandboxing.
-# Since Bazel 7, the details are unknown, but builds in sandbox has
-# started to fail with an error that process_wrapper.sh does not exist.
-build --spawn_strategy=local
-
 build:testing --config=stable
 build:testing --config=opt
 build:testing --config=strip
