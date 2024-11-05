@@ -9,6 +9,9 @@
 # https://bazel.build/reference/command-line-reference#flag--host_jvm_args
 startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
 
+# https://bazel.build/docs/user-manual#workspace_status
+common:stamp --stamp --workspace_status_command=stamp/buildinfo.sh
+
 # Bazel picks up host-OS-specific config lines from bazelrc files.
 # https://bazel.build/reference/command-line-reference#flag--enable_platform_specific_config
 common --enable_platform_specific_config
@@ -147,9 +150,6 @@ build --incompatible_sandbox_hermetic_tmp
 # https://github.com/bazelbuild/bazel/issues/10076.
 # https://bazel.build/reference/command-line-reference#flag--incompatible_default_to_explicit_init_py
 build --incompatible_default_to_explicit_init_py
-
-# https://bazel.build/docs/user-manual#workspace_status
-common:stamp --stamp --workspace_status_command=stamp/buildinfo.sh
 
 build:linux --action_env=CC=gcc
 build:linux --action_env=CXX=gcc++
