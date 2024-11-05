@@ -29,7 +29,9 @@ build --color=yes
 # Docs: https://bazel.build/docs/user-manual#curses
 build --curses=yes
 
-common --show_timestamps
+# The terminal width in columns. Configure this to override the default value based on what your CI system renders.
+# https://github.com/bazelbuild/bazel/blob/1af61b21df99edc2fc66939cdf14449c2661f873/src/main/java/com/google/devtools/build/lib/runtime/UiOptions.java#L151
+build --terminal_columns=120
 
 build --config=verbose
 build --config=clippy
