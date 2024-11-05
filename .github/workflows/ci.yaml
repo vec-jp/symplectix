@@ -52,7 +52,7 @@ jobs:
       # - name: Fuzz
       #   run: bazel build --config=fuzzing //...
 
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/save@v4
         if: github.ref == 'refs/heads/main'
         with:
           path: |
