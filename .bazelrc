@@ -145,10 +145,8 @@ build:macos --action_env=CFLAGS=-Wno-int-conversion
 # rustc flags for proc-macros, cargo_build_script, etc.
 build --@rules_rust//rust/settings:extra_exec_rustc_flags=-Copt-level=3
 
-# * The platfrom `stable` should be the default target.
-#
-# * Some tools like sanitizers depend on nightly.
-#   https://github.com/bazelbuild/rules_rust/blob/main/rust/toolchain/channel/BUILD.bazel
+# Some tools like sanitizers depend on nightly.
+# https://github.com/bazelbuild/rules_rust/blob/main/rust/toolchain/channel/BUILD.bazel
 build:stable --platforms=//platforms:stable
 build:stable --@rules_rust//rust/toolchain/channel=stable
 build:nightly --platforms=//platforms:nightly
@@ -158,19 +156,19 @@ build:nightly --@rules_rust//rust/toolchain/channel=nightly
 # fastbuild: -Copt-level=0 -Cdebuginfo=0
 # dbg:       -Copt-level=0 -Cdebuginfo=2
 # opt:       -Copt-level=3 -Cdebuginfo=0
-build:opt --compilation_mode=opt
-build:opt --@rules_rust//rust/settings:extra_rustc_flag=-Cdebug-assertions=off
-build:opt --@rules_rust//rust/settings:extra_rustc_flag=-Coverflow-checks=off
-build:opt --@rules_rust//rust/settings:extra_rustc_flag=-Cpanic=unwind
-build:opt --@rules_rust//rust/settings:extra_rustc_flag=-Clto=fat
-build:opt --@rules_rust//rust/settings:extra_rustc_flag=-Ccodegen-units=1
+build:release --compilation_mode=opt
+build:release --@rules_rust//rust/settings:extra_rustc_flag=-Cdebug-assertions=off
+build:release --@rules_rust//rust/settings:extra_rustc_flag=-Coverflow-checks=off
+build:release --@rules_rust//rust/settings:extra_rustc_flag=-Cpanic=unwind
+build:release --@rules_rust//rust/settings:extra_rustc_flag=-Clto=fat
+build:release --@rules_rust//rust/settings:extra_rustc_flag=-Ccodegen-units=1
 
-build:dbg --compilation_mode=dbg
-build:dbg --@rules_rust//rust/settings:extra_rustc_flag=-Cdebug-assertions=on
-build:dbg --@rules_rust//rust/settings:extra_rustc_flag=-Coverflow-checks=on
-build:dbg --@rules_rust//rust/settings:extra_rustc_flag=-Cpanic=unwind
-build:dbg --@rules_rust//rust/settings:extra_rustc_flag=-Clto=fat
-build:dbg --@rules_rust//rust/settings:extra_rustc_flag=-Ccodegen-units=32
+# build:debug --compilation_mode=dbg
+# build:debug --@rules_rust//rust/settings:extra_rustc_flag=-Cdebug-assertions=on
+# build:debug --@rules_rust//rust/settings:extra_rustc_flag=-Coverflow-checks=on
+# build:debug --@rules_rust//rust/settings:extra_rustc_flag=-Cpanic=unwind
+# build:debug --@rules_rust//rust/settings:extra_rustc_flag=-Clto=fat
+# build:debug --@rules_rust//rust/settings:extra_rustc_flag=-Ccodegen-units=32
 
 # Controls whether Bazel will strip debugging information from all binaries and shared libraries,
 # by invoking the linker with the -Wl,--strip-debug option.

@@ -42,9 +42,9 @@ build --config=clippy
 build --config=rustfmt
 
 build:testing --config=stable
-build:testing --config=opt
+build:testing --config=release
 build:testing --config=strip
 
-build:fuzzing --config=nightly
-build:fuzzing --config=dbg
-build:fuzzing --build_tag_filters=+fuzzing
+# build:fuzzing --config=nightly
+# build:fuzzing --config=dbg
+# build:fuzzing --build_tag_filters=+fuzzing
