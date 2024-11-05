@@ -1,3 +1,14 @@
+# Allow the Bazel server to check directory sources for changes. Ensures that the Bazel server
+# notices when a directory changes, if you have a directory listed in the srcs of some target.
+#
+# Recommended when using
+# - copy_directory: https://github.com/bazel-contrib/bazel-lib/blob/main/docs/copy_directory.md
+# - rules_js: https://github.com/aspect-build/rules_js
+# since npm package are source directories inputs to copy_directory actions.
+#
+# https://bazel.build/reference/command-line-reference#flag--host_jvm_args
+startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
+
 # This parameter is experimental and may change at any time. Please do not depend on it.
 #
 # If true, this usage of the module extension will be isolated from all other usages, both in this and other modules.
