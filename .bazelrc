@@ -27,6 +27,11 @@ common --enable_platform_specific_config
 # https://bazel.build/reference/command-line-reference#flag--heap_dump_on_oom
 common --heap_dump_on_oom
 
+# Do not upload locally executed action results to the remote cache by default
+# so local builds cannot poison the remote cache.
+# https://bazel.build/reference/command-line-reference#flag--remote_upload_local_results
+build --noremote_upload_local_results
+
 # Specifies desired output mode. Valid values are
 # - 'summary' to output only test status summary
 # - 'errors' to also print test logs for failed tests

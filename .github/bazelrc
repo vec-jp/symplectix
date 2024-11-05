@@ -12,6 +12,10 @@ startup --output_user_root=/tmp/ci/
 build --disk_cache=/tmp/ci/
 fetch --disk_cache=/tmp/ci/
 
+# TODO: Flip the default setting
+# To upload locally executed action results to the remote cache.
+# build --remote_upload_local_results
+
 # UI for cleaner CI output
 
 # Only show progress every 60 seconds on CI.
