@@ -9,6 +9,18 @@
 # https://bazel.build/reference/command-line-reference#flag--host_jvm_args
 startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
 
+# Use a directory on the file system as a remote cache.
+# By default, Bazel has a build cache per workspace which keeps only the latest version
+# of any target. Disk cache is useful for sharing build artifacts when switching branches
+# and/or working on multiple workspaces of the same project, such as multiple checkouts.
+#
+# Since Bazel does not garbage-collect the directory,
+# you might want to automate a periodic cleanup of this directory.
+#
+# https://bazel.build/remote/caching#disk-cache
+build --disk_cache=~/.cache/bazel-disk-cache/
+fetch --disk_cache=~/.cache/bazel-disk-cache/
+
 # https://bazel.build/docs/user-manual#workspace_status
 common:stamp --stamp --workspace_status_command=stamp/buildinfo.sh
 
