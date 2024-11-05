@@ -37,6 +37,15 @@ common --experimental_isolated_extension_usages
 # https://bazel.build/reference/command-line-reference#flag--heap_dump_on_oom
 common --heap_dump_on_oom
 
+# Do not build runfiles symlink forests for external repositories under
+# `.runfiles/wsname/external/repo` (in addition to `.runfiles/repo`). This reduces runfiles &
+# sandbox creation times & prevents accidentally depending on this feature which may flip to off by
+# default in the future. Note, some rules may fail under this flag, please file issues with the rule
+# author.
+#
+# https://bazel.build/reference/command-line-reference#flag--legacy_external_runfiles
+build --nolegacy_external_runfiles
+
 # Do not upload locally executed action results to the remote cache by default
 # so local builds cannot poison the remote cache.
 # https://bazel.build/reference/command-line-reference#flag--remote_upload_local_results
