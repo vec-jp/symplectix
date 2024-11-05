@@ -21,6 +21,12 @@ common --incompatible_enable_proto_toolchain_resolution
 # https://bazel.build/reference/command-line-reference#flag--enable_platform_specific_config
 common --enable_platform_specific_config
 
+# Output a heap dump if an OOM is thrown during a Bazel invocation.
+# The dump will be written to `<output_base>/<invocation_id>.heapdump.hprof`.
+#
+# https://bazel.build/reference/command-line-reference#flag--heap_dump_on_oom
+common --heap_dump_on_oom
+
 # Whether to announce rc options.
 # https://bazel.build/reference/command-line-reference#flag--announce_rc
 common:verbose --announce_rc
