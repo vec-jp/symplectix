@@ -21,10 +21,12 @@ startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
 build --disk_cache=~/.cache/bazel/
 fetch --disk_cache=~/.cache/bazel/
 
+# Collect garbage entries from cache.
+#
 # https://bazel.build/reference/command-line-reference#flag--experimental_disk_cache_gc_max_size
 # https://bazel.build/reference/command-line-reference#flag--experimental_disk_cache_gc_max_age
 build --experimental_disk_cache_gc_max_size=20G
-build --experimental_disk_cache_gc_max_age=10
+build --experimental_disk_cache_gc_max_age=14d
 
 # https://bazel.build/docs/user-manual#workspace_status
 common:stamp --stamp --workspace_status_command=stamp/buildinfo.sh
