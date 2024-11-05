@@ -27,6 +27,14 @@ common --enable_platform_specific_config
 # https://bazel.build/reference/command-line-reference#flag--heap_dump_on_oom
 common --heap_dump_on_oom
 
+# Specifies desired output mode. Valid values are
+# - 'summary' to output only test status summary
+# - 'errors' to also print test logs for failed tests
+# - 'all' to print logs for all tests
+# - 'streamed' to output logs for all tests in real time
+# https://bazel.build/reference/command-line-reference#flag--test_output
+test --test_output=errors
+
 # Whether to announce rc options.
 # https://bazel.build/reference/command-line-reference#flag--announce_rc
 common:verbose --announce_rc
@@ -39,14 +47,6 @@ build:verbose --show_timestamps
 # If a command fails, print out the full command line.
 # https://bazel.build/reference/command-line-reference#flag--verbose_failures
 build:verbose --verbose_failures
-
-# Specifies desired output mode. Valid values are
-# - 'summary' to output only test status summary
-# - 'errors' to also print test logs for failed tests
-# - 'all' to print logs for all tests
-# - 'streamed' to output logs for all tests in real time
-# https://bazel.build/reference/command-line-reference#flag--test_output
-test:verbose --test_output=errors
 
 # https://bazel.build/docs/user-manual#workspace_status
 common:stamp --stamp --workspace_status_command=stamp/buildinfo.sh
