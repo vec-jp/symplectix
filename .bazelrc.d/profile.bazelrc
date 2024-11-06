@@ -13,13 +13,9 @@ build:nightly --@rules_rust//rust/toolchain/channel=nightly
 
 build:debuginfo --@rules_rust//rust/settings:extra_rustc_flag=-Cdebuginfo=2
 build:debuginfo --@rules_rust//rust/settings:extra_rustc_flag=-Cdebug-assertions=on
-build:debuginfo --@rules_rust//rust/settings:extra_rustc_flag=-Coverflow-checks=on
-build:debuginfo --@rules_rust//rust/settings:extra_rustc_flag=-Cpanic=unwind
 
 build:nodebuginfo --@rules_rust//rust/settings:extra_rustc_flag=-Cdebuginfo=0
 build:nodebuginfo --@rules_rust//rust/settings:extra_rustc_flag=-Cdebug-assertions=off
-build:nodebuginfo --@rules_rust//rust/settings:extra_rustc_flag=-Coverflow-checks=off
-build:nodebuginfo --@rules_rust//rust/settings:extra_rustc_flag=-Cpanic=unwind
 
 # Controls whether Bazel will strip debugging information from all binaries and shared libraries,
 # by invoking the linker with the -Wl,--strip-debug option.
@@ -49,3 +45,4 @@ build:release --compilation_mode=opt
 build:release --config=nodebuginfo
 build:release --@rules_rust//rust/settings:extra_rustc_flag=-Clto=fat
 build:release --@rules_rust//rust/settings:extra_rustc_flag=-Ccodegen-units=1
+build:release --@rules_rust//rust/settings:extra_rustc_flag=-Coverflow-checks=off
