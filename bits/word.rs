@@ -185,13 +185,13 @@ macro_rules! impls_for_word {
             }
 
             #[inline]
-            fn all(this: &Self) -> bool {
-                *this == !0
+            fn all(&self) -> bool {
+                *self == !0
             }
 
             #[inline]
-            fn any(this: &Self) -> bool {
-                *this != 0
+            fn any(&self) -> bool {
+                *self != 0
             }
 
             #[inline]
