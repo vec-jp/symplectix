@@ -3,8 +3,6 @@ use std::fmt::{self, Debug, Formatter};
 use std::iter::Sum;
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
-use super::*;
-
 #[derive(Copy, Clone, Default, PartialEq, Eq)]
 pub(crate) struct L1L2(u64);
 
@@ -20,10 +18,10 @@ impl Debug for L1L2 {
 }
 
 impl L1L2 {
-    pub const LEN: usize = 4;
+    pub(crate) const LEN: usize = 4;
 
-    pub const L1: u64 = 0x_FFFF_FFFF; // lowest 32 bits
-    pub const L2: u64 = 0x_03FF; // lowest 10 bits
+    pub(crate) const L1: u64 = 0x_FFFF_FFFF; // lowest 32 bits
+    pub(crate) const L2: u64 = 0x_03FF; // lowest 10 bits
 
     const L2_0_SHIFT: u64 = 32;
     const L2_1_SHIFT: u64 = 42;
