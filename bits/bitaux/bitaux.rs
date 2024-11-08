@@ -40,30 +40,32 @@ where
     T: Word + 'a,
     I: IntoIterator<Item = Option<&'a [T]>>,
 {
-    let mut poppy = Aux::new(size);
+    let mut aux = Aux::new(size);
 
     for (i, sb) in super_blocks.into_iter().enumerate() {
-        let bbs = basic_blocks(sb);
-        let sum = bbs.iter().sum::<u64>();
+        let (bbs, sum) = basic_blocks(sb);
 
         let (q, r) = (i / MAX_SB_LEN, i % MAX_SB_LEN);
 
         // +1 to skip dummy index
-        poppy.ubs[q + 1] += sum;
-        poppy.lb_mut(q)[r + 1] = l1l2::L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
+        aux.ubs[q + 1] += sum;
+        aux.lb_mut(q)[r + 1] = l1l2::L1L2::merge([sum, bbs[0], bbs[1], bbs[2]]);
     }
 
-    poppy
+    aux
 }
 
-fn basic_blocks<W: Word>(sb: Option<&[W]>) -> [u64; l1l2::LEN] {
+fn basic_blocks<W: Word>(sb: Option<&[W]>) -> ([u64; l1l2::LEN], u64) {
     let mut bbs = [0; l1l2::LEN];
+    let mut sum = 0;
     if let Some(sb) = sb {
         for (i, bb) in sb.chunks(BASIC_BLOCK / W::BITS).enumerate() {
-            bbs[i] = bb.count1() as u64;
+            let count1 = bb.count1() as u64;
+            bbs[i] = count1;
+            sum += count1;
         }
     }
-    bbs
+    (bbs, sum)
 }
 
 fn super_blocks_from_words<T: Word>(slice: &[T]) -> impl Iterator<Item = Option<&[T]>> {
@@ -90,29 +92,29 @@ fn lbs_len(n: usize) -> usize {
 }
 
 impl<'a, T: Word> From<&'a [T]> for Pop<&'a [T]> {
-    fn from(inner: &'a [T]) -> Self {
-        let mut poppy = build(inner.bits(), super_blocks_from_words(inner));
+    fn from(repr: &'a [T]) -> Self {
+        let mut aux = build(repr.bits(), super_blocks_from_words(repr));
 
         // TODO: should be in the [`build`] loop.
         {
             // initialize upper_blocks as a binary index tree
-            fenwicktree::build(&mut poppy.ubs);
+            fenwicktree::build(&mut aux.ubs);
 
             // initialize lower_blocks as a binary index tree
-            for q in 0..poppy.lb_parts() {
-                fenwicktree::build(poppy.lb_mut(q));
+            for q in 0..aux.lb_parts() {
+                fenwicktree::build(aux.lb_mut(q));
             }
         }
 
-        Pop { aux: poppy, repr: inner }
+        Pop { aux, repr }
     }
 }
 
 impl<T: Block> Pop<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> Pop<Vec<T>> {
-        let dat = bits::new(n);
-        Pop { aux: Aux::new(dat.bits()), repr: dat }
+        let repr = bits::new(n);
+        Pop { aux: Aux::new(repr.bits()), repr }
     }
 }
 
@@ -154,7 +156,7 @@ impl<T: Unpack + Bits> Bits for Pop<T> {
                 let lo = me.aux.lb(q0);
                 let c0: u64 = hi.sum(q0);
                 let c1: u64 = lo.sum(q1);
-                let c2 = lo[q1 + 1].l2(q2);
+                let c2 = lo[q1 + 1].l2_sum(q2);
                 num::cast::<_, usize>(c0 + c1 + c2).expect("failed to cast from u64 to usize")
                     + me.repr.rank1(p0 - r2..p0)
             }
@@ -172,7 +174,7 @@ impl<T: Unpack + Bits> Bits for Pop<T> {
             let lo = self.aux.lb(p0);
             let p1 = find_l1(lo, &mut r);
             let ll = lo[p1 + 1];
-            let l2 = [ll.l2_0(), ll.l2_1(), ll.l2_2()];
+            let l2 = [ll.l2::<0>(), ll.l2::<1>(), ll.l2::<2>()];
             let p2 = find_l2(&l2, &mut r);
 
             let s = p0 * UPPER_BLOCK + p1 * SUPER_BLOCK + p2 * BASIC_BLOCK;
@@ -218,7 +220,7 @@ impl<T: Unpack + Bits> Bits for Pop<T> {
             let lo_complemented = fenwicktree::complement(lo, SB);
             let p1 = find_l1(&lo_complemented, &mut r);
             let ll = lo[p1 + 1];
-            let l2 = [BB - ll.l2_0(), BB - ll.l2_1(), BB - ll.l2_2()];
+            let l2 = [BB - ll.l2::<0>(), BB - ll.l2::<1>(), BB - ll.l2::<2>()];
             let p2 = find_l2(&l2, &mut r);
 
             let s = p0 * UPPER_BLOCK + p1 * SUPER_BLOCK + p2 * BASIC_BLOCK;
