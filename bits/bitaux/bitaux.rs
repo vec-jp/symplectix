@@ -131,8 +131,8 @@ impl<T: Unpack + Bits> Bits for Pop<T> {
     }
 
     #[inline]
-    fn bit(&self, i: usize) -> Option<bool> {
-        self.repr.bit(i)
+    fn test(&self, i: usize) -> Option<bool> {
+        self.repr.test(i)
     }
 
     #[inline]
@@ -290,7 +290,7 @@ where
 impl<T: BitsMut> Pop<T> {
     /// Swaps a bit at `i` by `bit` and returns the previous value.
     fn swap(&mut self, i: usize, bit: bool) -> bool {
-        let before = self.repr.bit(i);
+        let before = self.repr.test(i);
         if bit {
             self.repr.bit_set(i);
         } else {

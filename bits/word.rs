@@ -170,7 +170,7 @@ macro_rules! impls_for_word {
             }
 
             #[inline]
-            fn bit(&self, i: usize) -> Option<bool> {
+            fn test(&self, i: usize) -> Option<bool> {
                 (i < self.bits()).then(|| (*self & (1 << i)) != 0)
             }
 
