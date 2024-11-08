@@ -5,6 +5,9 @@ use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 use super::*;
 
+#[derive(Copy, Clone, Default, PartialEq, Eq)]
+pub(crate) struct L1L2(u64);
+
 impl Debug for L1L2 {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_tuple("L1L2")
@@ -25,6 +28,11 @@ impl L1L2 {
     const L2_0_SHIFT: u64 = 32;
     const L2_1_SHIFT: u64 = 42;
     const L2_2_SHIFT: u64 = 52;
+
+    #[inline]
+    pub(crate) const fn zero() -> Self {
+        Self(0)
+    }
 
     #[inline]
     pub(crate) const fn merge(mut arr: [u64; Self::LEN]) -> Self {
