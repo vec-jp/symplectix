@@ -16,7 +16,6 @@ pub use self::mask::Mask;
 
 use std::ops::{Range, RangeBounds};
 
-/// * [`Bits::count1`](crate::Bits::count1)
 pub trait Bits {
     /// Returns the number of binary digits.
     ///

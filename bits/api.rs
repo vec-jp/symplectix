@@ -2,7 +2,7 @@ use crate::{Bits, Block};
 
 /// Constructs a new, empty `Vec<T>`.
 ///
-/// # Examples
+/// # Tests
 ///
 /// ```
 /// # use bits::Bits;
@@ -17,7 +17,7 @@ pub fn new<T: Block>(n: usize) -> Vec<T> {
 
 /// Returns a `Vec<T>` with the at least specified capacity in bits.
 ///
-/// # Examples
+/// # Tests
 ///
 /// ```
 /// # use bits::Bits;
@@ -32,7 +32,7 @@ pub fn with_capacity<T: Block>(capacity: usize) -> Vec<T> {
 
 /// Returns the number of bits.
 ///
-/// # Examples
+/// # Tests
 ///
 /// ```
 /// let v: &[u8] = &[0, 0, 0];
@@ -47,7 +47,7 @@ pub fn len<T: ?Sized + Bits>(b: &T) -> usize {
 
 /// Returns true if contains no bits.
 ///
-/// # Examples
+/// # Tests
 ///
 /// ```
 /// let v: &[u8] = &[0, 0, 0];
@@ -63,7 +63,7 @@ pub fn is_empty<T: ?Sized + Bits>(b: &T) -> bool {
 /// Returns a bit at the given index `i`.
 /// When i is out of bounds, returns **None**.
 ///
-/// # Examples
+/// # Tests
 ///
 /// ```
 /// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
@@ -79,7 +79,7 @@ pub fn test<T: ?Sized + Bits>(b: &T, i: usize) -> Option<bool> {
 
 /// Counts the occurrences of `1`.
 ///
-/// # Examples
+/// # Tests
 ///
 /// ```
 /// # use bits::Bits;
@@ -97,7 +97,7 @@ pub fn count1<T: ?Sized + Bits>(b: &T) -> usize {
 
 /// Counts the occurrences of `0`.
 ///
-/// # Examples
+/// # Tests
 ///
 /// ```
 /// let a: &[u64] = &[];
