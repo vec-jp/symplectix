@@ -8,7 +8,7 @@ pub trait Pack: BitsMut {
     /// Writes `N` bits in `[i, i+N)`.
     #[doc(hidden)]
     fn pack<T: Word>(&mut self, i: usize, n: usize, bits: T) {
-        debug_assert!(i < self.bits() && n <= T::BITS);
+        debug_assert!(i < bits::len(self) && n <= T::BITS);
 
         for b in i..i + n {
             if bits.test(b - i).unwrap_or_default() {
@@ -34,7 +34,7 @@ pub trait Unpack: Bits {
     /// ```
     #[doc(hidden)]
     fn unpack<T: Word>(&self, i: usize, n: usize) -> T {
-        debug_assert!(i < self.bits() && n <= T::BITS);
+        debug_assert!(i < bits::len(self) && n <= T::BITS);
 
         let mut bits = T::empty();
         for b in i..i + n {

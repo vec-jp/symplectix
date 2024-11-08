@@ -93,7 +93,7 @@ fn lbs_len(n: usize) -> usize {
 
 impl<'a, T: Word> From<&'a [T]> for Pop<&'a [T]> {
     fn from(repr: &'a [T]) -> Self {
-        let mut aux = build(repr.bits(), super_blocks_from_words(repr));
+        let mut aux = build(bits::len(repr), super_blocks_from_words(repr));
 
         // TODO: should be in the [`build`] loop.
         {
@@ -114,7 +114,7 @@ impl<T: Block> Pop<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> Pop<Vec<T>> {
         let repr = bits::new(n);
-        Pop { aux: Aux::new(repr.bits()), repr }
+        Pop { aux: Aux::new(bits::len(&repr)), repr }
     }
 }
 
@@ -126,8 +126,8 @@ impl<T> Pop<T> {
 
 impl<T: Unpack + Bits> Bits for Pop<T> {
     #[inline]
-    fn bits(&self) -> usize {
-        self.repr.bits()
+    fn len(pop: &Self) -> usize {
+        bits::len(&pop.repr)
     }
 
     #[inline]
@@ -145,7 +145,7 @@ impl<T: Unpack + Bits> Bits for Pop<T> {
         fn rank1_impl<U: Unpack + Bits>(me: &Pop<U>, p0: usize) -> usize {
             if p0 == 0 {
                 0
-            } else if p0 == me.bits() {
+            } else if p0 == bits::len(me) {
                 me.count1()
             } else {
                 let (q0, r0) = (p0 / UPPER_BLOCK, p0 % UPPER_BLOCK);
@@ -162,7 +162,7 @@ impl<T: Unpack + Bits> Bits for Pop<T> {
             }
         }
         use std::ops::Range;
-        let Range { start, end } = bit::bounded(&index, 0, self.bits());
+        let Range { start, end } = bit::bounded(&index, 0, bits::len(self));
         rank1_impl(self, end) - rank1_impl(self, start)
     }
 
@@ -178,7 +178,7 @@ impl<T: Unpack + Bits> Bits for Pop<T> {
             let p2 = find_l2(&l2, &mut r);
 
             let s = p0 * UPPER_BLOCK + p1 * SUPER_BLOCK + p2 * BASIC_BLOCK;
-            (s, cmp::min(s + BASIC_BLOCK, self.bits()))
+            (s, cmp::min(s + BASIC_BLOCK, bits::len(self)))
         };
 
         let mut r = r as usize;
@@ -224,7 +224,7 @@ impl<T: Unpack + Bits> Bits for Pop<T> {
             let p2 = find_l2(&l2, &mut r);
 
             let s = p0 * UPPER_BLOCK + p1 * SUPER_BLOCK + p2 * BASIC_BLOCK;
-            (s, cmp::min(s + BASIC_BLOCK, self.bits()))
+            (s, cmp::min(s + BASIC_BLOCK, bits::len(self)))
         };
 
         let mut r = r as usize;

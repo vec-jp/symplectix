@@ -16,19 +16,6 @@ pub use mask::Mask;
 pub use word::Word;
 
 pub trait Bits {
-    /// Returns the number of binary digits.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use bits::Bits;
-    /// let v: &[u8] = &[0, 0, 0];
-    /// let w: &[u8] = &[];
-    /// assert_eq!(v.bits(), 24);
-    /// assert_eq!(w.bits(), 0);
-    /// ```
-    fn bits(&self) -> usize;
-
     /// Returns the number of bits.
     ///
     /// # Tests
@@ -40,10 +27,7 @@ pub trait Bits {
     /// assert_eq!(Bits::len(v), 24);
     /// assert_eq!(Bits::len(w), 0);
     /// ```
-    #[inline]
-    fn len(b: &Self) -> usize {
-        b.bits()
-    }
+    fn len(b: &Self) -> usize;
 
     /// Returns true if contains no bits.
     ///
@@ -91,7 +75,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn count1(&self) -> usize {
-        self.bits() - self.count0()
+        Bits::len(self) - self.count0()
     }
 
     /// Counts the occurrences of `0`.
@@ -109,7 +93,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn count0(&self) -> usize {
-        self.bits() - self.count1()
+        Bits::len(self) - self.count1()
     }
 
     /// Returns true if all bits are enabled. An empty bits should return true.
@@ -153,14 +137,14 @@ pub trait Bits {
     /// Counts occurrences of `1` in the given range.
     #[inline]
     fn rank1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let r = bit::bounded(&index, 0, self.bits());
+        let r = bit::bounded(&index, 0, Bits::len(self));
         r.len() - self.rank0(r)
     }
 
     /// Counts occurrences of `0` in the given range.
     #[inline]
     fn rank0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let r = bit::bounded(&index, 0, self.bits());
+        let r = bit::bounded(&index, 0, Bits::len(self));
         r.len() - self.rank1(r)
     }
 
@@ -237,7 +221,7 @@ mod excess_helper {
         T: ?Sized + Bits,
         Index: RangeBounds<usize>,
     {
-        let r = bit::bounded(&index, 0, bits.bits());
+        let r = bit::bounded(&index, 0, Bits::len(bits));
         let len = r.len();
         let rank1 = bits.rank1(r);
         let rank0 = len - rank1;
@@ -289,7 +273,7 @@ mod select_helper {
     where
         T: ?Sized + Bits,
     {
-        (n < bs.count1()).then(|| binary_search(0, bs.bits(), |k| bs.rank1(..k) > n) - 1)
+        (n < bs.count1()).then(|| binary_search(0, Bits::len(bs), |k| bs.rank1(..k) > n) - 1)
     }
 
     #[inline]
@@ -297,14 +281,14 @@ mod select_helper {
     where
         T: ?Sized + Bits,
     {
-        (n < bs.count0()).then(|| binary_search(0, bs.bits(), |k| bs.rank0(..k) > n) - 1)
+        (n < bs.count0()).then(|| binary_search(0, Bits::len(bs), |k| bs.rank0(..k) > n) - 1)
     }
 }
 
 impl<B: Block> Bits for [B] {
     #[inline]
-    fn bits(&self) -> usize {
-        B::BITS * self.len()
+    fn len(b: &Self) -> usize {
+        B::BITS * b.len()
     }
 
     #[inline]
@@ -334,7 +318,7 @@ impl<B: Block> Bits for [B] {
     }
 
     fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        let Range { start, end } = bit::bounded(&r, 0, self.bits());
+        let Range { start, end } = bit::bounded(&r, 0, Bits::len(self));
 
         // TODO: benchmark
         // bit::chunks(start, end, B::BITS)
@@ -383,14 +367,14 @@ impl<B: Block> Bits for [B] {
 impl<B: Block> BitsMut for [B] {
     #[inline]
     fn bit_set(&mut self, i: usize) {
-        assert!(i < self.bits());
+        assert!(i < Bits::len(self));
         let (i, o) = bit::addr(i, B::BITS);
         self[i].bit_set(o)
     }
 
     #[inline]
     fn bit_clear(&mut self, i: usize) {
-        assert!(i < self.bits());
+        assert!(i < Bits::len(self));
         let (i, o) = bit::addr(i, B::BITS);
         self[i].bit_clear(o)
     }
@@ -399,8 +383,8 @@ impl<B: Block> BitsMut for [B] {
 macro_rules! impl_bits {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn bits(&self) -> usize {
-            <$X as Bits>::bits(self$(.$method())?)
+        fn len(this: &Self) -> usize {
+            <$X as Bits>::len(this$(.$method())?)
         }
 
         #[inline]

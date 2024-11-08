@@ -36,7 +36,7 @@ fn rank_count(vec: Vec<u32>) -> bool {
 
 #[quickcheck]
 fn bits_rank0_rank1(vec: Vec<u32>) -> bool {
-    vec.bits() == vec.rank1(..) + vec.rank0(..)
+    bits::len(&vec) == vec.rank1(..) + vec.rank0(..)
 }
 
 fn rank_for_empty_range<T>(bits: &T)
@@ -84,7 +84,7 @@ fn bit_rank() {
 #[quickcheck]
 fn repr_bits(vec: Vec<u32>) -> bool {
     let aux = bitaux::Pop::from(&vec[..]);
-    vec.bits() == aux.bits()
+    bits::len(&vec) == bits::len(&aux)
 }
 
 #[quickcheck]

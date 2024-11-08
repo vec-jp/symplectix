@@ -1,4 +1,4 @@
-use crate::Block;
+use crate::{Bits, Block};
 
 /// Constructs a new, empty `Vec<T>`.
 ///
@@ -7,7 +7,7 @@ use crate::Block;
 /// ```
 /// # use bits::Bits;
 /// let v = bits::new::<u8>(80);
-/// assert_eq!(v.bits(), 80);
+/// assert_eq!(bits::len(&v), 80);
 /// assert_eq!(v.len(), 10);
 /// ```
 pub fn new<T: Block>(n: usize) -> Vec<T> {
@@ -23,9 +23,16 @@ pub fn new<T: Block>(n: usize) -> Vec<T> {
 /// # use bits::Bits;
 /// let v = bits::with_capacity::<u8>(80);
 /// // v has no bits, but an enough capacity to store 80 bits.
-/// assert_eq!(v.bits(), 0);
+/// assert_eq!(bits::len(&v), 0);
 /// assert_eq!(v.capacity(), 10);
 /// ```
 pub fn with_capacity<T: Block>(capacity: usize) -> Vec<T> {
     Vec::with_capacity(bit::blocks(capacity, T::BITS))
+}
+
+pub fn len<T>(b: &T) -> usize
+where
+    T: ?Sized + Bits,
+{
+    Bits::len(b)
 }
