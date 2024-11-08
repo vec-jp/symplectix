@@ -66,7 +66,6 @@ pub fn is_empty<T: ?Sized + Bits>(b: &T) -> bool {
 /// # Examples
 ///
 /// ```
-/// # use bits::Bits;
 /// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
 /// assert_eq!(bits::test(v, 0),   Some(true));
 /// assert_eq!(bits::test(v, 64),  Some(true));
@@ -76,4 +75,39 @@ pub fn is_empty<T: ?Sized + Bits>(b: &T) -> bool {
 #[inline]
 pub fn test<T: ?Sized + Bits>(b: &T, i: usize) -> Option<bool> {
     b.test(i)
+}
+
+/// Counts the occurrences of `1`.
+///
+/// # Examples
+///
+/// ```
+/// # use bits::Bits;
+/// let a: &[u64] = &[];
+/// let b: &[u64] = &[0, 0, 0];
+/// let c: &[u64] = &[0, 1, 3];
+/// assert_eq!(bits::count1(a), 0);
+/// assert_eq!(bits::count1(b), 0);
+/// assert_eq!(bits::count1(c), 3);
+/// ```
+#[inline]
+pub fn count1<T: ?Sized + Bits>(b: &T) -> usize {
+    b.count1()
+}
+
+/// Counts the occurrences of `0`.
+///
+/// # Examples
+///
+/// ```
+/// let a: &[u64] = &[];
+/// let b: &[u64] = &[0, 0, 0];
+/// let c: &[u64] = &[0, 1, 3];
+/// assert_eq!(bits::count0(a), 0);
+/// assert_eq!(bits::count0(b), 192);
+/// assert_eq!(bits::count0(c), 189);
+/// ```
+#[inline]
+pub fn count0<T: ?Sized + Bits>(b: &T) -> usize {
+    b.count0()
 }
