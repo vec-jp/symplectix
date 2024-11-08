@@ -1,5 +1,7 @@
 //! `bits`
 
+use std::ops::{Range, RangeBounds};
+
 mod api;
 pub use api::*;
 
@@ -8,13 +10,10 @@ pub mod not;
 pub mod or;
 pub mod xor;
 
-mod word;
-pub use word::Word;
-
 mod mask;
-pub use self::mask::Mask;
-
-use std::ops::{Range, RangeBounds};
+mod word;
+pub use mask::Mask;
+pub use word::Word;
 
 pub trait Bits {
     /// Returns the number of binary digits.
@@ -29,6 +28,38 @@ pub trait Bits {
     /// assert_eq!(w.bits(), 0);
     /// ```
     fn bits(&self) -> usize;
+
+    /// Returns the number of bits.
+    ///
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u8] = &[0, 0, 0];
+    /// let w: &[u8] = &[];
+    /// assert_eq!(Bits::len(v), 24);
+    /// assert_eq!(Bits::len(w), 0);
+    /// ```
+    #[inline]
+    fn len(b: &Self) -> usize {
+        b.bits()
+    }
+
+    /// Returns true if contains no bits.
+    ///
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits::Bits;
+    /// let v: &[u8] = &[0, 0, 0];
+    /// let w: &[u8] = &[];
+    /// assert!(!Bits::is_empty(v));
+    /// assert!(Bits::is_empty(w));
+    /// ```
+    #[inline]
+    fn is_empty(b: &Self) -> bool {
+        Bits::len(b) == 0
+    }
 
     /// Returns a bit at the given index `i`.
     /// When i is out of bounds, returns **None**.
@@ -96,7 +127,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn all(this: &Self) -> bool {
-        api::is_empty(this) || this.count0() == 0
+        Bits::is_empty(this) || this.count0() == 0
     }
 
     /// Returns true if any bits are enabled. An empty bits should return false.
@@ -116,7 +147,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn any(this: &Self) -> bool {
-        (!api::is_empty(this)) && this.count1() > 0
+        (!Bits::is_empty(this)) && this.count1() > 0
     }
 
     /// Counts occurrences of `1` in the given range.
