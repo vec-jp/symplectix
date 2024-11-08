@@ -17,62 +17,59 @@ impl Debug for L1L2 {
     }
 }
 
+pub(crate) const LEN: usize = 4;
+
+const L1_MASK: u64 = 0x_FFFF_FFFF; // lowest 32 bits
+const L2_MASK: u64 = 0x_03FF; // lowest 10 bits
+
+const L2_0_SHIFT: u64 = 32;
+const L2_1_SHIFT: u64 = 42;
+const L2_2_SHIFT: u64 = 52;
+
 impl L1L2 {
-    pub(crate) const LEN: usize = 4;
-
-    pub(crate) const L1: u64 = 0x_FFFF_FFFF; // lowest 32 bits
-    pub(crate) const L2: u64 = 0x_03FF; // lowest 10 bits
-
-    const L2_0_SHIFT: u64 = 32;
-    const L2_1_SHIFT: u64 = 42;
-    const L2_2_SHIFT: u64 = 52;
-
     #[inline]
     pub(crate) const fn zero() -> Self {
         Self(0)
     }
 
     #[inline]
-    pub(crate) const fn merge(mut arr: [u64; Self::LEN]) -> Self {
-        debug_assert!(arr[0] < Self::L1);
+    pub(crate) const fn merge(mut arr: [u64; LEN]) -> Self {
+        debug_assert!(arr[0] < L1_MASK);
         debug_assert!(arr[1] < 1024 && arr[2] < 1024 && arr[3] < 1024);
 
-        arr[0] |= arr[1] << Self::L2_0_SHIFT;
-        arr[0] |= arr[2] << Self::L2_1_SHIFT;
-        arr[0] |= arr[3] << Self::L2_2_SHIFT;
+        arr[0] |= arr[1] << L2_0_SHIFT;
+        arr[0] |= arr[2] << L2_1_SHIFT;
+        arr[0] |= arr[3] << L2_2_SHIFT;
         L1L2(arr[0])
     }
 
     #[inline]
-    pub(crate) const fn split(ll: Self) -> [u64; Self::LEN] {
+    pub(crate) const fn split(ll: Self) -> [u64; LEN] {
         [ll.l1(), ll.l2_0(), ll.l2_1(), ll.l2_2()]
     }
 
     #[inline]
     pub(crate) const fn l1(self) -> u64 {
         let L1L2(l1l2) = self;
-        l1l2 & Self::L1
+        l1l2 & L1_MASK
     }
 
     #[inline]
     pub(crate) const fn l2_0(self) -> u64 {
         let L1L2(l1l2) = self;
-        // (l1l2 & Self::MASK_L2_0) >> Self::L2_0_SHIFT
-        (l1l2 >> Self::L2_0_SHIFT) & Self::L2
+        (l1l2 >> L2_0_SHIFT) & L2_MASK
     }
 
     #[inline]
     pub(crate) const fn l2_1(self) -> u64 {
         let L1L2(l1l2) = self;
-        // (l1l2 & Self::MASK_L2_1) >> Self::L2_1_SHIFT
-        (l1l2 >> Self::L2_1_SHIFT) & Self::L2
+        (l1l2 >> L2_1_SHIFT) & L2_MASK
     }
 
     #[inline]
     pub(crate) const fn l2_2(self) -> u64 {
         let L1L2(l1l2) = self;
-        // (l1l2 & Self::MASK_L2_2) >> Self::L2_2_SHIFT
-        (l1l2 >> Self::L2_2_SHIFT) & Self::L2
+        (l1l2 >> L2_2_SHIFT) & L2_MASK
     }
 
     // Sum of basic blocks. [0,i)

@@ -30,9 +30,8 @@ struct Aux {
 
 const UPPER_BLOCK: usize = 1 << 32;
 
-const SUPER_BLOCK: usize = 1 << 11;
-
-const BASIC_BLOCK: usize = 1 << 9;
+const SUPER_BLOCK: usize = 1 << 11; // 4 basic blocks
+const BASIC_BLOCK: usize = 1 << 9; // 512 bits block
 
 const MAX_SB_LEN: usize = UPPER_BLOCK / SUPER_BLOCK;
 
@@ -57,8 +56,8 @@ where
     poppy
 }
 
-fn basic_blocks<W: Word>(sb: Option<&[W]>) -> [u64; l1l2::L1L2::LEN] {
-    let mut bbs = [0; l1l2::L1L2::LEN];
+fn basic_blocks<W: Word>(sb: Option<&[W]>) -> [u64; l1l2::LEN] {
+    let mut bbs = [0; l1l2::LEN];
     if let Some(sb) = sb {
         for (i, bb) in sb.chunks(BASIC_BLOCK / W::BITS).enumerate() {
             bbs[i] = bb.count1() as u64;
@@ -362,7 +361,7 @@ impl Aux {
         // Update L2 array which is interleaved into L1
         let sb = q1 + 1; // +1 because fenwick doesn't use index 0
         let bb = r1 / BASIC_BLOCK + 1; // +1 to skip index 0 which is for L1
-        if bb < l1l2::L1L2::LEN {
+        if bb < l1l2::LEN {
             lo[sb] = {
                 let mut arr = l1l2::L1L2::split(lo[sb]);
                 arr[bb] += delta;
@@ -385,7 +384,7 @@ impl Aux {
 
         let sb = q1 + 1;
         let bb = r1 / BASIC_BLOCK + 1;
-        if bb < l1l2::L1L2::LEN {
+        if bb < l1l2::LEN {
             lo[sb] = {
                 let mut arr = l1l2::L1L2::split(lo[sb]);
                 arr[bb] -= delta;
