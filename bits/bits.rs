@@ -1,5 +1,8 @@
 //! `bits`
 
+mod api;
+pub use api::*;
+
 pub mod and;
 pub mod not;
 pub mod or;
@@ -12,36 +15,6 @@ mod mask;
 pub use self::mask::Mask;
 
 use std::ops::{Range, RangeBounds};
-
-/// Constructs a new, empty `Vec<T>`.
-///
-/// # Examples
-///
-/// ```
-/// # use bits::Bits;
-/// let v = bits::new::<u8>(80);
-/// assert_eq!(v.bits(), 80);
-/// assert_eq!(v.len(), 10);
-/// ```
-pub fn new<T: Block>(n: usize) -> Vec<T> {
-    use std::iter::from_fn;
-    from_fn(|| Some(T::empty())).take(bit::blocks(n, T::BITS)).collect::<Vec<T>>()
-}
-
-/// Returns a `Vec<T>` with the at least specified capacity in bits.
-///
-/// # Examples
-///
-/// ```
-/// # use bits::Bits;
-/// let v = bits::with_capacity::<u8>(80);
-/// // v has no bits, but an enough capacity to store 80 bits.
-/// assert_eq!(v.bits(), 0);
-/// assert_eq!(v.capacity(), 10);
-/// ```
-pub fn with_capacity<T: Block>(capacity: usize) -> Vec<T> {
-    Vec::with_capacity(bit::blocks(capacity, T::BITS))
-}
 
 /// * [`Bits::count1`](crate::Bits::count1)
 pub trait Bits {
@@ -57,38 +30,6 @@ pub trait Bits {
     /// assert_eq!(w.bits(), 0);
     /// ```
     fn bits(&self) -> usize;
-
-    /// Returns the number of binary digits. Equivalent to [`Bits::bits`].
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use bits::Bits;
-    /// let v: &[u8] = &[0, 0, 0];
-    /// let w: &[u8] = &[];
-    /// assert_eq!(Bits::len(v), 24);
-    /// assert_eq!(Bits::len(w), 0);
-    /// ```
-    #[inline]
-    fn len(this: &Self) -> usize {
-        this.bits()
-    }
-
-    /// Returns true if contains no bits.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use bits::Bits;
-    /// let v: &[u8] = &[0, 0, 0];
-    /// let w: &[u8] = &[];
-    /// assert!(!Bits::is_empty(v));
-    /// assert!(Bits::is_empty(w));
-    /// ```
-    #[inline]
-    fn is_empty(this: &Self) -> bool {
-        Bits::len(this) == 0
-    }
 
     /// Returns a bit at the given index `i`.
     /// When i is out of bounds, returns **None**.
@@ -156,7 +97,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn all(this: &Self) -> bool {
-        Bits::is_empty(this) || this.count0() == 0
+        api::is_empty(this) || this.count0() == 0
     }
 
     /// Returns true if any bits are enabled. An empty bits should return false.
@@ -176,7 +117,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn any(this: &Self) -> bool {
-        (!Bits::is_empty(this)) && this.count1() > 0
+        (!api::is_empty(this)) && this.count1() > 0
     }
 
     /// Counts occurrences of `1` in the given range.
