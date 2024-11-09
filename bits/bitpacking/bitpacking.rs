@@ -12,7 +12,7 @@ pub trait Pack: BitsMut {
 
         for b in i..i + n {
             if bits.test(b - i).unwrap_or_default() {
-                self.bit_set(b);
+                self.set1(b);
             }
         }
     }
@@ -39,7 +39,7 @@ pub trait Unpack: Bits {
         let mut bits = T::empty();
         for b in i..i + n {
             if self.test(b).unwrap_or_default() {
-                bits.bit_set(b - i);
+                bits.set1(b - i);
             }
         }
         bits

@@ -128,7 +128,7 @@ fn check<T: Block + Unpack>(size: usize, bits: Vec<usize>) -> bool {
     let mut aux = none::<T>(size);
 
     for &b in &bits {
-        aux.bit_set(b);
+        aux.set1(b);
     }
 
     assert_eq!(aux.count1(), bits.len());

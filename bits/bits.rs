@@ -190,10 +190,10 @@ pub trait Bits {
 
 pub trait BitsMut: Bits {
     /// Enables the bit at the given index `i`.
-    fn bit_set(&mut self, i: usize);
+    fn set1(&mut self, i: usize);
 
     /// Disables the bit at the given index `i`.
-    fn bit_clear(&mut self, i: usize);
+    fn set0(&mut self, i: usize);
 }
 
 pub trait Block: Clone + Bits + BitsMut {
@@ -366,17 +366,17 @@ impl<B: Block> Bits for [B] {
 
 impl<B: Block> BitsMut for [B] {
     #[inline]
-    fn bit_set(&mut self, i: usize) {
+    fn set1(&mut self, i: usize) {
         assert!(i < Bits::len(self));
         let (i, o) = bit::addr(i, B::BITS);
-        self[i].bit_set(o)
+        self[i].set1(o)
     }
 
     #[inline]
-    fn bit_clear(&mut self, i: usize) {
+    fn set0(&mut self, i: usize) {
         assert!(i < Bits::len(self));
         let (i, o) = bit::addr(i, B::BITS);
-        self[i].bit_clear(o)
+        self[i].set0(o)
     }
 }
 
@@ -437,13 +437,13 @@ macro_rules! impl_bits {
 macro_rules! impl_bits_mut {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn bit_set(&mut self, i: usize) {
-            <$X as BitsMut>::bit_set(self$(.$method())?, i)
+        fn set1(&mut self, i: usize) {
+            <$X as BitsMut>::set1(self$(.$method())?, i)
         }
 
         #[inline]
-        fn bit_clear(&mut self, i: usize) {
-            <$X as BitsMut>::bit_clear(self$(.$method())?, i)
+        fn set0(&mut self, i: usize) {
+            <$X as BitsMut>::set0(self$(.$method())?, i)
         }
     }
 }

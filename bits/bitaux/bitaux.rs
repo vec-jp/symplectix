@@ -292,9 +292,9 @@ impl<T: BitsMut> Pop<T> {
     fn swap(&mut self, i: usize, bit: bool) -> bool {
         let before = self.repr.test(i);
         if bit {
-            self.repr.bit_set(i);
+            self.repr.set1(i);
         } else {
-            self.repr.bit_clear(i);
+            self.repr.set0(i);
         }
         before.unwrap_or(false)
     }
@@ -302,14 +302,14 @@ impl<T: BitsMut> Pop<T> {
 
 impl<T: Unpack + BitsMut> BitsMut for Pop<T> {
     #[inline]
-    fn bit_set(&mut self, index: usize) {
+    fn set1(&mut self, index: usize) {
         if !self.swap(index, true) {
             self.aux.incr(index, 1);
         }
     }
 
     #[inline]
-    fn bit_clear(&mut self, index: usize) {
+    fn set0(&mut self, index: usize) {
         if self.swap(index, false) {
             self.aux.decr(index, 1);
         }

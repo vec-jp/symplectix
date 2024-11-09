@@ -92,7 +92,7 @@ impl WordSelectHelper for u128 {
     /// # use bits::{Bits, BitsMut};
     /// let mut n: u128 = 0;
     /// for i in (0..128).step_by(2) {
-    ///     n.bit_set(i);
+    ///     n.set1(i);
     /// }
     /// assert_eq!(n.select1(60), Some(120));
     /// assert_eq!(n.select1(61), Some(122));
@@ -218,11 +218,11 @@ macro_rules! impls_for_word {
 
         impl crate::BitsMut for $Ty {
             #[inline]
-            fn bit_set(&mut self, i: usize) {
+            fn set1(&mut self, i: usize) {
                 *self |= 1 << i;
             }
             #[inline]
-            fn bit_clear(&mut self, i: usize) {
+            fn set0(&mut self, i: usize) {
                 *self &= !(1 << i);
             }
         }
