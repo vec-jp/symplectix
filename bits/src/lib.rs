@@ -1,7 +1,6 @@
 //! `bits`
 
 pub use bits_core::{Bits, BitsMut, Word};
-
 pub use bits_mask as mask;
 pub use bits_mask::Mask;
 

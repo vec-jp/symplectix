@@ -2,8 +2,8 @@ use std::cmp;
 use std::iter::Sum;
 use std::ops::RangeBounds;
 
-use bits_pack::Unpack;
 use bits_core::{Bits, BitsMut, Block, Word};
+use bits_pack::Unpack;
 use fenwicktree::{LowerBound, Nodes, Prefix};
 
 mod l1l2;
