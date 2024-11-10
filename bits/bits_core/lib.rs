@@ -1,9 +1,11 @@
 use std::ops::{Range, RangeBounds};
 
 mod bits;
+mod block;
 mod word;
 
 pub use bits::{Bits, BitsMut};
+pub use block::Block;
 pub use word::Word;
 
 /// Constructs a new, empty `Vec<T>`.
@@ -19,15 +21,6 @@ pub use word::Word;
 pub fn make<T: Block>(n: usize) -> Vec<T> {
     use std::iter::from_fn;
     from_fn(|| Some(T::empty())).take(bit::blocks(n, T::BITS)).collect()
-}
-
-pub trait Block: Clone + Bits + BitsMut {
-    const BITS: usize;
-
-    #[doc(hidden)]
-    const SIZE: usize = Self::BITS / 8;
-
-    fn empty() -> Self;
 }
 
 impl<B: Block> Bits for [B] {
@@ -211,18 +204,6 @@ where
     impl_bits_mut!([B], as_mut);
 }
 
-impl<B, const N: usize> Block for [B; N]
-where
-    B: Copy + Block,
-{
-    const BITS: usize = B::BITS * N;
-
-    #[inline]
-    fn empty() -> Self {
-        [B::empty(); N]
-    }
-}
-
 mod impl_bits {
     use std::borrow::Cow;
 
@@ -254,13 +235,6 @@ mod impl_bits {
     {
         impl_bits_mut!(T);
     }
-    impl<B: Block> Block for Box<B> {
-        const BITS: usize = B::BITS;
-        #[inline]
-        fn empty() -> Self {
-            Box::new(B::empty())
-        }
-    }
 
     impl<'a, T> Bits for Cow<'a, T>
     where
@@ -274,15 +248,5 @@ mod impl_bits {
         T::Owned: BitsMut,
     {
         impl_bits_mut!(T::Owned, to_mut);
-    }
-    impl<'a, T> Block for Cow<'a, T>
-    where
-        T: Block,
-    {
-        const BITS: usize = T::BITS;
-        #[inline]
-        fn empty() -> Self {
-            Cow::Owned(T::empty())
-        }
     }
 }
