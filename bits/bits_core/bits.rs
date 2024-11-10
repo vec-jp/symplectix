@@ -332,7 +332,7 @@ impl<B: Block> BitsMut for [B] {
     }
 }
 
-macro_rules! impl_bits {
+macro_rules! impl_Bits {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn bits(&self) -> usize {
@@ -386,7 +386,7 @@ macro_rules! impl_bits {
     }
 }
 
-macro_rules! impl_bits_mut {
+macro_rules! impl_BitsMut {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
         fn set1(&mut self, i: usize) {
@@ -401,60 +401,60 @@ macro_rules! impl_bits_mut {
 }
 
 impl<'a, T: ?Sized + Bits> Bits for &'a T {
-    impl_bits!(T);
+    impl_Bits!(T);
 }
 
 impl<B, const N: usize> Bits for [B; N]
 where
     [B]: Bits,
 {
-    impl_bits!([B], as_ref);
+    impl_Bits!([B], as_ref);
 }
 
 impl<B, const N: usize> BitsMut for [B; N]
 where
     [B]: BitsMut,
 {
-    impl_bits_mut!([B], as_mut);
+    impl_BitsMut!([B], as_mut);
 }
 
 impl<B> Bits for Vec<B>
 where
     [B]: Bits,
 {
-    impl_bits!([B]);
+    impl_Bits!([B]);
 }
 
 impl<B> BitsMut for Vec<B>
 where
     [B]: BitsMut,
 {
-    impl_bits_mut!([B]);
+    impl_BitsMut!([B]);
 }
 
 impl<T> Bits for Box<T>
 where
     T: ?Sized + Bits,
 {
-    impl_bits!(T);
+    impl_Bits!(T);
 }
 impl<T> BitsMut for Box<T>
 where
     T: ?Sized + BitsMut,
 {
-    impl_bits_mut!(T);
+    impl_BitsMut!(T);
 }
 
 impl<'a, T> Bits for Cow<'a, T>
 where
     T: ?Sized + ToOwned + Bits,
 {
-    impl_bits!(T, as_ref);
+    impl_Bits!(T, as_ref);
 }
 impl<'a, T> BitsMut for Cow<'a, T>
 where
     T: ?Sized + ToOwned + Bits,
     T::Owned: BitsMut,
 {
-    impl_bits_mut!(T::Owned, to_mut);
+    impl_BitsMut!(T::Owned, to_mut);
 }
