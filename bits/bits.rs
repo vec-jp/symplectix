@@ -53,12 +53,12 @@ pub trait Bits {
     /// ```
     /// # use bits::Bits;
     /// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
-    /// assert_eq!(v.test(0),   Some(true));
-    /// assert_eq!(v.test(64),  Some(true));
-    /// assert_eq!(v.test(128), Some(false));
-    /// assert_eq!(v.test(200), None);
+    /// assert_eq!(Bits::get(v, 0),   Some(true));
+    /// assert_eq!(Bits::get(v, 64),  Some(true));
+    /// assert_eq!(Bits::get(v, 128), Some(false));
+    /// assert_eq!(Bits::get(v, 200), None);
     /// ```
-    fn test(&self, i: usize) -> Option<bool>;
+    fn get(this: &Self, i: usize) -> Option<bool>;
 
     /// Counts the occurrences of `1`.
     ///
@@ -287,14 +287,14 @@ mod select_helper {
 
 impl<B: Block> Bits for [B] {
     #[inline]
-    fn len(b: &Self) -> usize {
-        B::BITS * b.len()
+    fn len(this: &Self) -> usize {
+        B::BITS * this.len()
     }
 
     #[inline]
-    fn test(&self, i: usize) -> Option<bool> {
+    fn get(this: &Self, i: usize) -> Option<bool> {
         let (i, o) = bit::addr(i, B::BITS);
-        self.get(i).map(|b| b.test(o).expect("index out of bounds"))
+        this.get(i).map(|b| Bits::get(b, o).expect("index out of bounds"))
     }
 
     #[inline]
@@ -388,8 +388,8 @@ macro_rules! impl_bits {
         }
 
         #[inline]
-        fn test(&self, i: usize) -> Option<bool> {
-            <$X as Bits>::test(self$(.$method())?, i)
+        fn get(this: &Self, i: usize) -> Option<bool> {
+            <$X as Bits>::get(this$(.$method())?, i)
         }
 
         #[inline]

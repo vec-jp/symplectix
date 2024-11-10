@@ -11,7 +11,7 @@ pub trait Pack: BitsMut {
         debug_assert!(i < Bits::len(self) && n <= T::BITS);
 
         for b in i..i + n {
-            if bits.test(b - i).unwrap_or_default() {
+            if Bits::get(&bits, b - i).unwrap_or_default() {
                 self.set1(b);
             }
         }
@@ -38,7 +38,7 @@ pub trait Unpack: Bits {
 
         let mut bits = T::empty();
         for b in i..i + n {
-            if self.test(b).unwrap_or_default() {
+            if Bits::get(self, b).unwrap_or_default() {
                 bits.set1(b - i);
             }
         }
