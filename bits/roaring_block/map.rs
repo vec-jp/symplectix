@@ -6,8 +6,8 @@ use bits_core::{Bits, BitsMut, Block, Word};
 pub struct BoxContainer<T>(Option<Box<T>>);
 
 impl<B: Word, const N: usize> BoxContainer<[B; N]> {
-    fn inner(&self) -> Option<&Box<[B; N]>> {
-        self.0.as_ref()
+    fn inner(&self) -> Option<&[B; N]> {
+        self.0.as_ref().map(|v| &**v)
     }
 
     // fn inner_mut(&mut self) -> Option<&mut Box<[B; N]>> {
