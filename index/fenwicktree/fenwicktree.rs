@@ -3,7 +3,7 @@
 use std::iter::Sum;
 use std::ops::{AddAssign, Sub, SubAssign};
 
-use bits_trait::{Bits, Word};
+use bits_trait::Word;
 
 pub use index::{children, prefix, search, update};
 

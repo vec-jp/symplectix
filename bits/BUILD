@@ -10,6 +10,7 @@ rust_library(
     visibility = ["//visibility:public"],
     deps = [
         "//bits/bit:bit_rs",
+        "//bits/bits_aux",
         "//bits/bits_trait",
         "@crates//:num",
     ],
@@ -34,13 +35,9 @@ rust_test_suite(
     proc_macro_deps = [
         "@crates//:quickcheck_macros",
     ],
-    rustc_flags = [
-        "-Copt-level=3",
-    ],
     deps = [
         ":bits",
-        "//bits/bitaux",
-        "//bits/bitpack",
+        "//bits/bits_pack",
         "@crates//:quickcheck",
     ],
 )

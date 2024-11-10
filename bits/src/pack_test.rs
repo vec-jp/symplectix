@@ -1,8 +1,8 @@
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
 
-use bitpack::{Pack, Unpack};
-use bits_trait::Bits;
+use bits::Bits;
+use bits_pack::{Pack, Unpack};
 
 #[quickcheck]
 fn packing_unpacked_bits(mut data: Vec<u32>) -> bool {

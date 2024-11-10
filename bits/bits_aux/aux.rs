@@ -2,7 +2,7 @@ use std::cmp;
 use std::iter::Sum;
 use std::ops::RangeBounds;
 
-use bitpack::Unpack;
+use bits_pack::Unpack;
 use bits_trait::{Bits, BitsMut, Block, Word};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 
@@ -113,7 +113,7 @@ impl<'a, T: Word> From<&'a [T]> for Pop<&'a [T]> {
 impl<T: Block> Pop<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> Pop<Vec<T>> {
-        let repr = bits::make(n);
+        let repr = bits_trait::make(n);
         Pop { aux: Aux::new(Bits::bits(&repr)), repr }
     }
 }

@@ -24,7 +24,7 @@ pub trait Unpack: Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bitpack::Unpack;
+    /// # use bits_pack::Unpack;
     /// let bits: &[u16] = &[0b_1101_0001_1010_0011, 0b_1001_1110_1110_1001];
     /// let len = 4;
     /// assert_eq!(bits.unpack::<u8>(0, len), 0b0011);

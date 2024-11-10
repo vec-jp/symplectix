@@ -3,9 +3,8 @@ extern crate quickcheck_macros;
 
 use std::borrow::Cow;
 
-use bitaux::Pop;
-use bitpack::Unpack;
 use bits::{Bits, BitsMut, Block};
+use bits_pack::Unpack;
 
 #[test]
 fn bits_is_implemented() {
@@ -83,30 +82,30 @@ fn bit_rank() {
 
 #[quickcheck]
 fn repr_bits(vec: Vec<u32>) -> bool {
-    let aux = bitaux::Pop::from(&vec[..]);
+    let aux = bits::Pop::from(&vec[..]);
     Bits::bits(&vec) == Bits::bits(&aux)
 }
 
 #[quickcheck]
 fn repr_rank(vec: Vec<u32>) -> bool {
-    let aux = bitaux::Pop::from(&vec[..]);
+    let aux = bits::Pop::from(&vec[..]);
     vec.count1() == aux.count1() && vec.count0() == aux.count0()
 }
 
 #[quickcheck]
 fn repr_select1(vec: Vec<u32>) -> bool {
-    let aux = bitaux::Pop::from(&vec[..]);
+    let aux = bits::Pop::from(&vec[..]);
     (0..vec.count1()).all(|i| vec.select1(i) == aux.select1(i))
 }
 
 #[quickcheck]
 fn repr_select0(vec: Vec<u32>) -> bool {
-    let aux = bitaux::Pop::from(&vec[..]);
+    let aux = bits::Pop::from(&vec[..]);
     (0..vec.count0()).all(|i| vec.select0(i) == aux.select0(i))
 }
 
-fn none<T: Block>(n: usize) -> Pop<Vec<T>> {
-    Pop::new(n)
+fn none<T: Block>(n: usize) -> bits::Pop<Vec<T>> {
+    bits::Pop::new(n)
 }
 
 fn setup_bits(size: usize, mut bits: Vec<usize>) -> Vec<usize> {
