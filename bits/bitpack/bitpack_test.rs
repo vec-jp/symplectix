@@ -1,7 +1,7 @@
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
 
-use bitpacking::{Pack, Unpack};
+use bitpack::{Pack, Unpack};
 use bits::Bits;
 
 #[quickcheck]

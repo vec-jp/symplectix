@@ -1,28 +1,27 @@
 load("@rules_rust//rust:defs.bzl", "rust_doc_test", "rust_library", "rust_test", "rust_test_suite")
 
 rust_library(
-    name = "bitpacking_rs",
-    srcs = ["bitpacking.rs"],
-    crate_name = "bitpacking",
-    crate_root = "bitpacking.rs",
+    name = "bitpack",
+    srcs = ["bitpack.rs"],
+    crate_root = "bitpack.rs",
     visibility = ["//bits:__subpackages__"],
-    deps = ["//bits:bits_rs"],
+    deps = ["//bits"],
 )
 
 rust_test(
-    name = "bitpacking_rs_lib_test",
+    name = "bitpack_lib_test",
     timeout = "short",
-    crate = ":bitpacking_rs",
+    crate = ":bitpack",
 )
 
 rust_doc_test(
-    name = "bitpacking_rs_doc_test",
+    name = "bitpack_doc_test",
     timeout = "short",
-    crate = ":bitpacking_rs",
+    crate = ":bitpack",
 )
 
 rust_test_suite(
-    name = "bitpacking_rs_tests",
+    name = "bitpack_tests",
     timeout = "short",
     srcs = glob(["*_test.rs"]),
     proc_macro_deps = [
@@ -32,9 +31,9 @@ rust_test_suite(
         "-Copt-level=3",
     ],
     deps = [
-        "//bits:bits_rs",
-        "//bits/bitaux:bitaux_rs",
-        "//bits/bitpacking:bitpacking_rs",
+        "//bits",
+        "//bits/bitaux",
+        "//bits/bitpack",
         "@crates//:quickcheck",
     ],
 )

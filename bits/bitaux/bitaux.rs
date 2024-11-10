@@ -2,7 +2,7 @@ use std::cmp;
 use std::iter::Sum;
 use std::ops::RangeBounds;
 
-use bitpacking::Unpack;
+use bitpack::Unpack;
 use bits::{Bits, BitsMut, Block, Word};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 

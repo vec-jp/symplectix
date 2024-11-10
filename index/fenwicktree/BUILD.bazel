@@ -1,30 +1,28 @@
 load("@rules_rust//rust:defs.bzl", "rust_doc_test", "rust_library", "rust_test", "rust_test_suite")
 
 rust_library(
-    name = "fenwicktree_rs",
+    name = "fenwicktree",
     srcs = ["fenwicktree.rs"],
-    crate_name = "fenwicktree",
-    crate_root = "fenwicktree.rs",
     visibility = ["//visibility:public"],
     deps = [
-        "//bits:bits_rs",
+        "//bits",
     ],
 )
 
 rust_test(
-    name = "fenwicktree_rs_lib_test",
+    name = "fenwicktree_lib_test",
     timeout = "short",
-    crate = ":fenwicktree_rs",
+    crate = ":fenwicktree",
 )
 
 rust_doc_test(
-    name = "fenwicktree_rs_doc_test",
+    name = "fenwicktree_doc_test",
     timeout = "short",
-    crate = ":fenwicktree_rs",
+    crate = ":fenwicktree",
 )
 
 rust_test_suite(
-    name = "fenwicktree_rs_tests",
+    name = "fenwicktree_tests",
     timeout = "short",
     srcs = glob(["*_test.rs"]),
     proc_macro_deps = [
@@ -34,8 +32,8 @@ rust_test_suite(
         "-Coverflow-checks=off",
     ],
     deps = [
-        ":fenwicktree_rs",
-        "//bits:bits_rs",
+        ":fenwicktree",
+        "//bits",
         "@crates//:quickcheck",
     ],
 )
