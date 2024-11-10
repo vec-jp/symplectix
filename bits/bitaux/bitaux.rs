@@ -3,7 +3,7 @@ use std::iter::Sum;
 use std::ops::RangeBounds;
 
 use bitpack::Unpack;
-use bits::{Bits, BitsMut, Block, Word};
+use bits_trait::{Bits, BitsMut, Block, Word};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 
 mod l1l2;

@@ -2,7 +2,7 @@
 //! This library should not be used to compress/decompress a large array.
 //! Consider using [`quickwit-oss/bitpacking`](https://github.com/quickwit-oss/bitpacking) in such cases.
 
-use bits::{Bits, BitsMut, Word};
+use bits_trait::{Bits, BitsMut, Block, Word};
 
 pub trait Pack: BitsMut {
     /// Writes `N` bits in `[i, i+N)`.
@@ -61,7 +61,7 @@ macro_rules! ints_impl_packing {
 }
 ints_impl_packing!(u8 u16 u32 u64 u128 usize);
 
-impl<B: bits::Block + Unpack> Unpack for [B] {
+impl<B: Block + Unpack> Unpack for [B] {
     // #[doc(hidden)]
     // fn varint<T: Block>(&self, i: usize, n: usize) -> T {
     //     use crate::index;
@@ -79,7 +79,7 @@ impl<B: bits::Block + Unpack> Unpack for [B] {
     // }
 }
 
-impl<B: bits::Block + Pack> Pack for [B] {
+impl<B: Block + Pack> Pack for [B] {
     // #[doc(hidden)]
     // fn put_varint<T: Block>(&mut self, i: usize, n: usize, int: T) {
     //     use crate::index;

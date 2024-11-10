@@ -3,7 +3,8 @@
 use std::iter::Sum;
 use std::ops::{AddAssign, Sub, SubAssign};
 
-use bits::{Bits, Word};
+use bits_trait::{Bits, Word};
+
 pub use index::{children, prefix, search, update};
 
 pub trait Node: Sized + Copy {}
@@ -81,7 +82,7 @@ mod index {
     use core::iter::{successors, Successors};
     use core::ops::{Add, Sub};
 
-    use bits::Word;
+    use bits_trait::Word;
 
     // The next node to be updated can be found by adding the node size `n.lsb()`.
     #[inline]
@@ -180,7 +181,7 @@ where
     fn lower_bound(&self, mut w: U) -> usize {
         assert!(!self.is_empty());
 
-        if !Bits::any(&w) {
+        if !w.any() {
             return 0;
         }
 

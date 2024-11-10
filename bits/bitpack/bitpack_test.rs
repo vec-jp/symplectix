@@ -2,7 +2,7 @@
 extern crate quickcheck_macros;
 
 use bitpack::{Pack, Unpack};
-use bits::Bits;
+use bits_trait::Bits;
 
 #[quickcheck]
 fn packing_unpacked_bits(mut data: Vec<u32>) -> bool {

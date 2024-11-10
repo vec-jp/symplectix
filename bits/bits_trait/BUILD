@@ -1,9 +1,11 @@
-load("@rules_go//go:def.bzl", "go_library", "go_test")
-load("@rules_rust//rust:defs.bzl", "rust_doc_test", "rust_library", "rust_test", "rust_test_suite")
+load("@rules_rust//rust:defs.bzl", "rust_doc_test", "rust_library", "rust_test")
 
 rust_library(
     name = "bits_trait",
-    srcs = glob( [ "**/*.rs", ], exclude = ["**/*_test.rs"], ),
+    srcs = glob(
+        ["**/*.rs"],
+        exclude = ["**/*_test.rs"],
+    ),
     visibility = ["//visibility:public"],
     deps = [
         "//bits/bit:bit_rs",

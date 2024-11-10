@@ -3,10 +3,14 @@ load("@rules_rust//rust:defs.bzl", "rust_doc_test", "rust_library", "rust_test",
 
 rust_library(
     name = "bits",
-    srcs = glob( [ "src/**/*.rs", ], exclude = ["*_test.rs"], ),
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["*_test.rs"],
+    ),
     visibility = ["//visibility:public"],
     deps = [
         "//bits/bit:bit_rs",
+        "//bits/bits_trait",
         "@crates//:num",
     ],
 )

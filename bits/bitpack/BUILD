@@ -5,7 +5,9 @@ rust_library(
     srcs = ["bitpack.rs"],
     crate_root = "bitpack.rs",
     visibility = ["//bits:__subpackages__"],
-    deps = ["//bits"],
+    deps = [
+        "//bits/bits_trait",
+    ],
 )
 
 rust_test(
@@ -34,6 +36,7 @@ rust_test_suite(
         "//bits",
         "//bits/bitaux",
         "//bits/bitpack",
+        "//bits/bits_trait",
         "@crates//:quickcheck",
     ],
 )

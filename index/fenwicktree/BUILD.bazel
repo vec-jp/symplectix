@@ -5,7 +5,7 @@ rust_library(
     srcs = ["fenwicktree.rs"],
     visibility = ["//visibility:public"],
     deps = [
-        "//bits",
+        "//bits/bits_trait",
     ],
 )
 
@@ -33,7 +33,7 @@ rust_test_suite(
     ],
     deps = [
         ":fenwicktree",
-        "//bits",
+        "//bits/bits_trait",
         "@crates//:quickcheck",
     ],
 )
