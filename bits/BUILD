@@ -23,15 +23,9 @@ go_test(
 
 rust_library(
     name = "bits_rs",
-    srcs = glob(
-        [
-            "*.rs",
-            "mask/*.rs",
-        ],
-        exclude = ["*_test.rs"],
-    ),
+    srcs = glob( [ "src/**/*.rs", ], exclude = ["*_test.rs"], ),
     crate_name = "bits",
-    crate_root = "bits.rs",
+    # crate_root = "src/bits.rs",
     visibility = ["//visibility:public"],
     deps = [
         "//bits/bit:bit_rs",
@@ -54,7 +48,7 @@ rust_doc_test(
 rust_test_suite(
     name = "bits_rs_tests",
     timeout = "short",
-    srcs = glob(["*_test.rs"]),
+    srcs = glob(["src/**/*_test.rs"]),
     proc_macro_deps = [
         "@crates//:quickcheck_macros",
     ],
