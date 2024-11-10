@@ -134,7 +134,7 @@ fn check<T: Block + Unpack>(size: usize, bits: Vec<usize>) -> bool {
     assert_eq!(aux.count1(), bits.len());
 
     bits.into_iter().enumerate().all(|(i, b)| {
-        Bits::get(&aux, b).unwrap()
+        Bits::test(&aux, b).unwrap()
             && aux.rank1(..b) == i
             && aux.select1(i) == Some(b)
             && aux.inner().select1(i) == Some(b)

@@ -170,8 +170,8 @@ macro_rules! impls_for_word {
             }
 
             #[inline]
-            fn get(this: &Self, i: usize) -> Option<bool> {
-                (i < Bits::bits(this)).then(|| (*this & (1 << i)) != 0)
+            fn test(&self, i: usize) -> Option<bool> {
+                (i < Bits::bits(self)).then(|| (*self & (1 << i)) != 0)
             }
 
             #[inline]
