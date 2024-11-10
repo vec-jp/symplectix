@@ -121,21 +121,16 @@ pub trait Bits {
 
     /// Counts occurrences of `1` in the given range.
     #[inline]
-    fn rank1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let r = bit::bounded(&index, 0, Bits::bits(self));
+    fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
+        let r = bit::bounded(&r, 0, Bits::bits(self));
         r.len() - self.rank0(r)
     }
 
     /// Counts occurrences of `0` in the given range.
     #[inline]
-    fn rank0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let r = bit::bounded(&index, 0, Bits::bits(self));
+    fn rank0<R: RangeBounds<usize>>(&self, r: R) -> usize {
+        let r = bit::bounded(&r, 0, Bits::bits(self));
         r.len() - self.rank1(r)
-    }
-
-    #[inline]
-    fn excess<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        excess_helper::ranks(self, r).excess()
     }
 
     #[inline]
@@ -155,17 +150,17 @@ pub trait Bits {
         select_helper::search1(self, n)
     }
 
+    // #[inline]
+    // fn select1_from(&self, i: usize, n: usize) -> Option<usize> {
+    //     self.select1(self.rank1(..i) + n).map(|pos| pos - i)
+    // }
+
     /// Returns the position of the n-th 0, indexed starting from zero.
     /// `n` must be less than `self.count0()`, otherwise returns `None`.
     #[inline]
     fn select0(&self, n: usize) -> Option<usize> {
         select_helper::search0(self, n)
     }
-
-    // #[inline]
-    // fn select1_from(&self, i: usize, n: usize) -> Option<usize> {
-    //     self.select1(self.rank1(..i) + n).map(|pos| pos - i)
-    // }
 
     // #[inline]
     // fn select0_from(&self, i: usize, n: usize) -> Option<usize> {
@@ -201,25 +196,19 @@ mod excess_helper {
     }
 
     /// Computes `rank0` and `rank1` at a time.
-    pub(crate) fn ranks<T, Index>(bits: &T, index: Index) -> Ranks
+    pub(crate) fn ranks<T, R>(b: &T, r: R) -> Ranks
     where
         T: ?Sized + Bits,
-        Index: RangeBounds<usize>,
+        R: RangeBounds<usize>,
     {
-        let r = bit::bounded(&index, 0, Bits::bits(bits));
+        let r = bit::bounded(&r, 0, b.bits());
         let len = r.len();
-        let rank1 = bits.rank1(r);
+        let rank1 = b.rank1(r);
         let rank0 = len - rank1;
         Ranks { rank0, rank1 }
     }
 
     impl Ranks {
-        #[inline]
-        pub(crate) fn excess(self) -> usize {
-            let Ranks { rank0, rank1 } = self;
-            rank0.abs_diff(rank1)
-        }
-
         #[inline]
         pub(crate) fn excess1(self) -> Option<usize> {
             let Ranks { rank0, rank1 } = self;
