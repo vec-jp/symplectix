@@ -1,8 +1,10 @@
 mod bits;
+mod bits_mut;
 mod block;
 mod word;
 
-pub use bits::{Bits, BitsMut};
+pub use bits::Bits;
+pub use bits_mut::BitsMut;
 pub use block::Block;
 pub use word::Word;
 

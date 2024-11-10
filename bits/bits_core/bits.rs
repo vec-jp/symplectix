@@ -155,14 +155,6 @@ pub trait Bits {
     // }
 }
 
-pub trait BitsMut: Bits {
-    /// Enables the bit at the given index `i`.
-    fn set1(&mut self, i: usize);
-
-    /// Disables the bit at the given index `i`.
-    fn set0(&mut self, i: usize);
-}
-
 mod excess_helper {
     use std::ops::RangeBounds;
 
@@ -237,6 +229,7 @@ mod select_helper {
         (n < bs.count0()).then(|| binary_search(0, bs.bits(), |k| bs.rank0(..k) > n) - 1)
     }
 }
+
 impl<B: Block> Bits for [B] {
     #[inline]
     fn bits(&self) -> usize {
@@ -316,22 +309,6 @@ impl<B: Block> Bits for [B] {
     }
 }
 
-impl<B: Block> BitsMut for [B] {
-    #[inline]
-    fn set1(&mut self, i: usize) {
-        assert!(i < self.bits());
-        let (i, o) = bit::addr(i, B::BITS);
-        self[i].set1(o)
-    }
-
-    #[inline]
-    fn set0(&mut self, i: usize) {
-        assert!(i < self.bits());
-        let (i, o) = bit::addr(i, B::BITS);
-        self[i].set0(o)
-    }
-}
-
 macro_rules! impl_Bits {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
@@ -386,20 +363,6 @@ macro_rules! impl_Bits {
     }
 }
 
-macro_rules! impl_BitsMut {
-    ($X:ty $(, $method:ident )?) => {
-        #[inline]
-        fn set1(&mut self, i: usize) {
-            <$X as BitsMut>::set1(self$(.$method())?, i)
-        }
-
-        #[inline]
-        fn set0(&mut self, i: usize) {
-            <$X as BitsMut>::set0(self$(.$method())?, i)
-        }
-    }
-}
-
 impl<'a, T: ?Sized + Bits> Bits for &'a T {
     impl_Bits!(T);
 }
@@ -411,25 +374,11 @@ where
     impl_Bits!([B], as_ref);
 }
 
-impl<B, const N: usize> BitsMut for [B; N]
-where
-    [B]: BitsMut,
-{
-    impl_BitsMut!([B], as_mut);
-}
-
 impl<B> Bits for Vec<B>
 where
     [B]: Bits,
 {
     impl_Bits!([B]);
-}
-
-impl<B> BitsMut for Vec<B>
-where
-    [B]: BitsMut,
-{
-    impl_BitsMut!([B]);
 }
 
 impl<T> Bits for Box<T>
@@ -438,23 +387,10 @@ where
 {
     impl_Bits!(T);
 }
-impl<T> BitsMut for Box<T>
-where
-    T: ?Sized + BitsMut,
-{
-    impl_BitsMut!(T);
-}
 
 impl<'a, T> Bits for Cow<'a, T>
 where
     T: ?Sized + ToOwned + Bits,
 {
     impl_Bits!(T, as_ref);
-}
-impl<'a, T> BitsMut for Cow<'a, T>
-where
-    T: ?Sized + ToOwned + Bits,
-    T::Owned: BitsMut,
-{
-    impl_BitsMut!(T::Owned, to_mut);
 }
