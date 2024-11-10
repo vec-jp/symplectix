@@ -1,51 +1,16 @@
 use core::cmp::Ordering::*;
 use core::iter::{Fuse, Peekable};
 
-use crate::Mask;
+use crate::{helper, Mask};
 
 pub struct Not<A, B> {
     pub(crate) a: A,
     pub(crate) b: B,
 }
 
-pub trait NotAssign<That: ?Sized> {
-    fn not_assign(a: &mut Self, b: &That);
-}
-
 pub struct Difference<A: Iterator, B: Iterator> {
     a: Peekable<Fuse<A>>,
     b: Peekable<Fuse<B>>,
-}
-
-macro_rules! ints_impl_not_assign {
-    ($( $Word:ty )*) => ($(
-        impl NotAssign<$Word> for $Word {
-            #[inline]
-            fn not_assign(a: &mut Self, b: &$Word) {
-                *a &= !*b;
-            }
-        }
-    )*)
-}
-ints_impl_not_assign!(u8 u16 u32 u64 u128);
-
-impl<A: NotAssign<B>, B> NotAssign<[B]> for [A] {
-    fn not_assign(this: &mut Self, that: &[B]) {
-        assert_eq!(this.len(), that.len());
-        for (v1, v2) in this.iter_mut().zip(that) {
-            NotAssign::not_assign(v1, v2);
-        }
-    }
-}
-
-impl<A, B: ?Sized, const N: usize> NotAssign<B> for [A; N]
-where
-    [A]: NotAssign<B>,
-{
-    #[inline]
-    fn not_assign(this: &mut Self, that: &B) {
-        <[A] as NotAssign<B>>::not_assign(this.as_mut(), that)
-    }
 }
 
 // impl<A: Bits, B: Bits> Bits for AndNot<A, B> {
@@ -73,7 +38,7 @@ where
 
 impl<A: Mask, B: Mask> Mask for Not<A, B>
 where
-    A::Bits: NotAssign<B::Bits>,
+    A::Bits: helper::Assign<B::Bits>,
 {
     type Bits = A::Bits;
     type Iter = Difference<A::Iter, B::Iter>;
@@ -87,7 +52,7 @@ impl<A, B, S1, S2> Iterator for Difference<A, B>
 where
     A: Iterator<Item = (usize, S1)>,
     B: Iterator<Item = (usize, S2)>,
-    S1: NotAssign<S2>,
+    S1: helper::Assign<S2>,
 {
     type Item = (usize, S1);
     fn next(&mut self) -> Option<Self::Item> {
@@ -100,54 +65,13 @@ where
                     let (i, mut s1) = a.next().expect("unreachable");
                     let (j, s2) = b.next().expect("unreachable");
                     debug_assert_eq!(i, j);
-                    NotAssign::not_assign(&mut s1, &s2);
+                    helper::Assign::not(&mut s1, &s2);
                     return Some((i, s1));
                 }
                 Greater => {
                     b.next();
                 }
             };
-        }
-    }
-}
-
-mod impl_alloc {
-    use std::borrow::{Cow, ToOwned};
-    use std::boxed::Box;
-    use std::vec::Vec;
-
-    use super::*;
-
-    impl<A, B: ?Sized> NotAssign<B> for Vec<A>
-    where
-        [A]: NotAssign<B>,
-    {
-        #[inline]
-        fn not_assign(this: &mut Self, that: &B) {
-            <[A] as NotAssign<B>>::not_assign(this.as_mut(), that)
-        }
-    }
-
-    impl<T, U> NotAssign<U> for Box<T>
-    where
-        T: ?Sized + NotAssign<U>,
-        U: ?Sized,
-    {
-        #[inline]
-        fn not_assign(this: &mut Self, that: &U) {
-            <T as NotAssign<U>>::not_assign(this, that)
-        }
-    }
-
-    impl<'a, 'b, T, U> NotAssign<Cow<'b, U>> for Cow<'a, T>
-    where
-        T: ?Sized + ToOwned,
-        U: ?Sized + ToOwned,
-        T::Owned: NotAssign<U>,
-    {
-        #[inline]
-        fn not_assign(this: &mut Self, that: &Cow<'b, U>) {
-            <T::Owned as NotAssign<U>>::not_assign(this.to_mut(), that.as_ref())
         }
     }
 }
