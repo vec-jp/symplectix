@@ -48,7 +48,7 @@ go_library(
         exclude = ["*_test.go"],
     ),
     importpath = "github.com/symplectix/symplectix/bits",
-    visibility = ["//visibility:public"],
+    visibility = ["//bits:__subpackages__"],
 )
 
 go_test(

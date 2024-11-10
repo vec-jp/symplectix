@@ -6,7 +6,7 @@ rust_library(
         ["**/*.rs"],
         exclude = ["**/*_test.rs"],
     ),
-    visibility = ["//visibility:public"],
+    visibility = ["//bits:__subpackages__"],
     deps = [
         "//bits/bit",
         "@crates//:num",
