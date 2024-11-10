@@ -3,6 +3,7 @@
 use std::ops::{Range, RangeBounds};
 
 mod api;
+use api as bits;
 pub use api::*;
 
 pub mod and;
@@ -24,26 +25,10 @@ pub trait Bits {
     /// # use bits::Bits;
     /// let v: &[u8] = &[0, 0, 0];
     /// let w: &[u8] = &[];
-    /// assert_eq!(Bits::len(v), 24);
-    /// assert_eq!(Bits::len(w), 0);
+    /// assert_eq!(v.bits(), 24);
+    /// assert_eq!(w.bits(), 0);
     /// ```
-    fn len(b: &Self) -> usize;
-
-    /// Returns true if contains no bits.
-    ///
-    /// # Tests
-    ///
-    /// ```
-    /// # use bits::Bits;
-    /// let v: &[u8] = &[0, 0, 0];
-    /// let w: &[u8] = &[];
-    /// assert!(!Bits::is_empty(v));
-    /// assert!(Bits::is_empty(w));
-    /// ```
-    #[inline]
-    fn is_empty(b: &Self) -> bool {
-        Bits::len(b) == 0
-    }
+    fn bits(&self) -> usize;
 
     /// Returns a bit at the given index `i`.
     /// When i is out of bounds, returns **None**.
@@ -75,7 +60,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn count1(&self) -> usize {
-        Bits::len(self) - self.count0()
+        Bits::bits(self) - self.count0()
     }
 
     /// Counts the occurrences of `0`.
@@ -93,7 +78,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn count0(&self) -> usize {
-        Bits::len(self) - self.count1()
+        Bits::bits(self) - self.count1()
     }
 
     /// Returns true if all bits are enabled. An empty bits should return true.
@@ -111,7 +96,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn all(&self) -> bool {
-        Bits::is_empty(self) || self.count0() == 0
+        bits::is_empty(self) || self.count0() == 0
     }
 
     /// Returns true if any bits are enabled. An empty bits should return false.
@@ -131,20 +116,20 @@ pub trait Bits {
     /// ```
     #[inline]
     fn any(&self) -> bool {
-        (!Bits::is_empty(self)) && self.count1() > 0
+        (!bits::is_empty(self)) && self.count1() > 0
     }
 
     /// Counts occurrences of `1` in the given range.
     #[inline]
     fn rank1<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let r = bit::bounded(&index, 0, Bits::len(self));
+        let r = bit::bounded(&index, 0, Bits::bits(self));
         r.len() - self.rank0(r)
     }
 
     /// Counts occurrences of `0` in the given range.
     #[inline]
     fn rank0<Index: RangeBounds<usize>>(&self, index: Index) -> usize {
-        let r = bit::bounded(&index, 0, Bits::len(self));
+        let r = bit::bounded(&index, 0, Bits::bits(self));
         r.len() - self.rank1(r)
     }
 
@@ -221,7 +206,7 @@ mod excess_helper {
         T: ?Sized + Bits,
         Index: RangeBounds<usize>,
     {
-        let r = bit::bounded(&index, 0, Bits::len(bits));
+        let r = bit::bounded(&index, 0, Bits::bits(bits));
         let len = r.len();
         let rank1 = bits.rank1(r);
         let rank0 = len - rank1;
@@ -273,7 +258,7 @@ mod select_helper {
     where
         T: ?Sized + Bits,
     {
-        (n < bs.count1()).then(|| binary_search(0, Bits::len(bs), |k| bs.rank1(..k) > n) - 1)
+        (n < bs.count1()).then(|| binary_search(0, Bits::bits(bs), |k| bs.rank1(..k) > n) - 1)
     }
 
     #[inline]
@@ -281,14 +266,14 @@ mod select_helper {
     where
         T: ?Sized + Bits,
     {
-        (n < bs.count0()).then(|| binary_search(0, Bits::len(bs), |k| bs.rank0(..k) > n) - 1)
+        (n < bs.count0()).then(|| binary_search(0, Bits::bits(bs), |k| bs.rank0(..k) > n) - 1)
     }
 }
 
 impl<B: Block> Bits for [B] {
     #[inline]
-    fn len(this: &Self) -> usize {
-        B::BITS * this.len()
+    fn bits(&self) -> usize {
+        B::BITS * self.len()
     }
 
     #[inline]
@@ -318,7 +303,7 @@ impl<B: Block> Bits for [B] {
     }
 
     fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        let Range { start, end } = bit::bounded(&r, 0, Bits::len(self));
+        let Range { start, end } = bit::bounded(&r, 0, Bits::bits(self));
 
         // TODO: benchmark
         // bit::chunks(start, end, B::BITS)
@@ -367,14 +352,14 @@ impl<B: Block> Bits for [B] {
 impl<B: Block> BitsMut for [B] {
     #[inline]
     fn set1(&mut self, i: usize) {
-        assert!(i < Bits::len(self));
+        assert!(i < Bits::bits(self));
         let (i, o) = bit::addr(i, B::BITS);
         self[i].set1(o)
     }
 
     #[inline]
     fn set0(&mut self, i: usize) {
-        assert!(i < Bits::len(self));
+        assert!(i < Bits::bits(self));
         let (i, o) = bit::addr(i, B::BITS);
         self[i].set0(o)
     }
@@ -383,8 +368,8 @@ impl<B: Block> BitsMut for [B] {
 macro_rules! impl_bits {
     ($X:ty $(, $method:ident )?) => {
         #[inline]
-        fn len(this: &Self) -> usize {
-            <$X as Bits>::len(this$(.$method())?)
+        fn bits(&self) -> usize {
+            <$X as Bits>::bits(self$(.$method())?)
         }
 
         #[inline]

@@ -165,13 +165,13 @@ macro_rules! impls_for_word {
 
         impl crate::Bits for $Ty {
             #[inline]
-            fn len(_: &Self) -> usize {
+            fn bits(&self) -> usize {
                 <Self as crate::Block>::BITS
             }
 
             #[inline]
             fn get(this: &Self, i: usize) -> Option<bool> {
-                (i < Bits::len(this)).then(|| (*this & (1 << i)) != 0)
+                (i < Bits::bits(this)).then(|| (*this & (1 << i)) != 0)
             }
 
             #[inline]
@@ -196,7 +196,7 @@ macro_rules! impls_for_word {
 
             #[inline]
             fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-                let Range { start: i, end: j } = bit::bounded(&r, 0, Bits::len(self));
+                let Range { start: i, end: j } = bit::bounded(&r, 0, Bits::bits(self));
                 (*self & mask!($Ty, i, j)).count1()
             }
 
