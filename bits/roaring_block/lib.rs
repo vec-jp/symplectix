@@ -1,3 +1,3 @@
 mod map;
 
-pub use map::MapContainer;
+pub use map::BoxContainer;

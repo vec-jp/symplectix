@@ -3,9 +3,9 @@ use std::ops::RangeBounds;
 use bits_core::{Bits, BitsMut, Block, Word};
 
 #[derive(Debug, Default, Clone)]
-pub struct MapContainer<T>(Option<Box<T>>);
+pub struct BoxContainer<T>(Option<Box<T>>);
 
-impl<B: Word, const N: usize> MapContainer<[B; N]> {
+impl<B: Word, const N: usize> BoxContainer<[B; N]> {
     fn inner(&self) -> Option<&Box<[B; N]>> {
         self.0.as_ref()
     }
@@ -19,12 +19,12 @@ impl<B: Word, const N: usize> MapContainer<[B; N]> {
     }
 }
 
-impl<B: Word, const N: usize> Bits for MapContainer<[B; N]> {
+impl<B: Word, const N: usize> Bits for BoxContainer<[B; N]> {
     /// # Tests
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring_block::MapContainer::<[u64; 8]>::default();
+    /// let mut b = roaring_block::BoxContainer::<[u64; 8]>::default();
     /// assert_eq!(b.bits(), 512);
     ///
     /// b.set1(100);
@@ -61,7 +61,7 @@ impl<B: Word, const N: usize> Bits for MapContainer<[B; N]> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring_block::MapContainer::<[u64; 8]>::default();
+    /// let mut b = roaring_block::BoxContainer::<[u64; 8]>::default();
     /// assert_eq!(b.select1(0), None);
     /// assert_eq!(b.select0(0), Some(0));
     /// assert_eq!(b.select0(b.bits()-1), Some(511));
@@ -83,7 +83,7 @@ impl<B: Word, const N: usize> Bits for MapContainer<[B; N]> {
     }
 }
 
-impl<B: Word, const N: usize> BitsMut for MapContainer<[B; N]> {
+impl<B: Word, const N: usize> BitsMut for BoxContainer<[B; N]> {
     #[inline]
     fn set1(&mut self, i: usize) {
         assert!(i < self.bits());
@@ -97,10 +97,10 @@ impl<B: Word, const N: usize> BitsMut for MapContainer<[B; N]> {
     }
 }
 
-impl<B: Word, const N: usize> Block for MapContainer<[B; N]> {
+impl<B: Word, const N: usize> Block for BoxContainer<[B; N]> {
     const BITS: usize = <[B; N]>::BITS;
     #[inline]
     fn empty() -> Self {
-        MapContainer(None)
+        BoxContainer(None)
     }
 }
