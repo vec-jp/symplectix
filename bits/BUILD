@@ -9,7 +9,6 @@ rust_library(
     ),
     visibility = ["//visibility:public"],
     deps = [
-        "//bits/bit:bit_rs",
         "//bits/bits_aux",
         "//bits/bits_trait",
         "@crates//:num",
