@@ -6,7 +6,7 @@ pub trait Bits {
     /// # Tests
     ///
     /// ```
-    /// # use bits_trait::Bits;
+    /// # use bits_core::Bits;
     /// let v: &[u8] = &[0, 0, 0];
     /// let w: &[u8] = &[];
     /// assert_eq!(v.bits(), 24);
@@ -20,7 +20,7 @@ pub trait Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits_trait::Bits;
+    /// # use bits_core::Bits;
     /// let v: &[u64] = &[0b00000101, 0b01100011, 0b01100000];
     /// assert_eq!(v.test(0),   Some(true));
     /// assert_eq!(v.test(64),  Some(true));
@@ -34,7 +34,7 @@ pub trait Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits_trait::Bits;
+    /// # use bits_core::Bits;
     /// let a: &[u64] = &[];
     /// let b: &[u64] = &[0, 0, 0];
     /// let c: &[u64] = &[0, 1, 3];
@@ -52,7 +52,7 @@ pub trait Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits_trait::Bits;
+    /// # use bits_core::Bits;
     /// let a: &[u64] = &[];
     /// let b: &[u64] = &[0, 0, 0];
     /// let c: &[u64] = &[0, 1, 3];
@@ -70,7 +70,7 @@ pub trait Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits_trait::Bits;
+    /// # use bits_core::Bits;
     /// let a: &[u64] = &[0, 0, 0];
     /// let b: &[u64] = &[];
     /// let c: &[u64] = &[!0, !0, !0];
@@ -88,7 +88,7 @@ pub trait Bits {
     /// # Examples
     ///
     /// ```
-    /// # use bits_trait::Bits;
+    /// # use bits_core::Bits;
     /// let b1: &[u64] = &[];
     /// let b2: &[u64] = &[0, 0, 0];
     /// let b3: &[u64] = &[!0, !0, !0];

@@ -3,7 +3,7 @@
 use std::iter::Sum;
 use std::ops::{AddAssign, Sub, SubAssign};
 
-use bits_trait::Word;
+use bits_core::Word;
 
 pub use index::{children, prefix, search, update};
 
@@ -82,7 +82,7 @@ mod index {
     use core::iter::{successors, Successors};
     use core::ops::{Add, Sub};
 
-    use bits_trait::Word;
+    use bits_core::Word;
 
     // The next node to be updated can be found by adding the node size `n.lsb()`.
     #[inline]

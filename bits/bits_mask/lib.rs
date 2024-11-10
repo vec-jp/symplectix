@@ -80,8 +80,9 @@ mod impl_mask {
     use std::iter::Enumerate;
     use std::slice;
 
+    use bits_core::{Bits, Block};
+
     use super::Mask;
-    use crate::{Bits, Block};
 
     impl<'a, T: Block> Mask for &'a [T] {
         type Bits = Cow<'a, T>;

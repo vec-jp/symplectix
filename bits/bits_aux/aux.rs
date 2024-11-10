@@ -3,7 +3,7 @@ use std::iter::Sum;
 use std::ops::RangeBounds;
 
 use bits_pack::Unpack;
-use bits_trait::{Bits, BitsMut, Block, Word};
+use bits_core::{Bits, BitsMut, Block, Word};
 use fenwicktree::{LowerBound, Nodes, Prefix};
 
 mod l1l2;
@@ -113,7 +113,7 @@ impl<'a, T: Word> From<&'a [T]> for Pop<&'a [T]> {
 impl<T: Block> Pop<Vec<T>> {
     #[inline]
     pub fn new(n: usize) -> Pop<Vec<T>> {
-        let repr = bits_trait::make(n);
+        let repr = bits_core::make(n);
         Pop { aux: Aux::new(Bits::bits(&repr)), repr }
     }
 }

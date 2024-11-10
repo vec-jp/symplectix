@@ -10,8 +10,8 @@ rust_library(
     visibility = ["//bits:__subpackages__"],
     deps = [
         "//bits/bit",
+        "//bits/bits_core",
         "//bits/bits_pack",
-        "//bits/bits_trait",
         "//bits/fenwicktree",
         "@crates//:num",
     ],

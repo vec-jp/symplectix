@@ -90,7 +90,7 @@ impl WordSelectHelper for u32 {
 
 impl WordSelectHelper for u128 {
     /// ```
-    /// # use bits_trait::{Bits, BitsMut};
+    /// # use bits_core::{Bits, BitsMut};
     /// let mut n: u128 = 0;
     /// for i in (0..128).step_by(2) {
     ///     n.set1(i);

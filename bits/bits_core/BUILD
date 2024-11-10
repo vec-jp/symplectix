@@ -1,7 +1,7 @@
 load("@rules_rust//rust:defs.bzl", "rust_doc_test", "rust_library", "rust_test")
 
 rust_library(
-    name = "bits_trait",
+    name = "bits_core",
     srcs = glob(
         ["**/*.rs"],
         exclude = ["**/*_test.rs"],
@@ -14,13 +14,13 @@ rust_library(
 )
 
 rust_test(
-    name = "bits_trait_lib_test",
+    name = "bits_core_lib_test",
     timeout = "short",
-    crate = ":bits_trait",
+    crate = ":bits_core",
 )
 
 rust_doc_test(
-    name = "bits_trait_doc_test",
+    name = "bits_core_doc_test",
     timeout = "short",
-    crate = ":bits_trait",
+    crate = ":bits_core",
 )

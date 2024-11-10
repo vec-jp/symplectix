@@ -1,7 +1,7 @@
 use core::cmp::Ordering::*;
 use core::iter::{Fuse, Peekable};
 
-use crate::mask::Mask;
+use crate::Mask;
 
 pub struct Not<A, B> {
     pub(crate) a: A,
@@ -94,7 +94,7 @@ where
         let a = &mut self.a;
         let b = &mut self.b;
         loop {
-            match crate::mask::compare(a.peek(), b.peek(), Less, Less) {
+            match crate::compare(a.peek(), b.peek(), Less, Less) {
                 Less => return a.next(),
                 Equal => {
                     let (i, mut s1) = a.next().expect("unreachable");

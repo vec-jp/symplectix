@@ -5,7 +5,7 @@ rust_library(
     srcs = ["pack.rs"],
     visibility = ["//bits:__subpackages__"],
     deps = [
-        "//bits/bits_trait",
+        "//bits/bits_core",
     ],
 )
 

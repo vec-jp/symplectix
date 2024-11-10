@@ -3,7 +3,7 @@ extern crate quickcheck_macros;
 
 use std::{iter, ops};
 
-use bits_trait::Word;
+use bits_core::Word;
 use fenwicktree::{Incr, LowerBound, Nodes, Prefix};
 
 #[test]

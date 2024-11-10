@@ -1,13 +1,9 @@
-//! `bits`
-
 use std::ops::{Range, RangeBounds};
 
 mod bits;
-pub mod mask;
 mod word;
 
 pub use bits::{Bits, BitsMut};
-pub use mask::Mask;
 pub use word::Word;
 
 /// Constructs a new, empty `Vec<T>`.
@@ -15,9 +11,8 @@ pub use word::Word;
 /// # Tests
 ///
 /// ```
-/// # use bits_trait as bits;
-/// # use bits_trait::Bits;
-/// let v = bits::make::<u8>(80);
+/// # use bits_core::Bits;
+/// let v = bits_core::make::<u8>(80);
 /// assert_eq!(v.bits(), 80);
 /// assert_eq!(v.len(),  10);
 /// ```

@@ -1,7 +1,7 @@
 use core::cmp::Ordering::*;
 use core::iter::{Fuse, Peekable};
 
-use crate::mask::Mask;
+use crate::Mask;
 
 pub struct And<A, B> {
     pub(crate) a: A,
