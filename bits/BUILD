@@ -12,6 +12,7 @@ rust_library(
         "//bits/bits_aux",
         "//bits/bits_core",
         "//bits/bits_mask",
+        "//bits/roaring_block",
         "@crates//:num",
     ],
 )
