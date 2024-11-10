@@ -1,5 +1,6 @@
-use crate::Bits;
 use std::ops::{Range, RangeBounds};
+
+use crate::Bits;
 
 /// Integer with a fixed-sized bits.
 pub trait Word: num::PrimInt + crate::Block {

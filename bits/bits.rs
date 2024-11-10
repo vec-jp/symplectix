@@ -186,8 +186,9 @@ pub trait Block: Clone + Bits + BitsMut {
 }
 
 mod excess_helper {
-    use crate::Bits;
     use std::ops::RangeBounds;
+
+    use crate::Bits;
 
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
     pub(crate) struct Ranks {
@@ -453,8 +454,9 @@ where
 }
 
 mod impl_bits {
-    use super::*;
     use std::borrow::Cow;
+
+    use super::*;
 
     impl<B> Bits for Vec<B>
     where

@@ -1,8 +1,7 @@
+use core::cmp::Ordering::*;
+use core::iter::{Fuse, Peekable};
+
 use crate::mask::Mask;
-use core::{
-    cmp::Ordering::*,
-    iter::{Fuse, Peekable},
-};
 
 pub struct Not<A, B> {
     pub(crate) a: A,
@@ -80,10 +79,7 @@ where
     type Iter = Difference<A::Iter, B::Iter>;
     #[inline]
     fn into_mask(self) -> Self::Iter {
-        Difference {
-            a: self.a.into_mask().fuse().peekable(),
-            b: self.b.into_mask().fuse().peekable(),
-        }
+        Difference { a: self.a.into_mask().fuse().peekable(), b: self.b.into_mask().fuse().peekable() }
     }
 }
 
@@ -116,10 +112,11 @@ where
 }
 
 mod impl_alloc {
-    use super::*;
     use std::borrow::{Cow, ToOwned};
     use std::boxed::Box;
     use std::vec::Vec;
+
+    use super::*;
 
     impl<A, B: ?Sized> NotAssign<B> for Vec<A>
     where

@@ -1,6 +1,9 @@
 use core::cmp::Ordering;
 
-pub use crate::{and::And, not::Not, or::Or, xor::Xor};
+pub use crate::and::And;
+pub use crate::not::Not;
+pub use crate::or::Or;
+pub use crate::xor::Xor;
 
 pub trait Mask: Sized {
     type Bits;
@@ -68,11 +71,12 @@ pub(crate) fn compare<X, Y>(
 }
 
 mod impl_mask {
+    use std::borrow::Cow;
+    use std::iter::Enumerate;
+    use std::slice;
+
     use super::Mask;
     use crate::{Bits, Block};
-
-    use std::borrow::Cow;
-    use std::{iter::Enumerate, slice};
 
     impl<'a, T: Block> Mask for &'a [T] {
         type Bits = Cow<'a, T>;

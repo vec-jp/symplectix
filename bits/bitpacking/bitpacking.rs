@@ -131,10 +131,11 @@ where
 }
 
 mod impl_alloc {
-    use super::*;
     use std::borrow::{Cow, ToOwned};
     use std::boxed::Box;
     use std::vec::Vec;
+
+    use super::*;
 
     impl<T: ?Sized + Unpack> Unpack for Box<T> {
         impl_unpack!(T);

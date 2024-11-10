@@ -4,7 +4,6 @@ use std::iter::Sum;
 use std::ops::{AddAssign, Sub, SubAssign};
 
 use bits::{Bits, Word};
-
 pub use index::{children, prefix, search, update};
 
 pub trait Node: Sized + Copy {}
@@ -79,9 +78,10 @@ pub fn pop<T: Node + SubAssign>(bit: &mut Vec<T>) -> Option<T> {
 }
 
 mod index {
-    use bits::Word;
     use core::iter::{successors, Successors};
     use core::ops::{Add, Sub};
+
+    use bits::Word;
 
     // The next node to be updated can be found by adding the node size `n.lsb()`.
     #[inline]
