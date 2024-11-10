@@ -2,19 +2,26 @@
 
 use std::ops::{Range, RangeBounds};
 
-mod api;
-use api as bits;
-pub use api::*;
-
-pub mod and;
-pub mod not;
-pub mod or;
-pub mod xor;
-
-mod mask;
+pub mod mask;
 mod word;
+
 pub use mask::Mask;
 pub use word::Word;
+
+/// Constructs a new, empty `Vec<T>`.
+///
+/// # Tests
+///
+/// ```
+/// # use bits::Bits;
+/// let v = bits::make::<u8>(80);
+/// assert_eq!(v.bits(), 80);
+/// assert_eq!(v.len(),  10);
+/// ```
+pub fn make<T: Block>(n: usize) -> Vec<T> {
+    use std::iter::from_fn;
+    from_fn(|| Some(T::empty())).take(bit::blocks(n, T::BITS)).collect()
+}
 
 pub trait Bits {
     /// Returns the number of bits.
@@ -96,7 +103,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn all(&self) -> bool {
-        bits::is_empty(self) || self.count0() == 0
+        self.bits() == 0 || self.count0() == 0
     }
 
     /// Returns true if any bits are enabled. An empty bits should return false.
@@ -116,7 +123,7 @@ pub trait Bits {
     /// ```
     #[inline]
     fn any(&self) -> bool {
-        (!bits::is_empty(self)) && self.count1() > 0
+        self.bits() != 0 && self.count1() > 0
     }
 
     /// Counts occurrences of `1` in the given range.

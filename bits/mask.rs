@@ -1,9 +1,14 @@
 use core::cmp::Ordering;
 
-pub use crate::and::And;
-pub use crate::not::Not;
-pub use crate::or::Or;
-pub use crate::xor::Xor;
+mod and;
+mod not;
+mod or;
+mod xor;
+
+pub use and::*;
+pub use not::*;
+pub use or::*;
+pub use xor::*;
 
 pub trait Mask: Sized {
     type Bits;

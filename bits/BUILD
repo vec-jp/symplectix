@@ -24,7 +24,10 @@ go_test(
 rust_library(
     name = "bits_rs",
     srcs = glob(
-        ["*.rs"],
+        [
+            "*.rs",
+            "mask/*.rs",
+        ],
         exclude = ["*_test.rs"],
     ),
     crate_name = "bits",
