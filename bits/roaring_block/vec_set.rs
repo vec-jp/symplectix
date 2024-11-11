@@ -27,14 +27,14 @@ impl<const N: usize> Bits for VecSet<N> {
 
     #[inline]
     fn test(&self, i: usize) -> Option<bool> {
-        num::cast(i).and_then(|k| self.as_slice().binary_search(&k).and_then(|_found| Ok(true)).ok())
+        num::cast(i).and_then(|k| self.as_slice().binary_search(&k).map(|_found| true).ok())
     }
 
     /// # Tests
     ///
     /// ```
-    /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring_block::VecSet::<12>::default();
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// let mut b = roaring_block::VecSet::<12>::empty();
     ///
     /// b.set1(300);
     /// b.set1(200);
@@ -49,8 +49,8 @@ impl<const N: usize> Bits for VecSet<N> {
     /// # Tests
     ///
     /// ```
-    /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring_block::VecSet::<12>::default();
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// let mut b = roaring_block::VecSet::<12>::empty();
     ///
     /// b.set1(65530);
     /// b.set1(65520);
@@ -80,14 +80,32 @@ impl<const N: usize> Bits for VecSet<N> {
             (i, j) => rank(j) - rank(i),
         }
     }
+
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// let mut b = roaring_block::VecSet::<12>::empty();
+    ///
+    /// b.set1(65530);
+    /// b.set1(65520);
+    /// b.set1(65510);
+    /// assert_eq!(b.select1(0), Some(65510));
+    /// assert_eq!(b.select1(1), Some(65520));
+    /// assert_eq!(b.select1(2), Some(65530));
+    /// assert_eq!(b.select1(3), None);
+    /// ```
+    fn select1(&self, n: usize) -> Option<usize> {
+        self.as_slice().get(n).map(|&u| u as usize)
+    }
 }
 
 impl<const N: usize> BitsMut for VecSet<N> {
     /// # Tests
     ///
     /// ```
-    /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring_block::VecSet::<4>::default();
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// let mut b = roaring_block::VecSet::<4>::empty();
     ///
     /// b.set1(100);
     /// assert_eq!(b.test(100), Some(true));
@@ -105,8 +123,8 @@ impl<const N: usize> BitsMut for VecSet<N> {
     /// # Tests
     ///
     /// ```
-    /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring_block::VecSet::<4>::default();
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// let mut b = roaring_block::VecSet::<4>::empty();
     ///
     /// b.set1(100);
     /// assert_eq!(b.test(100), Some(true));
