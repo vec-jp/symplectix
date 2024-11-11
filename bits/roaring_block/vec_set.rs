@@ -160,10 +160,10 @@ impl<const N: usize> Block for VecSet<N> {
     }
 }
 
-fn cmp_opt<T: Ord>(x: Option<&T>, y: Option<&T>, if_x_is_none: Ordering, if_y_is_none: Ordering) -> Ordering {
-    match (x, y) {
-        (None, _) => if_x_is_none,
-        (_, None) => if_y_is_none,
+fn cmp_opt<T: Ord>(a: Option<&T>, b: Option<&T>, a_is_none: Ordering, b_is_none: Ordering) -> Ordering {
+    match (a, b) {
+        (None, _) => a_is_none,
+        (_, None) => b_is_none,
         (Some(x), Some(y)) => x.cmp(y),
     }
 }
@@ -188,13 +188,13 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// assert_eq!(a.as_ref(), &[2, 3]);
     /// ```
     fn and(a: &mut Self, b: &VecSet<M>) {
-        a.0 = And { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
+        a.0 = Iter { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
 
-        struct And<A: Iterator, B: Iterator> {
+        struct Iter<A: Iterator, B: Iterator> {
             a: Peekable<A>,
             b: Peekable<B>,
         }
-        impl<'a, 'b, A, B> Iterator for And<A, B>
+        impl<'a, 'b, A, B> Iterator for Iter<A, B>
         where
             A: Iterator<Item = &'a u16>,
             B: Iterator<Item = &'b u16>,
@@ -291,13 +291,13 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// assert_eq!(a.as_ref(), &[1, 2, 3, 4]);
     /// ```
     fn or(a: &mut Self, b: &VecSet<M>) {
-        a.0 = Or { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
+        a.0 = Iter { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
 
-        struct Or<A: Iterator, B: Iterator> {
+        struct Iter<A: Iterator, B: Iterator> {
             a: Peekable<A>,
             b: Peekable<B>,
         }
-        impl<'a, 'b, A, B> Iterator for Or<A, B>
+        impl<'a, 'b, A, B> Iterator for Iter<A, B>
         where
             A: Iterator<Item = &'a u16>,
             B: Iterator<Item = &'b u16>,
@@ -319,7 +319,51 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
         }
     }
 
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// # use bits_mask::helper::Assign;
+    /// let mut a = roaring_block::VecSet::<4>::empty();
+    /// a.set1(1);
+    /// a.set1(2);
+    /// a.set1(3);
+    ///
+    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// b.set1(2);
+    /// b.set1(3);
+    /// b.set1(4);
+    ///
+    /// Assign::xor(&mut a, &b);
+    /// assert_eq!(a.as_ref(), &[1, 4]);
+    /// ```
     fn xor(a: &mut Self, b: &VecSet<M>) {
-        todo!()
+        a.0 = Iter { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
+
+        struct Iter<L: Iterator, R: Iterator> {
+            a: Peekable<L>,
+            b: Peekable<R>,
+        }
+        impl<'a, 'b, A, B> Iterator for Iter<A, B>
+        where
+            A: Iterator<Item = &'a u16>,
+            B: Iterator<Item = &'b u16>,
+        {
+            type Item = u16;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                loop {
+                    match cmp_opt(self.a.peek(), self.b.peek(), GT, LT) {
+                        LT => break self.a.next().copied(),
+                        EQ => {
+                            let a = self.a.next().unwrap();
+                            let b = self.b.next().unwrap();
+                            debug_assert_eq!(a, b);
+                        }
+                        GT => break self.b.next().copied(),
+                    }
+                }
+            }
+        }
     }
 }
