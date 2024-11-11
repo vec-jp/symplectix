@@ -3,7 +3,7 @@ extern crate quickcheck_macros;
 
 use std::borrow::Cow;
 
-use bits::block::{Block, BoxContainer};
+use bits::block::{BitMap, Block};
 use bits::{Bits, BitsMut};
 use bits_pack::Unpack;
 
@@ -27,7 +27,7 @@ fn bits_is_implemented() {
     _test::<&Box<[u8; 4]>>();
     _test::<Cow<[u8; 1000]>>();
     _test::<Cow<Box<[u8; 2000]>>>();
-    _test::<BoxContainer<[u8; 100]>>();
+    _test::<BitMap<[u8; 100]>>();
 }
 
 #[quickcheck]

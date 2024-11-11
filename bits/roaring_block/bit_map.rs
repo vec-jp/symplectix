@@ -3,15 +3,15 @@ use std::ops::RangeBounds;
 use bits_core::{Bits, BitsMut, Block, Word};
 
 #[derive(Debug, Default, Clone)]
-pub struct BoxContainer<T: private::WordArray>(Option<Box<T>>);
+pub struct BitMap<T: private::Array>(Option<Box<T>>);
 
 mod private {
     use bits_core::Word;
-    pub trait WordArray {}
-    impl<B: Word, const N: usize> WordArray for [B; N] {}
+    pub trait Array {}
+    impl<B: Word, const N: usize> Array for [B; N] {}
 }
 
-impl<B: Word, const N: usize> BoxContainer<[B; N]> {
+impl<B: Word, const N: usize> BitMap<[B; N]> {
     fn inner(&self) -> Option<&[B; N]> {
         self.0.as_deref()
     }
@@ -25,12 +25,12 @@ impl<B: Word, const N: usize> BoxContainer<[B; N]> {
     }
 }
 
-impl<B: Word, const N: usize> Bits for BoxContainer<[B; N]> {
+impl<B: Word, const N: usize> Bits for BitMap<[B; N]> {
     /// # Tests
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring_block::BoxContainer::<[u64; 8]>::default();
+    /// let mut b = roaring_block::BitMap::<[u64; 8]>::default();
     /// assert_eq!(b.bits(), 512);
     ///
     /// b.set1(100);
@@ -67,7 +67,7 @@ impl<B: Word, const N: usize> Bits for BoxContainer<[B; N]> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring_block::BoxContainer::<[u64; 8]>::default();
+    /// let mut b = roaring_block::BitMap::<[u64; 8]>::default();
     /// assert_eq!(b.select1(0), None);
     /// assert_eq!(b.select0(0), Some(0));
     /// assert_eq!(b.select0(b.bits()-1), Some(511));
@@ -89,7 +89,7 @@ impl<B: Word, const N: usize> Bits for BoxContainer<[B; N]> {
     }
 }
 
-impl<B: Word, const N: usize> BitsMut for BoxContainer<[B; N]> {
+impl<B: Word, const N: usize> BitsMut for BitMap<[B; N]> {
     #[inline]
     fn set1(&mut self, i: usize) {
         assert!(i < self.bits());
@@ -103,10 +103,10 @@ impl<B: Word, const N: usize> BitsMut for BoxContainer<[B; N]> {
     }
 }
 
-impl<B: Word, const N: usize> Block for BoxContainer<[B; N]> {
+impl<B: Word, const N: usize> Block for BitMap<[B; N]> {
     const BITS: usize = <[B; N]>::BITS;
     #[inline]
     fn empty() -> Self {
-        BoxContainer(None)
+        BitMap(None)
     }
 }

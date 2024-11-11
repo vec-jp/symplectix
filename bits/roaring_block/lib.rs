@@ -1,3 +1,3 @@
-mod map;
+mod bit_map;
 
-pub use map::BoxContainer;
+pub use bit_map::BitMap;

@@ -6,7 +6,7 @@ pub use bits_mask::Mask;
 
 pub mod block {
     pub use bits_core::Block;
-    pub use roaring_block::BoxContainer;
+    pub use roaring_block::BitMap;
 }
 
 pub use bits_aux::Pop;
