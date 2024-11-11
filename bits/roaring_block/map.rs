@@ -3,7 +3,13 @@ use std::ops::RangeBounds;
 use bits_core::{Bits, BitsMut, Block, Word};
 
 #[derive(Debug, Default, Clone)]
-pub struct BoxContainer<T>(Option<Box<T>>);
+pub struct BoxContainer<T: private::WordArray>(Option<Box<T>>);
+
+mod private {
+    use bits_core::Word;
+    pub trait WordArray {}
+    impl<B: Word, const N: usize> WordArray for [B; N] {}
+}
 
 impl<B: Word, const N: usize> BoxContainer<[B; N]> {
     fn inner(&self) -> Option<&[B; N]> {
