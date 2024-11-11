@@ -1,7 +1,6 @@
-use std::ops::{Deref, RangeBounds};
+use std::ops::{Deref, Range, RangeBounds};
 
 use bits_core::{Bits, BitsMut, Block};
-
 use smallvec::SmallVec;
 
 #[derive(Debug, Default, Clone)]
@@ -47,25 +46,39 @@ impl<const N: usize> Bits for VecSet<N> {
         self.as_slice().len()
     }
 
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits_core::{Bits, BitsMut};
+    /// let mut b = roaring_block::VecSet::<12>::default();
+    ///
+    /// b.set1(65530);
+    /// b.set1(65520);
+    /// b.set1(65510);
+    /// assert_eq!(b.rank1(..), 3);
+    /// assert_eq!(b.rank1(..65530), 2);
+    /// assert_eq!(b.rank1(..65536), 3);
+    /// ```
     fn rank1<R: RangeBounds<usize>>(&self, r: R) -> usize {
-        todo!()
-        //     let rank = |p| {
-        //         // Search the smallest index `p` that satisfy `vec[p] >= i`,
-        //         // `k` also implies the number of enabled bits in [0, p).
-        //         // For example, searching 5 in `[0, 1, 7]` return 2.
-        //         match self.data.binary_search(&try_cast::<usize, u16>(p)) {
-        //             Ok(p) | Err(p) => p,
-        //         }
-        //     };
-        //     let cap = self.size();
-        //     assert!(i <= j && j <= cap);
-        //     match (i, j) {
-        //         (i, j) if i == j => 0,
-        //         (0, i) if i == cap => self.count1(),
-        //         (0, i) => rank(i),
-        //         (i, j) if j == cap => self.count1() - rank(i),
-        //         (i, j) => rank(j) - rank(i),
-        //     }
+        let rank = |i| {
+            let i = num::cast(i).unwrap();
+            // Search the smallest index `p` that satisfy `vec[p] >= i`,
+            // `p` also implies the number of enabled bits in [0, p).
+            // For example, searching 5 in `[0, 1, 7]` return 2.
+            match self.as_slice().binary_search(&i) {
+                Ok(p) | Err(p) => p,
+            }
+        };
+
+        let cap = self.bits();
+        let Range { start: i, end: j } = bit::bounded(&r, 0, cap);
+        match (i, j) {
+            (i, j) if i == j => 0,
+            (0, n) if n == cap => self.count1(),
+            (0, n) => rank(n),
+            (i, j) if j == cap => self.count1() - rank(i),
+            (i, j) => rank(j) - rank(i),
+        }
     }
 }
 
