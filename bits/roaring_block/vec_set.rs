@@ -1,3 +1,5 @@
+use std::cmp::Ordering::{self, Equal as EQ, Greater as GT, Less as LT};
+use std::iter::Peekable;
 use std::ops::{Deref, Range, RangeBounds};
 
 use bits_core::{Bits, BitsMut, Block};
@@ -158,6 +160,14 @@ impl<const N: usize> Block for VecSet<N> {
     }
 }
 
+fn cmp_opt<T: Ord>(x: Option<&T>, y: Option<&T>, if_x_is_none: Ordering, if_y_is_none: Ordering) -> Ordering {
+    match (x, y) {
+        (None, _) => if_x_is_none,
+        (_, None) => if_y_is_none,
+        (Some(x), Some(y)) => x.cmp(y),
+    }
+}
+
 impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// # Tests
     ///
@@ -178,14 +188,13 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// assert_eq!(a.as_ref(), &[2, 3]);
     /// ```
     fn and(a: &mut Self, b: &VecSet<M>) {
-        use std::cmp;
-        use std::iter::Peekable;
+        a.0 = And { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
 
-        struct Cmp<A: Iterator, B: Iterator> {
+        struct And<A: Iterator, B: Iterator> {
             a: Peekable<A>,
             b: Peekable<B>,
         }
-        impl<'a, 'b, A, B> Iterator for Cmp<A, B>
+        impl<'a, 'b, A, B> Iterator for And<A, B>
         where
             A: Iterator<Item = &'a u16>,
             B: Iterator<Item = &'b u16>,
@@ -195,32 +204,73 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
             fn next(&mut self) -> Option<Self::Item> {
                 loop {
                     match self.a.peek()?.cmp(self.b.peek()?) {
-                        cmp::Ordering::Less => {
+                        LT => {
                             self.a.next();
                         }
-                        cmp::Ordering::Equal => {
+                        EQ => {
                             let a = self.a.next().unwrap();
                             let b = self.b.next().unwrap();
                             debug_assert_eq!(a, b);
                             break Some(*a);
                         }
-                        cmp::Ordering::Greater => {
+                        GT => {
                             self.b.next();
                         }
                     }
                 }
             }
         }
-
-        a.0 = Cmp { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
     }
 
     fn not(a: &mut Self, b: &VecSet<M>) {
         todo!()
     }
 
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// # use bits_mask::helper::Assign;
+    /// let mut a = roaring_block::VecSet::<4>::empty();
+    /// a.set1(1);
+    /// a.set1(2);
+    /// a.set1(3);
+    ///
+    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// b.set1(2);
+    /// b.set1(3);
+    /// b.set1(4);
+    ///
+    /// Assign::or(&mut a, &b);
+    /// assert_eq!(a.as_ref(), &[1, 2, 3, 4]);
+    /// ```
     fn or(a: &mut Self, b: &VecSet<M>) {
-        todo!()
+        a.0 = Or { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
+
+        struct Or<A: Iterator, B: Iterator> {
+            a: Peekable<A>,
+            b: Peekable<B>,
+        }
+        impl<'a, 'b, A, B> Iterator for Or<A, B>
+        where
+            A: Iterator<Item = &'a u16>,
+            B: Iterator<Item = &'b u16>,
+        {
+            type Item = u16;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                match cmp_opt(self.a.peek(), self.b.peek(), GT, LT) {
+                    LT => self.a.next().copied(),
+                    EQ => {
+                        let a = self.a.next().unwrap();
+                        let b = self.b.next().unwrap();
+                        debug_assert_eq!(a, b);
+                        Some(*a)
+                    }
+                    GT => self.b.next().copied(),
+                }
+            }
+        }
     }
 
     fn xor(a: &mut Self, b: &VecSet<M>) {
