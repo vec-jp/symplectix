@@ -1,6 +1,7 @@
 use std::ops::RangeBounds;
 
 use bits_core::{Bits, BitsMut, Block, Word};
+use bits_mask::helper;
 
 #[derive(Debug, Default, Clone)]
 pub struct BitMap<T: private::Array>(Option<Box<T>>);
@@ -12,13 +13,17 @@ mod private {
 }
 
 impl<B: Word, const N: usize> BitMap<[B; N]> {
-    fn inner(&self) -> Option<&[B; N]> {
-        self.0.as_deref()
+    pub fn as_slice(&self) -> &[B] {
+        self.inner().unwrap_or(&[])
     }
 
-    // fn inner_mut(&mut self) -> Option<&mut Box<[B; N]>> {
-    //     self.0.as_mut()
-    // }
+    pub fn inner(&self) -> Option<&[B]> {
+        self.0.as_deref().map(|a| a.as_slice())
+    }
+
+    pub fn inner_mut(&mut self) -> Option<&mut [B]> {
+        self.0.as_deref_mut().map(|a| a.as_mut_slice())
+    }
 
     fn or_empty(&mut self) -> &mut [B] {
         self.0.get_or_insert_with(|| Box::new([B::empty(); N])).as_mut_slice()
@@ -108,5 +113,122 @@ impl<B: Word, const N: usize> Block for BitMap<[B; N]> {
     #[inline]
     fn empty() -> Self {
         BitMap(None)
+    }
+}
+
+impl<B, const N: usize> helper::Assign<BitMap<[B; N]>> for BitMap<[B; N]>
+where
+    B: Word + helper::Assign<B>,
+{
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// # use bits_mask::helper::Assign;
+    /// let mut a = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// a.set1(0);
+    /// a.set1(1);
+    /// a.set1(2);
+    ///
+    /// let mut b = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// b.set1(1);
+    /// b.set1(2);
+    /// b.set1(3);
+    ///
+    /// Assign::and(&mut a, &b);
+    /// assert_eq!(a.as_slice(), &[0b_0110, 0, 0, 0]);
+    ///
+    /// Assign::and(&mut a, &roaring_block::BitMap::empty());
+    /// assert_eq!(a.as_slice(), &[]);
+    /// ```
+    fn and(a: &mut Self, b: &BitMap<[B; N]>) {
+        match (a.inner_mut(), b.inner()) {
+            (Some(a), Some(b)) => helper::Assign::and(a, b),
+            (None, _) | (_, None) => a.0 = None,
+        };
+    }
+
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// # use bits_mask::helper::Assign;
+    /// let mut a = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// a.set1(0);
+    /// a.set1(1);
+    /// a.set1(2);
+    ///
+    /// let mut b = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// b.set1(1);
+    /// b.set1(2);
+    /// b.set1(3);
+    ///
+    /// Assign::not(&mut a, &b);
+    /// assert_eq!(a.as_slice(), &[0b_0001, 0, 0, 0]);
+    /// ```
+    fn not(a: &mut Self, b: &BitMap<[B; N]>) {
+        if let (Some(a), Some(b)) = (a.inner_mut(), b.inner()) {
+            helper::Assign::not(a, b);
+        }
+    }
+
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// # use bits_mask::helper::Assign;
+    /// let mut a = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// a.set1(0);
+    /// a.set1(1);
+    /// a.set1(2);
+    ///
+    /// let mut b = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// b.set1(1);
+    /// b.set1(2);
+    /// b.set1(3);
+    ///
+    /// Assign::or(&mut a, &b);
+    /// assert_eq!(a.as_slice(), &[0b_1111, 0, 0, 0]);
+    ///
+    /// let mut c = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// Assign::or(&mut c, &a);
+    /// assert_eq!(c.as_slice(), &[0b_1111, 0, 0, 0]);
+    /// ```
+    fn or(a: &mut Self, b: &BitMap<[B; N]>) {
+        match (a.inner_mut(), b.inner()) {
+            (Some(a), Some(b)) => helper::Assign::or(a, b),
+            (None, Some(b)) => a.or_empty().copy_from_slice(b),
+            _ => {}
+        }
+    }
+
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// # use bits_mask::helper::Assign;
+    /// let mut a = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// a.set1(0);
+    /// a.set1(1);
+    /// a.set1(2);
+    ///
+    /// let mut b = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// b.set1(1);
+    /// b.set1(2);
+    /// b.set1(3);
+    ///
+    /// Assign::xor(&mut a, &b);
+    /// assert_eq!(a.as_slice(), &[0b_1001, 0, 0, 0]);
+    ///
+    /// let mut c = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// Assign::xor(&mut c, &a);
+    /// assert_eq!(c.as_slice(), &[0b_1001, 0, 0, 0]);
+    /// ```
+    fn xor(a: &mut Self, b: &BitMap<[B; N]>) {
+        match (a.inner_mut(), b.inner()) {
+            (Some(a), Some(b)) => helper::Assign::xor(a, b),
+            (None, Some(b)) => a.or_empty().copy_from_slice(b),
+            _ => {}
+        }
     }
 }
