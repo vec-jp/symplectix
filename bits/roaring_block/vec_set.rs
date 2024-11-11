@@ -222,8 +222,54 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
         }
     }
 
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// # use bits_mask::helper::Assign;
+    /// let mut a = roaring_block::VecSet::<4>::empty();
+    /// a.set1(1);
+    /// a.set1(2);
+    /// a.set1(3);
+    ///
+    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// b.set1(2);
+    /// b.set1(3);
+    /// b.set1(4);
+    ///
+    /// Assign::not(&mut a, &b);
+    /// assert_eq!(a.as_ref(), &[1]);
+    /// ```
     fn not(a: &mut Self, b: &VecSet<M>) {
-        todo!()
+        a.0 = Iter { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
+
+        struct Iter<A: Iterator, B: Iterator> {
+            a: Peekable<A>,
+            b: Peekable<B>,
+        }
+        impl<'a, 'b, A, B> Iterator for Iter<A, B>
+        where
+            A: Iterator<Item = &'a u16>,
+            B: Iterator<Item = &'b u16>,
+        {
+            type Item = u16;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                loop {
+                    match cmp_opt(self.a.peek(), self.b.peek(), LT, LT) {
+                        LT => break self.a.next().copied(),
+                        EQ => {
+                            let a = self.a.next().unwrap();
+                            let b = self.b.next().unwrap();
+                            debug_assert_eq!(a, b);
+                        }
+                        GT => {
+                            self.b.next().unwrap();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /// # Tests
