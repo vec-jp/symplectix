@@ -11,6 +11,8 @@ rust_library(
         "//bits/bit",
         "//bits/bits_core",
         "//bits/bits_mask",
+        "@crates//:num",
+        "@crates//:smallvec",
     ],
 )
 

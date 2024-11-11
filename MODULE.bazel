@@ -260,6 +260,18 @@ crate.annotation(
     gen_binaries = ["protoc-gen-tonic"],
 )
 
+# Small vectors store a certain number of elements inline, and fall back to the heap
+# for larger allocations. This can be a useful optimization for improving cache locality
+# and reducing allocator traffic for workloads that fit within the inline buffer.
+crate.spec(
+    features = [
+        "std",
+        "serde",
+    ],
+    package = "smallvec",
+    version = "2.0.0-alpha.7",
+)
+
 # A tree-sitter binding
 #
 # https://tree-sitter.github.io/tree-sitter/
