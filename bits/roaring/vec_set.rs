@@ -37,7 +37,7 @@ impl<const N: usize> Bits for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
-    /// let mut b = roaring_block::VecSet::<12>::empty();
+    /// let mut b = roaring::VecSet::<12>::empty();
     ///
     /// b.set1(300);
     /// b.set1(200);
@@ -53,7 +53,7 @@ impl<const N: usize> Bits for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
-    /// let mut b = roaring_block::VecSet::<12>::empty();
+    /// let mut b = roaring::VecSet::<12>::empty();
     ///
     /// b.set1(65530);
     /// b.set1(65520);
@@ -88,7 +88,7 @@ impl<const N: usize> Bits for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
-    /// let mut b = roaring_block::VecSet::<12>::empty();
+    /// let mut b = roaring::VecSet::<12>::empty();
     ///
     /// b.set1(65530);
     /// b.set1(65520);
@@ -108,7 +108,7 @@ impl<const N: usize> BitsMut for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
-    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<4>::empty();
     ///
     /// b.set1(100);
     /// assert_eq!(b.test(100), Some(true));
@@ -127,7 +127,7 @@ impl<const N: usize> BitsMut for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
-    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<4>::empty();
     ///
     /// b.set1(100);
     /// assert_eq!(b.test(100), Some(true));
@@ -151,7 +151,7 @@ impl<const N: usize> Block for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, Block};
-    /// let b = roaring_block::VecSet::<4>::empty();
+    /// let b = roaring::VecSet::<4>::empty();
     /// assert_eq!(b.bits(), 65536);
     /// ```
     #[inline]
@@ -174,12 +174,12 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring_block::VecSet::<4>::empty();
+    /// let mut a = roaring::VecSet::<4>::empty();
     /// a.set1(1);
     /// a.set1(2);
     /// a.set1(3);
     ///
-    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<4>::empty();
     /// b.set1(2);
     /// b.set1(3);
     /// b.set1(4);
@@ -227,12 +227,12 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring_block::VecSet::<4>::empty();
+    /// let mut a = roaring::VecSet::<4>::empty();
     /// a.set1(1);
     /// a.set1(2);
     /// a.set1(3);
     ///
-    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<4>::empty();
     /// b.set1(2);
     /// b.set1(3);
     /// b.set1(4);
@@ -277,12 +277,12 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring_block::VecSet::<4>::empty();
+    /// let mut a = roaring::VecSet::<4>::empty();
     /// a.set1(1);
     /// a.set1(2);
     /// a.set1(3);
     ///
-    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<4>::empty();
     /// b.set1(2);
     /// b.set1(3);
     /// b.set1(4);
@@ -324,12 +324,12 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring_block::VecSet::<4>::empty();
+    /// let mut a = roaring::VecSet::<4>::empty();
     /// a.set1(1);
     /// a.set1(2);
     /// a.set1(3);
     ///
-    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<4>::empty();
     /// b.set1(2);
     /// b.set1(3);
     /// b.set1(4);

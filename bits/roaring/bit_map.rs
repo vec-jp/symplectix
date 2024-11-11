@@ -35,7 +35,7 @@ impl<B: Word, const N: usize> Bits for BitMap<[B; N]> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring_block::BitMap::<[u64; 8]>::default();
+    /// let mut b = roaring::BitMap::<[u64; 8]>::default();
     /// assert_eq!(b.bits(), 512);
     ///
     /// b.set1(100);
@@ -72,7 +72,7 @@ impl<B: Word, const N: usize> Bits for BitMap<[B; N]> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring_block::BitMap::<[u64; 8]>::default();
+    /// let mut b = roaring::BitMap::<[u64; 8]>::default();
     /// assert_eq!(b.select1(0), None);
     /// assert_eq!(b.select0(0), Some(0));
     /// assert_eq!(b.select0(b.bits()-1), Some(511));
@@ -125,12 +125,12 @@ where
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// let mut a = roaring::BitMap::<[u64; 4]>::empty();
     /// a.set1(0);
     /// a.set1(1);
     /// a.set1(2);
     ///
-    /// let mut b = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// let mut b = roaring::BitMap::<[u64; 4]>::empty();
     /// b.set1(1);
     /// b.set1(2);
     /// b.set1(3);
@@ -138,7 +138,7 @@ where
     /// Assign::and(&mut a, &b);
     /// assert_eq!(a.as_slice(), &[0b_0110, 0, 0, 0]);
     ///
-    /// Assign::and(&mut a, &roaring_block::BitMap::empty());
+    /// Assign::and(&mut a, &roaring::BitMap::empty());
     /// assert_eq!(a.as_slice(), &[]);
     /// ```
     fn and(a: &mut Self, b: &BitMap<[B; N]>) {
@@ -153,12 +153,12 @@ where
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// let mut a = roaring::BitMap::<[u64; 4]>::empty();
     /// a.set1(0);
     /// a.set1(1);
     /// a.set1(2);
     ///
-    /// let mut b = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// let mut b = roaring::BitMap::<[u64; 4]>::empty();
     /// b.set1(1);
     /// b.set1(2);
     /// b.set1(3);
@@ -177,12 +177,12 @@ where
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// let mut a = roaring::BitMap::<[u64; 4]>::empty();
     /// a.set1(0);
     /// a.set1(1);
     /// a.set1(2);
     ///
-    /// let mut b = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// let mut b = roaring::BitMap::<[u64; 4]>::empty();
     /// b.set1(1);
     /// b.set1(2);
     /// b.set1(3);
@@ -190,7 +190,7 @@ where
     /// Assign::or(&mut a, &b);
     /// assert_eq!(a.as_slice(), &[0b_1111, 0, 0, 0]);
     ///
-    /// let mut c = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// let mut c = roaring::BitMap::<[u64; 4]>::empty();
     /// Assign::or(&mut c, &a);
     /// assert_eq!(c.as_slice(), &[0b_1111, 0, 0, 0]);
     /// ```
@@ -207,12 +207,12 @@ where
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// let mut a = roaring::BitMap::<[u64; 4]>::empty();
     /// a.set1(0);
     /// a.set1(1);
     /// a.set1(2);
     ///
-    /// let mut b = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// let mut b = roaring::BitMap::<[u64; 4]>::empty();
     /// b.set1(1);
     /// b.set1(2);
     /// b.set1(3);
@@ -220,7 +220,7 @@ where
     /// Assign::xor(&mut a, &b);
     /// assert_eq!(a.as_slice(), &[0b_1001, 0, 0, 0]);
     ///
-    /// let mut c = roaring_block::BitMap::<[u64; 4]>::empty();
+    /// let mut c = roaring::BitMap::<[u64; 4]>::empty();
     /// Assign::xor(&mut c, &a);
     /// assert_eq!(c.as_slice(), &[0b_1001, 0, 0, 0]);
     /// ```
