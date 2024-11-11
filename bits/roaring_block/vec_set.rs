@@ -1,6 +1,7 @@
 use std::ops::{Deref, Range, RangeBounds};
 
 use bits_core::{Bits, BitsMut, Block};
+use bits_mask::helper;
 use smallvec::SmallVec;
 
 #[derive(Debug, Default, Clone)]
@@ -148,11 +149,81 @@ impl<const N: usize> Block for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, Block};
-    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// let b = roaring_block::VecSet::<4>::empty();
     /// assert_eq!(b.bits(), 65536);
     /// ```
     #[inline]
     fn empty() -> Self {
         VecSet(SmallVec::new())
+    }
+}
+
+impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
+    /// # Tests
+    ///
+    /// ```
+    /// # use bits_core::{Bits, BitsMut, Block};
+    /// # use bits_mask::helper::Assign;
+    /// let mut a = roaring_block::VecSet::<4>::empty();
+    /// a.set1(1);
+    /// a.set1(2);
+    /// a.set1(3);
+    ///
+    /// let mut b = roaring_block::VecSet::<4>::empty();
+    /// b.set1(2);
+    /// b.set1(3);
+    /// b.set1(4);
+    ///
+    /// Assign::and(&mut a, &b);
+    /// assert_eq!(a.as_ref(), &[2, 3]);
+    /// ```
+    fn and(a: &mut Self, b: &VecSet<M>) {
+        use std::cmp;
+        use std::iter::Peekable;
+
+        struct Cmp<A: Iterator, B: Iterator> {
+            a: Peekable<A>,
+            b: Peekable<B>,
+        }
+        impl<'a, 'b, A, B> Iterator for Cmp<A, B>
+        where
+            A: Iterator<Item = &'a u16>,
+            B: Iterator<Item = &'b u16>,
+        {
+            type Item = u16;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                loop {
+                    match self.a.peek()?.cmp(self.b.peek()?) {
+                        cmp::Ordering::Less => {
+                            self.a.next();
+                        }
+                        cmp::Ordering::Equal => {
+                            let a = self.a.next().unwrap();
+                            let b = self.b.next().unwrap();
+                            debug_assert_eq!(a, b);
+                            break Some(*a);
+                        }
+                        cmp::Ordering::Greater => {
+                            self.b.next();
+                        }
+                    }
+                }
+            }
+        }
+
+        a.0 = Cmp { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
+    }
+
+    fn not(a: &mut Self, b: &VecSet<M>) {
+        todo!()
+    }
+
+    fn or(a: &mut Self, b: &VecSet<M>) {
+        todo!()
+    }
+
+    fn xor(a: &mut Self, b: &VecSet<M>) {
+        todo!()
     }
 }
