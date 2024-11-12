@@ -1,28 +1,42 @@
 use std::cmp::Ordering::{self, Equal as EQ, Greater as GT, Less as LT};
 use std::iter::Peekable;
-use std::ops::{Deref, Range, RangeBounds};
+use std::ops::{Deref, DerefMut, Range, RangeBounds};
+use std::u16;
 
 use bits_core::{Bits, BitsMut, Block};
 use bits_mask::helper;
 use smallvec::SmallVec;
 
 #[derive(Debug, Default, Clone)]
-pub struct VecSet<const N: usize>(SmallVec<u16, N>);
+pub struct VecSet<T, const N: usize>(SmallVec<T, N>);
 
-impl<const N: usize> AsRef<[u16]> for VecSet<N> {
+impl<T, const N: usize> AsRef<[T]> for VecSet<T, N> {
     #[inline]
-    fn as_ref(&self) -> &[u16] {
+    fn as_ref(&self) -> &[T] {
         self.as_slice()
     }
 }
-impl<const N: usize> VecSet<N> {
+
+impl<T, const N: usize> AsMut<[T]> for VecSet<T, N> {
     #[inline]
-    fn as_slice(&self) -> &[u16] {
-        self.0.deref()
+    fn as_mut(&mut self) -> &mut [T] {
+        self.as_mut_slice()
     }
 }
 
-impl<const N: usize> Bits for VecSet<N> {
+impl<T, const N: usize> VecSet<T, N> {
+    #[inline]
+    fn as_slice(&self) -> &[T] {
+        self.0.deref()
+    }
+
+    #[inline]
+    fn as_mut_slice(&mut self) -> &mut [T] {
+        self.0.deref_mut()
+    }
+}
+
+impl<const N: usize> Bits for VecSet<u16, N> {
     #[inline]
     fn bits(&self) -> usize {
         Self::BITS
@@ -37,7 +51,7 @@ impl<const N: usize> Bits for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
-    /// let mut b = roaring::VecSet::<12>::empty();
+    /// let mut b = roaring::VecSet::<u16, 12>::empty();
     ///
     /// b.set1(300);
     /// b.set1(200);
@@ -53,7 +67,7 @@ impl<const N: usize> Bits for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
-    /// let mut b = roaring::VecSet::<12>::empty();
+    /// let mut b = roaring::VecSet::<u16, 12>::empty();
     ///
     /// b.set1(65530);
     /// b.set1(65520);
@@ -88,7 +102,7 @@ impl<const N: usize> Bits for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
-    /// let mut b = roaring::VecSet::<12>::empty();
+    /// let mut b = roaring::VecSet::<u16, 12>::empty();
     ///
     /// b.set1(65530);
     /// b.set1(65520);
@@ -103,12 +117,12 @@ impl<const N: usize> Bits for VecSet<N> {
     }
 }
 
-impl<const N: usize> BitsMut for VecSet<N> {
+impl<const N: usize> BitsMut for VecSet<u16, N> {
     /// # Tests
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
-    /// let mut b = roaring::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<u16, 4>::empty();
     ///
     /// b.set1(100);
     /// assert_eq!(b.test(100), Some(true));
@@ -127,7 +141,7 @@ impl<const N: usize> BitsMut for VecSet<N> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
-    /// let mut b = roaring::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<u16, 4>::empty();
     ///
     /// b.set1(100);
     /// assert_eq!(b.test(100), Some(true));
@@ -144,14 +158,14 @@ impl<const N: usize> BitsMut for VecSet<N> {
     }
 }
 
-impl<const N: usize> Block for VecSet<N> {
-    const BITS: usize = 1 << 16;
+impl<const N: usize> Block for VecSet<u16, N> {
+    const BITS: usize = u16::max_value() as usize + 1;
 
     /// # Tests
     ///
     /// ```
     /// # use bits_core::{Bits, Block};
-    /// let b = roaring::VecSet::<4>::empty();
+    /// let b = roaring::VecSet::<u16, 4>::empty();
     /// assert_eq!(b.bits(), 65536);
     /// ```
     #[inline]
@@ -168,18 +182,18 @@ fn cmp_opt<T: Ord>(a: Option<&T>, b: Option<&T>, a_is_none: Ordering, b_is_none:
     }
 }
 
-impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
+impl<const N: usize, const M: usize> helper::Assign<VecSet<u16, M>> for VecSet<u16, N> {
     /// # Tests
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring::VecSet::<4>::empty();
+    /// let mut a = roaring::VecSet::<u16, 4>::empty();
     /// a.set1(1);
     /// a.set1(2);
     /// a.set1(3);
     ///
-    /// let mut b = roaring::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<u16, 4>::empty();
     /// b.set1(2);
     /// b.set1(3);
     /// b.set1(4);
@@ -187,7 +201,7 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// Assign::and(&mut a, &b);
     /// assert_eq!(a.as_ref(), &[2, 3]);
     /// ```
-    fn and(a: &mut Self, b: &VecSet<M>) {
+    fn and(a: &mut Self, b: &VecSet<u16, M>) {
         a.0 = Iter { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
 
         struct Iter<A: Iterator, B: Iterator> {
@@ -227,12 +241,12 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring::VecSet::<4>::empty();
+    /// let mut a = roaring::VecSet::<u16, 4>::empty();
     /// a.set1(1);
     /// a.set1(2);
     /// a.set1(3);
     ///
-    /// let mut b = roaring::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<u16, 4>::empty();
     /// b.set1(2);
     /// b.set1(3);
     /// b.set1(4);
@@ -240,7 +254,7 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// Assign::not(&mut a, &b);
     /// assert_eq!(a.as_ref(), &[1]);
     /// ```
-    fn not(a: &mut Self, b: &VecSet<M>) {
+    fn not(a: &mut Self, b: &VecSet<u16, M>) {
         a.0 = Iter { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
 
         struct Iter<A: Iterator, B: Iterator> {
@@ -277,12 +291,12 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring::VecSet::<4>::empty();
+    /// let mut a = roaring::VecSet::<u16, 4>::empty();
     /// a.set1(1);
     /// a.set1(2);
     /// a.set1(3);
     ///
-    /// let mut b = roaring::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<u16, 4>::empty();
     /// b.set1(2);
     /// b.set1(3);
     /// b.set1(4);
@@ -290,7 +304,7 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// Assign::or(&mut a, &b);
     /// assert_eq!(a.as_ref(), &[1, 2, 3, 4]);
     /// ```
-    fn or(a: &mut Self, b: &VecSet<M>) {
+    fn or(a: &mut Self, b: &VecSet<u16, M>) {
         a.0 = Iter { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
 
         struct Iter<A: Iterator, B: Iterator> {
@@ -324,12 +338,12 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// ```
     /// # use bits_core::{Bits, BitsMut, Block};
     /// # use bits_mask::helper::Assign;
-    /// let mut a = roaring::VecSet::<4>::empty();
+    /// let mut a = roaring::VecSet::<u16, 4>::empty();
     /// a.set1(1);
     /// a.set1(2);
     /// a.set1(3);
     ///
-    /// let mut b = roaring::VecSet::<4>::empty();
+    /// let mut b = roaring::VecSet::<u16, 4>::empty();
     /// b.set1(2);
     /// b.set1(3);
     /// b.set1(4);
@@ -337,7 +351,7 @@ impl<const N: usize, const M: usize> helper::Assign<VecSet<M>> for VecSet<N> {
     /// Assign::xor(&mut a, &b);
     /// assert_eq!(a.as_ref(), &[1, 4]);
     /// ```
-    fn xor(a: &mut Self, b: &VecSet<M>) {
+    fn xor(a: &mut Self, b: &VecSet<u16, M>) {
         a.0 = Iter { a: a.as_slice().iter().peekable(), b: b.as_slice().iter().peekable() }.collect();
 
         struct Iter<L: Iterator, R: Iterator> {

@@ -28,7 +28,7 @@ fn bits_is_implemented() {
     _test::<Cow<[u8; 1000]>>();
     _test::<Cow<Box<[u8; 2000]>>>();
     _test::<BitMap<[u8; 100]>>();
-    _test::<VecSet<10>>();
+    _test::<VecSet<u16, 10>>();
 }
 
 #[quickcheck]
