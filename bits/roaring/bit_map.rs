@@ -7,14 +7,13 @@ use bits_mask::helper;
 pub struct BitMap<T: private::Array>(Option<Box<T>>);
 
 mod private {
-    use bits_core::Word;
     pub trait Array {}
-    impl<B: Word, const N: usize> Array for [B; N] {}
+    impl<E, const N: usize> Array for [E; N] {}
 }
 
 impl<B: Word, const N: usize> BitMap<[B; N]> {
     pub fn as_slice(&self) -> &[B] {
-        self.inner().unwrap_or(&[])
+        self.0.as_deref().map_or(&[], |a| a.as_slice())
     }
 
     pub fn inner(&self) -> Option<&[B]> {
@@ -35,7 +34,7 @@ impl<B: Word, const N: usize> Bits for BitMap<[B; N]> {
     ///
     /// ```
     /// # use bits_core::{Bits, BitsMut};
-    /// let mut b = roaring::BitMap::<[u64; 8]>::default();
+    /// let mut b = roaring::BitMap::<[u32; 16]>::default();
     /// assert_eq!(b.bits(), 512);
     ///
     /// b.set1(100);
@@ -44,8 +43,7 @@ impl<B: Word, const N: usize> Bits for BitMap<[B; N]> {
     /// ```
     #[inline]
     fn bits(&self) -> usize {
-        // self.0.as_ref().map_or(0, |b| b.bits())
-        <u64 as Block>::BITS * N
+        B::BITS * N
     }
 
     #[inline]
